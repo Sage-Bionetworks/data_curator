@@ -4,6 +4,7 @@ library(dplyr)
 library(shinythemes)
 library(shinydashboard)
 library(stringr)
+library(DT)
 
 source(file= "functions.R")
 
@@ -91,11 +92,18 @@ ui <- dashboardPage(
                   solidHeader = TRUE,
                   status = "primary",
                   width = 12,
-                  fileInput("upload", "Upload CSV File",
+                  fileInput("csvFile", "Upload CSV File",
                             accept=c('text/csv', 
                                      'text/comma-separated-values,text/plain', 
                                      '.csv'))
                   ) ,
+                box(
+                  title = "Uploaded CSV",
+                  solidHeader = TRUE,
+                  status = "primary",
+                  width = 12, 
+                  DT::DTOutput("rawData")
+                ),
                 box(
                   title = "Validate Annotated Metadata",
                   status = "primary",
@@ -136,11 +144,19 @@ server <- function(input, output, session) {
       })
     }
 )
+  ### reads and displays csv file
+  rawData <- eventReactive(input$csvFile, {
+    read.csv(input$csvFile$datapath)
+  })
+  
+  output$rawData <- DT::renderDT(
+    rawData(), options = list(lengthChange = FALSE, scrollX = TRUE)
+  )
 
   ### toggles validation status when validate button pressed 
   observeEvent(
     input$validate, {
-      source_python("/Users/xdoan/Shell/HTAN-data-pipeline/validate_metadata_test.py") ### right now metadata file is hardcoded
+      validateModelManifest(input$csvFile$datapath, "scRNASeq") ### right now assay is hardcoded
       toggle('text_div2')
       if ( annotation_status != "Validation success!") {
         annotation_status2 <- strsplit(annotation_status, ";")
