@@ -4,7 +4,13 @@ use_condaenv('py3.5', required = TRUE)
 reticulate::import("sys")
 reticulate::import_from_path("MetadataModel", path = "HTAN-data-pipeline")
 
-source_python("metadataModelFuns.py")
+source_python("HTAN-data-pipeline/metadataModelFuns.py")
+
+render_dt = function(data, editable = 'cell', server = TRUE, ...) {
+  renderDT(data, selection = 'none', server = server, editable = editable, ...)
+}
+
+# source_python("~/Shell/HTAN-data-pipeline/get_url_test.py")
 
 # test <- source_python("/Users/xdoan/Shell/HTAN-data-pipeline/validate_metadata_test.py")
 

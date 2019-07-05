@@ -146,7 +146,7 @@ server <- function(input, output, session) {
   ###toggles link when download button pressed
   observeEvent(
     input$download, {
-      manifest_url <- getModelManifest("scRNASeq") ##cant use additionalMetadata for now bc python dict not compatible
+      manifest_url <- getModelManifest("scRNASeq")
       toggle('text_div')
       output$text <- renderUI({
         tags$a(href = manifest_url, manifest_url)
@@ -158,11 +158,12 @@ server <- function(input, output, session) {
     readr::read_csv(input$csvFile$datapath)
   })
   
-  output$rawData <- DT::renderDT(
-    rawData(),
-    editable = 'cell',
-    options = list(lengthChange = FALSE, scrollX = TRUE)
-  )
+  output$rawData <- render_dt(rawData(), 'cell', FALSE)
+  #   DT::renderDT(
+  #   rawData(),
+  #   editable = 'cell',
+  #   options = list(lengthChange = FALSE, scrollX = TRUE)
+  # )
 
   ### toggles validation status when validate button pressed 
   observeEvent(
