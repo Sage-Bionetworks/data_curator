@@ -7,6 +7,7 @@ library(stringr)
 library(DT)
 library(jsonlite)
 
+
 source(file= "functions.R")
 
 ui <- dashboardPage(
@@ -145,7 +146,7 @@ server <- function(input, output, session) {
   ###toggles link when download button pressed
   observeEvent(
     input$download, {
-      getModelManifest("scRNASeq") ##cant use additionalMetadata for now bc python dict not compatible
+      manifest_url <- getModelManifest("scRNASeq") ##cant use additionalMetadata for now bc python dict not compatible
       toggle('text_div')
       output$text <- renderUI({
         tags$a(href = manifest_url, manifest_url)
@@ -154,7 +155,7 @@ server <- function(input, output, session) {
 )
   ### reads and displays csv file
   rawData <- eventReactive(input$csvFile, {
-    read.csv(input$csvFile$datapath)
+    readr::read_csv(input$csvFile$datapath)
   })
   
   output$rawData <- DT::renderDT(
@@ -164,7 +165,7 @@ server <- function(input, output, session) {
   ### toggles validation status when validate button pressed 
   observeEvent(
     input$validate, {
-      validateModelManifest(input$csvFile$datapath, "scRNASeq") ### right now assay is hardcoded
+      annotation_status <- validateModelManifest(input$csvFile$datapath, "scRNASeq") ### right now assay is hardcoded
       toggle('text_div2')
       if ( annotation_status != "Validation success!") {
         annotation_status2 <- strsplit(annotation_status, ";")
