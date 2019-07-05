@@ -1,0 +1,12 @@
+.RData
+.Rhistory
+.Rproj.user/
+HTAN_test_shiny.Rproj
+app.bak.R
+get_manifest_anno.R
+manifest_url.txt
+token.pickle
+www/bootstrap.css
+www/bootstrap.min.css
+www/getdata.js
+www/message-handler.js
