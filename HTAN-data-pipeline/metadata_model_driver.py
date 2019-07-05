@@ -7,15 +7,13 @@ datasetType = "scRNASeq"
 
 mm = MetadataModel(inputMModelLocation, inputMModelLocationType)
 
-manifest_url = mm.getModelManifest(datasetType, additionalMetadata = {"Filename":["MantonCB1_HiSeq_1_S1_L001_R1_001.fastq.gz", "MantonCB1_HiSeq_1_S1_L001_R2_001.fastq.gz", "MantonCB1_HiSeq_1_S1_L002_R1_001.fastq.gz", "MantonCB1_HiSeq_1_S1_L002_R1_001.fastq.gz"]})
+manifest_url = mm.getModelManifest(datasetType, filenames = ["1.txt", "2.txt", "3.txt"])
 
 print(manifest_url)
 
 
-'''
 manifest_path = "./manifest.csv"
 
 annotation_status = mm.validateModelManifest(manifest_path, datasetType)
 
 print(annotation_status)
-'''
