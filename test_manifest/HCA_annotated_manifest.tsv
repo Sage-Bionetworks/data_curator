@@ -1,2 +1,0 @@
-path	name	parent	used	executed	BiosampleID	CellBarcodeRead	ReverseTranscription	LibraryConstructionMethod	Amplification	SpikeIn	Platform	NucleicAcidSource	SingleCellIsolation	BiosampleType	LibraryLayout	Primer	UMIBarcodeRead
-/Users/xdoan/HCA_Census_of_Immune_Cells/MantonCB1_HiSeq_1_S1_L002_R2_001.fastq.gz	MantonCB1_HiSeq_1_S1_L002_R2_001.fastq.gz	syn19557948	NA	NA	4	4	UMI	10x	PCR	NoSpikeIn	IlluminaiNextSeq2500	SingleCell	Droplets	CellLine	PairedEnd	atgcgc	NA
