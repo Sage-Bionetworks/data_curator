@@ -8,7 +8,7 @@ library(DT)
 library(jsonlite)
 
 
-source(file= "functions.R")
+source(file= "./functions.R")
 
 ui <- dashboardPage(
   skin = "purple",
