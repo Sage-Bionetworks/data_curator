@@ -159,7 +159,9 @@ server <- function(input, output, session) {
   })
   
   output$rawData <- DT::renderDT(
-    rawData(), options = list(lengthChange = FALSE, scrollX = TRUE)
+    rawData(),
+    editable = 'cell',
+    options = list(lengthChange = FALSE, scrollX = TRUE)
   )
 
   ### toggles validation status when validate button pressed 
