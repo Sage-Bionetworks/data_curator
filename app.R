@@ -155,15 +155,14 @@ server <- function(input, output, session) {
 )
   ### reads and displays csv file
   rawData <- eventReactive(input$csvFile, {
-    readr::read_csv(input$csvFile$datapath)
+    readr::read_csv(input$csvFile$datapath, na = c("", "NA"))
   })
   
-  output$rawData <- render_dt(rawData(), 'cell', FALSE)
-  #   DT::renderDT(
-  #   rawData(),
-  #   editable = 'cell',
-  #   options = list(lengthChange = FALSE, scrollX = TRUE)
-  # )
+  output$rawData <- DT::renderDT(
+    rawData(),
+    selection = 'none', server = TRUE, editable = 'cell',
+    options = list(lengthChange = FALSE, scrollX = TRUE)
+  )
 
   ### toggles validation status when validate button pressed 
   observeEvent(
