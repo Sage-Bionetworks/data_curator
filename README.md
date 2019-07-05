@@ -1,4 +1,4 @@
-# HTAN_Shiny_App
+# HTAN_Shiny
 ## Data Ingest Shiny App
 
 Currently shows a scRNAseq metadata template link on google sheets, then allows for a csv upload and validation based on that file. 
