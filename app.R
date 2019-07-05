@@ -31,6 +31,10 @@ ui <- dashboardPage(
     )
   ),
   dashboardBody(
+    tags$head(
+      singleton(
+        includeScript("www/readCookie.js")
+      )),
     tabItems(
       # First tab content
       tabItem(tabName = "template",
@@ -134,6 +138,9 @@ ui <- dashboardPage(
 )
 
 server <- function(input, output, session) {
+  ### synapse cookies
+  session$sendCustomMessage(type = "readCookie", message = list())
+  
   ###toggles link when download button pressed
   observeEvent(
     input$download, {
