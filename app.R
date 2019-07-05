@@ -5,6 +5,7 @@ library(shinythemes)
 library(shinydashboard)
 library(stringr)
 library(DT)
+library(jsonlite)
 
 source(file= "functions.R")
 
@@ -144,7 +145,7 @@ server <- function(input, output, session) {
   ###toggles link when download button pressed
   observeEvent(
     input$download, {
-      source_python("/Users/xdoan/Shell/HTAN-data-pipeline/get_url_test.py")
+      getModelManifest("scRNASeq") ##cant use additionalMetadata for now bc python dict not compatible
       toggle('text_div')
       output$text <- renderUI({
         tags$a(href = manifest_url, manifest_url)
