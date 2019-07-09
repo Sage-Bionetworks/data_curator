@@ -46,9 +46,9 @@ ui <- dashboardPage(
                   status = "primary",
                   solidHeader = TRUE,
                   width= 6,
-                  title = "Select a Bucket: ",
-                  selectInput(inputId = "var", label = "Bucket:",
-                              choices = c("hca-intake-bucket" ))
+                  title = "Select a Project: ",
+                  selectInput(inputId = "var", label = "Project:",
+                              choices = c("HCA Project (test)" ))
         
                 ),
                 box(
@@ -108,7 +108,8 @@ ui <- dashboardPage(
                   solidHeader = TRUE,
                   status = "primary",
                   width = 12, 
-                  DT::DTOutput("rawData")
+                  DT::DTOutput("rawData"),
+                  helpText("Google spreadsheet row numbers are incremented from this table by 1")
                 ),
                 box(
                   title = "Validate Annotated Metadata",
@@ -122,8 +123,6 @@ ui <- dashboardPage(
                         # width = 12,
                         height = "100%",
                         htmlOutput("text2"),
-                        # textOutput("text2"),
-                        # tags$style(type = "text/css", "#text2 {white-space: pre=wrap;}") ,
                         style = "font-size:18px; background-color: white; border: 1px solid #ccc; border-radius: 3px; margin: 10px 0; padding: 10px"
                     )
                   )
@@ -148,43 +147,62 @@ server <- function(input, output, session) {
   ###toggles link when download button pressed
   observeEvent(
     input$download, {
-      manifest_url <- getModelManifest("scRNASeq")
+      manifest_url <- getModelManifest("scRNASeq", filenames = c("MantonCB1_HiSeq_1_S1_L002_R1_001.fastq.gz", "MantonCB1_HiSeq_1_S1_L001_R2_001.fastq.gz", "MantonCB1_HiSeq_1_S1_L001_R1_001.fastq.gz", "MantonCB1_HiSeq_1_S1_L002_R2_001.fastq.gz"))
       toggle('text_div')
+      
+      ### if want a progress bar need more feedback from API to know how to increment progress bar
+      # withProgress(message = "connecting to Google Sheets API") 
+      
       output$text <- renderUI({
         tags$a(href = manifest_url, manifest_url)
       })
     }
 )
-  ### reads and displays csv file
+  ### reads csv file
   rawData <- eventReactive(input$csvFile, {
     readr::read_csv(input$csvFile$datapath, na = c("", "NA"))
   })
   
   ### editable DT element
-  output$rawData <- DT::renderDT(
-    rawData(),
-    selection = 'none', server = TRUE, editable = 'cell',
+  # output$rawData <- DT::renderDT(
+  #   rawData(),
+  #   selection = 'none', server = TRUE, editable = 'cell',
+  #   options = list(lengthChange = FALSE, scrollX = TRUE)
+  # )
+  
+  output$rawData <- DT::renderDT({ 
+    datatable(rawData(),
     options = list(lengthChange = FALSE, scrollX = TRUE)
-  )
+    ) 
+  
+    })
 
   ### toggles validation status when validate button pressed 
   observeEvent(
     input$validate, {
       annotation_status <- validateModelManifest(input$csvFile$datapath, "scRNASeq") ### right now assay is hardcoded
       toggle('text_div2')
-      if ( length(annotation_status) != 0 ) { ## if error not empty
+      if ( length(annotation_status) != 0 ) { ## if error not empty aka there is an error
         
-        str_names <- sprintf("str_%d", seq(length(anno_error)))
-        
+        ### create list of string names for the long error messages      
+        str_names <- sprintf("str_%d", seq(length(annotation_status)))
+        ### list to save errors
+        in_vals <- sprintf("input_%d", seq(length(annotation_status)))
+        ### create error messages
         for (i in seq_along(annotation_status)) {
           row <- annotation_status[[i]][1]
           column <- annotation_status[[i]][2]
           in_val <- annotation_status[[i]][3]
           allowed_vals <- annotation_status[[i]][4]
-          str_names[i] <- paste("At spreadsheet row ",
-                                row, "column ", column,
-                                "your value ", in_val,
-                                "is not an allowed value from list:", unlist(allowed_vals), sep=" ")
+          if (unlist(in_val) == "") {
+            in_val <- NA
+          } 
+          
+          str_names[i] <- paste("spreadsheet row <b>",
+                                row, "</b>column <b>", column,
+                                "</b>your value <b>", in_val,
+                                "</b> is not an allowed value from:", allowed_vals, sep=" ")
+          in_vals[i] <- in_val
         }
 
         output$text2 <- renderUI ({
@@ -192,6 +210,13 @@ server <- function(input, output, session) {
                "See errors below: <br/>",
                paste0(sprintf("%s", str_names), collapse = "<br/>")
                )
+        })
+        
+        output$rawData <- DT::renderDT({ 
+          datatable(rawData(),
+                    options = list(lengthChange = FALSE, scrollX = TRUE)
+          ) %>% formatStyle(unlist(column), 
+                            backgroundColor = styleEqual(unlist(in_vals), rep("yellow", length(in_vals))) ) ## how to have multiple errors 
         })
         
       } else {   
