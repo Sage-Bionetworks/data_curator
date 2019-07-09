@@ -122,6 +122,8 @@ ui <- dashboardPage(
                         # width = 12,
                         height = "100%",
                         htmlOutput("text2"),
+                        # textOutput("text2"),
+                        # tags$style(type = "text/css", "#text2 {white-space: pre=wrap;}") ,
                         style = "font-size:18px; background-color: white; border: 1px solid #ccc; border-radius: 3px; margin: 10px 0; padding: 10px"
                     )
                   )
@@ -158,6 +160,7 @@ server <- function(input, output, session) {
     readr::read_csv(input$csvFile$datapath, na = c("", "NA"))
   })
   
+  ### editable DT element
   output$rawData <- DT::renderDT(
     rawData(),
     selection = 'none', server = TRUE, editable = 'cell',
@@ -169,13 +172,28 @@ server <- function(input, output, session) {
     input$validate, {
       annotation_status <- validateModelManifest(input$csvFile$datapath, "scRNASeq") ### right now assay is hardcoded
       toggle('text_div2')
-      if ( annotation_status != "Validation success!") {
-        annotation_status2 <- strsplit(annotation_status, ";")
-        err1 <- str_trim( annotation_status2[[1]][1])
-        err2 <- str_trim( annotation_status2[[1]][2])
+      if ( length(annotation_status) != 0 ) { ## if error not empty
+        
+        str_names <- sprintf("str_%d", seq(length(anno_error)))
+        
+        for (i in seq_along(annotation_status)) {
+          row <- annotation_status[[i]][1]
+          column <- annotation_status[[i]][2]
+          in_val <- annotation_status[[i]][3]
+          allowed_vals <- annotation_status[[i]][4]
+          str_names[i] <- paste("At spreadsheet row ",
+                                row, "column ", column,
+                                "your value ", in_val,
+                                "is not an allowed value from list:", unlist(allowed_vals), sep=" ")
+        }
+
         output$text2 <- renderUI ({
-          HTML(paste("Your metadata is invalid according to the data model.","See errors below:" ,err1, err2,sep="<br/>")  )
+          HTML("Your metadata is invalid according to the data model.<br/> ",
+               "See errors below: <br/>",
+               paste0(sprintf("%s", str_names), collapse = "<br/>")
+               )
         })
+        
       } else {   
       output$text2 <- renderUI ({
             HTML("Your metadata is valid!"  )
