@@ -126,17 +126,17 @@ ui <- dashboardPage(
                     )
                   )
                 ),
-                box( 
-                  title = "Submit Validated Metadata to Synapse",
-                  status = "primary",
-                  solidHeader = TRUE, 
-                  width = 12, 
-                  actionButton("submit", "Submit to Synapse")
-                   )
+                box(    title = "Submit Validated Metadata to Synapse",
+                        status = "primary",
+                        solidHeader = TRUE,
+                        width = 12,
+                        # actionButton("submit", "Submit to Synapse")
+                        uiOutput("submit")
+                )
+        )
       )
     )
   )
-)
 )
 
 server <- function(input, output, session) {
@@ -226,12 +226,19 @@ server <- function(input, output, session) {
         })
         
       } else {   
-      output$text2 <- renderUI ({
-            HTML("Your metadata is valid!"  )
-      })
+        output$text2 <- renderUI ({
+          HTML("Your metadata is valid!")
+        })
+        ### show submit button
+        output$submit <- renderUI({
+          actionButton("submitButton", "Submit to Synapse")
+        })
+        
       }
     }
   )
+  
+
 
   # )
 }
