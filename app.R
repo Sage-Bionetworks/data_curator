@@ -174,9 +174,9 @@ server <- function(input, output, session) {
   observeEvent(
     input$validate, {
       annotation_status <- validateModelManifest(input$csvFile$datapath, "scRNASeq") ### right now assay is hardcoded
-      filled_manifest <- populateModelManifest(input$csvFile$datapath, "scRNASeq") ### wrong schema for values?
       toggle('text_div2')
       if ( length(annotation_status) != 0 ) { ## if error not empty aka there is an error
+        filled_manifest <- populateModelManifest(input$csvFile$datapath, "scRNASeq") ### wrong schema for values?
         
         ### create list of string names for the long error messages      
         str_names <- sprintf("str_%d", seq(length(annotation_status)))
@@ -189,33 +189,35 @@ server <- function(input, output, session) {
           in_val <- annotation_status[[i]][3]
           allowed_vals <- annotation_status[[i]][4]
           
-          if (unlist(in_val) == "") {
+          ### if empty value change to NA
+          if (unlist(in_val) == "") { 
             in_val <- NA
-            str_names[i] <- paste("spreadsheet row <b>",
+            str_names[i] <- paste("Spreadsheet row <b>",
                                   row, "</b>column <b>", column,
                                   "</b>your value <b>", in_val,
                                   "</b> is not an allowed value from:", allowed_vals, sep=" ")
             in_vals[i] <- in_val
           } else {
-          
-          str_names[i] <- paste("spreadsheet row <b>",
+          str_names[i] <- paste("Spreadsheet row <b>",
                                 row, "</b>column <b>", column,
                                 "</b>your value <b>", in_val,
                                 "</b> is not an allowed value from:", allowed_vals, sep=" ")
           in_vals[i] <- in_val
           }
         }
-
+        
+        ### format output text
         output$text2 <- renderUI ({
           HTML("Your metadata is invalid according to the data model.<br/> ",
-               "See errors below: <br/>",
+               "See errors at: <br/>",
                paste0(sprintf("%s", str_names), collapse = "<br/>"),
-               "Edit your data here: ",
+               "<br/>Edit your data locally or ",
                paste0('<a href="', filled_manifest, '">here</a>')
                )
 
         })
-        
+        ### update DT view with incorrect values
+        ### currently only one column, requires backend support of multiple
         output$rawData <- DT::renderDT({ 
           datatable(rawData(),
                     options = list(lengthChange = FALSE, scrollX = TRUE)

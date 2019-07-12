@@ -18,3 +18,7 @@ getModelManifest = mm.getModelManifest
 ### function for validating manifest
 # mm.validateModelManifest(manifest_path, datasetType)
 validateModelManifest = mm.validateModelManifest
+
+### get a sheet prepopulated with an existing manifest; returns a url to a google sheet
+# prepopulated_manifest_url = mm.populateModelManifest(manifest_path, datasetType)
+populateModelManifest = mm.populateModelManifest
