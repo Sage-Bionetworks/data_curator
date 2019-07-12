@@ -94,7 +94,6 @@ ui <- dashboardPage(
                 
                 box(
                   title = "Upload Annotated Metadata as a csv",
-                  
                   solidHeader = TRUE,
                   status = "primary",
                   width = 12,
@@ -154,7 +153,7 @@ server <- function(input, output, session) {
       # withProgress(message = "connecting to Google Sheets API") 
       
       output$text <- renderUI({
-        tags$a(href = manifest_url, manifest_url)
+        tags$a(href = manifest_url, manifest_url) ### add link to data dictionary
       })
     }
 )
@@ -163,13 +162,7 @@ server <- function(input, output, session) {
     readr::read_csv(input$csvFile$datapath, na = c("", "NA"))
   })
   
-  ### editable DT element
-  # output$rawData <- DT::renderDT(
-  #   rawData(),
-  #   selection = 'none', server = TRUE, editable = 'cell',
-  #   options = list(lengthChange = FALSE, scrollX = TRUE)
-  # )
-  
+  ### DT 
   output$rawData <- DT::renderDT({ 
     datatable(rawData(),
     options = list(lengthChange = FALSE, scrollX = TRUE)
@@ -181,6 +174,7 @@ server <- function(input, output, session) {
   observeEvent(
     input$validate, {
       annotation_status <- validateModelManifest(input$csvFile$datapath, "scRNASeq") ### right now assay is hardcoded
+      filled_manifest <- populateModelManifest(input$csvFile$datapath, "scRNASeq") ### wrong schema for values?
       toggle('text_div2')
       if ( length(annotation_status) != 0 ) { ## if error not empty aka there is an error
         
@@ -194,22 +188,32 @@ server <- function(input, output, session) {
           column <- annotation_status[[i]][2]
           in_val <- annotation_status[[i]][3]
           allowed_vals <- annotation_status[[i]][4]
+          
           if (unlist(in_val) == "") {
             in_val <- NA
-          } 
+            str_names[i] <- paste("spreadsheet row <b>",
+                                  row, "</b>column <b>", column,
+                                  "</b>your value <b>", in_val,
+                                  "</b> is not an allowed value from:", allowed_vals, sep=" ")
+            in_vals[i] <- in_val
+          } else {
           
           str_names[i] <- paste("spreadsheet row <b>",
                                 row, "</b>column <b>", column,
                                 "</b>your value <b>", in_val,
                                 "</b> is not an allowed value from:", allowed_vals, sep=" ")
           in_vals[i] <- in_val
+          }
         }
 
         output$text2 <- renderUI ({
           HTML("Your metadata is invalid according to the data model.<br/> ",
                "See errors below: <br/>",
-               paste0(sprintf("%s", str_names), collapse = "<br/>")
+               paste0(sprintf("%s", str_names), collapse = "<br/>"),
+               "Edit your data here: ",
+               paste0('<a href="', filled_manifest, '">here</a>')
                )
+
         })
         
         output$rawData <- DT::renderDT({ 
