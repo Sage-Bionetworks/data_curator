@@ -3,6 +3,7 @@ use_condaenv('py3.5', required = TRUE)
 
 reticulate::import("sys")
 reticulate::import_from_path("MetadataModel", path = "HTAN-data-pipeline")
+### need pygsheets installed
 
 source_python("HTAN-data-pipeline/metadataModelFuns.py")
 
