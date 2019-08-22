@@ -12,7 +12,7 @@ reticulate::import("sys")
 reticulate::import_from_path("MetadataModel", path = "HTAN-data-pipeline")
 ### need pygsheets installed
 
-source_python("HTAN-data-pipeline/metadataModelFuns.py")
+source_python("metadataModelFuns.py")
 
 ### ? only get filenames from bucket in filename view until data is actually uploaded after validation?
 
