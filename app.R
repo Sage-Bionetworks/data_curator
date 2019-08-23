@@ -48,7 +48,7 @@ ui <- dashboardPage(
                   width= 6,
                   title = "Select a Project: ",
                   selectInput(inputId = "var", label = "Project:",
-                              choices = c("HCA Project (test)" ))
+                              choices = project )
         
                 ),
                 box(
@@ -57,7 +57,7 @@ ui <- dashboardPage(
                   width= 6,
                   title = "Select a Dataset: ",
                   selectInput(inputId = "var", label = "Dataset:",
-                              choices = c("HCA Census of Immune Cells", "HCA Ischaemic Sensitivity of Human Tissue" ))
+                              choices = folder)
                 ),
                 
                 box(
@@ -146,7 +146,7 @@ server <- function(input, output, session) {
   ###toggles link when download button pressed
   observeEvent(
     input$download, {
-      manifest_url <- getModelManifest("scRNASeq", filenames = c("MantonCB1_HiSeq_1_S1_L002_R1_001.fastq.gz", "MantonCB1_HiSeq_1_S1_L001_R2_001.fastq.gz", "MantonCB1_HiSeq_1_S1_L001_R1_001.fastq.gz", "MantonCB1_HiSeq_1_S1_L002_R2_001.fastq.gz"))
+      manifest_url <- getModelManifest("scRNASeq", filenames = filename_list )
       toggle('text_div')
       
       ### if want a progress bar need more feedback from API to know how to increment progress bar

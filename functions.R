@@ -13,6 +13,21 @@ reticulate::import_from_path("MetadataModel", path = "HTAN-data-pipeline")
 ### need pygsheets installed
 
 source_python("metadataModelFuns.py")
+# source_python("HTAN-data-pipeline/storage_test_driver.py")
+projects_list <- get_projects_list
+project <- projects_list[[1]][[2]]
+
+folder_list <- get_folder_list("syn19557917")
+folder <- folder_list[[1]][[2]]
+
+file_list <- get_file_list("syn19557948")
+filename_list <- rep(NA, length(file_list)) ### initialize list of needed length
+for (i in seq_along(file_list) ) {
+  filename_list[i] <- file_list[[i]][[2]][1]
+  # print(file_list[[i]][[2]][1])
+}
+
+get_manifest_syn_id("./HTAN-data-pipeline/synapse_storage_manifest.csv", "syn20685746")
 
 ### ? only get filenames from bucket in filename view until data is actually uploaded after validation?
 
