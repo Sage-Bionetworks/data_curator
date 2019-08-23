@@ -14,18 +14,28 @@ reticulate::import_from_path("MetadataModel", path = "HTAN-data-pipeline")
 
 source_python("metadataModelFuns.py")
 
+# source_python("./HTAN-data-pipeline/storage_test_driver.py")
+
 source_python("synStoreFuns.py")
-projects_list <- get_projects_list
-project <- projects_list[[1]][[2]]
+#named list of projects (name) and synID (value)
 
-folder_list <- get_folder_list("syn19557917")
-folder <- folder_list[[1]][[2]]
+# projects_list <- get_projects_list
+# projects_namedList <- c()
+# for (i in seq_along(projects_list)) {
+#   projects_namedList[projects_list[[i]][[2]]] <- projects_list[[i]][[1]]
+# }
+# projects_namedList[["HCA immune cells census"]]
+# folder_list <- get_folder_list("syn20687304")
+# folder <- folder_list[[1]][[2]]
 
-file_list <- get_file_list("syn19557948")
-filename_list <- rep(NA, length(file_list)) ### initialize list of needed length
-for (i in seq_along(file_list) ) {
-  filename_list[i] <- file_list[[i]][[2]][1]
-}
-
-get_manifest_syn_id("./HTAN-data-pipeline/synapse_storage_manifest.csv", "syn20685746")
+# folder_list <- get_folder_list("syn20687304")
+# folder <- folder_list[[1]][[2]]
+# 
+# file_list <- get_file_list("syn19557948")
+# filename_list <- rep(NA, length(file_list)) ### initialize list of needed length
+# for (i in seq_along(file_list) ) {
+#   filename_list[i] <- file_list[[i]][[2]][1]
+# }
+# 
+# get_manifest_syn_id("./HTAN-data-pipeline/synapse_storage_manifest.csv", "syn20685746")
 

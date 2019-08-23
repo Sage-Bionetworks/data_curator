@@ -22,8 +22,8 @@ ui <- dashboardPage(
             tags$style(".messages-menu {padding-top :5px}" ),
             tags$a(href="https://humantumoratlas.org/", target = "_blank", 
                    tags$img(height = "40px", alt = "HTAN LOGO", 
-                            src = "HTAN_text_logo.png"))),
-    dropdownMenu(type = "messages", icon = icon("user", "fa-2x")) ### dummy user icon
+                            src = "HTAN_text_logo.png"))) #,
+    # dropdownMenu(type = "messages", icon = icon("user", "fa-2x")) ### dummy user icon
     ),
   dashboardSidebar(
     tags$style(".left-side, .main-sidebar {padding-top: 80px}"),
@@ -46,19 +46,20 @@ ui <- dashboardPage(
                   status = "primary",
                   solidHeader = TRUE,
                   width= 6,
-                  title = "Select a Project: ",
+                  title = "Select a Project and Dataset: ",
                   selectInput(inputId = "var", label = "Project:",
-                              choices = project )
+                              choices = names(projects_namedList) ),
+                  uiOutput('folders')
         
                 ),
-                box(
-                  status = "primary",
-                  solidHeader = TRUE,
-                  width= 6,
-                  title = "Select a Dataset: ",
-                  selectInput(inputId = "var", label = "Dataset:",
-                              choices = folder)
-                ),
+                # box(
+                #   status = "primary",
+                #   solidHeader = TRUE,
+                #   width= 6,
+                #   title = "Select a Dataset: ",
+                #   selectInput(inputId = "var", label = "Dataset:",
+                #               choices = "folder")
+                # ),
                 
                 box(
                   status = "primary",
@@ -70,11 +71,11 @@ ui <- dashboardPage(
                 ),
               
                 box(
-                  title = "Download Template as CSV",
+                  title = "Go to Google Sheets, Annotate, and Download as CSV",
                   status = "primary",
                   solidHeader = TRUE,
                   width = 12,
-                  actionButton("download", "Generate Link"),
+                  actionButton("download", "Generate Link to Google Sheets Annotations"),
                   hidden(
                     div(id='text_div',
                         height = "100%",
@@ -143,9 +144,27 @@ server <- function(input, output, session) {
   ### synapse cookies
   session$sendCustomMessage(type = "readCookie", message = list())
   
+  ### folder datasets 
+  output$folders = renderUI({
+    selected_project <- input$var
+    synID <- projects_namedList[[selected_project]] ### get synID of selected project
+    folder_list <- get_folder_list(synID)
+    folder <- folder_list[[1]][[2]]
+    selectInput(inputId = "dataset", label = "Dataset:", folder)
+  })
+  
   ###toggles link when download button pressed
   observeEvent(
     input$download, {
+      selected_project <- input$var
+      synID <- projects_namedList[[selected_project]] ### get synID of selected project
+      folder_list <- get_folder_list(synID)
+      synID <- folder_list[[1]][[1]]
+      file_list <- get_file_list(synID)
+      filename_list <- rep(NA, length(file_list)) ### initialize list of needed length
+      for (i in seq_along(file_list) ) {
+        filename_list[i] <- file_list[[i]][[2]][1]
+      }
       manifest_url <- getModelManifest("scRNASeq", filenames = filename_list )
       toggle('text_div')
       
@@ -153,7 +172,7 @@ server <- function(input, output, session) {
       # withProgress(message = "connecting to Google Sheets API") 
       
       output$text <- renderUI({
-        tags$a(href = manifest_url, manifest_url) ### add link to data dictionary
+        tags$a(href = manifest_url, manifest_url, target="_blank") ### add link to data dictionary
       })
     }
 )
