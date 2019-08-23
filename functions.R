@@ -18,12 +18,12 @@ source_python("metadataModelFuns.py")
 
 source_python("synStoreFuns.py")
 #named list of projects (name) and synID (value)
+projects_list <- get_projects_list
+projects_namedList <- c()
+for (i in seq_along(projects_list)) {
+  projects_namedList[projects_list[[i]][[2]]] <- projects_list[[i]][[1]]
+}
 
-# projects_list <- get_projects_list
-# projects_namedList <- c()
-# for (i in seq_along(projects_list)) {
-#   projects_namedList[projects_list[[i]][[2]]] <- projects_list[[i]][[1]]
-# }
 # projects_namedList[["HCA immune cells census"]]
 # folder_list <- get_folder_list("syn20687304")
 # folder <- folder_list[[1]][[2]]
