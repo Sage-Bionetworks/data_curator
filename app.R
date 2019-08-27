@@ -52,40 +52,43 @@ ui <- dashboardPage(
                   uiOutput('folders')
         
                 ),
-                # box(
-                #   status = "primary",
-                #   solidHeader = TRUE,
-                #   width= 6,
-                #   title = "Select a Dataset: ",
-                #   selectInput(inputId = "var", label = "Dataset:",
-                #               choices = "folder")
-                # ),
-                
                 box(
                   status = "primary",
                   solidHeader = TRUE,
                   width = 6,
                   title = "Select an Assay: ",
-                  selectInput(inputId = "dataset", label = "Assay:",
-                                     choices = list("scRNAseq", "Whole Exome Seq", "FISH", "CODEX" ))
+                  selectInput(
+                    inputId = "dataset",
+                    label = "Assay:",
+                    choices = list("scRNAseq", "Whole Exome Seq", "FISH", "CODEX")
+                  )
                 ),
-              
+                
                 box(
-                  title = "Go to Google Sheets, Annotate, and Download as CSV",
+                  title = "Annotate and Download as CSV",
                   status = "primary",
                   solidHeader = TRUE,
                   width = 12,
                   actionButton("download", "Generate Link to Google Sheets Annotations"),
                   hidden(
-                    div(id='text_div',
-                        height = "100%",
-                        htmlOutput("text"),
-                        style = "font-size:18px; background-color: white; border: 1px solid #ccc; border-radius: 3px; margin: 10px 0; padding: 10px"
+                    div(
+                      id = 'text_div',
+                      height = "100%",
+                      htmlOutput("text"),
+                      style = "font-size:18px; background-color: white; border: 1px solid #ccc; border-radius: 3px; margin: 10px 0; padding: 10px"
                     )
                   )
+                ),
+                box(
+                  title="Link to Existing Metadata",
+                  status = "primary",
+                  solidHeader = TRUE,
+                  width = 12,
+                  uiOutput("submit")
                 )
+                
               )
-      ),
+      ), 
       
       # Second tab content
       tabItem(tabName = "upload",
@@ -143,10 +146,19 @@ ui <- dashboardPage(
 server <- function(input, output, session) {
   ### synapse cookies
   session$sendCustomMessage(type = "readCookie", message = list())
-  
+  observeEvent(input$cookie, {
+    
+    syn_login(sessionToken=input$cookie, rememberMe = TRUE) 
+    
+    # output$title <- renderUI({
+    #   titlePanel(sprintf("Welcome, %s", synGetUserProfile()$userName))
+    # })
+  })
+    
   ### folder datasets 
   output$folders = renderUI({
     selected_project <- input$var
+    
     synID <- projects_namedList[[selected_project]] ### get synID of selected project
     folder_list <- get_folder_list(synID)
     folder <- folder_list[[1]][[2]]
@@ -157,6 +169,7 @@ server <- function(input, output, session) {
   observeEvent(
     input$download, {
       selected_project <- input$var
+      
       synID <- projects_namedList[[selected_project]] ### get synID of selected project
       folder_list <- get_folder_list(synID)
       synID <- folder_list[[1]][[1]]
@@ -176,6 +189,7 @@ server <- function(input, output, session) {
       })
     }
 )
+  
   ### reads csv file
   rawData <- eventReactive(input$csvFile, {
     readr::read_csv(input$csvFile$datapath, na = c("", "NA"))
@@ -264,12 +278,14 @@ server <- function(input, output, session) {
       file.copy(input$csvFile$datapath, "/tmp/synapse_storage_manifest.csv")
       
       selected_project <- input$var
+      
       synID <- projects_namedList[[selected_project]] ### get synID of selected project
       folder_list <- get_folder_list(synID)
       synID <- folder_list[[1]][[1]]
       print(synID)
-      
-      get_manifest_syn_id("/tmp/synapse_storage_manifest.csv", synID)
+      ### assocites metadata with data and returns manifest id
+      manifest_id <- get_manifest_syn_id("/tmp/synapse_storage_manifest.csv", synID)
+      print(manifest_id)
       })
   
     }

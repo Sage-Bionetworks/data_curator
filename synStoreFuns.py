@@ -7,7 +7,6 @@ storage_fileview = "syn20446927"
 syn = synapseclient.Synapse()
 syn.login()
 
-
 syn_store = SynapseStorage(storage_fileview, syn)
 
 ### "Testing retrieval of project list from Synapse
@@ -21,7 +20,9 @@ get_folder_list = syn_store.getStorageDatasetsInProject
 # "syn19557948"
 get_file_list = syn_store.getFilesInStorageDataset
 
-
 ### print("Testing association of antities with annotation from manifest")
 # "./synapse_storage_manifest.csv", "syn20685746"
 get_manifest_syn_id = syn_store.associateMetadataWithFiles
+
+syn_get = syn.get
+

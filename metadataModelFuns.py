@@ -18,3 +18,7 @@ getModelManifest = mm.getModelManifest
 ### function for validating manifest
 # mm.validateModelManifest(manifest_path, datasetType)
 validateModelManifest = mm.validateModelManifest
+
+
+### populates manifest with path to csv
+populateModelManifest = mm.populateModelManifest
