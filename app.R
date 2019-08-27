@@ -257,9 +257,27 @@ server <- function(input, output, session) {
     }
   )
   
+  ###toggles link when download button pressed
+  observeEvent(
+    input$submitButton, {
+      ### copies file to rename it
+      file.copy(input$csvFile$datapath, "/tmp/synapse_storage_manifest.csv")
+      
+      selected_project <- input$var
+      synID <- projects_namedList[[selected_project]] ### get synID of selected project
+      folder_list <- get_folder_list(synID)
+      synID <- folder_list[[1]][[1]]
+      print(synID)
+      
+      get_manifest_syn_id("/tmp/synapse_storage_manifest.csv", synID)
+      })
+  
+    }
+  # )
+  
 
 
   # )
-}
+# }
 
 shinyApp(ui, server)
