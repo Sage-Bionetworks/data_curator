@@ -11,10 +11,3 @@ To Use:
 - to get the manifest you'll need access permission to the HTAN google account from Milen
 
 
-To-Do:
-- link to synapse project and show project and folder
-
-- option to get previously uploaded manifest
-- progress bar for upload
-- reactive based on assay input (when we have more templates)
-
