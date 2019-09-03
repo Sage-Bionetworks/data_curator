@@ -63,7 +63,6 @@ ui <- dashboardPage(
                     choices = list("scRNAseq", "Whole Exome Seq", "FISH", "CODEX")
                   )
                 ),
-                
                 box(
                   title = "Annotate and Download as CSV",
                   status = "primary",
@@ -80,11 +79,19 @@ ui <- dashboardPage(
                   )
                 ),
                 box(
-                  title="Link to Existing Metadata",
+                  title = "Link to Previously Uploaded CSV",
                   status = "primary",
-                  solidHeader = TRUE,
+                  solidHeader = TRUE, 
                   width = 12,
-                  uiOutput("submit")
+                  actionButton("link", "Generate Link to Previously Uploaded Annotations"),
+                  hidden(
+                    div(
+                      id = 'text_div3',
+                      height = "100%",
+                      htmlOutput("text3"),
+                      style = "font-size:18px; background-color: white; border: 1px solid #ccc; border-radius: 3px; margin: 10px 0; padding: 10px"
+                    )
+                  )
                 )
                 
               )
@@ -189,6 +196,34 @@ server <- function(input, output, session) {
       })
     }
 )
+  
+  ###toggles link to preious manifest when pressed 
+  observeEvent(
+    input$link, {
+      selected_project <- input$var
+      
+      synID <- projects_namedList[[selected_project]] ### get synID of selected project
+      folder_list <- get_folder_list(synID)
+      synID <- folder_list[[1]][[1]]
+      fpath <- get_storage_manifest_path(synID)
+      if (fpath == "No manifest uploaded") {
+        toggle('text_div3')
+        output$text3 <- renderUI({
+          tags$b("No previously uploaded manifest was found")
+        })
+      } else {
+        manifest_url <- populateModelManifest(fpath, "scRNASeq" )
+        toggle('text_div3')
+
+
+        output$text3 <- renderUI({
+        tags$a(href = manifest_url, manifest_url, target="_blank")
+        })
+      }
+      
+
+    }
+  )
   
   ### reads csv file
   rawData <- eventReactive(input$csvFile, {

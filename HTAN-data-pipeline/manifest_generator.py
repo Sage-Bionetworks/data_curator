@@ -34,7 +34,7 @@ class ManifestGenerator(object):
         self.scopes = ['https://www.googleapis.com/auth/spreadsheets']
 
         # credentials file path
-        self.credentials_path = './credentials.json' 
+        self.credentials_path = '/Users/xdoan/Shell/HTAN_Shiny/HTAN-data-pipeline/credentials.json' 
 
         self.root = root
 
