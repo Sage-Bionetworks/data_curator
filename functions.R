@@ -26,3 +26,14 @@ projects_namedList <- c()
 for (i in seq_along(projects_list)) {
   projects_namedList[projects_list[[i]][[2]]] <- projects_list[[i]][[1]]
 }
+
+
+### test for multiple folders per project
+# synID <- projects_namedList[["HCA immune cells census"]] ### get synID of selected project
+# folder_list <- get_folder_list(synID)
+# folders_namedList <- c()
+# for (i in seq_along(folder_list)) {
+#   folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
+# }
+# 
+# folderNames <- names(folders_namedList)

@@ -58,7 +58,7 @@ ui <- dashboardPage(
                   width = 6,
                   title = "Select an Assay: ",
                   selectInput(
-                    inputId = "dataset",
+                    inputId = "assay_type",
                     label = "Assay:",
                     choices = list("scRNAseq", "Whole Exome Seq", "FISH", "CODEX")
                   )
@@ -168,18 +168,21 @@ server <- function(input, output, session) {
     
     synID <- projects_namedList[[selected_project]] ### get synID of selected project
     folder_list <- get_folder_list(synID)
-    folder <- folder_list[[1]][[2]]
-    selectInput(inputId = "dataset", label = "Dataset:", folder)
+    folders_namedList <- c()
+    for (i in seq_along(folder_list)) {
+      folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
+    }
+    folderNames <- names(folders_namedList)
+    selectInput(inputId = "dataset", label = "Dataset:", folderNames)
   })
   
   ###toggles link when download button pressed
   observeEvent(
     input$download, {
-      selected_project <- input$var
+      selected_folder <- input$dataset
       
-      synID <- projects_namedList[[selected_project]] ### get synID of selected project
-      folder_list <- get_folder_list(synID)
-      synID <- folder_list[[1]][[1]]
+      synID <- folders_namedList[[selected_folder]]
+      
       file_list <- get_file_list(synID)
       filename_list <- rep(NA, length(file_list)) ### initialize list of needed length
       for (i in seq_along(file_list) ) {
