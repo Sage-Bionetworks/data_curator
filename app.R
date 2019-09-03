@@ -180,6 +180,14 @@ server <- function(input, output, session) {
   observeEvent(
     input$download, {
       selected_folder <- input$dataset
+      selected_project <- input$var
+      
+      synID <- projects_namedList[[selected_project]] ### get synID of selected project
+      folder_list <- get_folder_list(synID)
+      folders_namedList <- c()
+      for (i in seq_along(folder_list)) {
+        folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
+      }
       
       synID <- folders_namedList[[selected_folder]]
       
@@ -200,7 +208,7 @@ server <- function(input, output, session) {
     }
 )
   
-  ###toggles link to preious manifest when pressed 
+  ###toggles link to previous manifest when pressed 
   observeEvent(
     input$link, {
       selected_project <- input$var
