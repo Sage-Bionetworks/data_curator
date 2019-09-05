@@ -196,6 +196,7 @@ server <- function(input, output, session) {
       for (i in seq_along(file_list) ) {
         filename_list[i] <- file_list[[i]][[2]][1]
       }
+      
       manifest_url <- getModelManifest("scRNASeq", filenames = filename_list )
       toggle('text_div')
       
