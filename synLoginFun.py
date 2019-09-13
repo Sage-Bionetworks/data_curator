@@ -2,7 +2,7 @@ import synapseclient
 
 syn = synapseclient.Synapse()
 syn_login = syn.login
-
+syn_tableQuery = syn.tableQuery
 ### function to get previously uploaded manifest
 ### returns statement if no manifest uploaded instead of path
 def get_storage_manifest_path (folderID):
@@ -17,4 +17,4 @@ def get_storage_manifest_path (folderID):
         path_to_file = fh.path
         return(path_to_file)
     else:
-        return("No manifest uploaded")
+        return None

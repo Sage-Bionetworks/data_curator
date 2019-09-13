@@ -13,7 +13,7 @@ source(file= "./functions.R")
 ui <- dashboardPage(
   skin = "purple",
   dashboardHeader(
-    title = "HTAN Upload" ,
+    title = "Data Curator" ,
     tags$li(class = "dropdown",
             tags$style(".main-header {max-height: 50px}"),
             tags$style(".main-header .logo {height: 70px; font-size: 28px; padding-top: 10px}"),
@@ -28,8 +28,9 @@ ui <- dashboardPage(
   dashboardSidebar(
     tags$style(".left-side, .main-sidebar {padding-top: 80px}"),
     sidebarMenu(
-    menuItem("Download Metadata Template", tabName = "template", icon = icon("table")),
-    menuItem("Upload Data", tabName = "upload", icon = icon("upload"))
+    # menuItem("Dataset Dashboard", tabName = "dashboard", icon = icon("home")),  
+    menuItem("Get Metadata Template", tabName = "template", icon = icon("table")),
+    menuItem("Upload Annotated Dataset", tabName = "upload", icon = icon("upload"))
     )
   ),
   dashboardBody(
@@ -39,6 +40,18 @@ ui <- dashboardPage(
       )),
     tabItems(
       # First tab content
+      # tabItem(tabName = "dashboard",
+      #         h2("Welcome to your dataset dashboard!"),
+      #         fluidRow(
+      #           box(
+      #             status = "primary",
+      #             solidHeader = TRUE,
+      #             title = "Datasets and Annotations",
+      #             width = 12 #, 
+      #             # DT::DTOutput("projData"),
+      #           )
+      #         )),
+      # Second tab item
       tabItem(tabName = "template",
               h2("Choose your Assay and Dataset Template"),
               fluidRow(
@@ -97,7 +110,7 @@ ui <- dashboardPage(
               )
       ), 
       
-      # Second tab content
+      # Third tab content
       tabItem(tabName = "upload",
               # useShinyjs(),
               h2("Upload Annotated Metadata File"),
@@ -162,12 +175,28 @@ server <- function(input, output, session) {
     # })
   })
     
+  ### table for dataset dashboard
+  ### create table
+  # rawData <- eventReactive(input$csvFile, {
+    # readr::read_csv(input$csvFile$datapath, na = c("", "NA"))
+  # })
+  
+  # 
+  # ### DT 
+  # output$rawData <- DT::renderDT({ 
+  #   datatable(rawData(),
+  #             options = list(lengthChange = FALSE, scrollX = TRUE)
+  #   ) 
+  #   
+  # })
+  
+  
   ### folder datasets 
   output$folders = renderUI({
     selected_project <- input$var
     
-    synID <- projects_namedList[[selected_project]] ### get synID of selected project
-    folder_list <- get_folder_list(synID)
+    project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
+    folder_list <- get_folder_list(project_synID)
     folders_namedList <- c()
     for (i in seq_along(folder_list)) {
       folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
@@ -182,16 +211,16 @@ server <- function(input, output, session) {
       selected_folder <- input$dataset
       selected_project <- input$var
       
-      synID <- projects_namedList[[selected_project]] ### get synID of selected project
-      folder_list <- get_folder_list(synID)
+      project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
+      folder_list <- get_folder_list(project_synID)
       folders_namedList <- c()
       for (i in seq_along(folder_list)) {
         folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
       }
       
-      synID <- folders_namedList[[selected_folder]]
+      folder_synID <- folders_namedList[[selected_folder]]
       
-      file_list <- get_file_list(synID)
+      file_list <- get_file_list(folder_synID)
       filename_list <- rep(NA, length(file_list)) ### initialize list of needed length
       for (i in seq_along(file_list) ) {
         filename_list[i] <- file_list[[i]][[2]][1]
@@ -213,12 +242,19 @@ server <- function(input, output, session) {
   observeEvent(
     input$link, {
       selected_project <- input$var
+      selected_folder <- input$dataset
       
-      synID <- projects_namedList[[selected_project]] ### get synID of selected project
-      folder_list <- get_folder_list(synID)
-      synID <- folder_list[[1]][[1]]
-      fpath <- get_storage_manifest_path(synID)
-      if (fpath == "No manifest uploaded") {
+      project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
+      folder_list <- get_folder_list(project_synID)
+      folders_namedList <- c()
+      for (i in seq_along(folder_list)) {
+        folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
+      }
+      
+      folder_synID <- folders_namedList[[selected_folder]]
+      
+      fpath <- get_storage_manifest_path(folder_synID)
+      if ( is.null(fpath)) {
         toggle('text_div3')
         output$text3 <- renderUI({
           tags$b("No previously uploaded manifest was found")
@@ -326,10 +362,17 @@ server <- function(input, output, session) {
       
       selected_project <- input$var
       
-      synID <- projects_namedList[[selected_project]] ### get synID of selected project
-      folder_list <- get_folder_list(synID)
-      synID <- folder_list[[1]][[1]]
-      print(synID)
+      project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
+      
+      folder_list <- get_folder_list(project_synID)
+      folders_namedList <- c()
+      for (i in seq_along(folder_list)) {
+        folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
+      }
+      
+      folder_synID <- folders_namedList[[selected_folder]]
+      
+      print(folder_synID)
       ### assocites metadata with data and returns manifest id
       manifest_id <- get_manifest_syn_id("/tmp/synapse_storage_manifest.csv", synID)
       print(manifest_id)
