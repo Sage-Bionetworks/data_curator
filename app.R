@@ -73,7 +73,7 @@ ui <- dashboardPage(
                   selectInput(
                     inputId = "assay_type",
                     label = "Assay:",
-                    choices = list("scRNAseq", "Whole Exome Seq", "FISH", "CODEX")
+                    choices = list("HTAPP", "scRNAseq", "Whole Exome Seq", "FISH", "CODEX")
                   )
                 ),
                 box(
@@ -226,7 +226,7 @@ server <- function(input, output, session) {
         filename_list[i] <- file_list[[i]][[2]][1]
       }
       
-      manifest_url <- getModelManifest("scRNASeq", filenames = filename_list )
+      manifest_url <- getModelManifest(input$assay_type, filenames = filename_list )
       toggle('text_div')
       
       ### if want a progress bar need more feedback from API to know how to increment progress bar
@@ -260,7 +260,7 @@ server <- function(input, output, session) {
           tags$b("No previously uploaded manifest was found")
         })
       } else {
-        manifest_url <- populateModelManifest(fpath, "scRNASeq" )
+        manifest_url <- populateModelManifest(fpath, input$assay_type )
         toggle('text_div3')
 
 
@@ -289,10 +289,10 @@ server <- function(input, output, session) {
   ### toggles validation status when validate button pressed 
   observeEvent(
     input$validate, {
-      annotation_status <- validateModelManifest(input$csvFile$datapath, "scRNASeq") ### right now assay is hardcoded
+      annotation_status <- validateModelManifest(input$csvFile$datapath, input$assay_type) ### right now assay is hardcoded
       toggle('text_div2')
       if ( length(annotation_status) != 0 ) { ## if error not empty aka there is an error
-        filled_manifest <- populateModelManifest(input$csvFile$datapath, "scRNASeq") ### wrong schema for values?
+        filled_manifest <- populateModelManifest(input$csvFile$datapath, input$assay_type) ### wrong schema for values?
         
         ### create list of string names for the long error messages      
         str_names <- sprintf("str_%d", seq(length(annotation_status)))
