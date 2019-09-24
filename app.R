@@ -374,7 +374,7 @@ server <- function(input, output, session) {
       
       print(folder_synID)
       ### assocites metadata with data and returns manifest id
-      manifest_id <- get_manifest_syn_id("/tmp/synapse_storage_manifest.csv", synID)
+      manifest_id <- get_manifest_syn_id("/tmp/synapse_storage_manifest.csv", folder_synID)
       print(manifest_id)
       })
   
