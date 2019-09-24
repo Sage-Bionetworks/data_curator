@@ -20,3 +20,9 @@ source_python("metadataModelFuns.py")
 
 source_python("synStoreFuns.py")
 
+### logs in and gets list of projects they have access to
+projects_list <- get_projects_list
+projects_namedList <- c()
+for (i in seq_along(projects_list)) {
+  projects_namedList[projects_list[[i]][[2]]] <- projects_list[[i]][[1]]
+}
