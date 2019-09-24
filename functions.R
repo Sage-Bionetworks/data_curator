@@ -26,3 +26,4 @@ projects_namedList <- c()
 for (i in seq_along(projects_list)) {
   projects_namedList[projects_list[[i]][[2]]] <- projects_list[[i]][[1]]
 }
+
