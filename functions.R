@@ -26,22 +26,3 @@ projects_namedList <- c()
 for (i in seq_along(projects_list)) {
   projects_namedList[projects_list[[i]][[2]]] <- projects_list[[i]][[1]]
 }
-# folder_list <- get_folder_list("syn20687304")
-# folders_namedList <- c()
-# for (i in seq_along(folder_list)) {
-#   folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
-# }
-# 
-# folder_synID <- folders_namedList[[ "HCA_Census_of_Immune_Cells" ]]
-# 
-# file_list <- get_file_list(folder_synID)
-# file_namedList <- c()
-# for (i in seq_along(file_list)) {
-#   file_namedList[file_list[[i]][[2]]] <- file_list[[i]][[1]]
-# }
-# names(file_namedList)
-# infile <- readr::read_csv("/tmp/synapse_storage_manifest.csv", na = c("", "NA"))
-# files_df <- stack(file_namedList)
-# colnames(files_df) <- c("entityId", "Filename" )
-# files_entity <- inner_join(infile, files_df, by = "Filename")
-# write.csv(files_entity, file= "/tmp/synapse_storage_manifest.csv", quote = FALSE, row.names = FALSE, na = "")
