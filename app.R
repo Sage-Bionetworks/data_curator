@@ -221,10 +221,12 @@ server <- function(input, output, session) {
       folder_synID <- folders_namedList[[selected_folder]]
       
       file_list <- get_file_list(folder_synID)
-      filename_list <- rep(NA, length(file_list)) ### initialize list of needed length
-      for (i in seq_along(file_list) ) {
-        filename_list[i] <- file_list[[i]][[2]][1]
+
+      file_namedList <- c()
+      for (i in seq_along(file_list)) {
+        file_namedList[file_list[[i]][[2]]] <- file_list[[i]][[1]]
       }
+      filename_list <- names(file_namedList)
       
       manifest_url <- getModelManifest(input$assay_type, filenames = filename_list )
       toggle('text_div')
@@ -262,7 +264,6 @@ server <- function(input, output, session) {
       } else {
         manifest_url <- populateModelManifest(fpath, input$assay_type )
         toggle('text_div3')
-
 
         output$text3 <- renderUI({
         tags$a(href = manifest_url, manifest_url, target="_blank")
@@ -357,10 +358,19 @@ server <- function(input, output, session) {
   ###toggles link when download button pressed
   observeEvent(
     input$submitButton, {
+      ### reads in csv and adds entityID, then saves it as synapse_storage_manifest.csv in tmp
+      infile <- readr::read_csv(input$csvFile$datapath, na = c("", "NA"))
+      files_df <- stack(file_namedList)
+      colnames(files_df) <- c("entityId", "Filename" )
+      files_entity <- inner_join(infile, files_df, by = "Filename")
+      write.csv(files_entity, file= "/tmp/synapse_storage_manifest.csv", quote = FALSE, row.names = FALSE)
+      
+      
       ### copies file to rename it
-      file.copy(input$csvFile$datapath, "/tmp/synapse_storage_manifest.csv")
+      # file.copy(input$csvFile$datapath, "/tmp/synapse_storage_manifest.csv")
       
       selected_project <- input$var
+      selected_folder <- input$dataset
       
       project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
       
