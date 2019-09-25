@@ -44,4 +44,4 @@ for (i in seq_along(projects_list)) {
 # files_df <- stack(file_namedList)
 # colnames(files_df) <- c("entityId", "Filename" )
 # files_entity <- inner_join(infile, files_df, by = "Filename")
-# write.csv(files_entity, file= "/tmp/synapse_storage_manifest.csv", quote = FALSE, row.names = FALSE)
+# write.csv(files_entity, file= "/tmp/synapse_storage_manifest.csv", quote = FALSE, row.names = FALSE, na = "")
