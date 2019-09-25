@@ -34,7 +34,7 @@ class ManifestGenerator(object):
         self.scopes = ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive']
 
         # credentials file path
-        self.credentials_path = 'credentials.json'
+        self.credentials_path = './HTAN-data-pipeline/credentials.json'
 
         # google service for Drive API
         self.driveService = None

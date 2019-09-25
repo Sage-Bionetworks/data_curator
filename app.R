@@ -73,7 +73,7 @@ ui <- dashboardPage(
                   selectInput(
                     inputId = "module_type",
                     label = "Module:",
-                    choices = list("HTAPP", "scRNAseq")
+                    choices = list("HTAPP") #, "scRNAseq")
                   )
                 )
               )

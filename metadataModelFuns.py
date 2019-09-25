@@ -5,7 +5,8 @@ parser = argparse.ArgumentParser()
 parser.parse_args()
 
 #inputMModelLocation = "./schemas/exampleSchemaReq.jsonld"
-inputMModelLocation = "./HTAN-data-pipeline/schemas/scRNASeq.jsonld"
+#inputMModelLocation = "./HTAN-data-pipeline/schemas/scRNASeq.jsonld"
+inputMModelLocation = "./HTAN-data-pipeline/schemas/HTAPP.jsonld"
 inputMModelLocationType = "local"
 # datasetType = "scRNASeq"
 
