@@ -28,7 +28,8 @@ ui <- dashboardPage(
   dashboardSidebar(
     tags$style(".left-side, .main-sidebar {padding-top: 80px}"),
     sidebarMenu(
-    # menuItem("Dataset Dashboard", tabName = "dashboard", icon = icon("home")),  
+    # menuItem("Dataset Dashboard", tabName = "dashboard", icon = icon("home")),
+    menuItem("Choose your Dataset", tabName = "data", icon = icon("mouse-pointer")),
     menuItem("Get Metadata Template", tabName = "template", icon = icon("table")),
     menuItem("Upload Annotated Dataset", tabName = "upload", icon = icon("upload"))
     )
@@ -39,7 +40,6 @@ ui <- dashboardPage(
         includeScript("www/readCookie.js")
       )),
     tabItems(
-      # First tab content
       # tabItem(tabName = "dashboard",
       #         h2("Welcome to your dataset dashboard!"),
       #         fluidRow(
@@ -51,9 +51,9 @@ ui <- dashboardPage(
       #             # DT::DTOutput("projData"),
       #           )
       #         )),
-      # Second tab item
-      tabItem(tabName = "template",
-              h2("Choose your Assay and Dataset Template"),
+      # First tab content
+      tabItem(tabName = "data",
+              h2("Choose your Dataset and Metadata Module"),
               fluidRow(
                 box(
                   status = "primary",
@@ -63,19 +63,25 @@ ui <- dashboardPage(
                   selectInput(inputId = "var", label = "Project:",
                               choices = names(projects_namedList) ),
                   uiOutput('folders')
-        
+
                 ),
                 box(
                   status = "primary",
                   solidHeader = TRUE,
                   width = 6,
-                  title = "Select an Assay: ",
+                  title = "Select a Module: ",
                   selectInput(
-                    inputId = "assay_type",
-                    label = "Assay:",
-                    choices = list("scRNAseq", "Whole Exome Seq", "FISH", "CODEX")
+                    inputId = "module_type",
+                    label = "Module:",
+                    choices = list("HTAPP", "scRNAseq")
                   )
-                ),
+                )
+              )
+              ),
+      # Second tab item
+      tabItem(tabName = "template",
+              h2("Get Your Metadata Template"),
+              fluidRow(
                 box(
                   title = "Annotate and Download as CSV",
                   status = "primary",
@@ -175,22 +181,6 @@ server <- function(input, output, session) {
     # })
   })
     
-  ### table for dataset dashboard
-  ### create table
-  # rawData <- eventReactive(input$csvFile, {
-    # readr::read_csv(input$csvFile$datapath, na = c("", "NA"))
-  # })
-  
-  # 
-  # ### DT 
-  # output$rawData <- DT::renderDT({ 
-  #   datatable(rawData(),
-  #             options = list(lengthChange = FALSE, scrollX = TRUE)
-  #   ) 
-  #   
-  # })
-  
-  
   ### folder datasets 
   output$folders = renderUI({
     selected_project <- input$var
@@ -221,12 +211,14 @@ server <- function(input, output, session) {
       folder_synID <- folders_namedList[[selected_folder]]
       
       file_list <- get_file_list(folder_synID)
-      filename_list <- rep(NA, length(file_list)) ### initialize list of needed length
-      for (i in seq_along(file_list) ) {
-        filename_list[i] <- file_list[[i]][[2]][1]
+
+      file_namedList <- c()
+      for (i in seq_along(file_list)) {
+        file_namedList[file_list[[i]][[2]]] <- file_list[[i]][[1]]
       }
+      filename_list <- names(file_namedList)
       
-      manifest_url <- getModelManifest("scRNASeq", filenames = filename_list )
+      manifest_url <- getModelManifest(input$module_type, filenames = filename_list )
       toggle('text_div')
       
       ### if want a progress bar need more feedback from API to know how to increment progress bar
@@ -260,9 +252,8 @@ server <- function(input, output, session) {
           tags$b("No previously uploaded manifest was found")
         })
       } else {
-        manifest_url <- populateModelManifest(fpath, "scRNASeq" )
+        manifest_url <- populateModelManifest(fpath, input$module_type )
         toggle('text_div3')
-
 
         output$text3 <- renderUI({
         tags$a(href = manifest_url, manifest_url, target="_blank")
@@ -289,10 +280,10 @@ server <- function(input, output, session) {
   ### toggles validation status when validate button pressed 
   observeEvent(
     input$validate, {
-      annotation_status <- validateModelManifest(input$csvFile$datapath, "scRNASeq") ### right now assay is hardcoded
+      annotation_status <- validateModelManifest(input$csvFile$datapath, input$module_type) ### right now assay is hardcoded
       toggle('text_div2')
       if ( length(annotation_status) != 0 ) { ## if error not empty aka there is an error
-        filled_manifest <- populateModelManifest(input$csvFile$datapath, "scRNASeq") ### wrong schema for values?
+        filled_manifest <- populateModelManifest(input$csvFile$datapath, input$module_type) ### wrong schema for values?
         
         ### create list of string names for the long error messages      
         str_names <- sprintf("str_%d", seq(length(annotation_status)))
@@ -354,13 +345,21 @@ server <- function(input, output, session) {
     }
   )
   
-  ###toggles link when download button pressed
+  ###submit button
   observeEvent(
     input$submitButton, {
+      ### reads in csv and adds entityID, then saves it as synapse_storage_manifest.csv in tmp
+      infile <- readr::read_csv(input$csvFile$datapath, na = c("", "NA"))
+      files_df <- stack(file_namedList)
+      colnames(files_df) <- c("entityId", "Filename" )
+      files_entity <- inner_join(infile, files_df, by = "Filename")
+      write.csv(files_entity, file= "/tmp/synapse_storage_manifest.csv", quote = FALSE, row.names = FALSE, na = "")
+      
       ### copies file to rename it
-      file.copy(input$csvFile$datapath, "/tmp/synapse_storage_manifest.csv")
+      # file.copy(input$csvFile$datapath, "/tmp/synapse_storage_manifest.csv")
       
       selected_project <- input$var
+      selected_folder <- input$dataset
       
       project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
       
@@ -373,9 +372,14 @@ server <- function(input, output, session) {
       folder_synID <- folders_namedList[[selected_folder]]
       
       print(folder_synID)
+      
       ### assocites metadata with data and returns manifest id
-      manifest_id <- get_manifest_syn_id("/tmp/synapse_storage_manifest.csv", synID)
+      manifest_id <- get_manifest_syn_id("/tmp/synapse_storage_manifest.csv", folder_synID)
       print(manifest_id)
+      ### if uploaded provide message
+      if (!is.na(manifest_id)) {
+        showNotification("Successfully Uploaded!", duration = NULL, type = "message")
+      }
       })
   
     }
