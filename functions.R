@@ -2,6 +2,9 @@
 # unloadNamespace("synapser")
 
 library(reticulate) 
+### clear tmp
+rm("/tmp/synapse_storage_manifest.csv")
+
 # py_available()
 # conda_python()
 use_condaenv('py3.5', required = TRUE ) ### use path to python 3.5 env
