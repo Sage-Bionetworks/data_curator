@@ -280,10 +280,10 @@ server <- function(input, output, session) {
   ### toggles validation status when validate button pressed 
   observeEvent(
     input$validate, {
-      annotation_status <- validateModelManifest(input$csvFile$datapath, input$module_type) ### right now assay is hardcoded
+      annotation_status <- validateModelManifest(input$csvFile$datapath, input$module_type) 
       toggle('text_div2')
       if ( length(annotation_status) != 0 ) { ## if error not empty aka there is an error
-        filled_manifest <- populateModelManifest(input$csvFile$datapath, input$module_type) ### wrong schema for values?
+        filled_manifest <- populateModelManifest(input$csvFile$datapath, input$module_type) 
         
         ### create list of string names for the long error messages      
         str_names <- sprintf("str_%d", seq(length(annotation_status)))
@@ -305,11 +305,11 @@ server <- function(input, output, session) {
                                   "</b> is not an allowed value from:", allowed_vals, sep=" ")
             in_vals[i] <- in_val
           } else {
-          str_names[i] <- paste("Spreadsheet row <b>",
-                                row, "</b>column <b>", column,
-                                "</b>your value <b>", in_val,
-                                "</b> is not an allowed value from:", allowed_vals, sep=" ")
-          in_vals[i] <- in_val
+            str_names[i] <- paste("Spreadsheet row <b>",
+                                  row, "</b>column <b>", column,
+                                  "</b>your value <b>", in_val,
+                                  "</b> is not an allowed value from:", allowed_vals, sep=" ")
+            in_vals[i] <- in_val
           }
         }
         
