@@ -71,12 +71,12 @@ ui <- dashboardPage(
                   status = "primary",
                   solidHeader = TRUE,
                   width = 6,
-                  title = "Select a Module: ",
+                  title = "Select a Template Type: ",
                   selectInput(
-                    inputId = "module_type",
-                    label = "Module:",
-                    choices = list("HTAPP") #, "scRNAseq")
-                  )
+                    inputId = "template_type",
+                    label = "Template:",
+                    choices = list("Minimal Metadata") #, "scRNAseq") ## add mapping step from string to input
+                  ) ## HTAPP to Minimal Metadata
                 )
               )
               ),
@@ -183,6 +183,9 @@ server <- function(input, output, session) {
     # })
   })
     
+  ### rename the input template type to HTAPP 
+  in_template_type <- "HTAPP" 
+    
   ### folder datasets 
   output$folders = renderUI({
     selected_project <- input$var
@@ -220,7 +223,7 @@ server <- function(input, output, session) {
       }
       filename_list <- names(file_namedList)
       
-      manifest_url <- getModelManifest(input$module_type, filenames = filename_list )
+      manifest_url <- getModelManifest(in_template_type, filenames = filename_list )
       toggle('text_div')
       
       ### if want a progress bar need more feedback from API to know how to increment progress bar
@@ -254,7 +257,7 @@ server <- function(input, output, session) {
           tags$b("No previously uploaded manifest was found")
         })
       } else {
-        manifest_url <- populateModelManifest(fpath, input$module_type )
+        manifest_url <- populateModelManifest(fpath, in_template_type )
         toggle('text_div3')
 
         output$text3 <- renderUI({
@@ -282,10 +285,10 @@ server <- function(input, output, session) {
   ### toggles validation status when validate button pressed 
   observeEvent(
     input$validate, {
-      annotation_status <- validateModelManifest(input$csvFile$datapath, input$module_type) 
+      annotation_status <- validateModelManifest(input$csvFile$datapath, in_template_type) 
       toggle('text_div2')
       if ( length(annotation_status) != 0 ) { ## if error not empty aka there is an error
-        filled_manifest <- populateModelManifest(input$csvFile$datapath, input$module_type) 
+        filled_manifest <- populateModelManifest(input$csvFile$datapath, in_template_type) 
         
         ### create list of string names for the long error messages      
         str_names <- sprintf("str_%d", seq(length(annotation_status)))
