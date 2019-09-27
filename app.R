@@ -36,6 +36,8 @@ ui <- dashboardPage(
   ),
   dashboardBody(
     tags$head(
+      tags$style("#shiny-notification-error {height: 500px; padding :20px; display: table-cell}" #makes taller so the error will fit
+      ),
       singleton(
         includeScript("www/readCookie.js")
       )),
@@ -395,9 +397,12 @@ server <- function(input, output, session) {
       ### assocites metadata with data and returns manifest id
       manifest_id <- get_manifest_syn_id("/tmp/synapse_storage_manifest.csv", folder_synID)
       print(manifest_id)
+      manifest_path <- paste0("synapse.org/#!Synapse:", manifest_id)
       ### if uploaded provide message
-      if (!is.na(manifest_id)) {
-        showNotification("Successfully Uploaded!", duration = NULL, type = "message")
+      if ( startsWith(manifest_id, "syn") == TRUE) {
+        showNotification( id= "success",  paste0("Uploaded Manifest to: ", manifest_path), duration = NULL, type = "message")
+      } else {
+        showNotification(paste0("error ", manifest_id ), duration = NULL, type = "error")
       }
       })
   
