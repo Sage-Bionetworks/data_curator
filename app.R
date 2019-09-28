@@ -326,7 +326,7 @@ server <- function(input, output, session) {
                "<br/>Edit your data locally or ",
                paste0('<a href="', filled_manifest, '">here</a>')
                )
-
+### tags$a(href = manifest_url, manifest_url, target="_blank") add 
         })
         ### update DT view with incorrect values
         ### currently only one column, requires backend support of multiple
@@ -377,6 +377,7 @@ server <- function(input, output, session) {
       files_df <- stack(file_namedList)
       colnames(files_df) <- c("entityId", "Filename" )
       files_entity <- inner_join(infile, files_df, by = "Filename")
+      rm("/tmp/synapse_storage_manifest.csv")
       write.csv(files_entity, file= "/tmp/synapse_storage_manifest.csv", quote = FALSE, row.names = FALSE, na = "")
       
       ### copies file to rename it
