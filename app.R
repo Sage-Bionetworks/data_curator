@@ -13,6 +13,7 @@ source(file= "./functions.R")
 ui <- dashboardPage(
   skin = "purple",
   dashboardHeader(
+    titleWidth = 250,
     title = "Data Curator" ,
     tags$li(class = "dropdown",
             tags$style(".main-header {max-height: 50px}"),
@@ -25,13 +26,13 @@ ui <- dashboardPage(
                             src = "HTAN_text_logo.png"))) #,
     # dropdownMenu(type = "messages", icon = icon("user", "fa-2x")) ### dummy user icon
     ),
-  dashboardSidebar(
-    tags$style(".left-side, .main-sidebar {padding-top: 80px}"),
+  dashboardSidebar( width = 250, 
+    tags$style(".left-side, .main-sidebar {padding-top: 80px; font-weight: bold; font-size: 1.1em } "),
     sidebarMenu(
     # menuItem("Dataset Dashboard", tabName = "dashboard", icon = icon("home")),
-    menuItem("Choose your Dataset", tabName = "data", icon = icon("mouse-pointer")),
+    menuItem("Select your Dataset", tabName = "data", icon = icon("mouse-pointer")),
     menuItem("Get Metadata Template", tabName = "template", icon = icon("table")),
-    menuItem("Upload Annotated Dataset", tabName = "upload", icon = icon("upload"))
+    menuItem("Submit & Validate Metadata", tabName = "upload", icon = icon("upload"))
     )
   ),
   dashboardBody(
@@ -55,13 +56,13 @@ ui <- dashboardPage(
       #         )),
       # First tab content
       tabItem(tabName = "data",
-              h2("Choose your Dataset and Metadata Module"),
+              h2("Set Dataset and Template for Curation"),
               fluidRow(
                 box(
                   status = "primary",
                   solidHeader = TRUE,
                   width= 6,
-                  title = "Select a Project and Dataset: ",
+                  title = "Choose a Project and Dataset: ",
                   selectInput(inputId = "var", label = "Project:",
                               choices = names(projects_namedList) ),
                   uiOutput('folders')
@@ -71,7 +72,7 @@ ui <- dashboardPage(
                   status = "primary",
                   solidHeader = TRUE,
                   width = 6,
-                  title = "Select a Template Type: ",
+                  title = "Choose a Template Type: ",
                   selectInput(
                     inputId = "template_type",
                     label = "Template:",
@@ -82,14 +83,14 @@ ui <- dashboardPage(
               ),
       # Second tab item
       tabItem(tabName = "template",
-              h2("Get Your Metadata Template"),
+              h2("Download Template for Selected Dataset"),
               fluidRow(
                 box(
-                  title = "Annotate and Download as CSV",
+                  title = "Get Link, Annotate, and Download Template as CSV",
                   status = "primary",
                   solidHeader = TRUE,
                   width = 12,
-                  actionButton("download", "Generate Link to Google Sheets Annotations"),
+                  actionButton("download", "Link to Google Sheets Template"),
                   hidden(
                     div(
                       id = 'text_div',
@@ -100,11 +101,11 @@ ui <- dashboardPage(
                   )
                 ),
                 box(
-                  title = "Link to Previously Uploaded CSV",
+                  title = "Have Previously Submitted Metadata?",
                   status = "primary",
                   solidHeader = TRUE, 
                   width = 12,
-                  actionButton("link", "Generate Link to Previously Uploaded Annotations"),
+                  actionButton("link", "Link to Google Sheets"),
                   hidden(
                     div(
                       id = 'text_div3',
@@ -121,11 +122,11 @@ ui <- dashboardPage(
       # Third tab content
       tabItem(tabName = "upload",
               # useShinyjs(),
-              h2("Upload Annotated Metadata File"),
+              h2("Submit & Validate a Filled Metadata Template"),
               fluidRow(
                 
                 box(
-                  title = "Upload Annotated Metadata as a csv",
+                  title = "Upload Filled Metadata as a CSV",
                   solidHeader = TRUE,
                   status = "primary",
                   width = 12,
@@ -135,18 +136,17 @@ ui <- dashboardPage(
                                      '.csv'))
                   ) ,
                 box(
-                  title = "Uploaded CSV",
+                  title = "Metadata Preview",
                   solidHeader = TRUE,
                   status = "primary",
                   width = 12, 
-                  DT::DTOutput("rawData"),
-                  helpText("Google spreadsheet row numbers are incremented from this table by 1")
+                  DT::DTOutput("rawData") #,
+                  # helpText("Google spreadsheet row numbers are incremented from this table by 1")
                 ),
                 box(
-                  title = "Validate Annotated Metadata",
+                  title = "Validate Filled Metadata",
                   status = "primary",
                   solidHeader = TRUE,
-                  
                   width = 12,
                   actionButton("validate", "Validate Metadata"),
                   hidden(
