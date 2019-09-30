@@ -14,7 +14,7 @@ ui <- dashboardPage(
   skin = "purple",
   dashboardHeader(
     titleWidth = 250,
-    title = "Data Curator" ,
+    title = "Data Curator",
     tags$li(class = "dropdown",
             tags$style(".main-header {max-height: 50px}"),
             tags$style(".main-header .logo {height: 70px; font-size: 28px; padding-top: 10px}"),
@@ -42,6 +42,7 @@ ui <- dashboardPage(
       singleton(
         includeScript("www/readCookie.js")
       )),
+    uiOutput("title"),
     tabItems(
       # tabItem(tabName = "dashboard",
       #         h2("Welcome to your dataset dashboard!"),
@@ -178,8 +179,18 @@ server <- function(input, output, session) {
     
     syn_login(sessionToken=input$cookie, rememberMe = TRUE) 
     
+    ## Show message if user is not logged in to synapse
+    unauthorized <- observeEvent(input$authorized, {
+      showModal(
+        modalDialog(
+          title = "Not logged in",
+          HTML("You must log in to <a href=\"https://www.synapse.org/\">Synapse</a> to use this application. Please log in, and then refresh this page.")
+        )
+      )
+    })
+    
     output$title <- renderUI({
-      titlePanel(sprintf("Welcome, %s", synGetUserProfile()$userName))
+      titlePanel(sprintf("Welcome, %s", syn_getUserProfile()$userName))
     })
   })
     
