@@ -203,9 +203,12 @@ server <- function(input, output, session) {
   ###toggles link when download button pressed
   observeEvent(
     input$download, {
+      
       selected_folder <- input$dataset
       selected_project <- input$var
       
+      id <- showNotification( "Generating link...", duration = NULL, type = "default" )
+
       project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
       folder_list <- get_folder_list(project_synID)
       folders_namedList <- c()
@@ -232,6 +235,7 @@ server <- function(input, output, session) {
       output$text <- renderUI({
         tags$a(href = manifest_url, manifest_url, target="_blank") ### add link to data dictionary
       })
+      removeNotification(id )
     }
 )
   
@@ -240,6 +244,8 @@ server <- function(input, output, session) {
     input$link, {
       selected_project <- input$var
       selected_folder <- input$dataset
+      
+      id <- showNotification( "Processing...", duration = NULL, type = "default" )
       
       project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
       folder_list <- get_folder_list(project_synID)
@@ -256,6 +262,7 @@ server <- function(input, output, session) {
         output$text3 <- renderUI({
           tags$b("No previously uploaded manifest was found")
         })
+        removeNotification(id )
       } else {
         manifest_url <- populateModelManifest(fpath, in_template_type )
         toggle('text_div3')
@@ -263,6 +270,7 @@ server <- function(input, output, session) {
         output$text3 <- renderUI({
         tags$a(href = manifest_url, manifest_url, target="_blank")
         })
+        removeNotification(id )
       }
       
 
@@ -287,6 +295,9 @@ server <- function(input, output, session) {
     input$validate, {
       annotation_status <- validateModelManifest(input$csvFile$datapath, in_template_type) 
       toggle('text_div2')
+      
+      id <- showNotification( "Processing...", duration = NULL, type = "default" )
+      
       if ( length(annotation_status) != 0 ) { ## if error not empty aka there is an error
         filled_manifest <- populateModelManifest(input$csvFile$datapath, in_template_type) 
         
@@ -336,11 +347,12 @@ server <- function(input, output, session) {
           ) %>% formatStyle(unlist(column), 
                             backgroundColor = styleEqual(unlist(in_vals), rep("yellow", length(in_vals))) ) ## how to have multiple errors 
         })
-        
+        removeNotification(id)
       } else {   
         output$text2 <- renderUI ({
           HTML("Your metadata is valid!")
         })
+        removeNotification(id)
         ### show submit button
         output$submit <- renderUI({
           actionButton("submitButton", "Submit to Synapse")
@@ -353,6 +365,9 @@ server <- function(input, output, session) {
   ###submit button
   observeEvent(
     input$submitButton, {
+      
+      id <- showNotification("Submitting...", duration = NULL, type = "default" )
+  
       ### reads in csv and adds entityID, then saves it as synapse_storage_manifest.csv in tmp
       infile <- readr::read_csv(input$csvFile$datapath, na = c("", "NA"))
       selected_folder <- input$dataset
@@ -404,7 +419,8 @@ server <- function(input, output, session) {
       manifest_path <- paste0("synapse.org/#!Synapse:", manifest_id)
       ### if uploaded provide message
       if ( startsWith(manifest_id, "syn") == TRUE) {
-        showNotification( id= "success",  paste0("Uploaded Manifest to: ", manifest_path), duration = NULL, type = "message")
+        removeNotification(id)
+        showNotification( id= "success",  paste0("Submit Manifest to: ", manifest_path), duration = NULL, type = "message")
       } else {
         showNotification(paste0("error ", manifest_id ), duration = NULL, type = "error")
       }
