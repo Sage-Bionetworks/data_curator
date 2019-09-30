@@ -178,9 +178,9 @@ server <- function(input, output, session) {
     
     syn_login(sessionToken=input$cookie, rememberMe = TRUE) 
     
-    # output$title <- renderUI({
-    #   titlePanel(sprintf("Welcome, %s", synGetUserProfile()$userName))
-    # })
+    output$title <- renderUI({
+      titlePanel(sprintf("Welcome, %s", synGetUserProfile()$userName))
+    })
   })
     
   ### rename the input template type to HTAPP 
