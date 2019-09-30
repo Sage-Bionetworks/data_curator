@@ -3,7 +3,7 @@
 
 library(reticulate) 
 ### clear tmp
-rm("/tmp/synapse_storage_manifest.csv")
+# rm("/tmp/synapse_storage_manifest.csv")
 
 # py_available()
 # conda_python()

@@ -368,7 +368,7 @@ server <- function(input, output, session) {
       
       id <- showNotification("Submitting...", duration = NULL, type = "default" )
   
-      ### reads in csv and adds entityID, then saves it as synapse_storage_manifest.csv in tmp
+      ### reads in csv and adds entityID, then saves it as synapse_storage_manifest.csv in folder
       infile <- readr::read_csv(input$csvFile$datapath, na = c("", "NA"))
       selected_folder <- input$dataset
       selected_project <- input$var
@@ -392,8 +392,8 @@ server <- function(input, output, session) {
       files_df <- stack(file_namedList)
       colnames(files_df) <- c("entityId", "Filename" )
       files_entity <- inner_join(infile, files_df, by = "Filename")
-      rm("/tmp/synapse_storage_manifest.csv")
-      write.csv(files_entity, file= "/tmp/synapse_storage_manifest.csv", quote = FALSE, row.names = FALSE, na = "")
+      # rm("/tmp/synapse_storage_manifest.csv")
+      write.csv(files_entity, file= "./files/synapse_storage_manifest.csv", quote = FALSE, row.names = FALSE, na = "")
       
       ### copies file to rename it
       # file.copy(input$csvFile$datapath, "/tmp/synapse_storage_manifest.csv")
@@ -414,7 +414,7 @@ server <- function(input, output, session) {
       print(folder_synID)
       
       ### assocites metadata with data and returns manifest id
-      manifest_id <- get_manifest_syn_id("/tmp/synapse_storage_manifest.csv", folder_synID)
+      manifest_id <- get_manifest_syn_id("./files/synapse_storage_manifest.csv", folder_synID)
       print(manifest_id)
       manifest_path <- paste0("synapse.org/#!Synapse:", manifest_id)
       ### if uploaded provide message
