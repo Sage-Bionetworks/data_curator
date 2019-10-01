@@ -7,10 +7,6 @@ library(stringr)
 library(DT)
 library(jsonlite)
 
-
-source(file= "./functions.R")
-# rm("~/.synapseSession")
-
 ui <- dashboardPage(
   skin = "purple",
   dashboardHeader(
@@ -176,6 +172,7 @@ ui <- dashboardPage(
 server <- function(input, output, session) {
   ### synapse cookies
   session$sendCustomMessage(type = "readCookie", message = list())
+  
   observeEvent(input$cookie, {
     
     syn_login(sessionToken=input$cookie, rememberMe = FALSE)
@@ -193,6 +190,8 @@ server <- function(input, output, session) {
     output$title <- renderUI({
       titlePanel(sprintf("Welcome, %s", syn_getUserProfile()$userName))
     })
+    
+    source(file= "./functions.R")
   })
     
   ### rename the input template type to HTAPP 
