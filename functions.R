@@ -14,7 +14,7 @@ reticulate::import_from_path("MetadataModel", path = "HTAN-data-pipeline")
 ### need pygsheets installed, pandas
 
 source_python("synLoginFun.py")
-syn_login()
+print(syn_login())
 
 source_python("metadataModelFuns.py")
 
@@ -28,3 +28,5 @@ projects_namedList <- c()
 for (i in seq_along(projects_list)) {
   projects_namedList[projects_list[[i]][[2]]] <- projects_list[[i]][[1]]
 }
+
+print(projects_list)
