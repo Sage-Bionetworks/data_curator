@@ -204,7 +204,7 @@ server <- function(input, output, session) {
     
     
   })
-#   source(file= "./functions.R")
+  source(file= "./functions.R")
 #   ### updates options
 #   updateSelectizeInput(session, 'var', choices = names(projects_namedList))
 # 
