@@ -9,7 +9,7 @@ storage_fileview = "syn20446927"
 # session_token = sys.argv[1]
 
 syn = synapseclient.Synapse()
-# syn.login(sessionToken = session_token, rememberMe = False)
+syn.login()
 
 syn_store = SynapseStorage(storage_fileview, syn)
 
