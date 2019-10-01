@@ -9,8 +9,6 @@ syn.login()
 
 syn_store = SynapseStorage(storage_fileview, syn)
 
-
-
 print("*****************************************************")
 print("Testing retrieval of project list from Synapse")
 print("*****************************************************")
