@@ -176,7 +176,7 @@ server <- function(input, output, session) {
   
   observeEvent(input$cookie, {
     source(file= "./functions.R")
-    
+    print(input$cookie)
     syn_login(sessionToken=input$cookie, rememberMe = FALSE)
     
     ## Show message if user is not logged in to synapse
