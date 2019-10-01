@@ -9,6 +9,7 @@ library(jsonlite)
 
 
 source(file= "./functions.R")
+rm("~/.synapseSession")
 
 ui <- dashboardPage(
   skin = "purple",
@@ -177,8 +178,7 @@ server <- function(input, output, session) {
   session$sendCustomMessage(type = "readCookie", message = list())
   observeEvent(input$cookie, {
     
-    syn_login(sessionToken=input$cookie, rememberMe = FALSE)
-    # rm("~/.synapseSession")
+    syn_login(sessionToken=input$cookie, rememberMe = TRUE)
     
     ## Show message if user is not logged in to synapse
     unauthorized <- observeEvent(input$authorized, {
@@ -197,7 +197,7 @@ server <- function(input, output, session) {
     
   ### rename the input template type to HTAPP 
   in_template_type <- "HTAPP" 
-    
+  
   ### folder datasets 
   output$folders = renderUI({
     selected_project <- input$var
