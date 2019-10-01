@@ -14,13 +14,13 @@ reticulate::import_from_path("MetadataModel", path = "HTAN-data-pipeline")
 ### need pygsheets installed, pandas
 
 source_python("synLoginFun.py")
-syn_login()
+syn_login(sessionToken=input$cookie, rememberMe = FALSE)
 
 source_python("metadataModelFuns.py")
 
 # source_python("./HTAN-data-pipeline/storage_test_driver.py")
 
-source_python("synStoreFuns.py")
+source_python("synStoreFuns.py", input$cookie)
 
 ### logs in and gets list of projects they have access to
 projects_list <- get_projects_list
