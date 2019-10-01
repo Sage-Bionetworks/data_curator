@@ -5,8 +5,8 @@ from SynapseStorage import SynapseStorage
 storage_fileview = "syn20446927"
 
 ### get session token from commandline
-import sys
-session_token = sys.argv[1]
+# import sys
+# session_token = sys.argv[1]
 
 syn = synapseclient.Synapse()
 # syn.login(sessionToken = session_token, rememberMe = False)
