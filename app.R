@@ -9,7 +9,7 @@ library(jsonlite)
 
 
 source(file= "./functions.R")
-rm("~/.synapseSession")
+# rm("~/.synapseSession")
 
 ui <- dashboardPage(
   skin = "purple",
