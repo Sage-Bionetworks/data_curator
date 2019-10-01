@@ -187,7 +187,7 @@ server <- function(input, output, session) {
   observeEvent(input$cookie, {
     
     print(input$cookie)
-    syn_login(sessionToken=input$cookie, rememberMe = TRUE)
+    syn_login(sessionToken=input$cookie, rememberMe = FALSE)
     ## Show message if user is not logged in to synapse
     unauthorized <- observeEvent(input$authorized, {
       showModal(
