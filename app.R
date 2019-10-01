@@ -195,7 +195,7 @@ server <- function(input, output, session) {
   observeEvent(input$cookie, {
     source(file= "./functions.R")
     print(input$cookie)
-    syn_login(sessionToken=input$cookie, rememberMe = FALSE)
+    syn_login(sessionToken=input$cookie, rememberMe = TRUE)
     
     ## Show message if user is not logged in to synapse
     unauthorized <- observeEvent(input$authorized, {
@@ -396,6 +396,7 @@ server <- function(input, output, session) {
   ###submit button
   observeEvent(
     input$submitButton, {
+      syn_logout
       
       id <- showNotification("Submitting...", duration = NULL, type = "default" )
   
