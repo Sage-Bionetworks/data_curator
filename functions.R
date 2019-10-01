@@ -17,7 +17,7 @@ reticulate::import_from_path("MetadataModel", path = "HTAN-data-pipeline")
 
 # source_python("metadataModelFuns.py")
 
-source_python("synStoreFuns.py", input$cookie)
+py_run_file("synStoreFuns.py", input$cookie)
 # source_python("synStoreFuns.py")
 
 
