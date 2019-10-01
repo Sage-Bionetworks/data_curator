@@ -13,7 +13,7 @@ reticulate::import_from_path("MetadataModel", path = "HTAN-data-pipeline")
 ### need pygsheets installed, pandas
 # 
 source_python("synLoginFun.py")
-syn_login(sessionToken=input$cookie, rememberMe = FALSE)
+syn_login()
 
 source_python("metadataModelFuns.py")
 

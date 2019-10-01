@@ -6,8 +6,16 @@ library(shinydashboard)
 library(stringr)
 library(DT)
 library(jsonlite)
+library(reticulate)
 
-source("./functions.R")
+#########global
+use_condaenv('py3.5', required = TRUE )
+reticulate::import("sys")
+reticulate::import_from_path("MetadataModel", path = "HTAN-data-pipeline")
+
+source_python("synLoginFun.py")
+source_python("metadataModelFuns.py")
+#########
 
 ui <- dashboardPage(
   skin = "purple",
@@ -63,8 +71,8 @@ ui <- dashboardPage(
                   solidHeader = TRUE,
                   width= 6,
                   title = "Choose a Project and Dataset: ",
-                  selectInput(inputId = "var", label = "Project:",
-                              choices = names(projects_namedList) ),
+                  selectizeInput(inputId = "var", label = "Project:",
+                              choices = NULL ), #names(projects_namedList) ),
                   uiOutput('folders')
 
                 ),
@@ -177,16 +185,9 @@ server <- function(input, output, session) {
   session$sendCustomMessage(type = "readCookie", message = list())
   
   observeEvent(input$cookie, {
-    source(file= "./functions.R")
+    
     print(input$cookie)
     syn_login(sessionToken=input$cookie, rememberMe = TRUE)
-    ####### modify variables set from global
-    projects_list <<- get_projects_list
-    projects_namedList <<- c()
-    for (i in seq_along(projects_list)) {
-      projects_namedList[projects_list[[i]][[2]]] <- projects_list[[i]][[1]]
-    }
-    #######
     ## Show message if user is not logged in to synapse
     unauthorized <- observeEvent(input$authorized, {
       showModal(
@@ -203,6 +204,9 @@ server <- function(input, output, session) {
     
     
   })
+  source(file= "./functions.R")
+  ### updates options
+  updateSelectizeInput(session, 'var', choices = names(projects_namedList))
 
   ### rename the input template type to HTAPP
   in_template_type <- "HTAPP"
@@ -443,10 +447,10 @@ server <- function(input, output, session) {
       if ( startsWith(manifest_id, "syn") == TRUE) {
         removeNotification(id)
         showNotification( id= "success",  paste0("Submit Manifest to: ", manifest_path), duration = NULL, type = "message")
-        syn_logout()
+        # syn_logout()
       } else {
         showNotification(paste0("error ", manifest_id ), duration = NULL, type = "error")
-        syn_logout()
+        # syn_logout()
       }
       })
 
