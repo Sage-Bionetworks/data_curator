@@ -170,10 +170,12 @@ ui <- dashboardPage(
 )
 
 server <- function(input, output, session) {
+
   ### synapse cookies
   session$sendCustomMessage(type = "readCookie", message = list())
   
   observeEvent(input$cookie, {
+    source(file= "./functions.R")
     
     syn_login(sessionToken=input$cookie, rememberMe = FALSE)
     
@@ -191,7 +193,7 @@ server <- function(input, output, session) {
       titlePanel(sprintf("Welcome, %s", syn_getUserProfile()$userName))
     })
     
-    source(file= "./functions.R")
+    
   })
     
   ### rename the input template type to HTAPP 
