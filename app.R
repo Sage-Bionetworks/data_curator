@@ -58,17 +58,6 @@ ui <- dashboardPage(
       )),
     uiOutput("title"),
     tabItems(
-      # tabItem(tabName = "dashboard",
-      #         h2("Welcome to your dataset dashboard!"),
-      #         fluidRow(
-      #           box(
-      #             status = "primary",
-      #             solidHeader = TRUE,
-      #             title = "Datasets and Annotations",
-      #             width = 12 #, 
-      #             # DT::DTOutput("projData"),
-      #           )
-      #         )),
       # First tab content
       tabItem(tabName = "data",
               h2("Set Dataset and Template for Curation"),
@@ -78,10 +67,9 @@ ui <- dashboardPage(
                   solidHeader = TRUE,
                   width= 6,
                   title = "Choose a Project and Dataset: ",
-                  selectInput(inputId = "var", label = "Project:",
-                              choices = names(projects_namedList) ),
+                  selectizeInput(inputId = "var", label = "Project:",
+                                 choices = NULL ), #names(projects_namedList) ),
                   uiOutput('folders')
-
                 ),
                 box(
                   status = "primary",
@@ -195,7 +183,6 @@ server <- function(input, output, session) {
     
     syn_login(sessionToken=input$cookie, rememberMe = FALSE)
     
-    cat(input$cookie)
     ## Show message if user is not logged in to synapse
     unauthorized <- observeEvent(input$authorized, {
       showModal(
@@ -211,23 +198,14 @@ server <- function(input, output, session) {
     })
     
     # source(file= "./functions.R")
-<<<<<<< HEAD
-    # ### logs in and gets list of projects they have access to
-    # projects_list <- get_projects_list(syn_store("syn20446927", syn_login(sessionToken=input$cookie, rememberMe = FALSE) ))
-=======
-    syn_login(sessionToken=input$cookie, rememberMe = TRUE) ### set for demo
+
     ### logs in and gets list of projects they have access to
     # projects_list <- get_projects_list(syn_store("syn20446927", syn_login() ))
->>>>>>> 49b9a3a50edeade60e821fa3dc6007c6b791968a
+
     # projects_namedList <- c()
     # for (i in seq_along(projects_list)) {
     #   projects_namedList[projects_list[[i]][[2]]] <- projects_list[[i]][[1]]
     # }
-<<<<<<< HEAD
-    ### updates options
-=======
-    # ## updates options
->>>>>>> 49b9a3a50edeade60e821fa3dc6007c6b791968a
     # updateSelectizeInput(session, 'var', choices = names(projects_namedList))
     
   })
