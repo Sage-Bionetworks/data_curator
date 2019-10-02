@@ -17,7 +17,8 @@ class SynapseStorage(object):
 
     def __init__(self,
                  storageFileview: str,
-                 syn: synapseclient = None,
+                 # syn: synapseclient = None,
+                 token: str ## gets sessionToken for logging in
                  ) -> None:
 
         """Instantiates a SynapseStorage object
@@ -30,8 +31,8 @@ class SynapseStorage(object):
         
         if not syn:  
             self.syn = synapseclient.Synapse()
-            self.syn.login()
-            # self.syn.login(sessionToken= syn)
+            # self.syn.login()
+            self.syn.login(sessionToken = token)
         else:
             self.syn = syn
 
