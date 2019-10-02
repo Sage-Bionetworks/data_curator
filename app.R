@@ -7,6 +7,8 @@ library(stringr)
 library(DT)
 library(jsonlite)
 
+source(file= "./functions.R")
+
 ui <- dashboardPage(
   skin = "purple",
   dashboardHeader(
@@ -175,7 +177,7 @@ server <- function(input, output, session) {
   
   observeEvent(input$cookie, {
     
-    syn_login(sessionToken=input$cookie, rememberMe = FALSE)
+    syn_login(sessionToken=input$cookie, rememberMe = TRUE)
     
     ## Show message if user is not logged in to synapse
     unauthorized <- observeEvent(input$authorized, {
@@ -191,7 +193,7 @@ server <- function(input, output, session) {
       titlePanel(sprintf("Welcome, %s", syn_getUserProfile()$userName))
     })
     
-    source(file= "./functions.R")
+    # source(file= "./functions.R")
   })
     
   ### rename the input template type to HTAPP 
