@@ -202,15 +202,15 @@ server <- function(input, output, session) {
       titlePanel(sprintf("Welcome, %s", syn_getUserProfile()$userName))
     })
     
-    source(file= "./functions.R")
-    ### logs in and gets list of projects they have access to
-    projects_list <- get_projects_list(syn_store("syn20446927", syn_login(sessionToken=input$cookie, rememberMe = FALSE) ))
-    projects_namedList <- c()
-    for (i in seq_along(projects_list)) {
-      projects_namedList[projects_list[[i]][[2]]] <- projects_list[[i]][[1]]
-    }
+    # source(file= "./functions.R")
+    # ### logs in and gets list of projects they have access to
+    # projects_list <- get_projects_list(syn_store("syn20446927", syn_login(sessionToken=input$cookie, rememberMe = FALSE) ))
+    # projects_namedList <- c()
+    # for (i in seq_along(projects_list)) {
+    #   projects_namedList[projects_list[[i]][[2]]] <- projects_list[[i]][[1]]
+    # }
     ### updates options
-    updateSelectizeInput(session, 'var', choices = names(projects_namedList))
+    # updateSelectizeInput(session, 'var', choices = names(projects_namedList))
     
   })
 
