@@ -29,12 +29,12 @@ class SynapseStorage(object):
             TODO: move away from specific project setup and work with an interface that Synapse specifies (e.g. based on schemas)
         """
         
-        if not syn:  
-            self.syn = synapseclient.Synapse()
+        # if not syn:  
+        self.syn = synapseclient.Synapse()
             # self.syn.login()
-            self.syn.login(sessionToken = token)
-        else:
-            self.syn = syn
+        self.syn.login(sessionToken = token)
+        # else:
+            # self.syn = syn
 
         self.storageFileview = storageFileview
 
