@@ -191,7 +191,7 @@ server <- function(input, output, session) {
       titlePanel(sprintf("Welcome, %s", syn_getUserProfile()$userName))
     })
     
-    # source(file= "./functions.R")
+    reticulate::source_python("synStore_Session.py")
 
     ### logs in and gets list of projects they have access to
     # projects_list <- get_projects_list(syn_store("syn20446927", syn_login() ))
