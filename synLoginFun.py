@@ -2,6 +2,7 @@ import synapseclient
 
 syn = synapseclient.Synapse()
 syn_login = syn.login
+syn_logout = syn.logout
 
 # syn_logout = syn.logout(forgetMe= True)
 syn_getUserProfile = syn.getUserProfile
