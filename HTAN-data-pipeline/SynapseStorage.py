@@ -31,6 +31,7 @@ class SynapseStorage(object):
         if not syn:  
             self.syn = synapseclient.Synapse()
             self.syn.login()
+            # self.syn.login(sessionToken= syn)
         else:
             self.syn = syn
 

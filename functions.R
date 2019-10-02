@@ -19,6 +19,10 @@ reticulate::import_from_path("MetadataModel", path = "HTAN-data-pipeline")
 
 # source_python("synStoreFuns.py", input$cookie)
 source_python("synStore_Session.py")
+# 6c6617b1-cbb0-423c-b9c5-e96905373cf1
+# 
+# synStore_obj <- syn_store("syn20446927", syn_login(sessionToken="6c6617b1-cbb0-423c-b9c5-e96905373cf1", rememberMe = FALSE) )
+# get_projects_list(synStore_obj)
 
 # syn_store("syn20446927", syn_login())
 # source_python("synStoreFuns.py")
