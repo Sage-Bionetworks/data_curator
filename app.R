@@ -194,7 +194,7 @@ server <- function(input, output, session) {
     reticulate::source_python("synStore_Session.py")
 
     ### logs in and gets list of projects they have access to
-    # projects_list <- get_projects_list(syn_store("syn20446927", syn_login() ))
+    projects_list <- get_projects_list(syn_store("syn20446927", syn_login() ))
 
     # projects_namedList <- c()
     # for (i in seq_along(projects_list)) {
