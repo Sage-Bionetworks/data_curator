@@ -251,83 +251,83 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
 
   
 
-#   ###toggles link when download button pressed
-#   observeEvent(
-#     input$download, {
-# 
-#       selected_folder <- input$dataset
-#       selected_project <- input$var
-# 
-#       id <- showNotification( "Generating link...", duration = NULL, type = "default" )
-# 
-#       project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
-#       folder_list <- get_folder_list(project_synID)
-#       folders_namedList <- c()
-#       for (i in seq_along(folder_list)) {
-#         folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
-#       }
-# 
-#       folder_synID <- folders_namedList[[selected_folder]]
-# 
-#       file_list <- get_file_list(folder_synID)
-# 
-#       file_namedList <- c()
-#       for (i in seq_along(file_list)) {
-#         file_namedList[file_list[[i]][[2]]] <- file_list[[i]][[1]]
-#       }
-#       filename_list <- names(file_namedList)
-# 
-#       manifest_url <- getModelManifest(in_template_type, filenames = filename_list )
-#       toggle('text_div')
-# 
-#       ### if want a progress bar need more feedback from API to know how to increment progress bar
-#       # withProgress(message = "connecting to Google Sheets API")
-# 
-#       output$text <- renderUI({
-#         tags$a(href = manifest_url, manifest_url, target="_blank") ### add link to data dictionary
-#       })
-#       removeNotification(id )
-#     }
-# )
-# 
-#   ###toggles link to previous manifest when pressed
-#   observeEvent(
-#     input$link, {
-#       selected_project <- input$var
-#       selected_folder <- input$dataset
-# 
-#       id <- showNotification( "Processing...", duration = NULL, type = "default" )
-# 
-#       project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
-#       folder_list <- get_folder_list(project_synID)
-#       folders_namedList <- c()
-#       for (i in seq_along(folder_list)) {
-#         folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
-#       }
-# 
-#       folder_synID <- folders_namedList[[selected_folder]]
-# 
-#       fpath <- get_storage_manifest_path(folder_synID)
-#       if ( is.null(fpath)) {
-#         toggle('text_div3')
-#         output$text3 <- renderUI({
-#           tags$b("No previously uploaded manifest was found")
-#         })
-#         removeNotification(id )
-#       } else {
-#         manifest_url <- populateModelManifest(fpath, in_template_type )
-#         toggle('text_div3')
-# 
-#         output$text3 <- renderUI({
-#         tags$a(href = manifest_url, manifest_url, target="_blank")
-#         })
-#         removeNotification(id )
-#       }
-# 
-# 
-#     }
-#   )
-# 
+  ###toggles link when download button pressed
+  observeEvent(
+    input$download, {
+
+      selected_folder <- input$dataset
+      selected_project <- input$var
+
+      id <- showNotification( "Generating link...", duration = NULL, type = "default" )
+
+      project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
+      folder_list <- get_folder_list(synStore_obj, project_synID)
+      folders_namedList <- c()
+      for (i in seq_along(folder_list)) {
+        folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
+      }
+
+      folder_synID <- folders_namedList[[selected_folder]]
+
+      file_list <- get_file_list(synStore_obj, folder_synID)
+
+      file_namedList <- c()
+      for (i in seq_along(file_list)) {
+        file_namedList[file_list[[i]][[2]]] <- file_list[[i]][[1]]
+      }
+      filename_list <- names(file_namedList)
+
+      manifest_url <- getModelManifest(in_template_type, filenames = filename_list )
+      toggle('text_div')
+
+      ### if want a progress bar need more feedback from API to know how to increment progress bar
+      # withProgress(message = "connecting to Google Sheets API")
+
+      output$text <- renderUI({
+        tags$a(href = manifest_url, manifest_url, target="_blank") ### add link to data dictionary
+      })
+      removeNotification(id )
+    }
+)
+
+  ###toggles link to previous manifest when pressed
+  observeEvent(
+    input$link, {
+      selected_project <- input$var
+      selected_folder <- input$dataset
+
+      id <- showNotification( "Processing...", duration = NULL, type = "default" )
+
+      project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
+      folder_list <- get_folder_list(synStore_obj, project_synID)
+      folders_namedList <- c()
+      for (i in seq_along(folder_list)) {
+        folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
+      }
+
+      folder_synID <- folders_namedList[[selected_folder]]
+
+      fpath <- get_storage_manifest_path(folder_synID)
+      if ( is.null(fpath)) {
+        toggle('text_div3')
+        output$text3 <- renderUI({
+          tags$b("No previously uploaded manifest was found")
+        })
+        removeNotification(id )
+      } else {
+        manifest_url <- populateModelManifest(fpath, in_template_type )
+        toggle('text_div3')
+
+        output$text3 <- renderUI({
+        tags$a(href = manifest_url, manifest_url, target="_blank")
+        })
+        removeNotification(id )
+      }
+
+
+    }
+  )
+
 #   ### reads csv file
 #   rawData <- eventReactive(input$csvFile, {
 #     readr::read_csv(input$csvFile$datapath, na = c("", "NA"))
