@@ -307,7 +307,7 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
 
       folder_synID <- folders_namedList[[selected_folder]]
 
-      fpath <- get_storage_manifest_path(folder_synID)
+      fpath <- get_storage_manifest_path(input$cookie, folder_synID)
       if ( is.null(fpath)) {
         toggle('text_div3')
         output$text3 <- renderUI({
@@ -328,158 +328,158 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
     }
   )
 
-#   ### reads csv file
-#   rawData <- eventReactive(input$csvFile, {
-#     readr::read_csv(input$csvFile$datapath, na = c("", "NA"))
-#   })
-# 
-#   ### DT
-#   output$rawData <- DT::renderDT({
-#     datatable(rawData(),
-#     options = list(lengthChange = FALSE, scrollX = TRUE)
-#     )
-# 
-#     })
-# 
-#   ### toggles validation status when validate button pressed
-#   observeEvent(
-#     input$validate, {
-#       annotation_status <- validateModelManifest(input$csvFile$datapath, in_template_type)
-#       toggle('text_div2')
-# 
-#       id <- showNotification( "Processing...", duration = NULL, type = "default" )
-# 
-#       if ( length(annotation_status) != 0 ) { ## if error not empty aka there is an error
-#         filled_manifest <- populateModelManifest(input$csvFile$datapath, in_template_type)
-# 
-#         ### create list of string names for the long error messages
-#         str_names <- sprintf("str_%d", seq(length(annotation_status)))
-#         ### list to save errors
-#         in_vals <- sprintf("input_%d", seq(length(annotation_status)))
-#         ### create error messages
-#         for (i in seq_along(annotation_status)) {
-#           row <- annotation_status[[i]][1]
-#           column <- annotation_status[[i]][2]
-#           in_val <- annotation_status[[i]][3]
-#           allowed_vals <- annotation_status[[i]][4]
-# 
-#           ### if empty value change to NA
-#           if (unlist(in_val) == "") {
-#             in_val <- NA
-#             str_names[i] <- paste("Spreadsheet row <b>",
-#                                   row, "</b>column <b>", column,
-#                                   "</b>your value <b>", in_val,
-#                                   "</b> is not an allowed value from:", allowed_vals, sep=" ")
-#             in_vals[i] <- in_val
-#           } else {
-#             str_names[i] <- paste("Spreadsheet row <b>",
-#                                   row, "</b>column <b>", column,
-#                                   "</b>your value <b>", in_val,
-#                                   "</b> is not an allowed value from:", allowed_vals, sep=" ")
-#             in_vals[i] <- in_val
-#           }
-#         }
-# 
-#         ### format output text
-#         output$text2 <- renderUI ({
-#           HTML("Your metadata is invalid according to the data model.<br/> ",
-#                "See errors at: <br/>",
-#                paste0(sprintf("%s", str_names), collapse = "<br/>"),
-#                "<br/>Edit your data locally or ",
-#                paste0('<a href="', filled_manifest, '">here</a>')
-#                )
-# ### tags$a(href = manifest_url, manifest_url, target="_blank") add
-#         })
-#         ### update DT view with incorrect values
-#         ### currently only one column, requires backend support of multiple
-#         output$rawData <- DT::renderDT({
-#           datatable(rawData(),
-#                     options = list(lengthChange = FALSE, scrollX = TRUE)
-#           ) %>% formatStyle(unlist(column),
-#                             backgroundColor = styleEqual(unlist(in_vals), rep("yellow", length(in_vals))) ) ## how to have multiple errors
-#         })
-#         removeNotification(id)
-#       } else {
-#         output$text2 <- renderUI ({
-#           HTML("Your metadata is valid!")
-#         })
-#         removeNotification(id)
-#         ### show submit button
-#         output$submit <- renderUI({
-#           actionButton("submitButton", "Submit to Synapse")
-#         })
-# 
-#       }
-#     }
-#   )
-# 
-#   ###submit button
-#   observeEvent(
-#     input$submitButton, {
-#       
-# 
-#       id <- showNotification("Submitting...", duration = NULL, type = "default" )
-# 
-#       ### reads in csv and adds entityID, then saves it as synapse_storage_manifest.csv in folder
-#       infile <- readr::read_csv(input$csvFile$datapath, na = c("", "NA"))
-#       selected_folder <- input$dataset
-#       selected_project <- input$var
-# 
-#       project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
-#       folder_list <- get_folder_list(project_synID)
-#       folders_namedList <- c()
-#       for (i in seq_along(folder_list)) {
-#         folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
-#       }
-# 
-#       folder_synID <- folders_namedList[[selected_folder]]
-# 
-#       file_list <- get_file_list(folder_synID)
-# 
-#       file_namedList <- c()
-#       for (i in seq_along(file_list)) {
-#         file_namedList[file_list[[i]][[2]]] <- file_list[[i]][[1]]
-#       }
-# 
-#       files_df <- stack(file_namedList)
-#       colnames(files_df) <- c("entityId", "Filename" )
-#       files_entity <- inner_join(infile, files_df, by = "Filename")
-#       # rm("/tmp/synapse_storage_manifest.csv")
-#       write.csv(files_entity, file= "./files/synapse_storage_manifest.csv", quote = FALSE, row.names = FALSE, na = "")
-# 
-#       ### copies file to rename it
-#       # file.copy(input$csvFile$datapath, "/tmp/synapse_storage_manifest.csv")
-# 
-#       selected_project <- input$var
-#       selected_folder <- input$dataset
-# 
-#       project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
-# 
-#       folder_list <- get_folder_list(project_synID)
-#       folders_namedList <- c()
-#       for (i in seq_along(folder_list)) {
-#         folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
-#       }
-# 
-#       folder_synID <- folders_namedList[[selected_folder]]
-# 
-#       print(folder_synID)
-# 
-#       ### assocites metadata with data and returns manifest id
-#       manifest_id <- get_manifest_syn_id("./files/synapse_storage_manifest.csv", folder_synID)
-#       print(manifest_id)
-#       manifest_path <- paste0("synapse.org/#!Synapse:", manifest_id)
-#       ### if uploaded provide message
-#       if ( startsWith(manifest_id, "syn") == TRUE) {
-#         removeNotification(id)
-#         showNotification( id= "success",  paste0("Submit Manifest to: ", manifest_path), duration = NULL, type = "message")
-#         # syn_logout()
-#       } else {
-#         showNotification(paste0("error ", manifest_id ), duration = NULL, type = "error")
-#         # syn_logout()
-#       }
-#       })
-# 
+  ### reads csv file
+  rawData <- eventReactive(input$csvFile, {
+    readr::read_csv(input$csvFile$datapath, na = c("", "NA"))
+  })
+
+  ### DT
+  output$rawData <- DT::renderDT({
+    datatable(rawData(),
+    options = list(lengthChange = FALSE, scrollX = TRUE)
+    )
+
+    })
+
+  ### toggles validation status when validate button pressed
+  observeEvent(
+    input$validate, {
+      annotation_status <- validateModelManifest(input$csvFile$datapath, in_template_type)
+      toggle('text_div2')
+
+      id <- showNotification( "Processing...", duration = NULL, type = "default" )
+
+      if ( length(annotation_status) != 0 ) { ## if error not empty aka there is an error
+        filled_manifest <- populateModelManifest(input$csvFile$datapath, in_template_type)
+
+        ### create list of string names for the long error messages
+        str_names <- sprintf("str_%d", seq(length(annotation_status)))
+        ### list to save errors
+        in_vals <- sprintf("input_%d", seq(length(annotation_status)))
+        ### create error messages
+        for (i in seq_along(annotation_status)) {
+          row <- annotation_status[[i]][1]
+          column <- annotation_status[[i]][2]
+          in_val <- annotation_status[[i]][3]
+          allowed_vals <- annotation_status[[i]][4]
+
+          ### if empty value change to NA
+          if (unlist(in_val) == "") {
+            in_val <- NA
+            str_names[i] <- paste("Spreadsheet row <b>",
+                                  row, "</b>column <b>", column,
+                                  "</b>your value <b>", in_val,
+                                  "</b> is not an allowed value from:", allowed_vals, sep=" ")
+            in_vals[i] <- in_val
+          } else {
+            str_names[i] <- paste("Spreadsheet row <b>",
+                                  row, "</b>column <b>", column,
+                                  "</b>your value <b>", in_val,
+                                  "</b> is not an allowed value from:", allowed_vals, sep=" ")
+            in_vals[i] <- in_val
+          }
+        }
+
+        ### format output text
+        output$text2 <- renderUI ({
+          HTML("Your metadata is invalid according to the data model.<br/> ",
+               "See errors at: <br/>",
+               paste0(sprintf("%s", str_names), collapse = "<br/>"),
+               "<br/>Edit your data locally or ",
+               paste0('<a href="', filled_manifest, '">here</a>')
+               )
+### tags$a(href = manifest_url, manifest_url, target="_blank") add
+        })
+        ### update DT view with incorrect values
+        ### currently only one column, requires backend support of multiple
+        output$rawData <- DT::renderDT({
+          datatable(rawData(),
+                    options = list(lengthChange = FALSE, scrollX = TRUE)
+          ) %>% formatStyle(unlist(column),
+                            backgroundColor = styleEqual(unlist(in_vals), rep("yellow", length(in_vals))) ) ## how to have multiple errors
+        })
+        removeNotification(id)
+      } else {
+        output$text2 <- renderUI ({
+          HTML("Your metadata is valid!")
+        })
+        removeNotification(id)
+        ### show submit button
+        output$submit <- renderUI({
+          actionButton("submitButton", "Submit to Synapse")
+        })
+
+      }
+    }
+  )
+
+  ###submit button
+  observeEvent(
+    input$submitButton, {
+      
+
+      id <- showNotification("Submitting...", duration = NULL, type = "default" )
+
+      ### reads in csv and adds entityID, then saves it as synapse_storage_manifest.csv in folder
+      infile <- readr::read_csv(input$csvFile$datapath, na = c("", "NA"))
+      selected_folder <- input$dataset
+      selected_project <- input$var
+
+      project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
+      folder_list <- get_folder_list(synStore_obj, project_synID)
+      folders_namedList <- c()
+      for (i in seq_along(folder_list)) {
+        folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
+      }
+
+      folder_synID <- folders_namedList[[selected_folder]]
+
+      file_list <- get_file_list(synStore_obj, folder_synID)
+
+      file_namedList <- c()
+      for (i in seq_along(file_list)) {
+        file_namedList[file_list[[i]][[2]]] <- file_list[[i]][[1]]
+      }
+
+      files_df <- stack(file_namedList)
+      colnames(files_df) <- c("entityId", "Filename" )
+      files_entity <- inner_join(infile, files_df, by = "Filename")
+      # rm("/tmp/synapse_storage_manifest.csv")
+      write.csv(files_entity, file= "./files/synapse_storage_manifest.csv", quote = FALSE, row.names = FALSE, na = "")
+
+      ### copies file to rename it
+      # file.copy(input$csvFile$datapath, "/tmp/synapse_storage_manifest.csv")
+
+      selected_project <- input$var
+      selected_folder <- input$dataset
+
+      project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
+
+      folder_list <- get_folder_list(synStore_obj, project_synID)
+      folders_namedList <- c()
+      for (i in seq_along(folder_list)) {
+        folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
+      }
+
+      folder_synID <- folders_namedList[[selected_folder]]
+
+      print(folder_synID)
+
+      ### assocites metadata with data and returns manifest id
+      manifest_id <- get_manifest_syn_id(synStore_obj, "./files/synapse_storage_manifest.csv", folder_synID)
+      print(manifest_id)
+      manifest_path <- paste0("synapse.org/#!Synapse:", manifest_id)
+      ### if uploaded provide message
+      if ( startsWith(manifest_id, "syn") == TRUE) {
+        removeNotification(id)
+        showNotification( id= "success",  paste0("Submit Manifest to: ", manifest_path), duration = NULL, type = "message")
+        # syn_logout()
+      } else {
+        showNotification(paste0("error ", manifest_id ), duration = NULL, type = "error")
+        # syn_logout()
+      }
+      })
+
     }
   # )
   
