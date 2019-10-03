@@ -65,14 +65,6 @@ ui <- dashboardPage(
                                  choices = "Generating..." ) , #names(projects_namedList) ),
                   uiOutput('folders')
                 ),
-                # box(
-                #   status = "primary",
-                #   solidHeader = TRUE,
-                #   width= 6,
-                #   title = "Choose a Dataset: ",
-                #   selectizeInput(inputId = "dataset", label = "Dataset:",
-                #                  choices = NULL )
-                # ),
                 box(
                   status = "primary",
                   solidHeader = TRUE,
@@ -177,7 +169,7 @@ ui <- dashboardPage(
 )
 
 server <- function(input, output, session) {
-  #### session global 
+  ########### session global 
   reticulate::source_python("synStore_Session.py")
 
   ### logs in and gets list of projects they have access to
@@ -186,12 +178,15 @@ server <- function(input, output, session) {
   projects_list <- c()
 
   projects_namedList <- c()
+  
+  ############
 
   ### synapse cookies
   session$sendCustomMessage(type = "readCookie", message = list())
   
   observeEvent(input$cookie, {
     
+    ### logs in 
     syn_login(sessionToken=input$cookie, rememberMe = FALSE)
     
     ## Show message if user is not logged in to synapse
@@ -203,11 +198,13 @@ server <- function(input, output, session) {
         )
       )
     })
-    
+
+    ### welcome message
     output$title <- renderUI({
       titlePanel(sprintf("Welcome, %s", syn_getUserProfile()$userName))
     })
-    ### updating global vars with values
+
+    ### updating global vars with values for projects
     synStore_obj <<- syn_store("syn20446927", input$cookie)
     # get_projects_list(synStore_obj)
     projects_list <<- get_projects_list(synStore_obj)
@@ -215,28 +212,26 @@ server <- function(input, output, session) {
     for (i in seq_along(projects_list)) {
       projects_namedList[projects_list[[i]][[2]]] <<- projects_list[[i]][[1]]
     }
+
+    ### updates project dropdown
     updateSelectizeInput(session, 'var', choices = names(projects_namedList))
-    
-    # output$folders = renderUI({
-    # selectizeInput(inputId = "dataset", label = "Dataset:",
-    #                              choices = "Generating..." )
-    #   })
   })
 
   ### rename the input template type to HTAPP
   in_template_type <- "HTAPP"
 
   ### folder datasets if value in project
-
 observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
   input$var, { 
   output$folders = renderUI({                         
     selected_project <- input$var
+
     # if selected_project not empty
     if (!is.null(selected_project)) { 
     project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
     # project_synID <- str(project_synID)
-    
+
+    ### gets folders per project
     folder_list <- get_folder_list(synStore_obj, project_synID)
     folders_namedList <- c()
     for (i in seq_along(folder_list)) {
@@ -244,12 +239,11 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
     }
     folderNames <- names(folders_namedList)
 
+    ### updates foldernames
     selectInput( inputId = "dataset", label = "Dataset:", choices = folderNames)
     }
   })
 })
-
-  
 
   ###toggles link when download button pressed
   observeEvent(
@@ -258,6 +252,7 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
       selected_folder <- input$dataset
       selected_project <- input$var
 
+      ### progess notif
       id <- showNotification( "Generating link...", duration = NULL, type = "default" )
 
       project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
@@ -286,6 +281,8 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
       output$text <- renderUI({
         tags$a(href = manifest_url, manifest_url, target="_blank") ### add link to data dictionary
       })
+
+      ### when done remove progress notif
       removeNotification(id )
     }
 )
@@ -323,8 +320,6 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
         })
         removeNotification(id )
       }
-
-
     }
   )
 
@@ -337,8 +332,7 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
   output$rawData <- DT::renderDT({
     datatable(rawData(),
     options = list(lengthChange = FALSE, scrollX = TRUE)
-    )
-
+      )
     })
 
   ### toggles validation status when validate button pressed
@@ -369,13 +363,13 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
             str_names[i] <- paste("Spreadsheet row <b>",
                                   row, "</b>column <b>", column,
                                   "</b>your value <b>", in_val,
-                                  "</b> is not an allowed value from:", allowed_vals, sep=" ")
+                                  "</b> is not an allowed value of:", allowed_vals, sep=" ")
             in_vals[i] <- in_val
           } else {
             str_names[i] <- paste("Spreadsheet row <b>",
                                   row, "</b>column <b>", column,
                                   "</b>your value <b>", in_val,
-                                  "</b> is not an allowed value from:", allowed_vals, sep=" ")
+                                  "</b> is not an allowed value of:", allowed_vals, sep=" ")
             in_vals[i] <- in_val
           }
         }
@@ -386,7 +380,7 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
                "See errors at: <br/>",
                paste0(sprintf("%s", str_names), collapse = "<br/>"),
                "<br/>Edit your data locally or ",
-               paste0('<a href="', filled_manifest, '">here</a>')
+               paste0('<a href="', filled_manifest, '">on Google Sheets</a>')
                )
 ### tags$a(href = manifest_url, manifest_url, target="_blank") add
         })
@@ -417,7 +411,6 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
   observeEvent(
     input$submitButton, {
       
-
       id <- showNotification("Submitting...", duration = NULL, type = "default" )
 
       ### reads in csv and adds entityID, then saves it as synapse_storage_manifest.csv in folder
@@ -444,11 +437,8 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
       files_df <- stack(file_namedList)
       colnames(files_df) <- c("entityId", "Filename" )
       files_entity <- inner_join(infile, files_df, by = "Filename")
-      # rm("/tmp/synapse_storage_manifest.csv")
+      
       write.csv(files_entity, file= "./files/synapse_storage_manifest.csv", quote = FALSE, row.names = FALSE, na = "")
-
-      ### copies file to rename it
-      # file.copy(input$csvFile$datapath, "/tmp/synapse_storage_manifest.csv")
 
       selected_project <- input$var
       selected_folder <- input$dataset
@@ -473,10 +463,10 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
       if ( startsWith(manifest_id, "syn") == TRUE) {
         removeNotification(id)
         showNotification( id= "success",  paste0("Submit Manifest to: ", manifest_path), duration = NULL, type = "message")
-        # syn_logout()
+        rm("/tmp/synapse_storage_manifest.csv")
       } else {
         showNotification(paste0("error ", manifest_id ), duration = NULL, type = "error")
-        # syn_logout()
+        rm("/tmp/synapse_storage_manifest.csv")
       }
       })
 
