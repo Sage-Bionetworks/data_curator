@@ -62,17 +62,17 @@ ui <- dashboardPage(
                   width= 6,
                   title = "Choose a Project and Dataset: ",
                   selectizeInput(inputId = "var", label = "Project:",
-                                 choices = "Generating..." ) #, #names(projects_namedList) ),
-                  # uiOutput('folders')
+                                 choices = "Generating..." ) , #names(projects_namedList) ),
+                  uiOutput('folders')
                 ),
-                box(
-                  status = "primary",
-                  solidHeader = TRUE,
-                  width= 6,
-                  title = "Choose a Dataset: ",
-                  selectizeInput(inputId = "dataset", label = "Dataset:",
-                                 choices = NULL )
-                ),
+                # box(
+                #   status = "primary",
+                #   solidHeader = TRUE,
+                #   width= 6,
+                #   title = "Choose a Dataset: ",
+                #   selectizeInput(inputId = "dataset", label = "Dataset:",
+                #                  choices = NULL )
+                # ),
                 box(
                   status = "primary",
                   solidHeader = TRUE,
@@ -177,6 +177,15 @@ ui <- dashboardPage(
 )
 
 server <- function(input, output, session) {
+  #### session global 
+  reticulate::source_python("synStore_Session.py")
+
+  ### logs in and gets list of projects they have access to
+  synStore_obj <- NULL
+  # get_projects_list(synStore_obj)
+  projects_list <- c()
+
+  projects_namedList <- c()
 
   ### synapse cookies
   session$sendCustomMessage(type = "readCookie", message = list())
@@ -198,70 +207,47 @@ server <- function(input, output, session) {
     output$title <- renderUI({
       titlePanel(sprintf("Welcome, %s", syn_getUserProfile()$userName))
     })
-    
-    reticulate::source_python("synStore_Session.py")
-
-    ### logs in and gets list of projects they have access to
-    synStore_obj <- syn_store("syn20446927", input$cookie)
+    ### updating global vars with values
+    synStore_obj <<- syn_store("syn20446927", input$cookie)
     # get_projects_list(synStore_obj)
-    projects_list <- get_projects_list(synStore_obj)
+    projects_list <<- get_projects_list(synStore_obj)
 
-    projects_namedList <- c()
     for (i in seq_along(projects_list)) {
-      projects_namedList[projects_list[[i]][[2]]] <- projects_list[[i]][[1]]
+      projects_namedList[projects_list[[i]][[2]]] <<- projects_list[[i]][[1]]
     }
     updateSelectizeInput(session, 'var', choices = names(projects_namedList))
     
+    # output$folders = renderUI({
+    # selectizeInput(inputId = "dataset", label = "Dataset:",
+    #                              choices = "Generating..." )
+    #   })
   })
 
   ### rename the input template type to HTAPP
   in_template_type <- "HTAPP"
 
   ### folder datasets if value in project
-    observe({
 
-        selected_project <- input$var
-        if (selected_project == "Generating..."){
-          updateSelectizeInput(session, inputId = "dataset", label = "Dataset:", choices = selected_project)
-        } else { 
-          synStore_obj <- syn_store("syn20446927", input$cookie)
-          # get_projects_list(synStore_obj)
-          projects_list <- get_projects_list(synStore_obj)
+observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
+  input$var, { 
+  output$folders = renderUI({                         
+    selected_project <- input$var
+    # if selected_project not empty
+    if (!is.null(selected_project)) { 
+    project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
+    # project_synID <- str(project_synID)
+    
+    folder_list <- get_folder_list(synStore_obj, project_synID)
+    folders_namedList <- c()
+    for (i in seq_along(folder_list)) {
+      folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
+    }
+    folderNames <- names(folders_namedList)
 
-          projects_namedList <- c()
-          for (i in seq_along(projects_list)) {
-            projects_namedList[projects_list[[i]][[2]]] <- projects_list[[i]][[1]]
-          }
-          project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
-          # folder_list <- get_folder_list(project_synID)
-          # folders_namedList <- c()
-          # for (i in seq_along(folder_list)) {
-            # folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
-          # }
-          # folderNames <- names(folders_namedList)
-          project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
-          updateSelectizeInput(session, inputId = "dataset", label = "Dataset:", choices = project_synID)
-        }
-      }
-    )
-
-  # output$folders = renderUI({
-  #   selectizeInput(inputId = "dataset", label = "Dataset:",
-  #                                choices = NULL )
-  #   selected_project <- input$var
-  #   # if selected_project
-
-  #   if( !is.null(input$var)){ 
-  #   project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
-  #   folder_list <- get_folder_list(project_synID)
-  #   folders_namedList <- c()
-  #   for (i in seq_along(folder_list)) {
-  #     folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
-  #   }
-  #   folderNames <- names(folders_namedList)
-  #   updateSelectizeInput(inputId = "dataset", label = "Dataset:", folderNames)
-  #   }
-  # })
+    selectInput( inputId = "dataset", label = "Dataset:", choices = folderNames)
+    }
+  })
+})
 
   
 
