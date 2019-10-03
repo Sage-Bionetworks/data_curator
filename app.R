@@ -62,8 +62,16 @@ ui <- dashboardPage(
                   width= 6,
                   title = "Choose a Project and Dataset: ",
                   selectizeInput(inputId = "var", label = "Project:",
-                                 choices = NULL ), #names(projects_namedList) ),
-                  uiOutput('folders')
+                                 choices = "Generating..." ) #, #names(projects_namedList) ),
+                  # uiOutput('folders')
+                ),
+                box(
+                  status = "primary",
+                  solidHeader = TRUE,
+                  width= 6,
+                  title = "Choose a Dataset: ",
+                  selectizeInput(inputId = "dataset", label = "Dataset:",
+                                 choices = NULL )
                 ),
                 box(
                   status = "primary",
@@ -198,34 +206,65 @@ server <- function(input, output, session) {
     # get_projects_list(synStore_obj)
     projects_list <- get_projects_list(synStore_obj)
 
-    # projects_namedList <- c()
-    # for (i in seq_along(projects_list)) {
-    #   projects_namedList[projects_list[[i]][[2]]] <- projects_list[[i]][[1]]
-    # }
-    # updateSelectizeInput(session, 'var', choices = names(projects_namedList))
+    projects_namedList <- c()
+    for (i in seq_along(projects_list)) {
+      projects_namedList[projects_list[[i]][[2]]] <- projects_list[[i]][[1]]
+    }
+    updateSelectizeInput(session, 'var', choices = names(projects_namedList))
     
   })
 
-#   ### rename the input template type to HTAPP
-#   in_template_type <- "HTAPP"
-# 
-#   ### folder datasets if value in project
-# 
-#   output$folders = renderUI({
-#     selected_project <- input$var
-#     # if selected_project
-# 
-#     project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
-#     folder_list <- get_folder_list(project_synID)
-#     folders_namedList <- c()
-#     for (i in seq_along(folder_list)) {
-#       folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
-#     }
-#     folderNames <- names(folders_namedList)
-#     selectInput(inputId = "dataset", label = "Dataset:", folderNames)
-#   })
-#   
-# 
+  ### rename the input template type to HTAPP
+  in_template_type <- "HTAPP"
+
+  ### folder datasets if value in project
+    observe({
+
+        selected_project <- input$var
+        if (selected_project == "Generating..."){
+          updateSelectizeInput(session, inputId = "dataset", label = "Dataset:", choices = selected_project)
+        } else { 
+          synStore_obj <- syn_store("syn20446927", input$cookie)
+          # get_projects_list(synStore_obj)
+          projects_list <- get_projects_list(synStore_obj)
+
+          projects_namedList <- c()
+          for (i in seq_along(projects_list)) {
+            projects_namedList[projects_list[[i]][[2]]] <- projects_list[[i]][[1]]
+          }
+          project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
+          # folder_list <- get_folder_list(project_synID)
+          # folders_namedList <- c()
+          # for (i in seq_along(folder_list)) {
+            # folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
+          # }
+          # folderNames <- names(folders_namedList)
+          project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
+          updateSelectizeInput(session, inputId = "dataset", label = "Dataset:", choices = project_synID)
+        }
+      }
+    )
+
+  # output$folders = renderUI({
+  #   selectizeInput(inputId = "dataset", label = "Dataset:",
+  #                                choices = NULL )
+  #   selected_project <- input$var
+  #   # if selected_project
+
+  #   if( !is.null(input$var)){ 
+  #   project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
+  #   folder_list <- get_folder_list(project_synID)
+  #   folders_namedList <- c()
+  #   for (i in seq_along(folder_list)) {
+  #     folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
+  #   }
+  #   folderNames <- names(folders_namedList)
+  #   updateSelectizeInput(inputId = "dataset", label = "Dataset:", folderNames)
+  #   }
+  # })
+
+  
+
 #   ###toggles link when download button pressed
 #   observeEvent(
 #     input$download, {
