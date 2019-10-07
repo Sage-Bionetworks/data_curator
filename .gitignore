@@ -12,3 +12,7 @@ www/getdata.js
 www/message-handler.js
 files/
 .Rproj.user
+HTAN-data-pipeline/schema_explorer/__pycache__/
+HTAN-data-pipeline/__pycache__/
+HTAN-data-pipeline/.DS_Store
+*.pyc
