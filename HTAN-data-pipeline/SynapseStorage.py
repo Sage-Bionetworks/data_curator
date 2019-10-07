@@ -15,6 +15,7 @@ class SynapseStorage(object):
     Provides utilities to list files in a specific project; update files annotations, create fileviews, etc.
     """
 
+
     def __init__(self,
                  storageFileview: str,
                  # syn: synapseclient = None,
@@ -29,12 +30,8 @@ class SynapseStorage(object):
             TODO: move away from specific project setup and work with an interface that Synapse specifies (e.g. based on schemas)
         """
         
-        # if not syn:  
         self.syn = synapseclient.Synapse()
-            # self.syn.login()
         self.syn.login(sessionToken = token)
-        # else:
-            # self.syn = syn
 
         self.storageFileview = storageFileview
 
@@ -51,7 +48,7 @@ class SynapseStorage(object):
         # query fileview for all administrative data
         self.storageFileviewTable = self.syn.tableQuery("SELECT * FROM " + self.storageFileview).asDataFrame()
 
-        
+
     def getStorageProjects(self) -> list: 
     
         """ get all storage projects the current user has access to
@@ -71,8 +68,8 @@ class SynapseStorage(object):
         currentUserId = currentUser.ownerId
         
         # get a set of projects from Synapse (that this user participates in)
-        currentUserProjects = self.syn.restGET('/projects/MY_PROJECTS/user/{principalId}?limit=1000'.format(principalId=currentUserId))
-
+        currentUserProjects = self.syn.restGET('/projects/MY_PROJECTS/user/{principalId}?limit=10000'.format(principalId=currentUserId))
+        
         # prune results json filtering project id
         currentUserProjects = [currentUserProject["id"] for currentUserProject in currentUserProjects["results"]]
 
@@ -122,7 +119,9 @@ class SynapseStorage(object):
         filesTable = self.storageFileviewTable[(self.storageFileviewTable["type"] == "file") & (self.storageFileviewTable["parentId"] == datasetId)]
 
         # return an array of tuples (fileId, fileName)
-        fileList = list(filesTable[["id", "name"]].itertuples(index = False, name = None))
+        # check if a metadata-manifest file has been passed in the list of filenames; assuming the manifest file has a specific filename, e.g. synapse_storage_manifest.csv; remove the manifest filename if so; (no need to add metadata to the metadata container)
+
+        fileList = list(row for row in filesTable[["id", "name"]].itertuples(index = False, name = None) if not row[1] == "synapse_storage_manifest.csv")
 
         return fileList
         
@@ -146,7 +145,6 @@ class SynapseStorage(object):
 
         # convert metadata in a form suitable for setting annotations on Synapse
         manifestMetadata = manifest.to_dict("index") 
-        print(manifestMetadata)
 
         # set annotations to files on Synapse
         for fileId, metadata in manifestMetadata.items():

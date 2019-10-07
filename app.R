@@ -272,7 +272,7 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
       }
       filename_list <- names(file_namedList)
 
-      manifest_url <- getModelManifest(in_template_type, filenames = filename_list )
+      manifest_url <- getModelManifest(paste0("HTAN_",in_template_type), filenames = filename_list )
       toggle('text_div')
 
       ### if want a progress bar need more feedback from API to know how to increment progress bar
@@ -312,7 +312,7 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
         })
         removeNotification(id )
       } else {
-        manifest_url <- populateModelManifest(fpath, in_template_type )
+        manifest_url <- populateModelManifest(paste0("HTAN_",in_template_type), fpath, in_template_type )
         toggle('text_div3')
 
         output$text3 <- renderUI({
@@ -344,7 +344,7 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
       id <- showNotification( "Processing...", duration = NULL, type = "default" )
 
       if ( length(annotation_status) != 0 ) { ## if error not empty aka there is an error
-        filled_manifest <- populateModelManifest(input$csvFile$datapath, in_template_type)
+        filled_manifest <- populateModelManifest(paste0("HTAN_",in_template_type), input$csvFile$datapath, in_template_type)
 
         ### create list of string names for the long error messages
         str_names <- sprintf("str_%d", seq(length(annotation_status)))

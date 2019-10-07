@@ -22,11 +22,7 @@ class MetadataModel(object):
      1) manipulate the metadata model;
      2) generate metadata model views:
         - generate manifest view of the metadata metadata model
-        - usage getModelManifest(rootNode)
-
         - generate validation schemas view of the metadata model;
-        - TODO: not currently part of the specification; to be defined.
-
      """
 
      def __init__(self,
@@ -115,7 +111,7 @@ class MetadataModel(object):
          pass
 
 
-     def getModelManifest(self, rootNode:str, filenames:list = None) -> str: 
+     def getModelManifest(self, title, rootNode:str, filenames:list = None) -> str: 
 
          """ get annotations manifest dataframe 
          Args:
@@ -130,13 +126,12 @@ class MetadataModel(object):
          if filenames:
              additionalMetadata["Filename"] = filenames
 
-          # TODO: remove reference to HTAN; have a manifestName  attribute
-         mg = ManifestGenerator(self.se, rootNode, "HTAN_" + rootNode, additionalMetadata)
+         mg = ManifestGenerator(title, self.se, rootNode,  additionalMetadata)
 
-         return mg.getManifest()
+         return mg.get_manifest()
 
 
-     def validateModelManifest(self, manifestPath:str, rootNode:str) -> list:
+     def validateModelManifest(self, manifestPath:str, rootNode:str, jsonSchema:str = None) -> list:
          
          """ check if provided annotations manifest dataframe 
          satisfied all model requirements
@@ -152,7 +147,8 @@ class MetadataModel(object):
          """
 
          # get validation schema for a given node in the data model
-         jsonSchema = get_JSONSchema_requirements(self.se, rootNode, rootNode + "_validation")
+         if not jsonSchema:
+             jsonSchema = get_JSONSchema_requirements(self.se, rootNode, rootNode + "_validation")
          
          # get annotations from manifest (array of json annotations corresponding to manifest rows)
 
@@ -200,11 +196,11 @@ class MetadataModel(object):
                 errorMessage += errorDetail
 
                 errorPositions.append((errorRow, errorTerms, errorValue, allowedValues))
-         print(errorPositions)
+         
          return errorPositions
 
      
-     def populateModelManifest(self, manifestPath:str, rootNode:str) -> str:
+     def populateModelManifest(self, title, manifestPath:str, rootNode:str) -> str:
          
          """ populate an existing annotations manifest based on a dataframe          
          
@@ -217,7 +213,8 @@ class MetadataModel(object):
          Raises: TODO 
             ValueError: rootNode not found in metadata model.
          """
-         mg = ManifestGenerator(self.se, rootNode, "HTAN_" + rootNode, {})
-         emptyManifestURL = mg.getManifest()
+         mg = ManifestGenerator(title, self.se, rootNode, {"Filename":[]})
+         emptyManifestURL = mg.get_manifest()
 
-         return mg.populateManifestSpreasheet(manifestPath, emptyManifestURL)
+         return mg.populate_manifest_spreasheet(manifestPath, emptyManifestURL)
+
