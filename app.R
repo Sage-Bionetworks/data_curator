@@ -45,7 +45,9 @@ ui <- dashboardPage(
   ),
   dashboardBody(
     tags$head(
-      tags$style("#shiny-notification-error {height: 500px; padding :20px; display: table-cell}" #makes taller so the error will fit
+      tags$style("#shiny-notification-error {height: 500px; padding :20px; display: table-cell}
+                 #shiny-notification-processing {background-color: #F7DC6F}
+                 #shiny-notification-success {background-color : #82E0AA}"
       ),
       singleton(
         includeScript("www/readCookie.js")
@@ -283,7 +285,7 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
       })
 
       ### when done remove progress notif
-      removeNotification(id )
+      removeNotification(id = "processing")
     }
 )
 
@@ -293,7 +295,7 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
       selected_project <- input$var
       selected_folder <- input$dataset
 
-      id <- showNotification( "Processing...", duration = NULL, type = "default" )
+      showNotification(id="processing", "Processing...", duration = NULL, type = "default" )
 
       project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
       folder_list <- get_folder_list(synStore_obj, project_synID)
@@ -310,7 +312,7 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
         output$text3 <- renderUI({
           tags$b("No previously uploaded manifest was found")
         })
-        removeNotification(id )
+        removeNotification(id = "processing")
       } else {
         manifest_url <- populateModelManifest(paste0("HTAN_",in_template_type), fpath, in_template_type )
         toggle('text_div3')
@@ -318,7 +320,7 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
         output$text3 <- renderUI({
         tags$a(href = manifest_url, manifest_url, target="_blank")
         })
-        removeNotification(id )
+        removeNotification(id = "processing")
       }
     }
   )
@@ -341,7 +343,7 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
       annotation_status <- validateModelManifest(input$csvFile$datapath, in_template_type)
       toggle('text_div2')
 
-      id <- showNotification( "Processing...", duration = NULL, type = "default" )
+      showNotification(id="processing", "Processing...", duration = NULL, type = "default" )
 
       if ( length(annotation_status) != 0 ) { ## if error not empty aka there is an error
         filled_manifest <- populateModelManifest(paste0("HTAN_",in_template_type), input$csvFile$datapath, in_template_type)
@@ -392,12 +394,12 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
           ) %>% formatStyle(unlist(column),
                             backgroundColor = styleEqual(unlist(in_vals), rep("yellow", length(in_vals))) ) ## how to have multiple errors
         })
-        removeNotification(id)
+        removeNotification(id = "processing")
       } else {
         output$text2 <- renderUI ({
           HTML("Your metadata is valid!")
         })
-        removeNotification(id)
+        removeNotification(id = "processing")
         ### show submit button
         output$submit <- renderUI({
           actionButton("submitButton", "Submit to Synapse")
@@ -411,7 +413,7 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
   observeEvent(
     input$submitButton, {
       
-      id <- showNotification("Submitting...", duration = NULL, type = "default" )
+      showNotification(id="processing","Submitting...", duration = NULL, type = "default" )
 
       ### reads in csv and adds entityID, then saves it as synapse_storage_manifest.csv in folder
       infile <- readr::read_csv(input$csvFile$datapath, na = c("", "NA"))
@@ -461,11 +463,11 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
       manifest_path <- paste0("synapse.org/#!Synapse:", manifest_id)
       ### if uploaded provide message
       if ( startsWith(manifest_id, "syn") == TRUE) {
-        removeNotification(id)
+        removeNotification(id = "processing")
         showNotification( id= "success",  paste0("Submit Manifest to: ", manifest_path), duration = NULL, type = "message")
         rm("/tmp/synapse_storage_manifest.csv")
       } else {
-        showNotification(paste0("error ", manifest_id ), duration = NULL, type = "error")
+        showNotification(id = "error", paste0("error ", manifest_id ), duration = NULL, type = "error")
         rm("/tmp/synapse_storage_manifest.csv")
       }
       })
