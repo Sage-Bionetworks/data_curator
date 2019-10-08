@@ -271,7 +271,7 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
       }
       filename_list <- names(file_namedList)
 
-      manifest_url <- getModelManifest(paste0("HTAN_",in_template_type), filenames = filename_list )
+      manifest_url <- getModelManifest(paste0("HTAN_",in_template_type), in_template_type, filenames = filename_list )
       toggle('text_div')
 
       ### if want a progress bar need more feedback from API to know how to increment progress bar
