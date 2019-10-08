@@ -184,20 +184,19 @@ server <- function(input, output, session) {
   ### synapse cookies
   session$sendCustomMessage(type = "readCookie", message = list())
   
-  observeEvent(input$cookie, {
-    
+  ## Show message if user is not logged in to synapse
+  unauthorized <- observeEvent(input$authorized, {
+    showModal(
+      modalDialog(
+        title = "Not logged in",
+        HTML("You must log in to <a href=\"https://www.synapse.org/\">Synapse</a> to use this application. Please log in, and then refresh this page.")
+      )
+    )
+  })
+
+  observeEvent(input$cookie, {  
     ### logs in 
     syn_login(sessionToken=input$cookie, rememberMe = FALSE)
-    
-    ## Show message if user is not logged in to synapse
-    unauthorized <- observeEvent(input$authorized, {
-      showModal(
-        modalDialog(
-          title = "Not logged in",
-          HTML("You must log in to <a href=\"https://www.synapse.org/\">Synapse</a> to use this application. Please log in, and then refresh this page.")
-        )
-      )
-    })
 
     ### welcome message
     output$title <- renderUI({
@@ -463,10 +462,10 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
       if ( startsWith(manifest_id, "syn") == TRUE) {
         removeNotification(id)
         showNotification( id= "success",  paste0("Submit Manifest to: ", manifest_path), duration = NULL, type = "message")
-        rm("/tmp/synapse_storage_manifest.csv")
+        rm("./files/synapse_storage_manifest.csv")
       } else {
         showNotification(paste0("error ", manifest_id ), duration = NULL, type = "error")
-        rm("/tmp/synapse_storage_manifest.csv")
+        rm("./files/synapse_storage_manifest.csv")
       }
       })
 
