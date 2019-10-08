@@ -253,7 +253,7 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
       selected_project <- input$var
 
       ### progess notif
-      id <- showNotification( "Generating link...", duration = NULL, type = "default" )
+      id <- showNotification( "Generating link...", duration = NULL, type = "warning" )
 
       project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
       folder_list <- get_folder_list(synStore_obj, project_synID)
@@ -293,7 +293,7 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
       selected_project <- input$var
       selected_folder <- input$dataset
 
-      id <- showNotification( "Processing...", duration = NULL, type = "default" )
+      id <- showNotification( "Processing...", duration = NULL, type = "warning" )
 
       project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
       folder_list <- get_folder_list(synStore_obj, project_synID)
@@ -341,7 +341,7 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
       annotation_status <- validateModelManifest(input$csvFile$datapath, in_template_type)
       toggle('text_div2')
 
-      id <- showNotification( "Processing...", duration = NULL, type = "default" )
+      id <- showNotification( "Processing...", duration = NULL, type = "warning" )
 
       if ( length(annotation_status) != 0 ) { ## if error not empty aka there is an error
         filled_manifest <- populateModelManifest(paste0("HTAN_",in_template_type), input$csvFile$datapath, in_template_type)
@@ -411,7 +411,7 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
   observeEvent(
     input$submitButton, {
       
-      id <- showNotification("Submitting...", duration = NULL, type = "default" )
+      id <- showNotification("Submitting...", duration = NULL, type = "warning" )
 
       ### reads in csv and adds entityID, then saves it as synapse_storage_manifest.csv in folder
       infile <- readr::read_csv(input$csvFile$datapath, na = c("", "NA"))
