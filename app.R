@@ -186,20 +186,19 @@ server <- function(input, output, session) {
   ### synapse cookies
   session$sendCustomMessage(type = "readCookie", message = list())
   
-  observeEvent(input$cookie, {
-    
+  ## Show message if user is not logged in to synapse
+  unauthorized <- observeEvent(input$authorized, {
+    showModal(
+      modalDialog(
+        title = "Not logged in",
+        HTML("You must log in to <a href=\"https://www.synapse.org/\">Synapse</a> to use this application. Please log in, and then refresh this page.")
+      )
+    )
+  })
+
+  observeEvent(input$cookie, {  
     ### logs in 
     syn_login(sessionToken=input$cookie, rememberMe = FALSE)
-    
-    ## Show message if user is not logged in to synapse
-    unauthorized <- observeEvent(input$authorized, {
-      showModal(
-        modalDialog(
-          title = "Not logged in",
-          HTML("You must log in to <a href=\"https://www.synapse.org/\">Synapse</a> to use this application. Please log in, and then refresh this page.")
-        )
-      )
-    })
 
     ### welcome message
     output$title <- renderUI({
@@ -255,7 +254,7 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
       selected_project <- input$var
 
       ### progess notif
-      id <- showNotification( "Generating link...", duration = NULL, type = "default" )
+      id <- showNotification( "Generating link...", duration = NULL, type = "warning" )
 
       project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
       folder_list <- get_folder_list(synStore_obj, project_synID)
@@ -274,7 +273,7 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
       }
       filename_list <- names(file_namedList)
 
-      manifest_url <- getModelManifest(paste0("HTAN_",in_template_type), filenames = filename_list )
+      manifest_url <- getModelManifest(paste0("HTAN_",in_template_type), in_template_type, filenames = filename_list )
       toggle('text_div')
 
       ### if want a progress bar need more feedback from API to know how to increment progress bar
@@ -465,7 +464,7 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
       if ( startsWith(manifest_id, "syn") == TRUE) {
         removeNotification(id = "processing")
         showNotification( id= "success",  paste0("Submit Manifest to: ", manifest_path), duration = NULL, type = "message")
-        rm("/tmp/synapse_storage_manifest.csv")
+        rm("./files/synapse_storage_manifest.csv")
       } else {
         showNotification(id = "error", paste0("error ", manifest_id ), duration = NULL, type = "error")
         rm("/tmp/synapse_storage_manifest.csv")
