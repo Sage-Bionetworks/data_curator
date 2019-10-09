@@ -197,6 +197,7 @@ server <- function(input, output, session) {
   })
 
   observeEvent(input$cookie, {  
+    showNotification(id="processing", "Please wait while we log you in...", duration = NULL, type = "default" )
     ### logs in 
     syn_login(sessionToken=input$cookie, rememberMe = FALSE)
 
@@ -213,7 +214,7 @@ server <- function(input, output, session) {
     for (i in seq_along(projects_list)) {
       projects_namedList[projects_list[[i]][[2]]] <<- projects_list[[i]][[1]]
     }
-
+    removeNotification(id="processing",)
     ### updates project dropdown
     updateSelectizeInput(session, 'var', choices = names(projects_namedList))
   })
@@ -254,7 +255,7 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
       selected_project <- input$var
 
       ### progess notif
-      id <- showNotification( "Generating link...", duration = NULL, type = "warning" )
+      showNotification(id = "processing",  "Generating link...", duration = NULL, type = "warning" )
 
       project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
       folder_list <- get_folder_list(synStore_obj, project_synID)
