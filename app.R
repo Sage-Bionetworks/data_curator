@@ -420,7 +420,8 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
       
       ### already has entityId
       if ("entityId" %in% colnames(infile)) {
-        write.csv(files_entity, file= "./files/synapse_storage_manifest.csv", quote = FALSE, row.names = FALSE, na = "")
+        write.csv(infile, file= "./files/synapse_storage_manifest.csv", quote = FALSE, row.names = FALSE, na = "")
+        
       } else{ # if not get ids
         selected_folder <- input$dataset
         selected_project <- input$var
