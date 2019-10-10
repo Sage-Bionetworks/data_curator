@@ -415,31 +415,36 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
 
       ### reads in csv and adds entityID, then saves it as synapse_storage_manifest.csv in folder
       infile <- readr::read_csv(input$csvFile$datapath, na = c("", "NA"))
-      selected_folder <- input$dataset
-      selected_project <- input$var
-
-      project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
-      folder_list <- get_folder_list(synStore_obj, project_synID)
-      folders_namedList <- c()
-      for (i in seq_along(folder_list)) {
-        folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
-      }
-
-      folder_synID <- folders_namedList[[selected_folder]]
-
-      file_list <- get_file_list(synStore_obj, folder_synID)
-
-      file_namedList <- c()
-      for (i in seq_along(file_list)) {
-        file_namedList[file_list[[i]][[2]]] <- file_list[[i]][[1]]
-      }
-
-      files_df <- stack(file_namedList)
-      colnames(files_df) <- c("entityId", "Filename" )
-      files_entity <- inner_join(infile, files_df, by = "Filename")
       
-      write.csv(files_entity, file= "./files/synapse_storage_manifest.csv", quote = FALSE, row.names = FALSE, na = "")
-
+      ### already has entityId
+      if ("entityId" %in% colnames(infile)) {
+        write.csv(files_entity, file= "./files/synapse_storage_manifest.csv", quote = FALSE, row.names = FALSE, na = "")
+      } else{ # if not get ids
+        selected_folder <- input$dataset
+        selected_project <- input$var
+        
+        project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
+        folder_list <- get_folder_list(synStore_obj, project_synID)
+        folders_namedList <- c()
+        for (i in seq_along(folder_list)) {
+          folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
+        }
+        
+        folder_synID <- folders_namedList[[selected_folder]]
+        
+        file_list <- get_file_list(synStore_obj, folder_synID)
+        
+        file_namedList <- c()
+        for (i in seq_along(file_list)) {
+          file_namedList[file_list[[i]][[2]]] <- file_list[[i]][[1]]
+        }
+        
+        files_df <- stack(file_namedList)
+        colnames(files_df) <- c("entityId", "Filename" )
+        files_entity <- inner_join(infile, files_df, by = "Filename")
+        
+        write.csv(files_entity, file= "./files/synapse_storage_manifest.csv", quote = FALSE, row.names = FALSE, na = "")
+      }
       selected_project <- input$var
       selected_folder <- input$dataset
 
