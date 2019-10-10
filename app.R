@@ -22,7 +22,7 @@ ui <- dashboardPage(
   skin = "purple",
   dashboardHeader(
     titleWidth = 250,
-    title = "Data Curator",
+    title = "Data Curator Dev",
     tags$li(class = "dropdown",
             tags$style(".main-header {max-height: 50px}"),
             tags$style(".main-header .logo {height: 70px; font-size: 28px; padding-top: 10px}"),
@@ -45,7 +45,9 @@ ui <- dashboardPage(
   ),
   dashboardBody(
     tags$head(
-      tags$style("#shiny-notification-error {height: 500px; padding :20px; display: table-cell}" #makes taller so the error will fit
+      tags$style("#shiny-notification-error {height: 500px; padding :20px; display: table-cell}
+                 #shiny-notification-processing {background-color: #F7DC6F}
+                 #shiny-notification-success {background-color : #82E0AA}"
       ),
       singleton(
         includeScript("www/readCookie.js")
@@ -184,20 +186,20 @@ server <- function(input, output, session) {
   ### synapse cookies
   session$sendCustomMessage(type = "readCookie", message = list())
   
-  observeEvent(input$cookie, {
-    
+  ## Show message if user is not logged in to synapse
+  unauthorized <- observeEvent(input$authorized, {
+    showModal(
+      modalDialog(
+        title = "Not logged in",
+        HTML("You must log in to <a href=\"https://www.synapse.org/\">Synapse</a> to use this application. Please log in, and then refresh this page.")
+      )
+    )
+  })
+
+  observeEvent(input$cookie, {  
+    showNotification(id="processing", "Please wait while we log you in...", duration = NULL, type = "default" )
     ### logs in 
     syn_login(sessionToken=input$cookie, rememberMe = FALSE)
-    
-    ## Show message if user is not logged in to synapse
-    unauthorized <- observeEvent(input$authorized, {
-      showModal(
-        modalDialog(
-          title = "Not logged in",
-          HTML("You must log in to <a href=\"https://www.synapse.org/\">Synapse</a> to use this application. Please log in, and then refresh this page.")
-        )
-      )
-    })
 
     ### welcome message
     output$title <- renderUI({
@@ -212,7 +214,7 @@ server <- function(input, output, session) {
     for (i in seq_along(projects_list)) {
       projects_namedList[projects_list[[i]][[2]]] <<- projects_list[[i]][[1]]
     }
-
+    removeNotification(id="processing",)
     ### updates project dropdown
     updateSelectizeInput(session, 'var', choices = names(projects_namedList))
   })
@@ -253,7 +255,7 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
       selected_project <- input$var
 
       ### progess notif
-      id <- showNotification( "Generating link...", duration = NULL, type = "default" )
+      showNotification(id = "processing",  "Generating link...", duration = NULL, type = "warning" )
 
       project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
       folder_list <- get_folder_list(synStore_obj, project_synID)
@@ -272,7 +274,7 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
       }
       filename_list <- names(file_namedList)
 
-      manifest_url <- getModelManifest(in_template_type, filenames = filename_list )
+      manifest_url <- getModelManifest(paste0("HTAN_",in_template_type), in_template_type, filenames = filename_list )
       toggle('text_div')
 
       ### if want a progress bar need more feedback from API to know how to increment progress bar
@@ -283,7 +285,7 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
       })
 
       ### when done remove progress notif
-      removeNotification(id )
+      removeNotification(id = "processing")
     }
 )
 
@@ -293,7 +295,7 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
       selected_project <- input$var
       selected_folder <- input$dataset
 
-      id <- showNotification( "Processing...", duration = NULL, type = "default" )
+      showNotification(id="processing", "Processing...", duration = NULL, type = "default" )
 
       project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
       folder_list <- get_folder_list(synStore_obj, project_synID)
@@ -310,15 +312,15 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
         output$text3 <- renderUI({
           tags$b("No previously uploaded manifest was found")
         })
-        removeNotification(id )
+        removeNotification(id = "processing")
       } else {
-        manifest_url <- populateModelManifest(fpath, in_template_type )
+        manifest_url <- populateModelManifest(paste0("HTAN_",in_template_type), fpath, in_template_type )
         toggle('text_div3')
 
         output$text3 <- renderUI({
         tags$a(href = manifest_url, manifest_url, target="_blank")
         })
-        removeNotification(id )
+        removeNotification(id = "processing")
       }
     }
   )
@@ -341,10 +343,10 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
       annotation_status <- validateModelManifest(input$csvFile$datapath, in_template_type)
       toggle('text_div2')
 
-      id <- showNotification( "Processing...", duration = NULL, type = "default" )
+      showNotification(id="processing", "Processing...", duration = NULL, type = "default" )
 
       if ( length(annotation_status) != 0 ) { ## if error not empty aka there is an error
-        filled_manifest <- populateModelManifest(input$csvFile$datapath, in_template_type)
+        filled_manifest <- populateModelManifest(paste0("HTAN_",in_template_type), input$csvFile$datapath, in_template_type)
 
         ### create list of string names for the long error messages
         str_names <- sprintf("str_%d", seq(length(annotation_status)))
@@ -392,12 +394,12 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
           ) %>% formatStyle(unlist(column),
                             backgroundColor = styleEqual(unlist(in_vals), rep("yellow", length(in_vals))) ) ## how to have multiple errors
         })
-        removeNotification(id)
+        removeNotification(id = "processing")
       } else {
         output$text2 <- renderUI ({
           HTML("Your metadata is valid!")
         })
-        removeNotification(id)
+        removeNotification(id = "processing")
         ### show submit button
         output$submit <- renderUI({
           actionButton("submitButton", "Submit to Synapse")
@@ -411,7 +413,7 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
   observeEvent(
     input$submitButton, {
       
-      id <- showNotification("Submitting...", duration = NULL, type = "default" )
+      showNotification(id="processing","Submitting...", duration = NULL, type = "default" )
 
       ### reads in csv and adds entityID, then saves it as synapse_storage_manifest.csv in folder
       infile <- readr::read_csv(input$csvFile$datapath, na = c("", "NA"))
@@ -466,11 +468,11 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
       manifest_path <- paste0("synapse.org/#!Synapse:", manifest_id)
       ### if uploaded provide message
       if ( startsWith(manifest_id, "syn") == TRUE) {
-        removeNotification(id)
+        removeNotification(id = "processing")
         showNotification( id= "success",  paste0("Submit Manifest to: ", manifest_path), duration = NULL, type = "message")
-        rm("/tmp/synapse_storage_manifest.csv")
+        rm("./files/synapse_storage_manifest.csv")
       } else {
-        showNotification(paste0("error ", manifest_id ), duration = NULL, type = "error")
+        showNotification(id = "error", paste0("error ", manifest_id ), duration = NULL, type = "error")
         rm("/tmp/synapse_storage_manifest.csv")
       }
       })
