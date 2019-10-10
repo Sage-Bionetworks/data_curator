@@ -472,8 +472,11 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
         removeNotification(id = "processing")
         showNotification( id= "success",  paste0("Submit Manifest to: ", manifest_path), duration = NULL, type = "message")
         rm("./files/synapse_storage_manifest.csv")
+        
         ### clear txt inputs 
-        updateTextInput(session,"text_div2", value = "" )
+        renderUI ({
+          HTML("")
+        })
       } else {
         showNotification(id = "error", paste0("error ", manifest_id ), duration = NULL, type = "error")
         rm("/tmp/synapse_storage_manifest.csv")
