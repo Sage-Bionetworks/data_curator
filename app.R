@@ -473,10 +473,15 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
         showNotification( id= "success",  paste0("Submit Manifest to: ", manifest_path), duration = NULL, type = "message")
         rm("./files/synapse_storage_manifest.csv")
         
-        ### clear txt inputs 
-        renderUI ({
+        ### clear inputs 
+        output$text2 <- renderUI ({
           HTML("")
         })
+        output$submit <- renderUI({
+        })
+        output$rawData <- DT::renderDT({
+        })
+
       } else {
         showNotification(id = "error", paste0("error ", manifest_id ), duration = NULL, type = "error")
         rm("/tmp/synapse_storage_manifest.csv")
