@@ -22,7 +22,7 @@ ui <- dashboardPage(
   skin = "purple",
   dashboardHeader(
     titleWidth = 250,
-    title = "Data Curator",
+    title = "Data Curator Dev",
     tags$li(class = "dropdown",
             tags$style(".main-header {max-height: 50px}"),
             tags$style(".main-header .logo {height: 70px; font-size: 28px; padding-top: 10px}"),
