@@ -470,7 +470,7 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
       ### if uploaded provide message
       if ( startsWith(manifest_id, "syn") == TRUE) {
         removeNotification(id = "processing")
-        showNotification( id= "success",  paste0("Submit Manifest to: ", manifest_path), duration = NULL, type = "message")
+        showNotification( id= "success",  paste0("Succesfully uploaded to: ", manifest_path), duration = NULL, type = "message")
         rm("./files/synapse_storage_manifest.csv")
 
       } else {
