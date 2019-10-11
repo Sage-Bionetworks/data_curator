@@ -22,7 +22,7 @@ ui <- dashboardPage(
   skin = "purple",
   dashboardHeader(
     titleWidth = 250,
-    title = "Data Curator Dev",
+    title = "Data Curator",
     tags$li(class = "dropdown",
             tags$style(".main-header {max-height: 50px}"),
             tags$style(".main-header .logo {height: 70px; font-size: 28px; padding-top: 10px}"),
@@ -472,15 +472,6 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
         removeNotification(id = "processing")
         showNotification( id= "success",  paste0("Submit Manifest to: ", manifest_path), duration = NULL, type = "message")
         rm("./files/synapse_storage_manifest.csv")
-        
-        ### clear inputs 
-        output$text2 <- renderUI ({
-          HTML("")
-        })
-        output$submit <- renderUI({
-        })
-        output$rawData <- DT::renderDT({
-        })
 
       } else {
         showNotification(id = "error", paste0("error ", manifest_id ), duration = NULL, type = "error")
