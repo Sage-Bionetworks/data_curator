@@ -257,7 +257,7 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
       # }
       # 
       # folder_synID <- folders_namedList[[selected_folder]]
-      folder_synID <- get_folder_synID(synStore_obj, project_synID)
+      folder_synID <- get_folder_synID(synStore_obj, project_synID, selected_folder)
       ### get file list
       # file_list <- get_file_list(synStore_obj, folder_synID)
       # 
@@ -298,7 +298,7 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
       # }
       # 
       # folder_synID <- folders_namedList[[selected_folder]]
-      folder_synID <- get_folder_synID(synStore_obj, project_synID)
+      folder_synID <- get_folder_synID(synStore_obj, project_synID, selected_folder)
 
       ### checks if a manifest exists on synapse, and if so returns a path to downloaded file
       fpath <- get_storage_manifest_path(input$cookie, folder_synID)
@@ -429,7 +429,7 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
         # }
         # 
         # folder_synID <- folders_namedList[[selected_folder]]
-        folder_synID <- get_folder_synID(synStore_obj, project_synID)
+        folder_synID <- get_folder_synID(synStore_obj, project_synID, selected_folder)
         
         file_list <- get_file_list(synStore_obj, folder_synID)
         
@@ -456,7 +456,7 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
       # }
       # 
       # folder_synID <- folders_namedList[[selected_folder]]
-      folder_synID <- get_folder_synID(synStore_obj, project_synID)
+      folder_synID <- get_folder_synID(synStore_obj, project_synID, selected_folder)
 
       print(folder_synID)
 

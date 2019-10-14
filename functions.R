@@ -14,7 +14,7 @@ source_python("synStore_Session.py")
 ### functions to get filename, foldername
 
 ### get folder_synID 
-get_folder_synID <- function(synStore_obj, project_synID) {
+get_folder_synID <- function(synStore_obj, project_synID, selected_folder) {
   folder_list <- get_folder_list(synStore_obj, project_synID)
   folders_namedList <- c()
   for (i in seq_along(folder_list)) {
