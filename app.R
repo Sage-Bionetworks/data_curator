@@ -15,6 +15,7 @@ reticulate::import_from_path("MetadataModel", path = "HTAN-data-pipeline")
 
 source_python("synLoginFun.py")
 source_python("metadataModelFuns.py")
+source("./functions.R")
 #########
 
 ui <- dashboardPage(
@@ -168,7 +169,6 @@ server <- function(input, output, session) {
   ########### session global variables
   reticulate::source_python("synStore_Session.py")
 
-  
   synStore_obj <- NULL
   projects_list <- c()
   projects_namedList <- c()
@@ -248,22 +248,24 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
       showNotification(id = "processing",  "Generating link...", duration = NULL, type = "warning" )
 
       project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
-      folder_list <- get_folder_list(synStore_obj, project_synID)
-      folders_namedList <- c()
-      for (i in seq_along(folder_list)) {
-        folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
-      }
-
-      folder_synID <- folders_namedList[[selected_folder]]
-
+      
+      ### get folder_synID 
+      # folder_list <- get_folder_list(synStore_obj, project_synID)
+      # folders_namedList <- c()
+      # for (i in seq_along(folder_list)) {
+      #   folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
+      # }
+      # 
+      # folder_synID <- folders_namedList[[selected_folder]]
+      folder_synID <- get_folder_synID(synStore_obj, project_synID)
       ### get file list
-      file_list <- get_file_list(synStore_obj, folder_synID)
-
-      file_namedList <- c()
-      for (i in seq_along(file_list)) {
-        file_namedList[file_list[[i]][[2]]] <- file_list[[i]][[1]]
-      }
-      filename_list <- names(file_namedList)
+      # file_list <- get_file_list(synStore_obj, folder_synID)
+      # 
+      # file_namedList <- c()
+      # for (i in seq_along(file_list)) {
+      #   file_namedList[file_list[[i]][[2]]] <- file_list[[i]][[1]]
+      # }
+      filename_list <- get_filename_list(synStore_obj, folder_synID)
 
       manifest_url <- getModelManifest(paste0("HTAN_",in_template_type), in_template_type, filenames = filename_list )
       toggle('text_div')
@@ -289,13 +291,14 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
       showNotification(id="processing", "Processing...", duration = NULL, type = "default" )
 
       project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
-      folder_list <- get_folder_list(synStore_obj, project_synID)
-      folders_namedList <- c()
-      for (i in seq_along(folder_list)) {
-        folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
-      }
-
-      folder_synID <- folders_namedList[[selected_folder]]
+      # folder_list <- get_folder_list(synStore_obj, project_synID)
+      # folders_namedList <- c()
+      # for (i in seq_along(folder_list)) {
+      #   folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
+      # }
+      # 
+      # folder_synID <- folders_namedList[[selected_folder]]
+      folder_synID <- get_folder_synID(synStore_obj, project_synID)
 
       ### checks if a manifest exists on synapse, and if so returns a path to downloaded file
       fpath <- get_storage_manifest_path(input$cookie, folder_synID)
@@ -419,13 +422,14 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
         selected_project <- input$var
         
         project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
-        folder_list <- get_folder_list(synStore_obj, project_synID)
-        folders_namedList <- c()
-        for (i in seq_along(folder_list)) {
-          folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
-        }
-        
-        folder_synID <- folders_namedList[[selected_folder]]
+        # folder_list <- get_folder_list(synStore_obj, project_synID)
+        # folders_namedList <- c()
+        # for (i in seq_along(folder_list)) {
+        #   folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
+        # }
+        # 
+        # folder_synID <- folders_namedList[[selected_folder]]
+        folder_synID <- get_folder_synID(synStore_obj, project_synID)
         
         file_list <- get_file_list(synStore_obj, folder_synID)
         
@@ -445,13 +449,14 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
 
       project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
 
-      folder_list <- get_folder_list(synStore_obj, project_synID)
-      folders_namedList <- c()
-      for (i in seq_along(folder_list)) {
-        folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
-      }
-
-      folder_synID <- folders_namedList[[selected_folder]]
+      # folder_list <- get_folder_list(synStore_obj, project_synID)
+      # folders_namedList <- c()
+      # for (i in seq_along(folder_list)) {
+      #   folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
+      # }
+      # 
+      # folder_synID <- folders_namedList[[selected_folder]]
+      folder_synID <- get_folder_synID(synStore_obj, project_synID)
 
       print(folder_synID)
 
