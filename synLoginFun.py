@@ -2,11 +2,9 @@ import synapseclient
 
 syn = synapseclient.Synapse()
 syn_login = syn.login
-syn_logout = syn.logout
-
-# syn_logout = syn.logout(forgetMe= True)
 syn_getUserProfile = syn.getUserProfile
 syn_tableQuery = syn.tableQuery
+
 ### function to get previously uploaded manifest
 ### returns statement if no manifest uploaded instead of path
 def get_storage_manifest_path (token, folderID):
