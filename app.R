@@ -256,7 +256,8 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
       filename_list <- get_filename_list(synStore_obj, folder_synID)
 
       manifest_url <- getModelManifest(paste0("HTAN_",in_template_type), in_template_type, filenames = filename_list )
-      toggle('text_div')
+      ### use the long name of the template for clarity
+      toggle('text_div') 
 
       ### if want a real progress bar need more feedback from API to know how to increment progress bar
       # withProgress(message = "connecting to Google Sheets API")
