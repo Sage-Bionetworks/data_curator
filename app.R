@@ -8,21 +8,21 @@ library(DT)
 library(jsonlite)
 library(reticulate)
 
-#########global
+#########global variables 
 use_condaenv('py3.5', required = TRUE )
 reticulate::import("sys")
 reticulate::import_from_path("MetadataModel", path = "HTAN-data-pipeline")
 
 source_python("synLoginFun.py")
 source_python("metadataModelFuns.py")
-
+source("./functions.R")
 #########
 
 ui <- dashboardPage(
   skin = "purple",
   dashboardHeader(
     titleWidth = 250,
-    title = "Data Curator Dev",
+    title = "Data Curator",
     tags$li(class = "dropdown",
             tags$style(".main-header {max-height: 50px}"),
             tags$style(".main-header .logo {height: 70px; font-size: 28px; padding-top: 10px}"),
@@ -31,13 +31,11 @@ ui <- dashboardPage(
             tags$style(".messages-menu {padding-top :5px}" ),
             tags$a(href="https://humantumoratlas.org/", target = "_blank", 
                    tags$img(height = "40px", alt = "HTAN LOGO", 
-                            src = "HTAN_text_logo.png"))) #,
-    # dropdownMenu(type = "messages", icon = icon("user", "fa-2x")) ### dummy user icon
+                            src = "HTAN_text_logo.png")))
     ),
   dashboardSidebar( width = 250, 
     tags$style(".left-side, .main-sidebar {padding-top: 80px; font-weight: bold; font-size: 1.1em } "),
     sidebarMenu(
-    # menuItem("Dataset Dashboard", tabName = "dashboard", icon = icon("home")),
     menuItem("Select your Dataset", tabName = "data", icon = icon("mouse-pointer")),
     menuItem("Get Metadata Template", tabName = "template", icon = icon("table")),
     menuItem("Submit & Validate Metadata", tabName = "upload", icon = icon("upload"))
@@ -64,7 +62,7 @@ ui <- dashboardPage(
                   width= 6,
                   title = "Choose a Project and Dataset: ",
                   selectizeInput(inputId = "var", label = "Project:",
-                                 choices = "Generating..." ) , #names(projects_namedList) ),
+                                 choices = "Generating..." ) ,
                   uiOutput('folders')
                 ),
                 box(
@@ -75,8 +73,8 @@ ui <- dashboardPage(
                   selectInput(
                     inputId = "template_type",
                     label = "Template:",
-                    choices = list("Minimal Metadata") #, "scRNAseq") ## add mapping step from string to input
-                  ) ## HTAPP to Minimal Metadata
+                    choices = list("Minimal Metadata") 
+                  ) 
                 )
               )
               ),
@@ -120,7 +118,6 @@ ui <- dashboardPage(
       
       # Third tab content
       tabItem(tabName = "upload",
-              # useShinyjs(),
               h2("Submit & Validate a Filled Metadata Template"),
               fluidRow(
                 
@@ -151,7 +148,6 @@ ui <- dashboardPage(
                   actionButton("validate", "Validate Metadata"),
                   hidden(
                     div(id='text_div2',
-                        # width = 12,
                         height = "100%",
                         htmlOutput("text2"),
                         style = "font-size:18px; background-color: white; border: 1px solid #ccc; border-radius: 3px; margin: 10px 0; padding: 10px"
@@ -162,7 +158,6 @@ ui <- dashboardPage(
                         status = "primary",
                         solidHeader = TRUE,
                         width = 12,
-                        # actionButton("submit", "Submit to Synapse")
                         uiOutput("submit")
                 )
         )
@@ -172,16 +167,12 @@ ui <- dashboardPage(
 )
 
 server <- function(input, output, session) {
-  ########### session global 
+  ########### session global variables
   reticulate::source_python("synStore_Session.py")
 
-  ### logs in and gets list of projects they have access to
   synStore_obj <- NULL
-  # get_projects_list(synStore_obj)
   projects_list <- c()
-
   projects_namedList <- c()
-  
   ############
 
   ### synapse cookies
@@ -223,7 +214,7 @@ server <- function(input, output, session) {
   ### rename the input template type to HTAPP
   in_template_type <- "HTAPP"
 
-  ### folder datasets if value in project
+  ### folder datasets if project selected
 observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
   input$var, { 
   output$folders = renderUI({                         
@@ -232,7 +223,6 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
     # if selected_project not empty
     if (!is.null(selected_project)) { 
     project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
-    # project_synID <- str(project_synID)
 
     ### gets folders per project
     folder_list <- get_folder_list(synStore_obj, project_synID)
@@ -259,30 +249,22 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
       showNotification(id = "processing",  "Generating link...", duration = NULL, type = "warning" )
 
       project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
-      folder_list <- get_folder_list(synStore_obj, project_synID)
-      folders_namedList <- c()
-      for (i in seq_along(folder_list)) {
-        folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
-      }
-
-      folder_synID <- folders_namedList[[selected_folder]]
-
-      file_list <- get_file_list(synStore_obj, folder_synID)
-
-      file_namedList <- c()
-      for (i in seq_along(file_list)) {
-        file_namedList[file_list[[i]][[2]]] <- file_list[[i]][[1]]
-      }
-      filename_list <- names(file_namedList)
+      
+      ### get folder_synID 
+      folder_synID <- get_folder_synID(synStore_obj, project_synID, selected_folder)
+      
+      ### get file list
+      filename_list <- get_filename_list(synStore_obj, folder_synID)
 
       manifest_url <- getModelManifest(paste0("HTAN_",in_template_type), in_template_type, filenames = filename_list )
-      toggle('text_div')
+      ### use the long name of the template for clarity
+      toggle('text_div') 
 
-      ### if want a progress bar need more feedback from API to know how to increment progress bar
+      ### if want a real progress bar need more feedback from API to know how to increment progress bar
       # withProgress(message = "connecting to Google Sheets API")
 
       output$text <- renderUI({
-        tags$a(href = manifest_url, manifest_url, target="_blank") ### add link to data dictionary
+        tags$a(href = manifest_url, manifest_url, target="_blank") ### add link to data dictionary when up
       })
 
       ### when done remove progress notif
@@ -299,16 +281,12 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
       showNotification(id="processing", "Processing...", duration = NULL, type = "default" )
 
       project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
-      folder_list <- get_folder_list(synStore_obj, project_synID)
-      folders_namedList <- c()
-      for (i in seq_along(folder_list)) {
-        folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
-      }
 
-      folder_synID <- folders_namedList[[selected_folder]]
+      folder_synID <- get_folder_synID(synStore_obj, project_synID, selected_folder)
 
+      ### checks if a manifest exists on synapse, and if so returns a path to downloaded file
       fpath <- get_storage_manifest_path(input$cookie, folder_synID)
-      if ( is.null(fpath)) {
+      if ( is.null(fpath)) { ### if no path returned
         toggle('text_div3')
         output$text3 <- renderUI({
           tags$b("No previously uploaded manifest was found")
@@ -357,8 +335,6 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
 observeEvent(
   rawData(), 
   {
-    showNotification(id = "file1", "observed rawData", duration = NULL)
-
     output$tbl <- DT::renderDT({
       datatable(rawData(), options = list(lengthChange = FALSE, scrollX = TRUE)
         )
@@ -422,7 +398,7 @@ observeEvent(
                "<br/>Edit your data locally or ",
                paste0('<a href="', filled_manifest, '">on Google Sheets</a>')
                )
-### tags$a(href = manifest_url, manifest_url, target="_blank") add
+        ### tags$a(href = manifest_url, manifest_url, target="_blank") add
         })
         ### update DT view with incorrect values
         ### currently only one column, requires backend support of multiple
@@ -465,13 +441,8 @@ observeEvent(
         selected_project <- input$var
         
         project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
-        folder_list <- get_folder_list(synStore_obj, project_synID)
-        folders_namedList <- c()
-        for (i in seq_along(folder_list)) {
-          folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
-        }
-        
-        folder_synID <- folders_namedList[[selected_folder]]
+       
+        folder_synID <- get_folder_synID(synStore_obj, project_synID, selected_folder)
         
         file_list <- get_file_list(synStore_obj, folder_synID)
         
@@ -491,13 +462,7 @@ observeEvent(
 
       project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
 
-      folder_list <- get_folder_list(synStore_obj, project_synID)
-      folders_namedList <- c()
-      for (i in seq_along(folder_list)) {
-        folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
-      }
-
-      folder_synID <- folders_namedList[[selected_folder]]
+      folder_synID <- get_folder_synID(synStore_obj, project_synID, selected_folder)
 
       print(folder_synID)
 
@@ -508,7 +473,7 @@ observeEvent(
       ### if uploaded provide message
       if ( startsWith(manifest_id, "syn") == TRUE) {
         removeNotification(id = "processing")
-        showNotification( id= "success",  paste0("Submit Manifest to: ", manifest_path), duration = NULL, type = "message")
+        showNotification( id= "success",  paste0("Succesfully uploaded to: ", manifest_path), duration = NULL, type = "message")
         rm("./files/synapse_storage_manifest.csv")
         
         ### clear inputs 
