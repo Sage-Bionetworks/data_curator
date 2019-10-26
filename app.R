@@ -129,17 +129,18 @@ ui <- dashboardPage(
                   solidHeader = TRUE,
                   status = "primary",
                   width = 12,
-                  fileInput("csvFile", "Upload CSV File",
-                            accept=c('text/csv', 
-                                     'text/comma-separated-values,text/plain', 
-                                     '.csv'))
-                  ) ,
+                  # fileInput("file1", "Upload CSV File",
+                  #           accept=c('text/csv', 
+                  #                    'text/comma-separated-values,text/plain', 
+                  #                    '.csv'))
+                  uiOutput('fileInput_ui')
+                ),
                 box(
                   title = "Metadata Preview",
                   solidHeader = TRUE,
                   status = "primary",
                   width = 12, 
-                  DT::DTOutput("rawData") #,
+                  DT::DTOutput("tbl") #,
                   # helpText("Google spreadsheet row numbers are incremented from this table by 1")
                 ),
                 box(
@@ -325,28 +326,65 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
     }
   )
 
-  ### reads csv file
-  rawData <- eventReactive(input$csvFile, {
-    readr::read_csv(input$csvFile$datapath, na = c("", "NA"))
+      values <- reactiveValues(
+        file1 = NULL
+    )
+
+    # observe({
+    #     input$clearFile1
+    #     input$uploadFormat
+    #     values$file1 <- NULL
+    # })
+
+    observe({
+        values$file1 <- input$file1
+    })
+
+  ### renders fileInput ui
+  output$fileInput_ui <- renderUI({
+
+    fileInput("file1", "Upload CSV File",
+                          accept=c('text/csv', 
+                                    'text/comma-separated-values', 
+                                    '.csv'))
   })
 
-  ### DT
-  output$rawData <- DT::renderDT({
-    datatable(rawData(),
-    options = list(lengthChange = FALSE, scrollX = TRUE)
-      )
-    })
+  ## reads csv file and previews
+  rawData <- eventReactive(input$file1, {
+    readr::read_csv(input$file1$datapath, na = c("", "NA"))
+  })
+  
+observeEvent(
+  rawData(), 
+  {
+    showNotification(id = "file1", "observed rawData", duration = NULL)
+
+    output$tbl <- DT::renderDT({
+      datatable(rawData(), options = list(lengthChange = FALSE, scrollX = TRUE)
+        )
+      })
+
+  }
+)
+
+#   ### DT
+# output$tbl <- DT::renderDT({
+#   datatable(rawData(),
+#   options = list(lengthChange = FALSE, scrollX = TRUE)
+#     )
+#   })
+
 
   ### toggles validation status when validate button pressed
   observeEvent(
     input$validate, {
-      annotation_status <- validateModelManifest(input$csvFile$datapath, in_template_type)
+      annotation_status <- validateModelManifest(input$file1$datapath, in_template_type)
       toggle('text_div2')
 
       showNotification(id="processing", "Processing...", duration = NULL, type = "default" )
 
       if ( length(annotation_status) != 0 ) { ## if error not empty aka there is an error
-        filled_manifest <- populateModelManifest(paste0("HTAN_",in_template_type), input$csvFile$datapath, in_template_type)
+        filled_manifest <- populateModelManifest(paste0("HTAN_",in_template_type), input$file1$datapath, in_template_type)
 
         ### create list of string names for the long error messages
         str_names <- sprintf("str_%d", seq(length(annotation_status)))
@@ -388,7 +426,7 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
         })
         ### update DT view with incorrect values
         ### currently only one column, requires backend support of multiple
-        output$rawData <- DT::renderDT({
+        output$tbl <- DT::renderDT({
           datatable(rawData(),
                     options = list(lengthChange = FALSE, scrollX = TRUE)
           ) %>% formatStyle(unlist(column),
@@ -416,7 +454,7 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
       showNotification(id="processing","Submitting...", duration = NULL, type = "default" )
 
       ### reads in csv and adds entityID, then saves it as synapse_storage_manifest.csv in folder
-      infile <- readr::read_csv(input$csvFile$datapath, na = c("", "NA"))
+      infile <- readr::read_csv(input$file1$datapath, na = c("", "NA"))
       
       ### already has entityId
       if ("entityId" %in% colnames(infile)) {
@@ -479,8 +517,19 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
         })
         output$submit <- renderUI({
         })
-        output$rawData <- DT::renderDT({
-        })
+
+        ### rerenders fileinput UI
+        output$fileInput_ui <- renderUI({
+        fileInput("file1", "Upload CSV File",
+                                accept=c('text/csv', 
+                                        'text/comma-separated-values', 
+                                        '.csv'))
+      })
+
+        output$tbl <- DT::renderDT(
+        datatable(as.data.frame(matrix(0, ncol = 0, nrow = 0)))
+        )
+
 
       } else {
         showNotification(id = "error", paste0("error ", manifest_id ), duration = NULL, type = "error")
