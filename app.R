@@ -8,21 +8,21 @@ library(DT)
 library(jsonlite)
 library(reticulate)
 
-#########global variables 
+#########global
 use_condaenv('py3.5', required = TRUE )
 reticulate::import("sys")
 reticulate::import_from_path("MetadataModel", path = "HTAN-data-pipeline")
 
 source_python("synLoginFun.py")
 source_python("metadataModelFuns.py")
-source("./functions.R")
+
 #########
 
 ui <- dashboardPage(
   skin = "purple",
   dashboardHeader(
     titleWidth = 250,
-    title = "Data Curator",
+    title = "Data Curator Dev",
     tags$li(class = "dropdown",
             tags$style(".main-header {max-height: 50px}"),
             tags$style(".main-header .logo {height: 70px; font-size: 28px; padding-top: 10px}"),
@@ -31,11 +31,13 @@ ui <- dashboardPage(
             tags$style(".messages-menu {padding-top :5px}" ),
             tags$a(href="https://humantumoratlas.org/", target = "_blank", 
                    tags$img(height = "40px", alt = "HTAN LOGO", 
-                            src = "HTAN_text_logo.png")))
+                            src = "HTAN_text_logo.png"))) #,
+    # dropdownMenu(type = "messages", icon = icon("user", "fa-2x")) ### dummy user icon
     ),
   dashboardSidebar( width = 250, 
     tags$style(".left-side, .main-sidebar {padding-top: 80px; font-weight: bold; font-size: 1.1em } "),
     sidebarMenu(
+    # menuItem("Dataset Dashboard", tabName = "dashboard", icon = icon("home")),
     menuItem("Select your Dataset", tabName = "data", icon = icon("mouse-pointer")),
     menuItem("Get Metadata Template", tabName = "template", icon = icon("table")),
     menuItem("Submit & Validate Metadata", tabName = "upload", icon = icon("upload"))
@@ -62,7 +64,7 @@ ui <- dashboardPage(
                   width= 6,
                   title = "Choose a Project and Dataset: ",
                   selectizeInput(inputId = "var", label = "Project:",
-                                 choices = "Generating..." ) ,
+                                 choices = "Generating..." ) , #names(projects_namedList) ),
                   uiOutput('folders')
                 ),
                 box(
@@ -73,8 +75,8 @@ ui <- dashboardPage(
                   selectInput(
                     inputId = "template_type",
                     label = "Template:",
-                    choices = list("Minimal Metadata") 
-                  ) 
+                    choices = list("Minimal Metadata") #, "scRNAseq") ## add mapping step from string to input
+                  ) ## HTAPP to Minimal Metadata
                 )
               )
               ),
@@ -118,6 +120,7 @@ ui <- dashboardPage(
       
       # Third tab content
       tabItem(tabName = "upload",
+              # useShinyjs(),
               h2("Submit & Validate a Filled Metadata Template"),
               fluidRow(
                 
@@ -126,18 +129,19 @@ ui <- dashboardPage(
                   solidHeader = TRUE,
                   status = "primary",
                   width = 12,
-                  fileInput("csvFile", "Upload CSV File",
-                            accept=c('text/csv', 
-                                     'text/comma-separated-values,text/plain', 
-                                     '.csv'))
-                  ) ,
+                  # fileInput("file1", "Upload CSV File",
+                  #           accept=c('text/csv', 
+                  #                    'text/comma-separated-values,text/plain', 
+                  #                    '.csv'))
+                  uiOutput('fileInput_ui')
+                ),
                 box(
                   title = "Metadata Preview",
                   solidHeader = TRUE,
                   status = "primary",
                   width = 12, 
-                  DT::DTOutput("rawData") #,
-                  # helpText("Your uploaded CSV will show here. Google spreadsheet row numbers are incremented from this table by 1")
+                  DT::DTOutput("tbl") #,
+                  # helpText("Google spreadsheet row numbers are incremented from this table by 1")
                 ),
                 box(
                   title = "Validate Filled Metadata",
@@ -147,6 +151,7 @@ ui <- dashboardPage(
                   actionButton("validate", "Validate Metadata"),
                   hidden(
                     div(id='text_div2',
+                        # width = 12,
                         height = "100%",
                         htmlOutput("text2"),
                         style = "font-size:18px; background-color: white; border: 1px solid #ccc; border-radius: 3px; margin: 10px 0; padding: 10px"
@@ -157,6 +162,7 @@ ui <- dashboardPage(
                         status = "primary",
                         solidHeader = TRUE,
                         width = 12,
+                        # actionButton("submit", "Submit to Synapse")
                         uiOutput("submit")
                 )
         )
@@ -166,12 +172,16 @@ ui <- dashboardPage(
 )
 
 server <- function(input, output, session) {
-  ########### session global variables
+  ########### session global 
   reticulate::source_python("synStore_Session.py")
 
+  ### logs in and gets list of projects they have access to
   synStore_obj <- NULL
+  # get_projects_list(synStore_obj)
   projects_list <- c()
+
   projects_namedList <- c()
+  
   ############
 
   ### synapse cookies
@@ -213,7 +223,7 @@ server <- function(input, output, session) {
   ### rename the input template type to HTAPP
   in_template_type <- "HTAPP"
 
-  ### folder datasets if project selected
+  ### folder datasets if value in project
 observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
   input$var, { 
   output$folders = renderUI({                         
@@ -222,6 +232,7 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
     # if selected_project not empty
     if (!is.null(selected_project)) { 
     project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
+    # project_synID <- str(project_synID)
 
     ### gets folders per project
     folder_list <- get_folder_list(synStore_obj, project_synID)
@@ -248,22 +259,30 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
       showNotification(id = "processing",  "Generating link...", duration = NULL, type = "warning" )
 
       project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
-      
-      ### get folder_synID 
-      folder_synID <- get_folder_synID(synStore_obj, project_synID, selected_folder)
-      
-      ### get file list
-      filename_list <- get_filename_list(synStore_obj, folder_synID)
+      folder_list <- get_folder_list(synStore_obj, project_synID)
+      folders_namedList <- c()
+      for (i in seq_along(folder_list)) {
+        folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
+      }
+
+      folder_synID <- folders_namedList[[selected_folder]]
+
+      file_list <- get_file_list(synStore_obj, folder_synID)
+
+      file_namedList <- c()
+      for (i in seq_along(file_list)) {
+        file_namedList[file_list[[i]][[2]]] <- file_list[[i]][[1]]
+      }
+      filename_list <- names(file_namedList)
 
       manifest_url <- getModelManifest(paste0("HTAN_",in_template_type), in_template_type, filenames = filename_list )
-      ### use the long name of the template for clarity
-      toggle('text_div') 
+      toggle('text_div')
 
-      ### if want a real progress bar need more feedback from API to know how to increment progress bar
+      ### if want a progress bar need more feedback from API to know how to increment progress bar
       # withProgress(message = "connecting to Google Sheets API")
 
       output$text <- renderUI({
-        tags$a(href = manifest_url, manifest_url, target="_blank") ### add link to data dictionary when up
+        tags$a(href = manifest_url, manifest_url, target="_blank") ### add link to data dictionary
       })
 
       ### when done remove progress notif
@@ -280,12 +299,16 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
       showNotification(id="processing", "Processing...", duration = NULL, type = "default" )
 
       project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
+      folder_list <- get_folder_list(synStore_obj, project_synID)
+      folders_namedList <- c()
+      for (i in seq_along(folder_list)) {
+        folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
+      }
 
-      folder_synID <- get_folder_synID(synStore_obj, project_synID, selected_folder)
+      folder_synID <- folders_namedList[[selected_folder]]
 
-      ### checks if a manifest exists on synapse, and if so returns a path to downloaded file
       fpath <- get_storage_manifest_path(input$cookie, folder_synID)
-      if ( is.null(fpath)) { ### if no path returned
+      if ( is.null(fpath)) {
         toggle('text_div3')
         output$text3 <- renderUI({
           tags$b("No previously uploaded manifest was found")
@@ -303,28 +326,43 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
     }
   )
 
-  ### reads csv file
-  rawData <- eventReactive(input$csvFile, {
-    readr::read_csv(input$csvFile$datapath, na = c("", "NA"))
+  ### renders fileInput ui
+  output$fileInput_ui <- renderUI({
+
+    fileInput("file1", "Upload CSV File",
+                          accept=c('text/csv', 
+                                    'text/comma-separated-values', 
+                                    '.csv'))
   })
 
-  ### DT
-  output$rawData <- DT::renderDT({
-    datatable(rawData(),
-    options = list(lengthChange = FALSE, scrollX = TRUE)
-      )
-    })
+  ## reads csv file and previews
+  rawData <- eventReactive(input$file1, {
+    readr::read_csv(input$file1$datapath, na = c("", "NA"))
+  })
+  
+observeEvent(
+  rawData(), 
+  {
+    showNotification(id = "file1", "observed rawData", duration = NULL)
+
+    output$tbl <- DT::renderDT({
+      datatable(rawData(), options = list(lengthChange = FALSE, scrollX = TRUE)
+        )
+      })
+
+  }
+)
 
   ### toggles validation status when validate button pressed
   observeEvent(
     input$validate, {
-      annotation_status <- validateModelManifest(input$csvFile$datapath, in_template_type)
+      annotation_status <- validateModelManifest(input$file1$datapath, in_template_type)
       toggle('text_div2')
 
       showNotification(id="processing", "Processing...", duration = NULL, type = "default" )
 
       if ( length(annotation_status) != 0 ) { ## if error not empty aka there is an error
-        filled_manifest <- populateModelManifest(paste0("HTAN_",in_template_type), input$csvFile$datapath, in_template_type)
+        filled_manifest <- populateModelManifest(paste0("HTAN_",in_template_type), input$file1$datapath, in_template_type)
 
         ### create list of string names for the long error messages
         str_names <- sprintf("str_%d", seq(length(annotation_status)))
@@ -362,11 +400,11 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
                "<br/>Edit your data locally or ",
                paste0('<a href="', filled_manifest, '">on Google Sheets</a>')
                )
-        ### tags$a(href = manifest_url, manifest_url, target="_blank") add
+### tags$a(href = manifest_url, manifest_url, target="_blank") add
         })
         ### update DT view with incorrect values
         ### currently only one column, requires backend support of multiple
-        output$rawData <- DT::renderDT({
+        output$tbl <- DT::renderDT({
           datatable(rawData(),
                     options = list(lengthChange = FALSE, scrollX = TRUE)
           ) %>% formatStyle(unlist(column),
@@ -394,7 +432,7 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
       showNotification(id="processing","Submitting...", duration = NULL, type = "default" )
 
       ### reads in csv and adds entityID, then saves it as synapse_storage_manifest.csv in folder
-      infile <- readr::read_csv(input$csvFile$datapath, na = c("", "NA"))
+      infile <- readr::read_csv(input$file1$datapath, na = c("", "NA"))
       
       ### already has entityId
       if ("entityId" %in% colnames(infile)) {
@@ -405,8 +443,13 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
         selected_project <- input$var
         
         project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
-       
-        folder_synID <- get_folder_synID(synStore_obj, project_synID, selected_folder)
+        folder_list <- get_folder_list(synStore_obj, project_synID)
+        folders_namedList <- c()
+        for (i in seq_along(folder_list)) {
+          folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
+        }
+        
+        folder_synID <- folders_namedList[[selected_folder]]
         
         file_list <- get_file_list(synStore_obj, folder_synID)
         
@@ -426,7 +469,13 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
 
       project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
 
-      folder_synID <- get_folder_synID(synStore_obj, project_synID, selected_folder)
+      folder_list <- get_folder_list(synStore_obj, project_synID)
+      folders_namedList <- c()
+      for (i in seq_along(folder_list)) {
+        folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
+      }
+
+      folder_synID <- folders_namedList[[selected_folder]]
 
       print(folder_synID)
 
@@ -437,8 +486,28 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
       ### if uploaded provide message
       if ( startsWith(manifest_id, "syn") == TRUE) {
         removeNotification(id = "processing")
-        showNotification( id= "success",  paste0("Succesfully uploaded to: ", manifest_path), duration = NULL, type = "message")
+        showNotification( id= "success",  paste0("Submit Manifest to: ", manifest_path), duration = NULL, type = "message")
         rm("./files/synapse_storage_manifest.csv")
+        
+        ### clear inputs 
+        output$text2 <- renderUI ({
+          HTML("")
+        })
+        output$submit <- renderUI({
+        })
+
+        ### rerenders fileinput UI
+        output$fileInput_ui <- renderUI({
+        fileInput("file1", "Upload CSV File",
+                                accept=c('text/csv', 
+                                        'text/comma-separated-values', 
+                                        '.csv'))
+      })
+       ### renders empty df
+      output$tbl <- DT::renderDT(
+        datatable(as.data.frame(matrix(0, ncol = 0, nrow = 0)))
+        )
+
 
       } else {
         showNotification(id = "error", paste0("error ", manifest_id ), duration = NULL, type = "error")
