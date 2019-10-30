@@ -343,7 +343,6 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
 observeEvent(
   rawData(), 
   {
-    showNotification(id = "file1", "observed rawData", duration = NULL)
 
     output$tbl <- DT::renderDT({
       datatable(rawData(), options = list(lengthChange = FALSE, scrollX = TRUE)
