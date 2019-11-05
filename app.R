@@ -22,7 +22,7 @@ ui <- dashboardPage(
   skin = "purple",
   dashboardHeader(
     titleWidth = 250,
-    title = "Data Curator Dev",
+    title = "Data Curator",
     tags$li(class = "dropdown",
             tags$style(".main-header {max-height: 50px}"),
             tags$style(".main-header .logo {height: 70px; font-size: 28px; padding-top: 10px}"),
@@ -343,7 +343,6 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
 observeEvent(
   rawData(), 
   {
-    # showNotification(id = "file1", "observed rawData", duration = NULL)
 
     output$tbl <- DT::renderDT({
       datatable(rawData(), options = list(lengthChange = FALSE, scrollX = TRUE)
