@@ -20,20 +20,25 @@ class SynapseStorage(object):
 
     def __init__(self,
                  storageFileview: str,
-                 # syn: synapseclient = None,
-                 token: str ## gets sessionToken for logging in
+                 syn: synapseclient = None,
+                 token: str = None ## gets sessionToken for logging in
                  ) -> None:
 
         """Instantiates a SynapseStorage object
 
         Args:
             syn: synapse client; if not provided instantiate one
+            token: if provided, use to instantiate a synapse client and login using the toke
             storageFileview: synapse ID of fileview containing administrative storage metadata; 
             TODO: move away from specific project setup and work with an interface that Synapse specifies (e.g. based on schemas)
         """
-        
-        self.syn = synapseclient.Synapse()
-        self.syn.login(sessionToken = token)
+     
+        # login using a token 
+        if token:
+            self.syn = synapseclient.Synapse()
+            self.syn.login(sessionToken = token)
+        elif syn: # if no token, assume a logged in synapse client has been provided
+            self.syn = syn
 
         self.storageFileview = storageFileview
 
@@ -70,7 +75,8 @@ class SynapseStorage(object):
         currentUserId = currentUser.ownerId
         
         # get a set of projects from Synapse (that this user participates in)
-        currentUserProjects = self.syn.restGET('/projects/MY_PROJECTS/user/{principalId}?limit=10000'.format(principalId=currentUserId))
+        # currentUserProjects = self.syn.restGET('/projects/MY_PROJECTS/user/{principalId}?limit=10000'.format(principalId=currentUserId))
+        currentUserProjects = self.syn.restGET('/projects/MY_PROJECTS/user/{principalId}'.format(principalId=currentUserId))
         
         # prune results json filtering project id
         currentUserProjects = [currentUserProject["id"] for currentUserProject in currentUserProjects["results"]]
