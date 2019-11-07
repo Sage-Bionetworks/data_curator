@@ -7,6 +7,8 @@ library(stringr)
 library(DT)
 library(jsonlite)
 library(reticulate)
+library(ggplot2)
+library(purrr)
 
 #########global
 use_condaenv('py3.5', required = TRUE )
