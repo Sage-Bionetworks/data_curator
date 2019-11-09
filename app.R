@@ -9,6 +9,7 @@ library(jsonlite)
 library(reticulate)
 library(ggplot2)
 library(purrr)
+library(plotly)
 
 #########global
 use_condaenv('py3.5', required = TRUE )
@@ -17,6 +18,8 @@ reticulate::import_from_path("MetadataModel", path = "HTAN-data-pipeline")
 
 source_python("synLoginFun.py")
 source_python("metadataModelFuns.py")
+
+source("functions.R")
 
 #########
 
@@ -79,6 +82,14 @@ ui <- dashboardPage(
                     label = "Template:",
                     choices = list("Minimal Metadata") #, "scRNAseq") ## add mapping step from string to input
                   ) ## HTAPP to Minimal Metadata
+                ),
+                box(
+                  status = "primary", 
+                  solidHeader = TRUE, 
+                  width = 12, 
+                  title = "All Dataset Annotation by Component Completion",
+                  plotOutput("dash_plot", height = "500px")
+                  # plotly::plotlyOutput("dash_plot", height = "600px")
                 )
               )
               ),
@@ -183,7 +194,8 @@ server <- function(input, output, session) {
   projects_list <- c()
 
   projects_namedList <- c()
-  
+
+  proj_folder_manifest_cells <- c()
   ############
 
   ### synapse cookies
@@ -200,7 +212,7 @@ server <- function(input, output, session) {
   })
 
   observeEvent(input$cookie, {  
-    showNotification(id="processing", "Please wait while we log you in...", duration = NULL, type = "default" )
+    showNotification(id="processing", "Please wait while we log you in...", duration = NULL, type = "warning" )
     ### logs in 
     syn_login(sessionToken=input$cookie, rememberMe = FALSE)
 
@@ -217,10 +229,166 @@ server <- function(input, output, session) {
     for (i in seq_along(projects_list)) {
       projects_namedList[projects_list[[i]][[2]]] <<- projects_list[[i]][[1]]
     }
-    removeNotification(id="processing",)
+    
     ### updates project dropdown
     updateSelectizeInput(session, 'var', choices = names(projects_namedList))
+    removeNotification(id="processing",)
+    
   })
+
+  observeEvent(input$cookie, {  
+    showNotification(id="dash_gather", "Gathering your Data...", duration = NULL, type = "default" )
+        ###================ gets the manifest cells table 
+    tab <- syn_tableQuery("select * from syn20446927", resultsAs='csv')
+    tab <- read.csv(tab$filepath)
+    # get just folders and match parent ID to project name
+    projects_df <- stack(projects_namedList)
+    colnames(projects_df) <- c("parentId", "project_name")
+    proj_folder_df <- inner_join(tab %>% filter(type == "folder"), projects_df)
+    
+    all_folders_list <- as.character(proj_folder_df$id)
+    
+    ### get manifest paths per folder
+    folders_manifest_df <- data.frame()
+    for (i in seq_along(all_folders_list)) {
+      # folders_manifest_df[]
+      print(i)
+      print(all_folders_list[i])
+      folders_manifest_df[i,1] <- all_folders_list[i]
+      path <- get_storage_manifest_path(input$cookie , all_folders_list[i])
+      if ( is.null(path) ) { ## if no manifest is uploaded 
+        folders_manifest_df[i,2] <- NA  
+      } else {
+        folders_manifest_df[i,2] <- path
+      }
+    }
+    
+    colnames(folders_manifest_df) <- c("id", "manifest_path")
+    
+    proj_folder_manifest <- inner_join(folders_manifest_df, proj_folder_df, by = "id")
+    
+    ### get metrics for each manifest
+  manifest_cells <- data.frame()
+  for (i in seq_along(proj_folder_manifest$id)) {
+    print(i)
+    manifest_path <- proj_folder_manifest$manifest_path[i]
+    manifest_cells[i, 1] <- proj_folder_manifest$id[i]
+    manifest_cells[i, 2] <- manifest_path
+    
+    if ( !is.na(manifest_path)) {
+      manifest_df <- read.csv(manifest_path)
+      
+      ### subset cols by component type ASSAY
+      assay_cols <- manifest_df[, c("Cancer.Type", "Library.Construction.Method")]
+      
+      # how to count empty cells vs all cells
+      dim_val <- dim(assay_cols)
+      total_cells <- dim_val[1] * dim_val[2]
+      empty_cells <- table(is.na(assay_cols))
+      per_filled <- (empty_cells[1] / total_cells )* 100
+      
+      manifest_cells[i,3] <- "Assay"
+      manifest_cells[i,4] <- total_cells
+      manifest_cells[i,5] <- empty_cells[1] ## filled, empty= F
+      manifest_cells[i,6] <- per_filled
+      
+      
+      HTAN_cols <- manifest_df[, c("HTAN.Participant.ID", "HTAN.Sample.ID")]
+      # how to count empty cells vs all cells
+      dim_val <- dim(HTAN_cols)
+      total_cells <- dim_val[1] * dim_val[2]
+      empty_cells <- table(is.na(HTAN_cols))
+      per_filled <- (empty_cells[1] / total_cells )* 100
+      
+      manifest_cells[i,7] <- "HTAN_IDs"
+      manifest_cells[i,8] <- total_cells
+      manifest_cells[i,9] <- empty_cells[1] ## filled, empty= F
+      manifest_cells[i,10] <- per_filled
+    } else {
+      # print(proj_folder_manifest$id[i])
+      manifest_cells[i,3] <- "Assay"
+      manifest_cells[i,4] <- 0
+      manifest_cells[i,5] <- 0
+      manifest_cells[i,6] <- 0
+
+      manifest_cells[i,7] <- "HTAN_IDs"
+      manifest_cells[i,8] <- 0
+      manifest_cells[i,9] <- 0 ## filled, empty= F
+      manifest_cells[i,10] <- 0
+      
+    }
+  }
+
+  ### NAs to 0 but not for manifest path
+  manifest_cells[,-c(2)][is.na((manifest_cells[,-c(2)]))] <- 0
+
+  colnames(manifest_cells) <- c("id", "manifest_path", "component", "total_cells","filled_cells", "percent_filled", "component2", "total_cells2","filled_cells2", "percent_filled2")
+
+  proj_folder_manifest_cells <<- right_join(manifest_cells, proj_folder_manifest )
+
+    minimal <- proj_folder_manifest_cells[, c("project_name", "name", "component", "total_cells","filled_cells", "percent_filled", "component2", "total_cells2","filled_cells2", "percent_filled2")]
+
+    colnames(minimal)[7:10] <- c("component", "total_cells","filled_cells", "percent_filled")
+
+    minimal_long <- rbind(minimal[,1:6], minimal[,c(1:2,7:10) ])
+
+    ### get the wrapped project names to fit
+    minimal_long <- mutate(minimal_long, project = str_wrap(project_name, width = 10))
+
+    # p_dash <- ggplot(minimal_long, aes(x= name, y = percent_filled, fill = component)) + 
+    #       geom_histogram(stat= "identity", position = "dodge")  + 
+    #       coord_flip() +
+    #       facet_grid(project ~ ., 
+    #                 scales = "free_y", space = "free_y",
+    #                 drop = TRUE) +
+    #       guides(alpha = FALSE, fill = FALSE, colour = guide_legend(title = "Annotation Component")) +
+    #       xlab("") +
+    #       ylab("Percent Annotated") +
+    #       theme_bw() +
+    #       theme(strip.text.y = element_text(face = "bold", angle = 270),
+    #             legend.title = element_blank(),
+    #             axis.text.x = element_text(angle = 0, hjust = 1),
+    #             strip.text.x = element_text(margin = margin(.1, 0, .1, 0, "cm")))
+    
+    # g <- ggplotGrob(p_dash)
+    # g$heights[6] <- unit(2, "cm")
+    # for(i in 13:15) g$grobs[[i]]$heights = unit(1, "npc") # Set height of grobs
+
+    # grid.newpage()
+    # grid.draw(g)
+
+    # output$dash_plot <- plotly::renderPlotly({
+    #     ggplotly( p_dash ) %>%
+    #     layout(legend = list(orientation = 'h',
+    #                           y = 1, x = 0, yanchor = "bottom"),
+    #             margin = list(l = 300, b = 60, r = 60)) %>% 
+    #     plotly::config(displayModeBar = F)  
+    # })
+    output$dash_plot <- renderPlot({
+      ggplot(minimal_long, aes(x= name, y = percent_filled, fill = component)) + 
+          geom_histogram(stat= "identity", position = "dodge")  + 
+          coord_flip() +
+          facet_grid(project ~ ., 
+                    scales = "free_y", space = "free_y",
+                    drop = TRUE) +
+          # guides(fill = guide_legend(title = "Annotation Component")) +
+          labs(fill = "Fill legend label") +
+          xlab("") +
+          ylab("Percent Annotated") +
+          theme_bw() +
+          theme(strip.text.y = element_text(face = "bold", angle = 270),
+                legend.title = element_blank(),
+                axis.text.x = element_text(angle = 0, hjust = 1),
+                strip.text.x = element_text(margin = margin(.1, 0, .1, 0, "cm")),
+                text = element_text(size=12),
+                legend.position = "top")
+    })
+
+    removeNotification(id = "dash_gather")
+    
+  })
+
+
 
   ### rename the input template type to HTAPP
   in_template_type <- "HTAPP"
@@ -345,7 +513,6 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
 observeEvent(
   rawData(), 
   {
-
     output$tbl <- DT::renderDT({
       datatable(rawData(), options = list(lengthChange = FALSE, scrollX = TRUE)
         )
