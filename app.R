@@ -45,7 +45,8 @@ ui <- dashboardPage(
     # menuItem("Dataset Dashboard", tabName = "dashboard", icon = icon("home")),
     menuItem("Select your Dataset", tabName = "data", icon = icon("mouse-pointer")),
     menuItem("Get Metadata Template", tabName = "template", icon = icon("table")),
-    menuItem("Submit & Validate Metadata", tabName = "upload", icon = icon("upload"))
+    menuItem("Submit & Validate Metadata", tabName = "upload", icon = icon("upload")), 
+    menuItem("Annotation Status Summaries", tabName = "anno_summaries", icon = icon("tasks") )
     )
   ),
   dashboardBody(
@@ -88,7 +89,7 @@ ui <- dashboardPage(
                   solidHeader = TRUE, 
                   width = 12, 
                   title = "All Dataset Annotation by Component Completion",
-                  plotOutput("dash_plot", height = "500px")
+                  plotOutput("dash_plot", height = "500px") %>% shinycssloaders::withSpinner()
                   # plotly::plotlyOutput("dash_plot", height = "600px")
                 )
               )
@@ -136,7 +137,6 @@ ui <- dashboardPage(
               # useShinyjs(),
               h2("Submit & Validate a Filled Metadata Template"),
               fluidRow(
-                
                 box(
                   title = "Upload Filled Metadata as a CSV",
                   solidHeader = TRUE,
@@ -179,7 +179,19 @@ ui <- dashboardPage(
                         uiOutput("submit")
                 )
         )
-      )
+      ),
+      tabItem(tabName = "anno_summaries",
+              h2("Submit & Validate a Filled Metadata Template"),
+              fluidRow(
+                box(
+                  title = "Annotation Snapshot", 
+                  width = 12, 
+                  status = "primary", 
+                  solidHeader = TRUE, 
+                  DT::dataTableOutput('center_summary')
+                )
+              )
+        )
     )
   )
 )
@@ -324,7 +336,10 @@ server <- function(input, output, session) {
 
   colnames(manifest_cells) <- c("id", "manifest_path", "component", "total_cells","filled_cells", "percent_filled", "component2", "total_cells2","filled_cells2", "percent_filled2")
 
-  proj_folder_manifest_cells <<- right_join(manifest_cells, proj_folder_manifest )
+  proj_folder_manifest_cells <- right_join(manifest_cells, proj_folder_manifest )
+  proj_folder_manifest_cells <<- proj_folder_manifest_cells %>% 
+    mutate('Synapse Project Folder' = id) %>% 
+    create_synapse_links( list('Synapse Project Folder' = "id") )
 
     minimal <- proj_folder_manifest_cells[, c("project_name", "name", "component", "total_cells","filled_cells", "percent_filled", "component2", "total_cells2","filled_cells2", "percent_filled2")]
 
@@ -362,7 +377,7 @@ server <- function(input, output, session) {
     #     layout(legend = list(orientation = 'h',
     #                           y = 1, x = 0, yanchor = "bottom"),
     #             margin = list(l = 300, b = 60, r = 60)) %>% 
-    #     plotly::config(displayModeBar = F)  
+    #     plotly::config(displayModeBar = F)  ### plotly doesn't show single dataset names in facets?? use static plot for now
     # })
     output$dash_plot <- renderPlot({
       ggplot(minimal_long, aes(x= name, y = percent_filled, fill = component)) + 
@@ -683,12 +698,37 @@ observeEvent(
       }
       })
 
-    }
-  # )
-  
+    output$center_summary <- DT::renderDT({
+      proj_folder_manifest_cells %>% 
+        select(
+          `Dataset ` = name,
+          Project = project_name,
+          total_cells,
+          filled_cells,
+          percent_filled,
+          component2,
+          total_cells2,
+          filled_cells2,
+          percent_filled2,
+          `Synapse Project Folder` = `Synapse Project Folder`
+        ) %>% 
+        datatable(
+          # selection = list(
+          #   mode = 'single'
+          # ),
+          # options = list(
+          #   scrollX = TRUE,
+          #   autoWidth = F,
+          #   dom = "tip"
+          # ),
+          # rownames = FALSE
+        )  
+    }, server = FALSE )
+
+    # })
 
 
-  # )
-# }
+  }
+
 
 shinyApp(ui, server)
