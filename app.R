@@ -75,7 +75,7 @@ ui <- dashboardPage(
                   selectInput(
                     inputId = "template_type",
                     label = "Template:",
-                    choices = list("Minimal Metadata") #, "scRNAseq") ## add mapping step from string to input
+                    choices = list("scRNA-seq v1.0") #, "scRNAseq") ## add mapping step from string to input
                   ) ## HTAPP to Minimal Metadata
                 )
               )
@@ -220,8 +220,8 @@ server <- function(input, output, session) {
     updateSelectizeInput(session, 'var', choices = names(projects_namedList))
   })
 
-  ### rename the input template type to HTAPP
-  in_template_type <- "HTAPP"
+  ### rename the input template type to scRNA-seq
+  in_template_type <- "scRNA-seq"
 
   ### folder datasets if value in project
 observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
@@ -380,13 +380,13 @@ observeEvent(
             str_names[i] <- paste("Spreadsheet row <b>",
                                   row, "</b>column <b>", column,
                                   "</b>your value <b>", in_val,
-                                  "</b> is not an allowed value of:", allowed_vals, sep=" ")
+                                  "</b> is not one of of:", allowed_vals, sep=" ")
             in_vals[i] <- in_val
           } else {
             str_names[i] <- paste("Spreadsheet row <b>",
                                   row, "</b>column <b>", column,
                                   "</b>your value <b>", in_val,
-                                  "</b> is not an allowed value of:", allowed_vals, sep=" ")
+                                  "</b> is not one of:", allowed_vals, sep=" ")
             in_vals[i] <- in_val
           }
         }
