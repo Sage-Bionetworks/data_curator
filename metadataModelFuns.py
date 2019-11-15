@@ -1,14 +1,15 @@
+# import json
+# import os
 from MetadataModel import MetadataModel
-
-import argparse
-parser = argparse.ArgumentParser()
-parser.parse_args()
+from ManifestGenerator import ManifestGenerator
 
 #inputMModelLocation = "./schemas/exampleSchemaReq.jsonld"
 #inputMModelLocation = "./HTAN-data-pipeline/schemas/scRNASeq.jsonld"
-inputMModelLocation = "./HTAN-data-pipeline/schemas/HTAPP.jsonld"
+# inputMModelLocation = "./HTAN-data-pipeline/schemas/HTAPP.jsonld"
+inputMModelLocation = "./HTAN-data-pipeline/schemas/HTAN.jsonld"
 inputMModelLocationType = "local"
 # datasetType = "scRNASeq"
+datasetType = "ScRNA-seq"
 
 mm = MetadataModel(inputMModelLocation, inputMModelLocationType)
 

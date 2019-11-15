@@ -12,6 +12,7 @@ library(reticulate)
 use_condaenv('py3.5', required = TRUE )
 reticulate::import("sys")
 reticulate::import_from_path("MetadataModel", path = "HTAN-data-pipeline")
+reticulate::import_from_path("ManifestGenerator", path = "HTAN-data-pipeline")
 
 source_python("synLoginFun.py")
 source_python("metadataModelFuns.py")
@@ -75,7 +76,7 @@ ui <- dashboardPage(
                   selectInput(
                     inputId = "template_type",
                     label = "Template:",
-                    choices = list("Minimal Metadata") #, "scRNAseq") ## add mapping step from string to input
+                    choices = list("scRNA-seq v1.0") #, "scRNAseq") ## add mapping step from string to input
                   ) ## HTAPP to Minimal Metadata
                 )
               )
@@ -220,8 +221,8 @@ server <- function(input, output, session) {
     updateSelectizeInput(session, 'var', choices = names(projects_namedList))
   })
 
-  ### rename the input template type to HTAPP
-  in_template_type <- "HTAPP"
+  ### rename the input template type to scRNA-seq
+  in_template_type <- "ScRNA-seq"
 
   ### folder datasets if value in project
 observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
@@ -275,7 +276,7 @@ observeEvent( ignoreNULL = TRUE, ignoreInit = TRUE,
       }
       filename_list <- names(file_namedList)
 
-      manifest_url <- getModelManifest(paste0("HTAN_",in_template_type), in_template_type, filenames = filename_list )
+      manifest_url <- getModelManifest(paste0("HTAN ", input$template_type), in_template_type, filenames = filename_list )
       toggle('text_div')
 
       ### if want a progress bar need more feedback from API to know how to increment progress bar
@@ -380,13 +381,13 @@ observeEvent(
             str_names[i] <- paste("Spreadsheet row <b>",
                                   row, "</b>column <b>", column,
                                   "</b>your value <b>", in_val,
-                                  "</b> is not an allowed value of:", allowed_vals, sep=" ")
+                                  "</b> is not one of of:", allowed_vals, sep=" ")
             in_vals[i] <- in_val
           } else {
             str_names[i] <- paste("Spreadsheet row <b>",
                                   row, "</b>column <b>", column,
                                   "</b>your value <b>", in_val,
-                                  "</b> is not an allowed value of:", allowed_vals, sep=" ")
+                                  "</b> is not one of:", allowed_vals, sep=" ")
             in_vals[i] <- in_val
           }
         }
