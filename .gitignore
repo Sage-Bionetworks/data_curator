@@ -15,3 +15,5 @@ files/synapse_storage_manifest.csv
 HTAN-data-pipeline/schema_explorer/__pycache__/*
 HTAN-data-pipeline/__pycache__/*
 HTAN-data-pipeline/.DS_Store
+HTAN-data-pipeline/credentials.json
+
