@@ -9,12 +9,12 @@ from ManifestGenerator import ManifestGenerator
 inputMModelLocation = "./HTAN-data-pipeline/schemas/HTAN.jsonld"
 inputMModelLocationType = "local"
 # datasetType = "scRNASeq"
-datasetType = "ScRNA-seq"
+# modelType = "TableA"
 
 mm = MetadataModel(inputMModelLocation, inputMModelLocationType)
 
 ### function for getting model Manifest
-#  mm.getModelManifest(datasetType, additionalMetadata = {"Filename":["MantonCB1_HiSeq_1_S1_L001_R1_001.fastq.gz"]} )
+#  mm.getModelManifest(modelType, additionalMetadata = {"Filename":["MantonCB1_HiSeq_1_S1_L001_R1_001.fastq.gz"]} )
 getModelManifest = mm.getModelManifest
 
 ### function for validating manifest
