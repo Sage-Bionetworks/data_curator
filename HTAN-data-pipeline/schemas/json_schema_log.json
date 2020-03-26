@@ -1,0 +1,188 @@
+{
+  "title": "Test_ScRNA-seqAssay",
+  "properties": {
+    "Transcript Identifier": {
+      "enum": [
+        "UMI"
+      ]
+    },
+    "Library Layout": {
+      "enum": [
+        "Paired End",
+        "Single Read"
+      ]
+    },
+    "Cell Identifier": {
+      "enum": [
+        "Cell Barcode"
+      ]
+    },
+    "Library Construction Method": {
+      "enum": [
+        "10xV3",
+        "10xV2",
+        "Drop-seq",
+        "inDrops",
+        "10xV1",
+        "CEL-seq2",
+        "Smart-seq2",
+        "Smart-SeqV4"
+      ]
+    },
+    "End Bias": {
+      "enum": [
+        "5 Prime",
+        "3 Prime",
+        "Full Length Transcript"
+      ]
+    },
+    "Nucleic Acid Source": {
+      "enum": [
+        "Bulk Nuclei",
+        "Bulk Cell",
+        "Single Nucleus",
+        "Single Cell"
+      ]
+    },
+    "Reverse Transcription": {
+      "enum": [
+        "cDNA"
+      ]
+    },
+    "Platform": {
+      "enum": [
+        "Illumina Next Seq 500",
+        "Illumina Next Seq 2500"
+      ]
+    },
+    "Single Cell Isolation": {
+      "enum": [
+        "Droplets",
+        "Microfluidics Chip",
+        "10x",
+        "FACS"
+      ]
+    },
+    "Spike In": {
+      "enum": [
+        "No Spike In",
+        "ERCC",
+        "Other Spike In"
+      ]
+    },
+    "Primer": {
+      "enum": [
+        "Poly-dT",
+        "Random",
+        "Oligo-dT"
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "then": {
+        "required": [
+          "cDNA Read",
+          "cDNA Offset",
+          "cDNA Size"
+        ]
+      },
+      "if": {
+        "properties": {
+          "Reverse Transcription": {
+            "enum": [
+              "cDNA"
+            ]
+          }
+        },
+        "required": [
+          "Reverse Transcription"
+        ]
+      }
+    },
+    {
+      "then": {
+        "required": [
+          "UMI Barcode Offset",
+          "UMI Barcode Read",
+          "Median UMIs per Cell Number",
+          "UMI Barcode Length"
+        ]
+      },
+      "if": {
+        "properties": {
+          "Transcript Identifier": {
+            "enum": [
+              "UMI"
+            ]
+          }
+        },
+        "required": [
+          "Transcript Identifier"
+        ]
+      }
+    },
+    {
+      "then": {
+        "required": [
+          "Cell Barcode Offset",
+          "Cell Barcode Read",
+          "Valid Barcodes Cell Number",
+          "Cell Barcode Length"
+        ]
+      },
+      "if": {
+        "properties": {
+          "Cell Identifier": {
+            "enum": [
+              "Cell Barcode"
+            ]
+          }
+        },
+        "required": [
+          "Cell Identifier"
+        ]
+      }
+    },
+    {
+      "then": {
+        "required": [
+          "Spike In Concentration"
+        ]
+      },
+      "if": {
+        "properties": {
+          "Spike In": {
+            "enum": [
+              "ERCC"
+            ]
+          }
+        },
+        "required": [
+          "Spike In"
+        ]
+      }
+    }
+  ],
+  "$id": "http://example.com/Test_ScRNA-seqAssay",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": [
+    "Spike In",
+    "Component",
+    "End Bias",
+    "Library Construction Method",
+    "Single Cell Isolation",
+    "Technical Replicate Group",
+    "Cell Identifier",
+    "Input Molecule",
+    "Platform",
+    "Nucleic Acid Source",
+    "Primer",
+    "Filename",
+    "Library Layout",
+    "Transcript Identifier",
+    "Reverse Transcription",
+    "HTAN Biosample ID"
+  ]
+}

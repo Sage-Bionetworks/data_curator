@@ -222,6 +222,10 @@ class ManifestGenerator(object):
             # adding value-constraints if any
             req_vals = [{"userEnteredValue":value} for value in values if value]
 
+            if len(req_vals) > 499:
+                print("WARNING: Value range > Google Sheet limit of 500. Truncating...")
+                req_vals = req_vals[:499]
+
             if not req_vals:
                 continue
 
@@ -288,9 +292,10 @@ class ManifestGenerator(object):
     def sort_manifest_fields(self, manifest_fields):
         """ sort a set of metadata fields (e.g. to organize manifest column headers in a more user-friendly and consistent pattern, (e.g. alphabetical))  
         """
-        print(manifest_fields)
         manifest_fields.sort()
 
+        # should be able to abstract custom logic so that certain
+        # special fields appear as first (or last) columns
         if "Filename" in manifest_fields:
             pos = manifest_fields.index("Filename")
             manifest_fields[pos] = manifest_fields[0]
@@ -300,5 +305,7 @@ class ManifestGenerator(object):
             manifest_fields.remove("entityId")
             manifest_fields.append("entityId")
 
+        print("Manifest fields:")
+        print()
         print(manifest_fields)
         return manifest_fields
