@@ -278,7 +278,7 @@ def get_JSONSchema_requirements(se, root, schema_name):
         del json_schema["allOf"]
     
     print(json.dumps(json_schema))
-    with open(".HTAN-data-pipeline/schemas/json_schema_log.json", "w") as js_f:
+    with open("./HTAN-data-pipeline/schemas/json_schema_log.json", "w") as js_f:
         json.dump(json_schema, js_f, indent = 2)
     print("=================")
 
