@@ -365,13 +365,13 @@ observeEvent(
   ### toggles validation status when validate button pressed
   observeEvent(
     input$validate, {
-      annotation_status <- validateModelManifest(input$file1$datapath, in_template_type)
+      annotation_status <- validateModelManifest(input$file1$datapath, input$template_type)
       toggle('text_div2')
 
       showNotification(id="processing", "Processing...", duration = NULL, type = "default" )
 
       if ( length(annotation_status) != 0 ) { ## if error not empty aka there is an error
-        filled_manifest <- populateModelManifest(paste0("HTAN_",in_template_type), input$file1$datapath, in_template_type)
+        filled_manifest <- populateModelManifest(paste0("HTAN_",input$template_type), input$file1$datapath, input$template_type)
 
         ### create list of string names for the long error messages
         str_names <- sprintf("str_%d", seq(length(annotation_status)))

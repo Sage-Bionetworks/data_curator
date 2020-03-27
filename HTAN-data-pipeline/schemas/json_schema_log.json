@@ -1,188 +1,448 @@
 {
-  "title": "Test_ScRNA-seqAssay",
-  "properties": {
-    "Transcript Identifier": {
-      "enum": [
-        "UMI"
-      ]
-    },
-    "Library Layout": {
-      "enum": [
-        "Paired End",
-        "Single Read"
-      ]
-    },
-    "Cell Identifier": {
-      "enum": [
-        "Cell Barcode"
-      ]
-    },
-    "Library Construction Method": {
-      "enum": [
-        "10xV3",
-        "10xV2",
-        "Drop-seq",
-        "inDrops",
-        "10xV1",
-        "CEL-seq2",
-        "Smart-seq2",
-        "Smart-SeqV4"
-      ]
-    },
-    "End Bias": {
-      "enum": [
-        "5 Prime",
-        "3 Prime",
-        "Full Length Transcript"
-      ]
-    },
-    "Nucleic Acid Source": {
-      "enum": [
-        "Bulk Nuclei",
-        "Bulk Cell",
-        "Single Nucleus",
-        "Single Cell"
-      ]
-    },
-    "Reverse Transcription": {
-      "enum": [
-        "cDNA"
-      ]
-    },
-    "Platform": {
-      "enum": [
-        "Illumina Next Seq 500",
-        "Illumina Next Seq 2500"
-      ]
-    },
-    "Single Cell Isolation": {
-      "enum": [
-        "Droplets",
-        "Microfluidics Chip",
-        "10x",
-        "FACS"
-      ]
-    },
-    "Spike In": {
-      "enum": [
-        "No Spike In",
-        "ERCC",
-        "Other Spike In"
-      ]
-    },
-    "Primer": {
-      "enum": [
-        "Poly-dT",
-        "Random",
-        "Oligo-dT"
-      ]
-    }
-  },
-  "allOf": [
-    {
-      "then": {
-        "required": [
-          "cDNA Read",
-          "cDNA Offset",
-          "cDNA Size"
-        ]
-      },
-      "if": {
-        "properties": {
-          "Reverse Transcription": {
-            "enum": [
-              "cDNA"
-            ]
-          }
-        },
-        "required": [
-          "Reverse Transcription"
-        ]
-      }
-    },
-    {
-      "then": {
-        "required": [
-          "UMI Barcode Offset",
-          "UMI Barcode Read",
-          "Median UMIs per Cell Number",
-          "UMI Barcode Length"
-        ]
-      },
-      "if": {
-        "properties": {
-          "Transcript Identifier": {
-            "enum": [
-              "UMI"
-            ]
-          }
-        },
-        "required": [
-          "Transcript Identifier"
-        ]
-      }
-    },
-    {
-      "then": {
-        "required": [
-          "Cell Barcode Offset",
-          "Cell Barcode Read",
-          "Valid Barcodes Cell Number",
-          "Cell Barcode Length"
-        ]
-      },
-      "if": {
-        "properties": {
-          "Cell Identifier": {
-            "enum": [
-              "Cell Barcode"
-            ]
-          }
-        },
-        "required": [
-          "Cell Identifier"
-        ]
-      }
-    },
-    {
-      "then": {
-        "required": [
-          "Spike In Concentration"
-        ]
-      },
-      "if": {
-        "properties": {
-          "Spike In": {
-            "enum": [
-              "ERCC"
-            ]
-          }
-        },
-        "required": [
-          "Spike In"
-        ]
-      }
-    }
-  ],
-  "$id": "http://example.com/Test_ScRNA-seqAssay",
-  "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
+  "$schema": "http://json-schema.org/draft-07/schema#",
   "required": [
-    "Spike In",
+    "Therapeutic Agents",
     "Component",
-    "End Bias",
-    "Library Construction Method",
-    "Single Cell Isolation",
-    "Technical Replicate Group",
-    "Cell Identifier",
-    "Input Molecule",
-    "Platform",
-    "Nucleic Acid Source",
-    "Primer",
-    "Filename",
-    "Library Layout",
-    "Transcript Identifier",
-    "Reverse Transcription",
-    "HTAN Biosample ID"
-  ]
+    "Initial Disease Status",
+    "Days to Treatment End",
+    "HTAN ID",
+    "Treatment or Therapy",
+    "Treatment Intent Type",
+    "Treatment Type",
+    "Treatment Effect",
+    "Regimen or Line of Therapy",
+    "Days to Treatment Start",
+    "Treatment Anatomic Site",
+    "Treatment Outcome"
+  ],
+  "title": "Test_Treatment",
+  "$id": "http://example.com/Test_Treatment",
+  "properties": {
+    "Treatment Effect": {
+      "enum": [
+        "Incomplete Necrosis (Viable Tumor Present)",
+        "Not Reported",
+        "Complete Necrosis (No Viable Tumor)",
+        "No Necrosis",
+        "Unknown"
+      ]
+    },
+    "Treatment Outcome": {
+      "enum": [
+        "Very Good Partial Response",
+        "Treatment Ongoing",
+        "Persistent Disease",
+        "Treatment Stopped Due to Toxicity",
+        "Progressive Disease",
+        "Unknown",
+        "Mixed Response",
+        "No Response",
+        "Stable Disease",
+        "Not Reported",
+        "No Measurable Disease",
+        "Partial Response",
+        "Complete Response"
+      ]
+    },
+    "Treatment or Therapy": {
+      "enum": [
+        "not reported",
+        "Unknown",
+        "yes",
+        "no"
+      ]
+    },
+    "Initial Disease Status": {
+      "enum": [
+        "Progressive Disease",
+        "Unknown",
+        "Recurrent Disease",
+        "Initial Diagnosis",
+        "Not Reported",
+        "Residual Disease"
+      ]
+    },
+    "Treatment Anatomic Site": {
+      "enum": [
+        "Arm",
+        "Nasal Cavity",
+        "Thyroid",
+        "Thorax",
+        "Pituitary Gland",
+        "Gum",
+        "Cardia",
+        "Lymph Node(s) Femoral",
+        "Brain",
+        "Foot",
+        "Anus",
+        "Thigh",
+        "Ascending Colon Hepatic Flexure",
+        "Mesentery",
+        "Trunk",
+        "Femur",
+        "Bowel",
+        "Broad Ligament",
+        "Rib",
+        "Carina",
+        "Heart",
+        "Lung",
+        "Large Bowel",
+        "Amniotic Fluid",
+        "Nails",
+        "Testis",
+        "Spinal Column",
+        "Sinus",
+        "Seminal Vesicle",
+        "Sciatic Nerve",
+        "Hard Palate",
+        "Kidney",
+        "Pharynx",
+        "Common Duct",
+        "Tendon",
+        "Forehead",
+        "Cervical Spine",
+        "Lymph Node(s) Mammary",
+        "Chest Wall",
+        "Bone non-spine",
+        "Sacrum",
+        "Salivary Gland",
+        "Duodenum",
+        "Chin",
+        "Conjunctiva",
+        "Periorbital Soft Tissue",
+        "Esophagogastric Junction",
+        "Palate",
+        "Buccal Mucosa",
+        "Rectosigmoid Junction",
+        "Peritoneum",
+        "Hippocampus",
+        "Mitochondria",
+        "Skin trunk local",
+        "Carotid Body",
+        "Antecubital Fossa",
+        "Diaphragm",
+        "Small Bowel Mucosa Only",
+        "Cerebral Cortex",
+        "Adenoid",
+        "Ampulla of Vater",
+        "Body total",
+        "Hypopharynx",
+        "Tibia",
+        "Lymph Node(s) Distant",
+        "Forearm",
+        "Knee",
+        "Vas Deferens",
+        "Fibula",
+        "Artery",
+        "Splenic Flexure",
+        "Oropharynx",
+        "Auditory Canal",
+        "Parotid Gland",
+        "Ileocecal Valve",
+        "Leg",
+        "Fluid",
+        "Bone",
+        "Alveolar Ridge",
+        "Tongue",
+        "Calf",
+        "Descending Colon",
+        "Anal Sphincter",
+        "Bile Duct",
+        "Regional Site",
+        "Urethra",
+        "Ear Canal",
+        "Spine",
+        "Joint",
+        "Parathyroid",
+        "Femoral Vein",
+        "Skull",
+        "Urinary Tract",
+        "Nasal Soft Tissue",
+        "Lymph Node(s) Iliac-Common",
+        "Hepatic Vein",
+        "Capillary",
+        "Spinal Cord",
+        "Finger",
+        "Sigmoid Colon",
+        "Antrum",
+        "Mesothelium",
+        "Lymph Node(s) Inguinal",
+        "Oral Cavity",
+        "Nerve",
+        "Wrist",
+        "Umbilical Cord",
+        "Pancreas",
+        "White Blood Cells",
+        "Cartilage",
+        "Thumb",
+        "Popliteal Fossa",
+        "Cerebrum",
+        "Bronchus",
+        "Lip",
+        "Esophagus",
+        "Subcutaneous Tissue",
+        "Scalp",
+        "Ascites",
+        "Jejunum",
+        "Nasopharynx",
+        "Brow",
+        "Endocrine Gland",
+        "Colon Mucosa Only",
+        "Distant Site",
+        "Lymph Node(s) Regional",
+        "Ganglia",
+        "Lymph Node(s) Cervical",
+        "Tonsil (Pharyngeal)",
+        "Uvula",
+        "Round Ligament",
+        "Frontal Lobe",
+        "Lymph Node(s) Parotid",
+        "Hand",
+        "Abdominal Wall",
+        "Frontal Cortex",
+        "Fallopian Tube",
+        "Synovium",
+        "Cell-Line",
+        "Lacrimal Gland",
+        "Retina",
+        "Aorta",
+        "Gallbladder",
+        "Lymph Node(s) Hilar",
+        "Lymph Node(s) Retroperitoneal",
+        "Carotid Artery",
+        "Ilium",
+        "Prostate Bed",
+        "Lymph Node(s) Iliac-External",
+        "Other",
+        "Ovary",
+        "Bladder",
+        "Scrotum",
+        "Not Reported",
+        "Pericardium",
+        "Epididymis",
+        "Pouch",
+        "Groin",
+        "Ischium",
+        "Dermal",
+        "Ear",
+        "Gastroesophageal Junction",
+        "Laryngopharynx",
+        "Thoracic Spine",
+        "Prostate",
+        "Adipose",
+        "Adrenal",
+        "Unknown",
+        "Lymph Node(s) Internal Mammary",
+        "Back",
+        "Lymph Node(s) Splenic",
+        "Ocular Orbits",
+        "Breast",
+        "Neck",
+        "Penis",
+        "Lymph Node(s) Occipital",
+        "Occipital Cortex",
+        "Placenta",
+        "Ear Pinna (External)",
+        "Appendix",
+        "Vagina",
+        "Anorectum",
+        "Skin total",
+        "Index Finger",
+        "Cervix",
+        "Scapula",
+        "Retro-Orbital Region",
+        "Clavicle",
+        "Femoral Artery",
+        "Primary tumor site",
+        "Shoulder",
+        "Epitrochlear",
+        "Lymph Node(s) Pelvic",
+        "Bronchiole",
+        "Trachea / Major Bronchi",
+        "Skin lower extremity local",
+        "Spleen",
+        "Leptomeninges",
+        "Mediastinal Soft Tissue",
+        "Fibroblasts",
+        "Hepatic",
+        "Hip",
+        "Lymph Node(s) Subclavicular",
+        "Stomach",
+        "Rectum",
+        "Transverse Colon",
+        "Chest",
+        "Lymph Node(s) Submandibular",
+        "Patella",
+        "Soft Tissue",
+        "Lymph Node(s) Paraaortic",
+        "Islet Cells",
+        "Colon",
+        "Small Bowel",
+        "Hilar",
+        "Maxilla",
+        "Aortic Body",
+        "Fundus of Stomach",
+        "Stomach Mucosa Only",
+        "Aqueous Fluid",
+        "Nerve(s) Cranial",
+        "Mantle",
+        "Uterus",
+        "Humerus",
+        "Peritoneal Cavity",
+        "Mediastinum",
+        "Ureter",
+        "Buttock",
+        "Lymph Node(s) Mediastinal",
+        "Mandible",
+        "Lumbar Spine",
+        "Muscle",
+        "Lymph Node(s) Supraclavicular",
+        "Ankle",
+        "Small Finger",
+        "Head Face Or Neck Nos",
+        "Vulva",
+        "Larynx",
+        "Thymus",
+        "Lymph Node(s) Popliteal",
+        "Ligament",
+        "Pineal Gland",
+        "Head and Neck",
+        "Sternum",
+        "Primary Tumor Field",
+        "Esophagus Mucosa Only",
+        "Hepatic Duct",
+        "Throat",
+        "Lymph Node(s) Mesenteric",
+        "Liver",
+        "Jaw",
+        "Pineal",
+        "Clitoris",
+        "Lymph Node",
+        "Pleura",
+        "Central Nervous System",
+        "Temporal Cortex",
+        "Skin upper extremity local",
+        "Lymph Node(s) Axilla",
+        "Bone Marrow",
+        "Cecum",
+        "Buccal Cavity",
+        "Ileum",
+        "Vertebra",
+        "Abdomen total",
+        "Tonsil",
+        "Venous",
+        "Parametrium",
+        "Ring Finger",
+        "Lymph Node(s) Epitrochlear",
+        "Pelvis",
+        "Blood Vessel",
+        "Axilla",
+        "Elbow",
+        "Connective Tissue",
+        "Lymph Node(s) Scalene",
+        "Floor of Mouth",
+        "Cerebrospinal Fluid",
+        "Blood",
+        "Genitourinary NOS",
+        "Gastrointestinal Intestine",
+        "Cerebellum",
+        "Retroperitoneum",
+        "Oral Cavity Mucosa Only",
+        "Pylorus",
+        "Eye",
+        "Foreskin",
+        "Paraspinal Ganglion",
+        "Middle Finger",
+        "Epidural Space",
+        "Sinus(es) Maxillary",
+        "Autonomic Nervous System",
+        "Vein",
+        "Skeletal Muscle",
+        "Prostate Seminal Vesicles and Lymph Nodes",
+        "Gastrointestinal Tract",
+        "Skin",
+        "Brain Stem",
+        "Omentum",
+        "Acetabulum",
+        "Ascending Colon"
+      ]
+    },
+    "Treatment Type": {
+      "enum": [
+        "Antiseizure Treatment",
+        "Concurrent Chemoradiation",
+        "Radiation Intensity-Modulated Radiotherapy",
+        "Stem Cell Transplantation Syngenic",
+        "Cryoablation",
+        "Ablation Cryo",
+        "Radioembolization",
+        "Stem Cell Transplantation Non-Myeloablative",
+        "Radiation Internal",
+        "Other",
+        "Chemoembolization",
+        "Chemoprotectant",
+        "Not Reported",
+        "Embolization",
+        "Isolated Limb Perfusion (ILP)",
+        "Internal Radiation",
+        "Radiation Systemic",
+        "Stereotactic Radiosurgery",
+        "Surgery",
+        "Brachytherapy NOS",
+        "Radiation Implants",
+        "Stem Cell Transplantation Autologous",
+        "Unknown",
+        "External Beam Radiation",
+        "Radiation Combination",
+        "Radioactive Iodine Therapy",
+        "Bisphosphonate Therapy",
+        "Ablation NOS",
+        "Radiation 3D Conformal",
+        "Pharmaceutical Therapy NOS",
+        "Pleurodesis",
+        "Ablation Radiofrequency",
+        "Organ Transplantation",
+        "Ablation Ethanol Injection",
+        "Radiation Stereotactic/Gamma Knife/SRS",
+        "Radiation Cyberknife",
+        "Stem Cell Transplantation Double Autologous",
+        "Brachytherapy High Dose",
+        "Targeted Molecular Therapy",
+        "Ablation Microwave",
+        "Stem Cell Treatment",
+        "Radiation External Beam",
+        "Ancillary Treatment",
+        "Brachytherapy Low Dose",
+        "Radiation Proton Beam",
+        "Stem Cell Transplantation Haploidentical",
+        "Ablation Radiosurgical",
+        "Radiation 2D Conventional",
+        "Radiosensitizing Agent",
+        "I-131 Radiation Therapy",
+        "Steroid Therapy",
+        "Ethanol Injection Ablation",
+        "Radiation Radioisotope",
+        "Stem Cell Transplantation Allogeneic",
+        "Blinded Study Treatment Unknown",
+        "Immunotherapy (Including Vaccines)",
+        "Chemotherapy",
+        "Stem Cell Transplantation NOS",
+        "Hormone Therapy",
+        "Radiation Therapy NOS"
+      ]
+    },
+    "Treatment Intent Type": {
+      "enum": [
+        "Prevention",
+        "Neoadjuvant",
+        "Unknown",
+        "Not Reported",
+        "Palliative",
+        "Cancer Control",
+        "Adjuvant",
+        "Cure"
+      ]
+    }
+  }
 }
