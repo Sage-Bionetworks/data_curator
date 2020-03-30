@@ -14,3 +14,5 @@ get_file_list = syn_store.getFilesInStorageDataset
 
 ### print("Testing association of antities with annotation from manifest")
 get_manifest_syn_id = syn_store.associateMetadataWithFiles
+
+get_all_manifests = syn_store.getAllManifests
