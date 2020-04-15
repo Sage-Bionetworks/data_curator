@@ -4,7 +4,6 @@ import json
 import re
 from jsonschema import validate, ValidationError
 
-
 # allows specifying explicit variable types
 from typing import Any, Dict, Optional, Text
 
@@ -125,11 +124,11 @@ class MetadataModel(object):
         ordered_nodes.reverse()
 
         return ordered_nodes
-         
 
-     def getModelManifest(self, title, rootNode:str, filenames:list = None) -> str: 
-
+    
+     def getModelManifest(self, title:str, rootNode:str, filenames:list = None) -> str: 
          """ get annotations manifest dataframe 
+         TBD: DOes this method belong here or in manifest generator?
          Args:
           rootNode: a schema node label (i.e. term)
         
@@ -255,5 +254,5 @@ class MetadataModel(object):
          mg = ManifestGenerator(title, self.se, rootNode)
          emptyManifestURL = mg.get_manifest()
 
-         return mg.populate_manifest_spreasheet(manifestPath, emptyManifestURL)
+         return mg.populate_manifest_spreadsheet(manifestPath, emptyManifestURL)
 

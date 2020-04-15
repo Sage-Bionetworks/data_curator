@@ -21,6 +21,10 @@ getModelManifest = mm.getModelManifest
 # mm.validateModelManifest(manifest_path, datasetType)
 validateModelManifest = mm.validateModelManifest
 
-
 ### populates manifest with path to csv
 populateModelManifest = mm.populateModelManifest
+
+### gets dependencies
+# "Generating dependency graph and ordering dependencies")
+# dependencies = mm.getOrderedModelNodes(component, "requiresDependency")
+getDependencies = mm.getOrderedModelNodes

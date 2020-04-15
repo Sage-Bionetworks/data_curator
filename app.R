@@ -70,7 +70,8 @@ ui <- dashboardPage(
                   title = "Choose a Project and Dataset: ",
                   selectizeInput(inputId = "var", label = "Project:",
                                  choices = "Generating..."),
-                  uiOutput('folders')
+                  uiOutput('folders'),
+                  helpText("If your recently updated dataset does not appear, please wait for Synapse to sync and refresh")
                 ),
                 box(
                   status = "primary",
@@ -80,7 +81,7 @@ ui <- dashboardPage(
                   selectInput(
                     inputId = "template_type",
                     label = "Template:",
-                    choices = list("ScRNA-seqAssay", "ScRNA-seqQC", "Demographics", "FamilyHistory", "Exposure", "FollowUp", "Treatment")
+                    choices = list("ScRNA-seqAssay", "Demographics", "FamilyHistory", "Exposure", "FollowUp", "Therapy")
 ## add mapping step from string to input when I have more time
                   )
                 )
@@ -103,23 +104,24 @@ ui <- dashboardPage(
                       htmlOutput("text"),
                       style = "font-size:18px; background-color: white; border: 1px solid #ccc; border-radius: 3px; margin: 10px 0; padding: 10px"
                     )
-                  )
-                ),
-                box(
-                  title = "Have Previously Submitted Metadata?",
-                  status = "primary",
-                  solidHeader = TRUE,
-                  width = 12,
-                  actionButton("link", "Link to Google Sheets"),
-                  hidden(
-                    div(
-                      id = 'text_div3',
-                      height = "100%",
-                      htmlOutput("text3"),
-                      style = "font-size:18px; background-color: white; border: 1px solid #ccc; border-radius: 3px; margin: 10px 0; padding: 10px"
-                    )
-                  )
-                )
+                  ),
+                  helpText("This link will leads to an empty template or your previously submitted template with new files if applicable.")
+                ) #,
+# box(
+#   title = "Have Previously Submitted Metadata?",
+#   status = "primary",
+#   solidHeader = TRUE,
+#   width = 12,
+#   actionButton("link", "Link to Google Sheets"),
+#   hidden(
+#     div(
+#       id = 'text_div3',
+#       height = "100%",
+#       htmlOutput("text3"),
+#       style = "font-size:18px; background-color: white; border: 1px solid #ccc; border-radius: 3px; margin: 10px 0; padding: 10px"
+#     )
+#   )
+# )
 
               )
       ),
@@ -151,13 +153,13 @@ ui <- dashboardPage(
                   width = 12,
                   actionButton("validate", "Validate Metadata"),
                   hidden(
-                    div(id = 'text_div2',
-# width = 12,
+                    div(id = 'text_div2', 
                         height = "100%",
                         htmlOutput("text2"),
                         style = "font-size:18px; background-color: white; border: 1px solid #ccc; border-radius: 3px; margin: 10px 0; padding: 10px"
                     )
-                  )
+                  ),
+                  helpText("Erorrs are evaluated one column at a time, if you have an error please reupload your CSV and press the validate button as much as needed")
                 ),
                 box(title = "Submit Validated Metadata to Synapse",
                         status = "primary",
@@ -195,7 +197,7 @@ server <- function(input, output, session) {
 
   proj_folder_manifest_cells <- c()
 
-  folder_synID  <- NULL
+  folder_synID <- NULL
 
   filename_list <- c()
   ############
@@ -212,7 +214,7 @@ server <- function(input, output, session) {
 
     ### welcome message
     output$title <- renderUI({
-      titlePanel(sprintf("Welcome, %s", syn_getUserProfile()$userName))
+      titlePanel(h4(sprintf("Welcome, %s", syn_getUserProfile()$userName)))
     })
 
     ### updating global vars with values for projects
@@ -255,7 +257,7 @@ server <- function(input, output, session) {
     })
   })
 
-  ###toggles new metadata link when get gsheets template button pressed
+  ###shows new metadata link when get gsheets template button pressed OR updates old metadata if is exists 
   observeEvent(
     input$download, {
 
@@ -266,72 +268,54 @@ server <- function(input, output, session) {
     showNotification(id = "processing", "Generating link...", duration = NULL, type = "warning")
 
     project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
-    
+
     folder_list <- get_folder_list(synStore_obj, project_synID)
     folders_namedList <- c()
     for (i in seq_along(folder_list)) {
       folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
     }
     folder_synID <- folders_namedList[[selected_folder]]
-    
-    # filename_list <<- get_filename_list(synStore_obj, folder_synID)
-    file_list <- get_file_list(synStore_obj, folder_synID)
-    file_namedList <- c()
-    for (i in seq_along(file_list)) {
-      file_namedList[file_list[[i]][[2]]] <- file_list[[i]][[1]]
-    }
-    filename_list <- names(file_namedList)
+    # showNotification( folder_synID, duration = NULL, type = "warning")
 
-    manifest_url <- getModelManifest(paste0("HTAN ", input$template_type), input$template_type, filenames = filename_list)
-    ### add in the step to convert names later ###
-    
-    ### links shows in text box
-    toggle('text_div')
-    ### if want a progress bar need more feedback from API to know how to increment progress bar ###
+    ### checks if a manifest already exists
+    existing_manifestID <- get_manifestId(synStore_obj, folder_synID)
+    # showNotification( paste0("existing manifest: ", existing_manifestID) , duration = NULL, type = "warning")
 
-    output$text <- renderUI({
-      tags$a(href = manifest_url, manifest_url, target = "_blank") ### add link to data dictionary when we have it ###
-    })
+    ### if there isn't an existing manifest make a new one 
+    if (existing_manifestID == '') {
+      file_list <- get_file_list(synStore_obj, folder_synID)
+      file_namedList <- c()
+      for (i in seq_along(file_list)) {
+        file_namedList[file_list[[i]][[2]]] <- file_list[[i]][[1]]
+      }
+      filename_list <- names(file_namedList)
 
-    ### when done remove progress notif
-    removeNotification(id = "processing")
-  }
-  )
+      manifest_url <- getModelManifest(paste0("HTAN ", input$template_type), input$template_type, filenames = filename_list)
+      ### add in the step to convert names later ###
 
-  ###toggles link to previous manifest when pressed
-  observeEvent(
-    input$link, {
-    selected_project <- input$var
-    selected_folder <- input$dataset
+      ### links shows in text box
+      toggle('text_div')
+      ### if want a progress bar need more feedback from API to know how to increment progress bar ###
 
-    showNotification(id = "processing", "Processing...", duration = NULL, type = "default")
-
-    project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
-    folder_list <- get_folder_list(synStore_obj, project_synID)
-    folders_namedList <- c()
-    for (i in seq_along(folder_list)) {
-      folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
-    }
-
-    folder_synID <- folders_namedList[[selected_folder]]
-
-    fpath <- get_storage_manifest_path(input$cookie, folder_synID)
-    if (is.null(fpath)) {
-      toggle('text_div3')
-      output$text3 <- renderUI({
-        tags$b("No previously uploaded manifest was found")
+      output$text <- renderUI({
+        tags$a(href = manifest_url, manifest_url, target = "_blank") ### add link to data dictionary when we have it ###
       })
+
+      ### when done remove progress notif
       removeNotification(id = "processing")
     } else {
-      manifest_url <- populateModelManifest(paste0("HTAN_", input$template_type), fpath, input$template_type)
+      ### if the manifest already exists
+      manifest_entity <- syn_get(existing_manifestID)
+      # prepopulatedManifestURL = mm.populateModelManifest("test_update", entity.path, component)
+      manifest_url <- populateModelManifest(paste0("HTAN_", input$template_type), manifest_entity$path, input$template_type)
       toggle('text_div3')
 
-      output$text3 <- renderUI({
+      output$text <- renderUI({
         tags$a(href = manifest_url, manifest_url, target = "_blank")
       })
       removeNotification(id = "processing")
     }
-  }
+    }
   )
 
   ### renders fileInput ui
@@ -436,10 +420,13 @@ server <- function(input, output, session) {
 
     showNotification(id = "processing", "Submitting...", duration = NULL, type = "default")
 
-    ### reads in csv and adds entityID IF its an assay component, then saves it as synapse_storage_manifest.csv in folder
+    ### reads in csv 
     infile <- readr::read_csv(input$file1$datapath, na = c("", "NA"))
 
-    if (input$template_type %in% c("ScRNA-seqAssay", "ScRNA-seqQC")) {
+    ### IF an assay component selected and has filename col
+    ### and adds entityID, saves it as synapse_storage_manifest.csv, then associates with synapse files 
+    if ( input$template_type %in% list("ScRNA-seqAssay") ) {
+      
       ### make into a csv or table for assay components
       ### already has entityId
       if ("entityId" %in% colnames(infile)) {
@@ -460,7 +447,6 @@ server <- function(input, output, session) {
         folder_synID <- folders_namedList[[selected_folder]]
 
         file_list <- get_file_list(synStore_obj, folder_synID)
-
         file_namedList <- c()
         for (i in seq_along(file_list)) {
           file_namedList[file_list[[i]][[2]]] <- file_list[[i]][[1]]
@@ -476,16 +462,13 @@ server <- function(input, output, session) {
       selected_folder <- input$dataset
 
       project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
-      # folder_synID <- get_folder_synID(synStore_obj, project_synID, selected_folder)
+
       folder_list <- get_folder_list(synStore_obj, project_synID)
       folders_namedList <- c()
       for (i in seq_along(folder_list)) {
         folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
       }
-
       folder_synID <- folders_namedList[[selected_folder]]
-
-      # print(folder_synID)
 
       ### assocites metadata with data and returns manifest id
       manifest_id <- get_manifest_syn_id(synStore_obj, "./files/synapse_storage_manifest.csv", folder_synID)
@@ -520,8 +503,9 @@ server <- function(input, output, session) {
         showNotification(id = "error", paste0("error ", manifest_id), duration = NULL, type = "error")
         rm("/tmp/synapse_storage_manifest.csv")
       }
+
     } else {
-      ## if biospec or clinical component 
+      # showNotification( "no FIlename", duration = NULL, type = "default")
       write.csv(infile, file = "./files/synapse_storage_manifest.csv", quote = FALSE, row.names = FALSE, na = "")
 
       selected_project <- input$var
@@ -535,7 +519,6 @@ server <- function(input, output, session) {
       for (i in seq_along(folder_list)) {
         folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
       }
-
       folder_synID <- folders_namedList[[selected_folder]]
 
       ### assocites metadata with data and returns manifest id
