@@ -19,3 +19,4 @@ HTAN-data-pipeline/credentials.json
 HTAN-data-pipeline/token.pickle
 credentials.json
 token.pickle
+**/__pychache__
