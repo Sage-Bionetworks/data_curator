@@ -3,9 +3,12 @@ import json
 import networkx as nx
 from orderedset import OrderedSet
 
+# allows specifying explicit variable types
+from typing import Any, Dict, Optional, Text
+
 from schema_explorer import SchemaExplorer
 
-#TODO: refactor into class; expose parameters as constructor args
+#TODO: refactor into class(es); expose parameters as constructor args
 
 """
 Gather all metadata/annotations requirements for an object part of the schema.org metadata model.
@@ -27,6 +30,10 @@ Assumed semantic sugar for requirements:
     resourceType must be set either to a value curatedData, experimentalData, tool, analysis.
  
 
+- requiresComponent: a node property indicating that this node requires a component (a higher level class/ontology category containing multiple attributes/objects) for its full characterization
+
+    E.g. scRNA-seq Assay is an object that requires components Biospecimen (e.g. containing attributes describing the assay sample input); scRNA-seq QC is an object that requires component scRNA-seq Assay (e.g .containing attributes describing the assay for which this QC is performed).
+
 - requiresDependency: a relationship type corresponding to an edge between two nodes/terms x and y.
     requiresDependency indicates that if a value for term x is specified, then a value for term y 
     is also required.
@@ -35,7 +42,6 @@ Assumed semantic sugar for requirements:
     E.g. suppose node experimentalData has requiresDependency edges respectively to assay and dataType.
     Then, if experimentalData is specified that requires that both assay and dataType are specified
     (e.g. in annotations of an object).
-
 
 This semantic sugar enables the generation different kinds of validation schemas including:
     - validate that all required annotation terms (i.e. properties) of an object are present in the 
@@ -49,10 +55,15 @@ This semantic sugar enables the generation different kinds of validation schemas
 """
 
 requires_dependency_relationship = "requiresDependency"
-#requires_range = "requiresChildAsValue" # "requiresChildAsValue" is also an option here, but will be deprecated
+
 requires_range = "rangeIncludes" # "requiresChildAsValue" is also an option here, but will be deprecated
-#range_value_relationship = "parentOf" # "parentOf" is also an option here but will be deprecated
+#requires_range = "requiresChildAsValue"
+
 range_value_relationship = "rangeValue" # "parentOf" is also an option here but will be deprecated
+#range_value_relationship = "parentOf"
+
+requires_component_relationship = "requiresComponent"
+
 
 """
 Get the out-edges of a node, where the edges match specific type of relationship: 
@@ -78,7 +89,8 @@ Get the  adjacent nodes of a node by a relationship type: i.e. nodes neighbors o
 Possible edge relationship types are parentOf, rangeValue, requiresDependency
 
 """
-def get_adgacent_node_by_relationship(mm_graph, u, relationship):
+def get_adjacent_node_by_relationship(mm_graph, u, relationship):
+     
     nodes = set()
     for u, v, properties in mm_graph.out_edges(u, data = True):
         if properties["relationship"] == relationship: 
@@ -87,31 +99,211 @@ def get_adgacent_node_by_relationship(mm_graph, u, relationship):
     return list(nodes)
 
 
-"""
-Get the nodes that this node requires as dependencies that are also neihbors of node u
-on edges of type "requiresDependency"
-def get_node_neighbor_dependencies(mm_graph, u):
+def get_component_requirements(graph: nx.MultiDiGraph, source_component: str) -> list:
+    """
+    Get all components that are associated with the given source component and required by it
+
+    Args:
+        graph: metadata model schema graph
+        source_component: source component for which to find all downstream required components
+    Returns: A list of required components
+    """
+
+    req_components = get_descendants_by_edge_type(graph, source_component, relationship_type = requires_component_relationship)
+
+    return req_components
+
+
+def get_descendants_by_edge_type(graph: nx.MultiDiGraph, source_node_label: str, relationship_type: str, connected: bool = True, ordered: bool = False) -> list:
+    """
+    Get all nodes that are descendent from this node on a specific type of edge, i.e. edge relationship type.
+
+    Args: 
+        graph: a networkx directed hypergraph; with typed edges
+        source_node_label: node whose descendants are requested
+        relationship: edge relationship type (see possible types above)
+        connected: if True ensure that all descendent nodes are reachable - i.e. are in the same connected component - from the source node; if False, the descendent nodes could be in multiple connected components. Default is True. 
+        ordered: if True, the list of descendant nodes will be topologically ordered. Default is False. 
+    Returns: a list of nodes, descending from this node
+    """
+
+
+    # get all nodes reachable from the specified root node in the data model
+    # TODO: catch if root is not in graph currently networkx would throw an exception?
+
+    root_descendants = nx.descendants(graph, source_node_label)
+    # get the subgraph induced on all nodes reachable from the root node
+    subgraph_nodes = list(root_descendants)
+    subgraph_nodes.append(source_node_label)
+    descendants_subgraph = graph.subgraph(subgraph_nodes)
+
+    '''
+    prune the descendants subgraph to include only relationship edges matching relationship type
+    '''
+    rel_edges = []
+    for u, v, properties in descendants_subgraph.edges(data = True):
+        if properties["relationship"] == relationship_type:
+            rel_edges.append((u,v))
     
-    children = set()
-    for u, v, properties in mm_graph.out_edges(u, data = True):
-        if properties["relationship"] == requires_dependency: 
-            children.add(v)
-
-    return list(children)
-"""
-
-
-
-"""
-TODO: check if needed and remove the get_node_dependencies method
-Get the nodes that this node requires as dependencies.
-These are all nodes *reachable* on edges of type "requiresDependency"
-def get_node_dependencies(req_graph, u):
     
-    descendants = nx.descendants(req_graph, u)
+    relationship_subgraph = nx.DiGraph()
+    relationship_subgraph.add_edges_from(rel_edges)
+
+    descendants = relationship_subgraph.nodes()
+    if not descendants:
+        # there might not be any nodes reachable from this node on this relationship type
+        return []
+    
+    if connected and ordered:
+        # get the set of reachable nodes from the source node
+        descendants = nx.descendants(relationship_subgraph, source_node_label)
+        descendants.add(source_node_label)
+        # the descendants are unordered (peculiarity of nx descendants call)
+        # form the subgraph on descendants and order it topologically
+        # this assumes an acyclic subgraph
+        descendants = nx.topological_sort(relationship_subgraph.subgraph(descendants))
+    elif connected:
+        # get only the nodes reachable from the root node (after the pruning above some nodes in the root-descendants subgraph might have become disconnected and will be omitted)
+        descendants = nx.descendants(relationship_subgraph, source_node_label)
+        descendants.add(source_node_label)
+    elif ordered:
+        # sort nodes topologically - this requires an acyclic graph 
+        descendants = nx.topological_sort(relationship_subgraph)
+
 
     return list(descendants)
-"""
+
+
+def get_node_dependencies(se:SchemaExplorer, node_label:str, display_names:bool = True, schema_ordered:bool = True) -> list:
+    
+        """ get the node dependencies (i.e. immediate dependencies) given a node label  
+         Args:
+          se: a schema explorer object instantiated with a schema.org schema
+          node_label: a schema node label (i.e. term)
+          display_names: if True return display names of dependencies; otherwise return node_labels
+          schema_ordered: if True return dependencies of node following order defined in schema (slower); if False will derive dependencies from graph w/o guaranteeing schema order (faster)
+         Returns: a list of dependencies (strings)
+         Raises: 
+            ValueError: TODO: node label not found in metadata model.
+        """
+
+        # get schema graph
+        schema_graph = se.get_nx_schema()
+
+        if schema_ordered:
+            # get node dependencies in the order defined in schema for root
+            required_dependencies = se.explore_class(node_label)["dependencies"]
+        else:
+            required_dependencies = get_adjacent_node_by_relationship(schema_graph, node_label, relationship = requires_dependency_relationship)
+
+        if display_names:
+            # get display names of dependencies
+            dependencies_display_names = []               
+            for req in required_dependencies:
+                dependencies_display_names.append(schema_graph.nodes[req]["displayName"])
+
+            return dependencies_display_names
+
+        return required_dependencies
+
+
+def get_node_range(se:SchemaExplorer, node_label:str, display_names:bool = True) -> list:
+         
+        """ get the node range (i.e. valid values) given a node label  
+         Args:
+          se: a schema explorer object instantiated with a schema.org schema
+          node_label: a schema node label (i.e. term)
+          display_names: if True return display names of range; otherwise return node_labels
+        
+         Returns: a list of range nodes (strings)
+         Raises: 
+            ValueError: TODO: node label not found in metadata model.
+        """
+
+        # get schema graph
+        schema_graph = se.get_nx_schema()
+        
+        # get node range in the order defined in schema for root
+        required_range = se.explore_class(node_label)["range"]
+        
+        if display_names:
+            # get display names of dependencies
+            dependencies_display_names = []               
+            for req in required_range:
+                dependencies_display_names.append(schema_graph.nodes[req]["displayName"])
+
+            return dependencies_display_names
+
+        return required_range
+
+def get_node_label(se:SchemaExplorer, node_display_name:str) -> str:
+    """ get node label given a node display name
+         Args:
+          se: a schema explorer object instantiated with a schema.org schema
+          display_name: node display name
+        
+         Returns: a node label in schema if one exists; ow return ""
+         Raises: 
+            ValueError: TODO: node not found in metadata model.
+    """
+
+    # node is either a class or a property, if it is in the graph; otherwise return 
+    node_class_label = se.get_class_label_from_display_name(node_display_name)
+    node_property_label = se.get_property_label_from_display_name(node_display_name)
+    
+    # get the right label of the node
+    schema_graph = se.get_nx_schema()
+    if node_class_label in schema_graph.nodes:        
+        node_label = node_class_label 
+    elif node_property_label in schema_graph.nodes:
+        node_label = node_property_label
+    else:
+        node_label = ""
+
+    return node_label
+
+
+def get_node_definition(se:SchemaExplorer, node_display_name:str) -> str:
+         
+        """ get node definition (i.e. immediate dependencies) given a node display name  
+         Args:
+          se: a schema explorer object instantiated with a schema.org schema
+          display_name: node display name
+        
+         Returns: a node definition 
+         Raises: 
+            ValueError: TODO: node label not found in metadata model.
+        """
+        # get node label
+        node_label = get_node_label(se, node_display_name)
+
+        # get node definition from schema
+        schema_graph = se.get_nx_schema()
+         
+        node_definition = schema_graph.nodes[node_label]["comment"] 
+
+        return node_definition
+
+
+def is_node_required(se:SchemaExplorer, node_display_name:str) -> bool:
+        """ determine if a node is required given a node display name  
+         Args:
+          se: a schema explorer object instantiated with a schema.org schema
+          display_name: node display name
+        
+         Returns: True if a node is required; False otherwise 
+         Raises: 
+            ValueError: TODO: node label not found in metadata model.
+        """
+        # get node label
+        node_label = get_node_label(se, node_display_name)
+
+        # get node definition from schema
+        schema_graph = se.get_nx_schema()
+         
+        node_required = schema_graph.nodes[node_label]["required"] 
+
+        return node_required
 
 
 """
@@ -148,10 +340,10 @@ def get_JSONSchema_requirements(se, root, schema_name):
     '''
     keep checking for dependencies until there are no nodes
     left to process
+    TODO: there's repeating logic that can be abstracted as methods
     '''
     while nodes_to_process:  
         process_node = nodes_to_process.pop()
-
         '''
         get allowable values for this node;
         each of these values is a node that in turn is processed for
@@ -159,7 +351,7 @@ def get_JSONSchema_requirements(se, root, schema_name):
         '''
         if requires_range in mm_graph.nodes[process_node]:
             if mm_graph.nodes[process_node][requires_range]:
-                node_range = get_adgacent_node_by_relationship(mm_graph, process_node, range_value_relationship)
+                node_range = get_adjacent_node_by_relationship(mm_graph, process_node, range_value_relationship)
                 # set allowable values based on range nodes
                 if node_range:
                     schema_properties = {mm_graph.nodes[process_node]["displayName"]:{"enum":[mm_graph.nodes[node]["displayName"] for node in node_range]}}
@@ -170,8 +362,19 @@ def get_JSONSchema_requirements(se, root, schema_name):
                 
                     # set conditional dependencies based on node range dependencies
                     for node in node_range:
-                        node_dependencies = get_adgacent_node_by_relationship(mm_graph, node, requires_dependency_relationship)
-                        
+                        node_dependencies = get_adjacent_node_by_relationship(mm_graph, node, requires_dependency_relationship)
+                       
+                        # if only require dependencies that are required by the schema; otherwise add dependencies as validation schema properties
+                        required_dependencies = []
+                        for node_dependency in node_dependencies:
+                            node_dep_name = mm_graph.nodes[node_dependency]["displayName"]
+                            #if a node is not yet in the schema properties add it
+                            if not node_dep_name in json_schema["properties"]:
+                                schema_properties = {node_dep_name:{}}
+                                json_schema["properties"].update(schema_properties)                       
+
+                            if mm_graph.nodes[node_dependency]["required"]:
+                                required_dependencies.append(node_dep_name)
                         if node_dependencies:
                             schema_conditional_dependencies = {
                                     "if": {
@@ -180,12 +383,12 @@ def get_JSONSchema_requirements(se, root, schema_name):
                                         },
                                         "required":[mm_graph.nodes[process_node]["displayName"]],
                                       },
-                                    "then": { "required": [mm_graph.nodes[node_dependency]["displayName"] for node_dependency in node_dependencies] },
+                                    "then":{"required":required_dependencies}
                             }
                             nodes_with_processed_dependencies.add(node)
                             nodes_to_process.update(node_dependencies)
                             json_schema["allOf"].append(schema_conditional_dependencies)
-
+        
 
         '''
         get required nodes by this node (e.g. other terms/nodes
@@ -194,12 +397,33 @@ def get_JSONSchema_requirements(se, root, schema_name):
         processed for dependencies in turn.
         '''
         if not process_node in nodes_with_processed_dependencies:
-            process_node_dependencies = get_adgacent_node_by_relationship(mm_graph, process_node, requires_dependency_relationship)
+            process_node_dependencies = get_adjacent_node_by_relationship(mm_graph, process_node, requires_dependency_relationship)
             if process_node_dependencies:
-                if process_node == root: # these are unconditional dependencies
+
+                if process_node == root: # these are unconditional dependencies (unless explicitly marked as not required in the schema)
+                    for process_node_dependency in process_node_dependencies:
+                        if mm_graph.nodes[process_node_dependency]["required"]:
+                            # check if a node is required and only add to the required set if so
+                            json_schema["required"] += [mm_graph.nodes[process_node_dependency]["displayName"]]
+       
+                        if not mm_graph.nodes[process_node_dependency]["displayName"] in json_schema["properties"]:
+                            #if a node is not yet in the schema properties add it
+                            schema_properties = {mm_graph.nodes[process_node_dependency]["displayName"]:{}}
+                            json_schema["properties"].update(schema_properties)                       
                     
-                    json_schema["required"] += [mm_graph.nodes[process_node_dependency]["displayName"] for process_node_dependency in process_node_dependencies]
                 else: # these are dependencies given the processed node 
+                    # if dependencies are not required attributes do not require them  
+                    required_dependencies = []
+                    for process_node_dependency in process_node_dependencies:
+                        node_dep_name = mm_graph.nodes[process_node_dependency]["displayName"]
+                        if mm_graph.nodes[process_node_dependency]["required"]:
+                            required_dependencies.append(node_dep_name)
+     
+                        if not node_dep_name in json_schema["properties"]:
+                            #if a node is not yet in the schema properties add it
+                            schema_properties = {node_dep_name:{}}
+                            json_schema["properties"].update(schema_properties)                       
+
                     schema_conditional_dependencies = {
                             "if": {
                                 "properties": {
@@ -207,7 +431,7 @@ def get_JSONSchema_requirements(se, root, schema_name):
                                 },
                                 "required":[mm_graph.nodes[process_node]["displayName"]],
                               },
-                            "then": { "required": [mm_graph.nodes[process_node_dependency]["displayName"] for process_node_dependency in process_node_dependencies] },
+                            "then": { "required": required_dependencies },
                     }
                     json_schema["allOf"].append(schema_conditional_dependencies)
 
@@ -222,7 +446,10 @@ def get_JSONSchema_requirements(se, root, schema_name):
     if not json_schema["allOf"]:
         del json_schema["allOf"]
     
-    print(json.dumps(json_schema))
+    with open("./HTAN-data-pipeline/schemas/json_schema_log.json", "w") as js_f:
+        json.dump(json_schema, js_f, indent = 2)
+    
+    print("Schema file log stored as ./schemas/json_schema_log.json")
     print("=================")
 
     return json_schema

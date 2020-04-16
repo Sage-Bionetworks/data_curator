@@ -41,118 +41,118 @@ get_filename_list <- function(synStore_obj, folder_synID) {
 
 ######============= dashboard dataframe 
 ### logs in and gets list of projects they have access to
-get_proj_folder_manifest_cells_df <- function(synStore_obj, projects_namedList, sessionToken){ ## gets user into 
+# get_proj_folder_manifest_cells_df <- function(synStore_obj, projects_namedList, sessionToken){ ## gets user into 
 
-  ### for each component (biosamp, assay, clinical) right now only assay 
+#   ### for each component (biosamp, assay, clinical) right now only assay 
 
-  ### project to folder dataframe generation
-  # get fileview of folders and files
-  syn <- syn_login(sessionToken = sessionToken)
-  tab <- syn_tableQuery("select * from syn20446927", resultsAs='csv')
-  tab <- read.csv(tab$filepath)
-  # get just folders and match parent ID to project name
-  projects_df <- stack(projects_namedList)
-  colnames(projects_df) <- c("parentId", "project_name")
-  proj_folder_df <- inner_join(tab %>% filter(type == "folder"), projects_df)
+#   ### project to folder dataframe generation
+#   # get fileview of folders and files
+#   syn <- syn_login(sessionToken = sessionToken)
+#   tab <- syn_tableQuery("select * from syn20446927", resultsAs='csv')
+#   tab <- read.csv(tab$filepath)
+#   # get just folders and match parent ID to project name
+#   projects_df <- stack(projects_namedList)
+#   colnames(projects_df) <- c("parentId", "project_name")
+#   proj_folder_df <- inner_join(tab %>% filter(type == "folder"), projects_df)
 
-  all_folders_list <- as.character(proj_folder_df$id)
+#   all_folders_list <- as.character(proj_folder_df$id)
 
-  ### get manifest paths per folder
-  folders_manifest_df <- data.frame()
-  for (i in seq_along(all_folders_list)) {
-    # folders_manifest_df[]
-    print(i)
-    print(all_folders_list[i])
-    folders_manifest_df[i,1] <- all_folders_list[i]
-    path <- get_storage_manifest_path(sessionToken , all_folders_list[i])
-    if ( is.null(path) ) { ## if no manifest is uploaded 
-      folders_manifest_df[i,2] <- NA  
-    } else {
-    folders_manifest_df[i,2] <- path
-    }
-  }
+#   ### get manifest paths per folder
+#   folders_manifest_df <- data.frame()
+#   for (i in seq_along(all_folders_list)) {
+#     # folders_manifest_df[]
+#     print(i)
+#     print(all_folders_list[i])
+#     folders_manifest_df[i,1] <- all_folders_list[i]
+#     path <- get_storage_manifest_path(sessionToken , all_folders_list[i])
+#     if ( is.null(path) ) { ## if no manifest is uploaded 
+#       folders_manifest_df[i,2] <- NA  
+#     } else {
+#     folders_manifest_df[i,2] <- path
+#     }
+#   }
 
-  colnames(folders_manifest_df) <- c("id", "manifest_path")
+#   colnames(folders_manifest_df) <- c("id", "manifest_path")
 
-  proj_folder_manifest <- inner_join(folders_manifest_df, proj_folder_df, by = "id")
+#   proj_folder_manifest <- inner_join(folders_manifest_df, proj_folder_df, by = "id")
 
-  ### get the manifest synID
-  # entity <- syn_tableQuery(  ("select id, name from syn20446927 where name = 'synapse_storage_manifest.csv' " ), resultsAs='csv'  )
-  # entity <- read.csv(entity$filepath)
-  # 
-  # manifest_path_df <- data.frame()
-  # for (i in seq_along(entity$id)) {
-  #   manifest_path_df[i,1] <- entity$id[i] ##id of manifest
-  #   syn_login(sessionToken ="10b3258a-1486-4663-9018-822b034dd84c")
-  #   fh <- syn_get(entity$id[i])
-  #   manifest_path_df[i,2] <- fh$path
-  # }
-  # colnames(manifest_path_df) <- c("id", "manifest_path")
-  # 
-  # inner_join(manifest_path_df, tab)
+#   ### get the manifest synID
+#   # entity <- syn_tableQuery(  ("select id, name from syn20446927 where name = 'synapse_storage_manifest.csv' " ), resultsAs='csv'  )
+#   # entity <- read.csv(entity$filepath)
+#   # 
+#   # manifest_path_df <- data.frame()
+#   # for (i in seq_along(entity$id)) {
+#   #   manifest_path_df[i,1] <- entity$id[i] ##id of manifest
+#   #   syn_login(sessionToken ="10b3258a-1486-4663-9018-822b034dd84c")
+#   #   fh <- syn_get(entity$id[i])
+#   #   manifest_path_df[i,2] <- fh$path
+#   # }
+#   # colnames(manifest_path_df) <- c("id", "manifest_path")
+#   # 
+#   # inner_join(manifest_path_df, tab)
 
-  ### end faster way?
+#   ### end faster way?
 
-  ### get metrics for each manifest
-  manifest_cells <- data.frame()
-  for (i in seq_along(proj_folder_manifest$id)) {
-    print(i)
-    manifest_path <- proj_folder_manifest$manifest_path[i]
-    manifest_cells[i, 1] <- proj_folder_manifest$id[i]
-    manifest_cells[i, 2] <- manifest_path
+#   ### get metrics for each manifest
+#   manifest_cells <- data.frame()
+#   for (i in seq_along(proj_folder_manifest$id)) {
+#     print(i)
+#     manifest_path <- proj_folder_manifest$manifest_path[i]
+#     manifest_cells[i, 1] <- proj_folder_manifest$id[i]
+#     manifest_cells[i, 2] <- manifest_path
     
-    if ( !is.na(manifest_path)) {
-      manifest_df <- read.csv(manifest_path)
+#     if ( !is.na(manifest_path)) {
+#       manifest_df <- read.csv(manifest_path)
       
-      ### subset cols by component type ASSAY
-      assay_cols <- manifest_df[, c("Cancer.Type", "Library.Construction.Method")]
+#       ### subset cols by component type ASSAY
+#       assay_cols <- manifest_df[, c("Cancer.Type", "Library.Construction.Method")]
       
-      # how to count empty cells vs all cells
-      dim_val <- dim(assay_cols)
-      total_cells <- dim_val[1] * dim_val[2]
-      empty_cells <- table(is.na(assay_cols))
-      per_filled <- (empty_cells[1] / total_cells )* 100
+#       # how to count empty cells vs all cells
+#       dim_val <- dim(assay_cols)
+#       total_cells <- dim_val[1] * dim_val[2]
+#       empty_cells <- table(is.na(assay_cols))
+#       per_filled <- (empty_cells[1] / total_cells )* 100
       
-      manifest_cells[i,3] <- "Assay"
-      manifest_cells[i,4] <- total_cells
-      manifest_cells[i,5] <- empty_cells[1] ## filled, empty= F
-      manifest_cells[i,6] <- per_filled
+#       manifest_cells[i,3] <- "Assay"
+#       manifest_cells[i,4] <- total_cells
+#       manifest_cells[i,5] <- empty_cells[1] ## filled, empty= F
+#       manifest_cells[i,6] <- per_filled
       
       
-      HTAN_cols <- manifest_df[, c("HTAN.Participant.ID", "HTAN.Sample.ID")]
-      # how to count empty cells vs all cells
-      dim_val <- dim(HTAN_cols)
-      total_cells <- dim_val[1] * dim_val[2]
-      empty_cells <- table(is.na(HTAN_cols))
-      per_filled <- (empty_cells[1] / total_cells )* 100
+#       HTAN_cols <- manifest_df[, c("HTAN.Participant.ID", "HTAN.Sample.ID")]
+#       # how to count empty cells vs all cells
+#       dim_val <- dim(HTAN_cols)
+#       total_cells <- dim_val[1] * dim_val[2]
+#       empty_cells <- table(is.na(HTAN_cols))
+#       per_filled <- (empty_cells[1] / total_cells )* 100
       
-      manifest_cells[i,7] <- "HTAN_IDs"
-      manifest_cells[i,8] <- total_cells
-      manifest_cells[i,9] <- empty_cells[1] ## filled, empty= F
-      manifest_cells[i,10] <- per_filled
-    } else {
-      # print(proj_folder_manifest$id[i])
-      manifest_cells[i,3] <- "Assay"
-      manifest_cells[i,4] <- 0
-      manifest_cells[i,5] <- 0
-      manifest_cells[i,6] <- 0
+#       manifest_cells[i,7] <- "HTAN_IDs"
+#       manifest_cells[i,8] <- total_cells
+#       manifest_cells[i,9] <- empty_cells[1] ## filled, empty= F
+#       manifest_cells[i,10] <- per_filled
+#     } else {
+#       # print(proj_folder_manifest$id[i])
+#       manifest_cells[i,3] <- "Assay"
+#       manifest_cells[i,4] <- 0
+#       manifest_cells[i,5] <- 0
+#       manifest_cells[i,6] <- 0
 
-      manifest_cells[i,7] <- "HTAN_IDs"
-      manifest_cells[i,8] <- 0
-      manifest_cells[i,9] <- 0 ## filled, empty= F
-      manifest_cells[i,10] <- 0
+#       manifest_cells[i,7] <- "HTAN_IDs"
+#       manifest_cells[i,8] <- 0
+#       manifest_cells[i,9] <- 0 ## filled, empty= F
+#       manifest_cells[i,10] <- 0
       
-    }
-  }
+#     }
+#   }
 
-  ### NAs to 0 but not for manifest path
-  manifest_cells[,-c(2)][is.na((manifest_cells[,-c(2)]))] <- 0
+#   ### NAs to 0 but not for manifest path
+#   manifest_cells[,-c(2)][is.na((manifest_cells[,-c(2)]))] <- 0
 
-  colnames(manifest_cells) <- c("id", "manifest_path", "component", "total_cells","filled_cells", "percent_filled", "component2", "total_cells2","filled_cells2", "percent_filled2")
+#   colnames(manifest_cells) <- c("id", "manifest_path", "component", "total_cells","filled_cells", "percent_filled", "component2", "total_cells2","filled_cells2", "percent_filled2")
 
-  proj_folder_manifest_cells <- right_join(manifest_cells, proj_folder_manifest )
-  return(proj_folder_manifest_cells)
-}
+#   proj_folder_manifest_cells <- right_join(manifest_cells, proj_folder_manifest )
+#   return(proj_folder_manifest_cells)
+# }
 
 ### do in server
 # minimal <- proj_folder_manifest_cells[, c("project_name", "name", "component", "total_cells","filled_cells", "percent_filled", "component2", "total_cells2","filled_cells2", "percent_filled2")]

@@ -1,18 +1,17 @@
 import json
 import os
+import pprint
 
 from MetadataModel import MetadataModel
 from ManifestGenerator import ManifestGenerator
 
-#inputMModelLocation = "./schemas/exampleSchemaReq.jsonld"
-#inputMModelLocation = "./schemas/scRNASeq.jsonld"
-#inputMModelLocation = "./schemas/HTAPP.jsonld"
+pp = pprint.PrettyPrinter(indent = 3)
+
 inputMModelLocation = "./schemas/HTAN.jsonld"
-#inputMModelLocation = "./data/NFSchemaReq.jsonld"
 inputMModelLocationType = "local"
-#datasetType = "scRNASeq"
-#datasetType = "Thing"
-datasetType = "ScRNA-seq"
+
+component = "FamilyHistory"
+#component = "ScRNA-seqAssay" 
 
 mm = MetadataModel(inputMModelLocation, inputMModelLocationType)
 
@@ -29,8 +28,8 @@ print("*****************************************************")
 # Google API credentials file stored on Synapse 
 credentials_syn_file = "syn21088684"
 
-# try downloading credentials file, if needed 
 
+# try downloading credentials file, if needed 
 if not os.path.exists("./credentials.json"):
     
     print("Retrieving Google API credentials from Synapse")
@@ -44,7 +43,7 @@ if not os.path.exists("./credentials.json"):
 print("Google API credentials successfully located")
 
 print("Testing manifest generation based on a provided Schema.org schema")
-manifestURL = mm.getModelManifest("HTAN_" + datasetType, datasetType, filenames = ["1.txt", "2.txt", "3.txt"])
+manifestURL = mm.getModelManifest("Test_" + component, component, filenames = ["1.txt", "2.txt", "3.txt"])
 
 print(manifestURL)
 
@@ -66,21 +65,51 @@ print("*****************************************************")
 manifestPath = "./HTAPP_manifest_valid.csv"
 
 print("Testing validation with jsonSchema generation from Schema.org schema")
-annotationErrors = mm.validateModelManifest(manifestPath, datasetType)
-print(annotationErrors)
+annotationErrors = mm.validateModelManifest(manifestPath, component)
+pp.pprint(annotationErrors)
 
 print("Testing validation with provided jsonSchema")
 jsonSchemaFile = "./schemas/minimalHTAPPJSONSchema.json"
 with open(jsonSchemaFile, "r") as f:
     jsonSchema = json.load(f)
-annotationErrors = mm.validateModelManifest(manifestPath, datasetType, jsonSchema)
-print(annotationErrors)
+annotationErrors = mm.validateModelManifest(manifestPath, component, jsonSchema)
+pp.pprint(annotationErrors)
 
 
 print("*****************************************************")
 print("Testing metamodel-based manifest population")
 print("*****************************************************")
 
-print("Get a sheet prepopulated with an existing manifest; this is an example scRNASeq manifest")
-prepopulatedManifestURL = mm.populateModelManifest("HTAN_" + datasetType, manifestPath, datasetType)
+print("Get a sheet prepopulated with an existing manifest; this is an example manifest")
+prepopulatedManifestURL = mm.populateModelManifest("Test_" + component, manifestPath, component)
 print(prepopulatedManifestURL)
+
+
+
+print("*****************************************************")
+print("Testing metamodel-based object dependency generation")
+print("*****************************************************")
+
+print("Generating dependency graph and ordering dependencies")
+dependencies = mm.getOrderedModelNodes(component, "requiresDependency")
+pp.pprint(dependencies)
+
+with open(component + "_dependencies.json", "w") as f:
+    json.dump(dependencies, f, indent = 3)
+
+print("Dependencies stored: " + component + "_dependencies.json")
+
+
+print("*****************************************************")
+print("Testing metamodel-based component dependency generation")
+print("*****************************************************")
+
+print("Generating dependency graph and ordering dependencies")
+component = "ScRNA-seqAssay"
+dependencies = mm.getOrderedModelNodes(component, "requiresComponent")
+pp.pprint(dependencies)
+
+with open(component + "component_dependencies.json", "w") as f:
+    json.dump(dependencies, f, indent = 3)
+
+print("Component dependencies stored: " + component + "component_dependencies.json")
