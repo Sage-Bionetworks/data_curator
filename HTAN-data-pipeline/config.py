@@ -5,7 +5,7 @@ Stores config variables to be used in other modules
 storage = {
     "Synapse":{
       #synapse ID of fileview containing administrative storage metadata; 
-    #   "masterFileview":"syn21893840", user study one
+    #   "masterFileview":"syn21893840",
       "masterFileview":"syn20446927",
       # default manifest name 
       "manifestFilename":"synapse_storage_manifest.csv"

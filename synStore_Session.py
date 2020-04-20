@@ -20,7 +20,7 @@ get_folder_list = syn_store.getStorageDatasetsInProject
 get_file_list = syn_store.getFilesInStorageDataset
 
 ### print("Testing association of antities with annotation from manifest")
-get_manifest_syn_id = syn_store.associateMetadataWithFiles
+get_associated_manifestId = syn_store.associateMetadataWithFiles
 
 ### getting all manifests associated with a project accessible by user
 ### returns a list, empty if manifest isn't there
@@ -36,4 +36,4 @@ get_all_manifests = syn_store.getAllManifests
 #manifestId = syn_store.update_dataset_manifest_files(dataset_id)
 # returns '' if no manifest exists
 # depends on fileview so it may take a few min for new files to show
-get_manifestId = syn_store.update_dataset_manifest_files
+get_update_manifestId = syn_store.update_dataset_manifest_files
