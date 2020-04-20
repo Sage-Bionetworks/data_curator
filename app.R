@@ -279,7 +279,6 @@ server <- function(input, output, session) {
 
     ### checks if a manifest already exists
     existing_manifestID <- get_manifestId(synStore_obj, folder_synID)
-    # showNotification( paste0("existing manifest: ", existing_manifestID) , duration = NULL, type = "warning")
 
     ### if there isn't an existing manifest make a new one 
     if (existing_manifestID == '') {
@@ -290,7 +289,7 @@ server <- function(input, output, session) {
       }
       filename_list <- names(file_namedList)
 
-      manifest_url <- getModelManifest(paste0("HTAN ", input$template_type), input$template_type, filenames = filename_list)
+      manifest_url <- getModelManifest(paste0("HTAN ", input$template_type), input$template_type, filenames = as.list(filename_list))
       ### add in the step to convert names later ###
 
       ### links shows in text box
@@ -346,47 +345,60 @@ server <- function(input, output, session) {
   observeEvent(
     input$validate, {
     annotation_status <- validateModelManifest(input$file1$datapath, input$template_type)
+    # showNotification(input$file1$datapath, duration = NULL, type = "default")
+    
     toggle('text_div2')
 
     showNotification(id = "processing", "Processing...", duration = NULL, type = "default")
 
     if (length(annotation_status) != 0) {
-      ## if error not empty aka there is an error
-      filled_manifest <- populateModelManifest(paste0("HTAN_", input$template_type), input$file1$datapath, input$template_type)
 
-      ### create list of string names for the long error messages
-      str_names <- sprintf("str_%d", seq(length(annotation_status)))
+      ## if error not empty aka there is an error
+      filled_manifest <- "https://docs.google.com/spreadsheets/d/1yFc8zCTCUOmiSqYT_5JzBvA9PVWuiZ_Plpq3pD1IHNs/edit" #populateModelManifest(paste0("HTAN_", input$template_type), input$file1$datapath, input$template_type)
+
+      ### create list of string names for the error messages if there is more than one at a time (not currently a feature)
+      # str_names <- sprintf("str_%d", seq(length(annotation_status)))
       ### list to save errors
-      in_vals <- sprintf("input_%d", seq(length(annotation_status)))
+      # in_vals <- sprintf("input_%d", seq(length(annotation_status)))
       ### create error messages
+
       for (i in seq_along(annotation_status)) {
         row <- annotation_status[[i]][1]
         column <- annotation_status[[i]][2]
         in_val <- annotation_status[[i]][3]
-        allowed_vals <- annotation_status[[i]][4]
 
-        ### if empty value change to NA
+        message <- annotation_status[[i]][4]
+
+        ## if empty value change to NA ### not reporting the value in the cell anymore!!!
         if (unlist(in_val) == "") {
           in_val <- NA
-          str_names[i] <- paste("Spreadsheet row <b>",
-                                  row, "</b>column <b>", column,
-                                  "</b>your value <b>", in_val,
-                                  "</b> is not one of of:", allowed_vals, sep = " ")
-          in_vals[i] <- in_val
+          
+          # str_names[i] <- paste("Spreadsheet row <b>",
+          #                         row, message, sep = " ")
+          #                         # row, "</b>column <b>", column,
+          #                         # "</b>your value <b>", in_val,
+          #                         # "</b> is not one of of:", allowed_vals, sep = " ")
+          # in_vals[i] <- in_val
         } else {
-          str_names[i] <- paste("Spreadsheet row <b>",
-                                  row, "</b>column <b>", column,
-                                  "</b>your value <b>", in_val,
-                                  "</b> is not one of:", allowed_vals, sep = " ")
-          in_vals[i] <- in_val
+          # str_names[i] <- paste("Spreadsheet row <b>",
+          #                         row, message, sep = " ")
+          #                         # row, "</b>column <b>", column,
+          #                         # "</b>your value <b>", in_val,
+          #                         # "</b> is not one of:", allowed_vals, sep = " ")
+          in_val <- in_val
         }
       }
+
+        str_names <- paste("At spreadsheet row <b>",
+                                  row, "</b>value <b>", in_val, "</b>in ", message, sep = " ")
+
 
       ### format output text
       output$text2 <- renderUI({
         HTML("Your metadata is invalid according to the data model.<br/> ",
-               "See errors at: <br/>",
-               paste0(sprintf("%s", str_names), collapse = "<br/>"),
+              #  "See errors: <br/>",
+               unlist(unlist(str_names)), #"<br/>", 
+              #  paste0(sprintf("%s", str_names), collapse = "<br/>"),
                "<br/>Edit your data locally or ",
                paste0('<a target="_blank" href="', filled_manifest, '">on Google Sheets </a>')
                )
@@ -397,7 +409,7 @@ server <- function(input, output, session) {
         datatable(rawData(),
                     options = list(lengthChange = FALSE, scrollX = TRUE)
           ) %>% formatStyle(unlist(column),
-                            backgroundColor = styleEqual(unlist(in_vals), rep("yellow", length(in_vals)))) ## how to have multiple errors
+                            backgroundColor = styleEqual(unlist(in_val), rep("yellow", length(in_val) ) )) ## how to have multiple errors
       })
       removeNotification(id = "processing")
     } else {
