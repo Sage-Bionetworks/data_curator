@@ -81,7 +81,7 @@ ui <- dashboardPage(
                   selectInput(
                     inputId = "template_type",
                     label = "Template:",
-                    choices = list("ScRNA-seqAssay", "Demographics", "FamilyHistory", "Exposure", "FollowUp", "Therapy")
+                    choices = list("ScRNA-seqAssay", "Demographics", "Diagnosis", "FamilyHistory", "Exposure", "FollowUp", "Therapy")
 ## add mapping step from string to input when I have more time
                   )
                 )
@@ -106,22 +106,7 @@ ui <- dashboardPage(
                     )
                   ),
                   helpText("This link will leads to an empty template or your previously submitted template with new files if applicable.")
-                ) #,
-# box(
-#   title = "Have Previously Submitted Metadata?",
-#   status = "primary",
-#   solidHeader = TRUE,
-#   width = 12,
-#   actionButton("link", "Link to Google Sheets"),
-#   hidden(
-#     div(
-#       id = 'text_div3',
-#       height = "100%",
-#       htmlOutput("text3"),
-#       style = "font-size:18px; background-color: white; border: 1px solid #ccc; border-radius: 3px; margin: 10px 0; padding: 10px"
-#     )
-#   )
-# )
+                ) 
 
               )
       ),
@@ -278,7 +263,8 @@ server <- function(input, output, session) {
     # showNotification( folder_synID, duration = NULL, type = "warning")
 
     ### checks if a manifest already exists
-    existing_manifestID <- get_manifestId(synStore_obj, folder_synID)
+    existing_manifestID <- get_update_manifestId(synStore_obj, folder_synID)
+    # showNotification( paste0("existing manifest: ", existing_manifestID) , duration = NULL, type = "warning")
 
     ### if there isn't an existing manifest make a new one 
     if (existing_manifestID == '') {
@@ -289,10 +275,12 @@ server <- function(input, output, session) {
       }
       filename_list <- names(file_namedList)
 
-      manifest_url <- getModelManifest(paste0("HTAN ", input$template_type), input$template_type, filenames = as.list(filename_list))
-      ### add in the step to convert names later ###
 
-      ### links shows in text box
+      manifest_url <- getModelManifest(paste0("HTAN ", input$template_type), input$template_type, filenames = as.list(filename_list) ) ### make sure not scalar if length of list is 1 in R
+      ## add in the step to convert names later ###
+
+
+      ## links shows in text box
       toggle('text_div')
       ### if want a progress bar need more feedback from API to know how to increment progress bar ###
 
@@ -482,8 +470,8 @@ server <- function(input, output, session) {
       }
       folder_synID <- folders_namedList[[selected_folder]]
 
-      ### assocites metadata with data and returns manifest id
-      manifest_id <- get_manifest_syn_id(synStore_obj, "./files/synapse_storage_manifest.csv", folder_synID)
+      ### associates metadata with data and returns manifest id
+      manifest_id <- get_associated_manifestId(synStore_obj, "./files/synapse_storage_manifest.csv", folder_synID)
       print(manifest_id)
       manifest_path <- paste0("synapse.org/#!Synapse:", manifest_id)
       ### if no error 
@@ -533,8 +521,8 @@ server <- function(input, output, session) {
       }
       folder_synID <- folders_namedList[[selected_folder]]
 
-      ### assocites metadata with data and returns manifest id
-      manifest_id <- get_manifest_syn_id(synStore_obj, "./files/synapse_storage_manifest.csv", folder_synID)
+      ### associates metadata with data and returns manifest id
+      manifest_id <- get_associated_manifestId(synStore_obj, "./files/synapse_storage_manifest.csv", folder_synID)
       print(manifest_id)
       manifest_path <- paste0("synapse.org/#!Synapse:", manifest_id)
 
