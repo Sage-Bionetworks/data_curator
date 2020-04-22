@@ -144,7 +144,7 @@ ui <- dashboardPage(
                         style = "font-size:18px; background-color: white; border: 1px solid #ccc; border-radius: 3px; margin: 10px 0; padding: 10px"
                     )
                   ),
-                  helpText("Erorrs are evaluated one column at a time, if you have an error please reupload your CSV and press the validate button as much as needed")
+                  helpText("Errors are evaluated one column at a time, if you have an error please reupload your CSV and press the validate button as much as needed")
                 ),
                 box(title = "Submit Validated Metadata to Synapse",
                         status = "primary",
