@@ -342,7 +342,7 @@ server <- function(input, output, session) {
     if (length(annotation_status) != 0) {
 
       ## if error not empty aka there is an error
-      filled_manifest <- "https://docs.google.com/spreadsheets/d/1yFc8zCTCUOmiSqYT_5JzBvA9PVWuiZ_Plpq3pD1IHNs/edit" #populateModelManifest(paste0("HTAN_", input$template_type), input$file1$datapath, input$template_type)
+      filled_manifest <- populateModelManifest(paste0("HTAN_", input$template_type), input$file1$datapath, input$template_type)
 
       ### create list of string names for the error messages if there is more than one at a time (not currently a feature)
       # str_names <- sprintf("str_%d", seq(length(annotation_status)))
