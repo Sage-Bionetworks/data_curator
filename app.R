@@ -42,7 +42,7 @@ ui <- dashboardPage(
   dashboardSidebar(width = 250,
     tags$style(".left-side, .main-sidebar {padding-top: 80px; font-weight: bold; font-size: 1.1em } "),
     sidebarMenu(
-# menuItem("Dataset Dashboard", tabName = "dashboard", icon = icon("home")),
+    menuItem("Instructions", tabName = "instructions", icon = icon("book-open")),
     menuItem("Select your Dataset", tabName = "data", icon = icon("mouse-pointer")),
     menuItem("Get Metadata Template", tabName = "template", icon = icon("table")),
     menuItem("Submit & Validate Metadata", tabName = "upload", icon = icon("upload")) #, 
@@ -53,50 +53,58 @@ ui <- dashboardPage(
       tags$style("#shiny-notification-error {height: 500px; padding :20px; display: table-cell}
                  #shiny-notification-processing {background-color: #F7DC6F}
                  #shiny-notification-success {background-color : #82E0AA}"
+                 
       ),
       singleton(
         includeScript("www/readCookie.js")
       )),
     uiOutput("title"),
     tabItems(
-# First tab content
+      # First tab content
+      tabItem(tabName = "instructions",
+              h2("Instructions for the Data Curator App:"),
+              h3("1. Go to", strong("Select your Dataset"), "tab - select your project; choose your folder and metadata template type matching your metadata."),
+              h3("2. Go to", strong("Get Metadata Template"), "tab - click on the link to generate the metadata template, then fill out and download the file as a CSV. If you already have an annotated metadata template, you may skip this step."),
+              h3("3. Go to", strong("Submit and Validate Metadata"), "tab - upload your filled CSV and validate your metadata. If you receive errors correct them, reupload your CSV, and revalidate until you receive no more errors. When your metadata is valid, you will be able to see a 'Submit' button. Press it to submit your metadata.")
+              ),
+# second tab content
       tabItem(tabName = "data",
-              h2("Set Dataset and Template for Curation"),
+              h2("Set Dataset and Metadata Template for Curation"),
               fluidRow(
                 box(
                   status = "primary",
                   solidHeader = TRUE,
                   width = 6,
-                  title = "Choose a Project and Dataset: ",
+                  title = "Choose a Project and Folder: ",
                   selectizeInput(inputId = "var", label = "Project:",
                                  choices = "Generating..."),
                   uiOutput('folders'),
-                  helpText("If your recently updated dataset does not appear, please wait for Synapse to sync and refresh")
+                  helpText("If your recently updated folder does not appear, please wait for Synapse to sync and refresh")
                 ),
                 box(
                   status = "primary",
                   solidHeader = TRUE,
                   width = 6,
-                  title = "Choose a Template Type: ",
+                  title = "Choose a Metadata Template Type: ",
                   selectInput(
                     inputId = "template_type",
                     label = "Template:",
                     choices = list("ScRNA-seqAssay", "Demographics", "Diagnosis", "FamilyHistory", "Exposure", "FollowUp", "Therapy")
-## add mapping step from string to input when I have more time
+## add mapping step from string to input when I have more time ##
                   )
                 )
               )
               ),
-# Second tab item
+# Third tab item
       tabItem(tabName = "template",
-              h2("Download Template for Selected Dataset"),
+              h2("Download Template for Selected Folder"),
               fluidRow(
                 box(
                   title = "Get Link, Annotate, and Download Template as CSV",
                   status = "primary",
                   solidHeader = TRUE,
                   width = 12,
-                  actionButton("download", "Link to Google Sheets Template"),
+                  actionButton("download", "Clink to Generate Google Sheets Template"),
                   hidden(
                     div(
                       id = 'text_div',
@@ -111,7 +119,7 @@ ui <- dashboardPage(
               )
       ),
 
-# Third tab content
+# Fourth tab content
       tabItem(tabName = "upload",
 # useShinyjs(),
               h2("Submit & Validate a Filled Metadata Template"),
@@ -144,7 +152,7 @@ ui <- dashboardPage(
                         style = "font-size:18px; background-color: white; border: 1px solid #ccc; border-radius: 3px; margin: 10px 0; padding: 10px"
                     )
                   ),
-                  helpText("Errors are evaluated one column at a time, if you have an error please reupload your CSV and press the validate button as much as needed")
+                  helpText("Errors are evaluated one column at a time, if you have an error please reupload your CSV and press the validate button as needed.")
                 ),
                 box(title = "Submit Validated Metadata to Synapse",
                         status = "primary",
@@ -237,7 +245,7 @@ server <- function(input, output, session) {
         folderNames <- names(folders_namedList)
 
         ### updates foldernames
-        selectInput(inputId = "dataset", label = "Dataset:", choices = folderNames)
+        selectInput(inputId = "dataset", label = "Folder:", choices = folderNames)
       }
     })
   })
