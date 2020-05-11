@@ -104,7 +104,7 @@ ui <- dashboardPage(
                   status = "primary",
                   solidHeader = TRUE,
                   width = 12,
-                  actionButton("download", "Clink to Generate Google Sheets Template"),
+                  actionButton("download", "Click to Generate Google Sheets Template"),
                   hidden(
                     div(
                       id = 'text_div',
