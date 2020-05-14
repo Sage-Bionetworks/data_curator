@@ -330,7 +330,7 @@ server <- function(input, output, session) {
   observeEvent(
   rawData(), {
     output$tbl <- DT::renderDT({
-      datatable(rawData(), options = list(lengthChange = FALSE, scrollX = TRUE)
+      datatable(rawData(), options = list(lengthChange = FALSE, scrollX = TRUE) 
         )
     })
 
@@ -352,60 +352,64 @@ server <- function(input, output, session) {
       ## if error not empty aka there is an error
       filled_manifest <- populateModelManifest(paste0("HTAN_", input$template_type), input$file1$datapath, input$template_type)
 
-      ### create list of string names for the error messages if there is more than one at a time (not currently a feature)
-      # str_names <- sprintf("str_%d", seq(length(annotation_status)))
-      ### list to save errors
-      # in_vals <- sprintf("input_%d", seq(length(annotation_status)))
-      ### create error messages
+      ### create list of string names for the error messages if there is more than one at a time 
+      str_names <- c()
 
+      ### initialize list of errors and column names to highlight 
+      error_values <- c()
+      column_names <- c()
+
+      ### loop through the multiple error messages
       for (i in seq_along(annotation_status)) {
-        row <- annotation_status[[i]][1]
-        column <- annotation_status[[i]][2]
-        in_val <- annotation_status[[i]][3]
+        
 
-        message <- annotation_status[[i]][4]
+        row <- annotation_status[i][[1]][1]
+        column <- annotation_status[i][[1]][2]
+        message <- annotation_status[i][[1]][3]
+
+        error_value <- annotation_status[i][[1]][4]
 
         ## if empty value change to NA ### not reporting the value in the cell anymore!!!
-        if (unlist(in_val) == "") {
-          in_val <- NA
+        if (unlist(error_value) == "") {
+          error_value <- NA
           
-          # str_names[i] <- paste("Spreadsheet row <b>",
-          #                         row, message, sep = " ")
-          #                         # row, "</b>column <b>", column,
-          #                         # "</b>your value <b>", in_val,
-          #                         # "</b> is not one of of:", allowed_vals, sep = " ")
-          # in_vals[i] <- in_val
         } else {
-          # str_names[i] <- paste("Spreadsheet row <b>",
-          #                         row, message, sep = " ")
-          #                         # row, "</b>column <b>", column,
-          #                         # "</b>your value <b>", in_val,
-          #                         # "</b> is not one of:", allowed_vals, sep = " ")
-          in_val <- in_val
+
+          error_value <- error_value
         }
+
+        
+        error_values[i] <- error_value
+        column_names[i] <- column
+        str_names[i] <- paste( paste0(i, "."),
+                              "At row <b>", row, 
+                              "</b>value <b>", error_value,
+                              "</b>in ", "<b>", message, paste0("</b>", 
+                              "<br/>"), sep = " ")
       }
 
-        str_names <- paste("At spreadsheet row <b>",
-                                  row, "</b>value <b>", in_val, "</b>in ", message, sep = " ")
+        
 
 
       ### format output text
       output$text2 <- renderUI({
-        HTML("Your metadata is invalid according to the data model.<br/> ",
-              #  "See errors: <br/>",
-               unlist(unlist(str_names)), #"<br/>", 
-              #  paste0(sprintf("%s", str_names), collapse = "<br/>"),
-               "<br/>Edit your data locally or ",
-               paste0('<a target="_blank" href="', filled_manifest, '">on Google Sheets </a>')
-               )
+          tagList( 
+          HTML("Your metadata is invalid according to the data model.<br/> ",
+              "You have", length(annotation_status), " errors: <br/>"),
+          HTML(str_names),
+          HTML("<br/>Edit your data locally or ",
+              paste0('<a target="_blank" href="', filled_manifest, '">on Google Sheets </a>')
+              )
+
+          )
       })
       ### update DT view with incorrect values
       ### currently only one column, requires backend support of multiple
       output$tbl <- DT::renderDT({
         datatable(rawData(),
                     options = list(lengthChange = FALSE, scrollX = TRUE)
-          ) %>% formatStyle(unlist(column),
-                            backgroundColor = styleEqual(unlist(in_val), rep("yellow", length(in_val) ) )) ## how to have multiple errors
+          ) %>% formatStyle(unlist(column_names),
+                            backgroundColor = styleEqual( unlist(error_values), rep("yellow", length(error_values) ) )) ## how to have multiple errors
       })
       removeNotification(id = "processing")
     } else {
