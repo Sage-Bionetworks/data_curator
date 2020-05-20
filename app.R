@@ -10,6 +10,7 @@ library(reticulate)
 library(ggplot2)
 library(purrr)
 library(plotly)
+library(shinypop)
 
 #########global
 use_condaenv('py3.5', required = TRUE)
@@ -50,7 +51,15 @@ ui <- dashboardPage(
   ),
   dashboardBody(
     tags$head(
-      tags$style("#shiny-notification-error {height: 500px; padding :20px; display: table-cell}
+      tags$style(
+        HTML(".shiny-notification {
+              position:fixed;
+              bottom: 0;
+              right: 0;
+              width: 100%;
+             }
+             "),
+                "#shiny-notification-error {height: 500px; padding :20px; display: table-cell}
                  #shiny-notification-processing {background-color: #F7DC6F}
                  #shiny-notification-success {background-color : #82E0AA}"
                  
@@ -59,6 +68,7 @@ ui <- dashboardPage(
         includeScript("www/readCookie.js")
       )),
     uiOutput("title"),
+    use_notiflix_report(), 
     tabItems(
       # First tab content
       tabItem(tabName = "instructions",
@@ -489,7 +499,8 @@ server <- function(input, output, session) {
       ### if no error 
       if (startsWith(manifest_id, "syn") == TRUE) {
         removeNotification(id = "processing")
-        showNotification(id = "success", paste0("Submit Manifest to: ", manifest_path), duration = NULL, type = "message")
+        # showNotification(id = "success", paste0("Submit Manifest to: ", manifest_path), duration = NULL, type = "message")
+        nx_report_success("Success!", paste0("Manifest submitted to: ", manifest_path))
         rm("./files/synapse_storage_manifest.csv")
 
         ### clear inputs 
@@ -541,7 +552,8 @@ server <- function(input, output, session) {
       ### if uploaded provided valid synID message
       if (startsWith(manifest_id, "syn") == TRUE) {
         removeNotification(id = "processing")
-        showNotification(id = "success", paste0("Submit Manifest to: ", manifest_path), duration = NULL, type = "message")
+        # showNotification(id = "success", paste0("Submit Manifest to: ", manifest_path), duration = NULL, type = "message")
+        nx_report_success("Success!", paste0("Manifest submitted to: ", manifest_path))
         rm("./files/synapse_storage_manifest.csv")
 
         ### clear inputs 
