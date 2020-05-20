@@ -210,11 +210,6 @@ server <- function(input, output, session) {
 
   ### initial login front page items
   observeEvent(input$cookie, {
-    notie(
-      text = "Please wait while we log you in...",
-      type = "info",
-      position = "top"
-    )
     showNotification(id = "processing", "Please wait while we log you in...", duration = NULL, type = "warning")
 
     ### logs in 
