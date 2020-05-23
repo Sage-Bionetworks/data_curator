@@ -13,8 +13,7 @@ storage = {
 }
 
 schema = {
-    # "schemaLocation": "./schemas/HTAN.jsonld"
-    "schemaLocation" : "./HTAN-data-pipeline/schemas/HTAN.jsonld"
+    "schemaLocation": "./schemas/HTAN.jsonld"
 }
 
 # app and manifest style (colors, alignments, etc.)
@@ -23,15 +22,15 @@ style = {
         "googleManifest":{
             #required columns/cells background color
             "reqBgColor":{
-                        'red': 231.0/255,
+                        'red': 235.0/255,
                         'green': 248.0/255,
                         'blue': 250.0/255
             },
             #optional columns/cells background color
             "optBgColor":{
-                        'red': 229.0/255,
+                        'red': 255.0/255,
                         'green': 255.0/255,
-                        'blue': 204.0/255
+                        'blue': 230.0/255
             }
         }
 }
