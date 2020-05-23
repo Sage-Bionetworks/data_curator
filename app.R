@@ -99,7 +99,7 @@ ui <- dashboardPage(
                   selectInput(
                     inputId = "template_type",
                     label = "Template:",
-                    choices = list("ScRNA-seqAssay", "Demographics", "Diagnosis", "FamilyHistory", "Exposure", "FollowUp", "Therapy")
+                    choices = list("ScRNA-seqAssay", "BulkRNA-seqAssay", "BulkRNA-seqAlignment", "Demographics", "Diagnosis", "FamilyHistory", "Exposure", "FollowUp", "Therapy")
 ## add mapping step from string to input when I have more time ##
                   )
                 )

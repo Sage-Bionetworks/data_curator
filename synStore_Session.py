@@ -36,4 +36,4 @@ get_all_manifests = syn_store.getAllManifests
 #manifestId = syn_store.update_dataset_manifest_files(dataset_id)
 # returns '' if no manifest exists
 # depends on fileview so it may take a few min for new files to show
-get_update_manifestId = syn_store.update_dataset_manifest_files
+get_update_manifestId = syn_store.updateDatasetManifestFiles
