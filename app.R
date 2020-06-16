@@ -40,7 +40,9 @@ ui <- dashboardPage(
                    tags$img(height = "40px", alt = "HTAN LOGO",
                             src = "HTAN_text_logo.png")))
     ),
-  dashboardSidebar(width = 250,
+  dashboardSidebar(
+    id = tabs, 
+    width = 250,
     tags$style(".left-side, .main-sidebar {padding-top: 80px; font-weight: bold; font-size: 1.1em } "),
     sidebarMenu(
     menuItem("Instructions", tabName = "instructions", icon = icon("book-open")),
@@ -75,7 +77,9 @@ ui <- dashboardPage(
               h2("Instructions for the Data Curator App:"),
               h3("1. Go to", strong("Select your Dataset"), "tab - select your project; choose your folder and metadata template type matching your metadata."),
               h3("2. Go to", strong("Get Metadata Template"), "tab - click on the link to generate the metadata template, then fill out and download the file as a CSV. If you already have an annotated metadata template, you may skip this step."),
-              h3("3. Go to", strong("Submit and Validate Metadata"), "tab - upload your filled CSV and validate your metadata. If you receive errors correct them, reupload your CSV, and revalidate until you receive no more errors. When your metadata is valid, you will be able to see a 'Submit' button. Press it to submit your metadata.")
+              h3("3. Go to", strong("Submit and Validate Metadata"), "tab - upload your filled CSV and validate your metadata. If you receive errors correct them, reupload your CSV, and revalidate until you receive no more errors. When your metadata is valid, you will be able to see a 'Submit' button. Press it to submit your metadata."),
+              actionButton(   inputId ="Next1", label = icon("arrow-right"))
+              
               ),
 # second tab content
       tabItem(tabName = "data",
@@ -234,6 +238,10 @@ server <- function(input, output, session) {
     updateSelectizeInput(session, 'var', choices = names(projects_namedList))
     removeNotification(id = "processing",)
 
+  })
+  ### next1 button
+  observeEvent(input$Next1, {
+    updateTabItems(session, "tabs", "data")
   })
 
   ### lists folder datasets if exists in project
