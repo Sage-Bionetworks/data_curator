@@ -40,13 +40,15 @@ ui <- dashboardPage(
                    tags$img(height = "40px", alt = "HTAN LOGO",
                             src = "HTAN_text_logo.png")))
     ),
-  dashboardSidebar(width = 250,
+  dashboardSidebar(
+    width = 250,
     tags$style(".left-side, .main-sidebar {padding-top: 80px; font-weight: bold; font-size: 1.1em } "),
     sidebarMenu(
+    id = "tabs", 
     menuItem("Instructions", tabName = "instructions", icon = icon("book-open")),
     menuItem("Select your Dataset", tabName = "data", icon = icon("mouse-pointer")),
     menuItem("Get Metadata Template", tabName = "template", icon = icon("table")),
-    menuItem("Submit & Validate Metadata", tabName = "upload", icon = icon("upload")) #, 
+    menuItem("Submit & Validate Metadata", tabName = "upload", icon = icon("upload"))  
     )
   ),
   dashboardBody(
@@ -172,7 +174,8 @@ ui <- dashboardPage(
                 )
         )
       )
-    )
+    ),
+    uiOutput("Next_Previous")
   )
 )
 
@@ -235,6 +238,45 @@ server <- function(input, output, session) {
     removeNotification(id = "processing",)
 
   })
+
+
+  ###### BUTTONS STUFF  !!! remove last arrow 
+  Previous_Button=tags$div(actionButton("Prev_Tab",HTML('
+<div class="col-sm-4"><i class="fa fa-angle-double-left fa-2x"></i></div>
+')))
+  Next_Button=div(actionButton("Next_Tab",HTML('
+<div class="col-sm-4"><i class="fa fa-angle-double-right fa-2x"></i></div>
+')))
+
+list_tabs <- c("instructions", "data", "template", "upload")
+
+  output$Next_Previous <- renderUI({
+    
+    tab_list=list_tabs
+    if ( input[["tabs"]] == "upload" ){
+      # column(1,offset=1,Previous_Button)
+    } else if (input[["tabs"]] == "instructions" ) {
+      column(1,offset = 10,Next_Button)
+    } else {
+      div(column(1,offset=1,Previous_Button),column(1,offset=8,Next_Button))
+    }
+  })
+
+  observeEvent(input$Prev_Tab,
+              {
+                tab_list=list_tabs
+                current_tab=which(tab_list==input[["tabs"]])
+                updateTabItems(session,"tabs",selected=tab_list[current_tab-1])
+              })
+
+  observeEvent(input$Next_Tab,
+              {
+                tab_list=list_tabs
+                current_tab=which(tab_list==input[["tabs"]])
+                updateTabItems(session,"tabs",selected=tab_list[current_tab+1])
+              })
+
+  ####### BUTTONS END
 
   ### lists folder datasets if exists in project
   observeEvent(ignoreNULL = TRUE, ignoreInit = TRUE,
