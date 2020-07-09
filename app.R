@@ -452,7 +452,8 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
         str_names[i] <- paste( paste0(i, "."),
                               "At row <b>", row, 
                               "</b>value <b>", error_value,
-                              "</b>in ", "<b>", message, paste0("</b>", 
+                              "</b>in ", "<b>", column, "</b>",
+                              message, paste0(#"</b>", 
                               "<br/>"), sep = " ")
       }
 
@@ -505,7 +506,7 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
 
     ### IF an assay component selected 
     ### and adds entityID, saves it as synapse_storage_manifest.csv, then associates with synapse files 
-    if ( template_type %in% list("ScRNA-seqAssay", "BulkRNA-seqAssay", "BulkRNA-seqAlignment") ) {
+    if ( input$template_type %in% list("scRNA-seq Level 1", "Bulk RNA-seq Level 1", "Bulk RNA-seq Level 2") ) {
       
       ### make into a csv or table for assay components
       ### already has entityId
