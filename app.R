@@ -101,7 +101,8 @@ ui <- dashboardPage(
                   selectInput(
                     inputId = "template_type",
                     label = "Template:",
-                    choices = list("ScRNA-seqAssay", "BulkRNA-seqAssay", "BulkRNA-seqAlignment", "Demographics", "Diagnosis", "FamilyHistory", "Exposure", "FollowUp", "Therapy")
+                    # choices = list("ScRNA-seqAssay", "BulkRNA-seqAssay", "BulkRNA-seqAlignment", "Demographics", "Diagnosis", "FamilyHistory", "Exposure", "FollowUp", "Therapy")
+                    choices = list("scRNA-seq Level 1", "Bulk RNA-seq Level 1", "Bulk RNA-seq Level 2"," Clinical Tier 1: Demographics"," Clinical Tier 1: Diagnosis"," Clinical Tier 1: FamilyHistory"," Clinical Tier 1: Exposure"," Clinical Tier 1: FollowUp"," Clinical Tier 1: Therapy")
 ## add mapping step from string to input when I have more time ##
                   )
                 )
@@ -302,12 +303,22 @@ list_tabs <- c("instructions", "data", "template", "upload")
     })
   })
 
+### mapping from display name to schema name
+schema_name  <- c("ScRNA-seqAssay", "BulkRNA-seqAssay", "BulkRNA-seqAlignment", "Demographics", "Diagnosis", "FamilyHistory", "Exposure", "FollowUp", "Therapy")
+display_name <- c("scRNA-seq Level 1", "Bulk RNA-seq Level 1", "Bulk RNA-seq Level 2"," Clinical Tier 1: Demographics"," Clinical Tier 1: Diagnosis"," Clinical Tier 1: FamilyHistory"," Clinical Tier 1: Exposure"," Clinical Tier 1: FollowUp"," Clinical Tier 1: Therapy")
+
+schema_to_display_lookup <- data.frame(schema_name, display_name)
+
   ###shows new metadata link when get gsheets template button pressed OR updates old metadata if is exists 
   observeEvent(
     input$download, {
 
     selected_folder <- input$dataset
     selected_project <- input$var
+
+    ###lookup schema template name 
+    template_type_df <- schema_to_display_lookup[match(input$template_type, schema_to_display_lookup$display_name), 1, drop = F ]
+    template_type <- as.character(template_type_df$schema_name)
 
     ### progess notif
     showNotification(id = "processing", "Generating link...", duration = NULL, type = "warning")
@@ -336,7 +347,7 @@ list_tabs <- c("instructions", "data", "template", "upload")
       filename_list <- names(file_namedList)
 
 
-      manifest_url <- getModelManifest(paste0("HTAN ", input$template_type), input$template_type, filenames = as.list(filename_list) ) ### make sure not scalar if length of list is 1 in R
+      manifest_url <- getModelManifest(paste0("HTAN ", input$template_type), template_type, filenames = as.list(filename_list) ) ### make sure not scalar if length of list is 1 in R
       ## add in the step to convert names later ###
 
 
@@ -354,7 +365,7 @@ list_tabs <- c("instructions", "data", "template", "upload")
       ### if the manifest already exists
       manifest_entity <- syn_get(existing_manifestID)
       # prepopulatedManifestURL = mm.populateModelManifest("test_update", entity.path, component)
-      manifest_url <- populateModelManifest(paste0("HTAN_", input$template_type), manifest_entity$path, input$template_type)
+      manifest_url <- populateModelManifest(paste0("HTAN ", input$template_type), manifest_entity$path, template_type)
       toggle('text_div3')
 
       output$text <- renderUI({
@@ -378,6 +389,7 @@ list_tabs <- c("instructions", "data", "template", "upload")
   rawData <- eventReactive(input$file1, {
     readr::read_csv(input$file1$datapath, na = c("", "NA"))
   })
+
   ### renders in DT for preview 
   observeEvent(
   rawData(), {
@@ -392,7 +404,11 @@ list_tabs <- c("instructions", "data", "template", "upload")
   ### toggles validation status when validate button pressed
   observeEvent(
     input$validate, {
-    annotation_status <- validateModelManifest(input$file1$datapath, input$template_type)
+    ###lookup schema template name 
+    template_type_df <- schema_to_display_lookup[match(input$template_type, schema_to_display_lookup$display_name), 1, drop = F ]
+    template_type <- as.character(template_type_df$schema_name)
+
+    annotation_status <- validateModelManifest(input$file1$datapath, template_type)
     # showNotification(input$file1$datapath, duration = NULL, type = "default")
     
     toggle('text_div2')
@@ -402,7 +418,7 @@ list_tabs <- c("instructions", "data", "template", "upload")
     if (length(annotation_status) != 0) {
 
       ## if error not empty aka there is an error
-      filled_manifest <- populateModelManifest(paste0("HTAN_", input$template_type), input$file1$datapath, input$template_type)
+      filled_manifest <- populateModelManifest(paste0("HTAN ", input$template_type), input$file1$datapath, template_type)
 
       ### create list of string names for the error messages if there is more than one at a time 
       str_names <- c()
@@ -436,7 +452,8 @@ list_tabs <- c("instructions", "data", "template", "upload")
         str_names[i] <- paste( paste0(i, "."),
                               "At row <b>", row, 
                               "</b>value <b>", error_value,
-                              "</b>in ", "<b>", message, paste0("</b>", 
+                              "</b>in ", "<b>", column, "</b>",
+                              message, paste0(#"</b>", 
                               "<br/>"), sep = " ")
       }
 
@@ -487,9 +504,9 @@ list_tabs <- c("instructions", "data", "template", "upload")
     ### reads in csv 
     infile <- readr::read_csv(input$file1$datapath, na = c("", "NA"))
 
-    ### IF an assay component selected and has filename col
+    ### IF an assay component selected 
     ### and adds entityID, saves it as synapse_storage_manifest.csv, then associates with synapse files 
-    if ( input$template_type %in% list("ScRNA-seqAssay") ) {
+    if ( input$template_type %in% list("scRNA-seq Level 1", "Bulk RNA-seq Level 1", "Bulk RNA-seq Level 2") ) {
       
       ### make into a csv or table for assay components
       ### already has entityId
