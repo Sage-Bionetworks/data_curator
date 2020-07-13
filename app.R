@@ -13,13 +13,13 @@ library(plotly)
 library(shinypop)
 
 #########global
-use_condaenv('py3.5', required = TRUE)
+use_condaenv('data_curator_env', required = TRUE)
 reticulate::import("sys")
-reticulate::import_from_path("MetadataModel", path = "HTAN-data-pipeline")
-reticulate::import_from_path("ManifestGenerator", path = "HTAN-data-pipeline")
 
 source_python("synLoginFun.py")
 source_python("metadataModelFuns.py")
+
+# ingresspipe <- reticulate::import("ingresspipe")
 
 # source("functions.R")
 
@@ -191,7 +191,7 @@ server <- function(input, output, session) {
     )
   })
 
-  ########### session global variables 
+  ########### session global variables
   reticulate::source_python("synStore_Session.py")
   source("functions.R")
 
@@ -217,7 +217,7 @@ server <- function(input, output, session) {
     showNotification(id = "processing", "Please wait while we log you in...", duration = NULL, type = "warning")
 
     ### logs in 
-    syn_login(sessionToken = input$cookie, rememberMe = FALSE)
+    # syn_login(sessionToken = input$cookie, rememberMe = FALSE)
 
     ### welcome message
     output$title <- renderUI({
@@ -225,10 +225,10 @@ server <- function(input, output, session) {
     })
 
     ### updating global vars with values for projects
-    synStore_obj <<- syn_store("syn20446927", token = input$cookie)
+    # synStore_obj <<- syn_store("syn20446927", token = input$cookie)
 
     # get_projects_list(synStore_obj)
-    projects_list <<- get_projects_list(synStore_obj)
+    projects_list <<- syn_store$getStorageProjects()
 
     for (i in seq_along(projects_list)) {
       projects_namedList[projects_list[[i]][[2]]] <<- projects_list[[i]][[1]]
@@ -290,7 +290,7 @@ list_tabs <- c("instructions", "data", "template", "upload")
         project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
 
         ### gets folders per project
-        folder_list <- get_folder_list(synStore_obj, project_synID)
+        folder_list <- syn_store$getStorageDatasetsInProject(project_synID)
         folders_namedList <- c()
         for (i in seq_along(folder_list)) {
           folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
@@ -325,7 +325,7 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
 
     project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
 
-    folder_list <- get_folder_list(synStore_obj, project_synID)
+    folder_list <- syn_store$getStorageDatasetsInProject(project_synID)
     folders_namedList <- c()
     for (i in seq_along(folder_list)) {
       folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
@@ -334,12 +334,12 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
     # showNotification( folder_synID, duration = NULL, type = "warning")
 
     ### checks if a manifest already exists
-    existing_manifestID <- get_update_manifestId(synStore_obj, folder_synID)
+    existing_manifestID <- syn_store$updateDatasetManifestFiles(folder_synID)
     # showNotification( paste0("existing manifest: ", existing_manifestID) , duration = NULL, type = "warning")
 
     ### if there isn't an existing manifest make a new one 
     if (existing_manifestID == '') {
-      file_list <- get_file_list(synStore_obj, folder_synID)
+      file_list <- syn_store$getFilesInStorageDataset(folder_synID)
       file_namedList <- c()
       for (i in seq_along(file_list)) {
         file_namedList[file_list[[i]][[2]]] <- file_list[[i]][[1]]
@@ -347,7 +347,8 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
       filename_list <- names(file_namedList)
 
 
-      manifest_url <- getModelManifest(paste0("HTAN ", input$template_type), template_type, filenames = as.list(filename_list) ) ### make sure not scalar if length of list is 1 in R
+      manifest_url <- metadata_model$getModelManifest(paste0("HTAN ", input$template_type), template_type, filenames = as.list(filename_list))
+      ### make sure not scalar if length of list is 1 in R
       ## add in the step to convert names later ###
 
 
@@ -365,7 +366,7 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
       ### if the manifest already exists
       manifest_entity <- syn_get(existing_manifestID)
       # prepopulatedManifestURL = mm.populateModelManifest("test_update", entity.path, component)
-      manifest_url <- populateModelManifest(paste0("HTAN ", input$template_type), manifest_entity$path, template_type)
+      manifest_url <- metadata_model$populateModelManifest(paste0("HTAN ", input$template_type), manifest_entity$path, template_type)
       toggle('text_div3')
 
       output$text <- renderUI({
@@ -394,7 +395,7 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
   observeEvent(
   rawData(), {
     output$tbl <- DT::renderDT({
-      datatable(rawData(), options = list(lengthChange = FALSE, scrollX = TRUE) 
+      datatable(rawData(), options = list(lengthChange = FALSE, scrollX = TRUE)
         )
     })
 
@@ -408,7 +409,7 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
     template_type_df <- schema_to_display_lookup[match(input$template_type, schema_to_display_lookup$display_name), 1, drop = F ]
     template_type <- as.character(template_type_df$schema_name)
 
-    annotation_status <- validateModelManifest(input$file1$datapath, template_type)
+    annotation_status <- metadata_model$validateModelManifest(input$file1$datapath, template_type)
     # showNotification(input$file1$datapath, duration = NULL, type = "default")
     
     toggle('text_div2')
@@ -418,7 +419,7 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
     if (length(annotation_status) != 0) {
 
       ## if error not empty aka there is an error
-      filled_manifest <- populateModelManifest(paste0("HTAN ", input$template_type), input$file1$datapath, template_type)
+      filled_manifest <- metadata_model$populateModelManifest(paste0("HTAN ", input$template_type), input$file1$datapath, template_type)
 
       ### create list of string names for the error messages if there is more than one at a time 
       str_names <- c()
@@ -453,8 +454,7 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
                               "At row <b>", row, 
                               "</b>value <b>", error_value,
                               "</b>in ", "<b>", column, "</b>",
-                              message, paste0(#"</b>", 
-                              "<br/>"), sep = " ")
+                              message, paste0("</b>", "<br/>"), sep = " ")
       }
 
         
@@ -519,7 +519,7 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
         selected_project <- input$var
 
         project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
-        folder_list <- get_folder_list(synStore_obj, project_synID)
+        folder_list <- syn_store$getStorageDatasetsInProject(project_synID)
         folders_namedList <- c()
         for (i in seq_along(folder_list)) {
           folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
@@ -527,7 +527,7 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
 
         folder_synID <- folders_namedList[[selected_folder]]
 
-        file_list <- get_file_list(synStore_obj, folder_synID)
+        file_list <- syn_store$getFilesInStorageDataset(folder_synID)
         file_namedList <- c()
         for (i in seq_along(file_list)) {
           file_namedList[file_list[[i]][[2]]] <- file_list[[i]][[1]]
@@ -544,7 +544,7 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
 
       project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
 
-      folder_list <- get_folder_list(synStore_obj, project_synID)
+      folder_list <- syn_store$getStorageDatasetsInProject(project_synID)
       folders_namedList <- c()
       for (i in seq_along(folder_list)) {
         folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
@@ -552,7 +552,7 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
       folder_synID <- folders_namedList[[selected_folder]]
 
       ### associates metadata with data and returns manifest id
-      manifest_id <- get_associated_manifestId(synStore_obj, "./files/synapse_storage_manifest.csv", folder_synID)
+      manifest_id <- syn_store$associateMetadataWithFiles("./files/synapse_storage_manifest.csv", folder_synID)
       print(manifest_id)
       manifest_path <- paste0("synapse.org/#!Synapse:", manifest_id)
       ### if no error 
@@ -596,7 +596,7 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
       project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
       # folder_synID <- get_folder_synID(synStore_obj, project_synID, selected_folder)
 
-      folder_list <- get_folder_list(synStore_obj, project_synID)
+      folder_list <- syn_store$getStorageDatasetsInProject(project_synID)
       folders_namedList <- c()
       for (i in seq_along(folder_list)) {
         folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
@@ -604,7 +604,7 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
       folder_synID <- folders_namedList[[selected_folder]]
 
       ### associates metadata with data and returns manifest id
-      manifest_id <- get_associated_manifestId(synStore_obj, "./files/synapse_storage_manifest.csv", folder_synID)
+      manifest_id <- syn_store$associateMetadataWithFiles("./files/synapse_storage_manifest.csv", folder_synID)
       print(manifest_id)
       manifest_path <- paste0("synapse.org/#!Synapse:", manifest_id)
 
