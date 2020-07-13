@@ -1,0 +1,518 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://example.com/Test_FamilyHistory",
+  "title": "Test_FamilyHistory",
+  "type": "object",
+  "properties": {
+    "Relative with Cancer History": {
+      "enum": [
+        "None",
+        "not reported",
+        "Yes - Cancer History Relative",
+        "Unknown",
+        ""
+      ]
+    },
+    "Component": {
+      "not": {
+        "type": "null"
+      },
+      "minLength": 1
+    },
+    "HTAN Patient ID": {
+      "not": {
+        "type": "null"
+      },
+      "minLength": 1
+    },
+    "Relatives with Cancer History Count": {},
+    "Relationship Gender": {
+      "enum": [
+        "Unspecified",
+        "NotReported",
+        "Female",
+        "Unknown",
+        "Male",
+        ""
+      ]
+    },
+    "Relationship Age at Diagnosis": {},
+    "Relationship Type": {
+      "enum": [
+        "PaternalUncle",
+        "GrandNephew",
+        "Spouse",
+        "HalfSister",
+        "Nephew",
+        "IdenticalTwinBrother",
+        "Mother-in-law",
+        "Aunt",
+        "FosterFather",
+        "Unrelated",
+        "IdenticalTwinSister",
+        "MaternalFirstCousin",
+        "AdoptedDaughter",
+        "NaturalFather",
+        "Mother",
+        "AdoptiveFather",
+        "Ward",
+        "Stepsister",
+        "MaternalAunt",
+        "Child",
+        "Son-in-law",
+        "Brother-in-law",
+        "FullSister",
+        "Stepdaughter",
+        "TwinSibling",
+        "Granddaughter",
+        "HalfSibling",
+        "Sister",
+        "PaternalGreatUncle",
+        "FraternalTwinBrother",
+        "Niece",
+        "FraternalTwinSister",
+        "PaternalAunt",
+        "FosterSister",
+        "Grandfather",
+        "PaternalGrandmother",
+        "MaternalFirstCousinOnceRemoved",
+        "LegalGuardian",
+        "FirstCousin",
+        "PaternalGreatAunt",
+        "FosterBrother",
+        "Grandchild",
+        "Father",
+        "FirstCousinOnceRemoved",
+        "StepChild",
+        "Parent",
+        "MaternalGrandparent",
+        "PaternalHalfBrother",
+        "FosterDaughter",
+        "Daughter",
+        "NaturalDaughter",
+        "Other",
+        "Grandparent",
+        "Sister-in-law",
+        "Stepfather",
+        "MaternalGreatUncle",
+        "MaternalGrandfather",
+        "Uncle",
+        "HalfBrother",
+        "MaleCousin",
+        "NaturalGrandparent",
+        "StepSibling",
+        "Grandson",
+        "Unknown",
+        "MaternalHalfSister",
+        "MaternalGrandmother",
+        "GreatGrandchild",
+        "NaturalGrandchild",
+        "AdoptiveSister",
+        "IdenticalTwinSibling",
+        "FraternalTwinSibling",
+        "NaturalSibling",
+        "AdoptiveMother",
+        "NaturalSister",
+        "Stepson",
+        "MaternalGreatAunt",
+        "FosterMother",
+        "MaternalHalfSibling",
+        "FemaleCousin",
+        "NaturalMother",
+        "AdoptiveBrother",
+        "Sibling",
+        "FullBrother",
+        "Father-in-law",
+        "Stepbrother",
+        "Stepmother",
+        "NotReported",
+        "PaternalGrandfather",
+        "Son",
+        "AdoptedSon",
+        "Refused",
+        "MaternalGreatGrandparent",
+        "NaturalGrandmother",
+        "PaternalGreatGrandparent",
+        "Husband",
+        "PaternalHalfSibling",
+        "PaternalGrandparent",
+        "Grandmother",
+        "Cousin",
+        "NaturalGrandfather",
+        "NaturalSon",
+        "NaturalChild",
+        "PaternalFirstCousinOnceRemoved",
+        "Daughter-in-law",
+        "NaturalBrother",
+        "FosterSon",
+        "MaternalUncle",
+        "GrandNiece",
+        "PaternalHalfSister",
+        "PaternalFirstCousin",
+        "NaturalParent",
+        "DomesticPartner",
+        "NieceSecondDegreeRelative",
+        "Brother",
+        "Wife",
+        "MaternalHalfBrother",
+        ""
+      ]
+    },
+    "Relationship Primary Diagnosis": {
+      "enum": [
+        "UterineCancer",
+        "TongueCancer",
+        "HematologicCancer",
+        "LaryngealCancer",
+        "KaposiSarcoma",
+        "SkinCancer",
+        "ProstateCancer",
+        "ThroatCancer",
+        "Melanoma",
+        "WilmsTumor",
+        "PancreasCancer",
+        "CervicalCancer",
+        "OvarianCancer",
+        "Cancer",
+        "Neuroblastoma",
+        "TesticularCancer",
+        "GynecologicCancer",
+        "LungCancer",
+        "Mesothelioma",
+        "AdrenalGlandCancer",
+        "GallbladderCancer",
+        "Sarcoma",
+        "BloodCancer",
+        "EsophagealCancer",
+        "BrainCancer",
+        "Rhabdomyosarcoma",
+        "Lymphoma",
+        "CNSCancer",
+        "BileDuctCancer",
+        "KidneyCancer",
+        "ColorectalCancer",
+        "TonsillarCancer",
+        "EwingSarcoma",
+        "BreastCancer",
+        "GastricCancer",
+        "HeadandNeckCancer",
+        "LymphNodeCancer",
+        "Leukemia",
+        "SpleenCancer",
+        "BoneCancer",
+        "BasalCellCancer",
+        "MultipleMyeloma",
+        "Osteosarcoma",
+        "LiverCancer",
+        "RectalCancer",
+        "NotReported",
+        "ThyroidCancer",
+        "Chondrosarcoma",
+        "BladderCancer",
+        "Unknown",
+        "Glioblastoma",
+        ""
+      ]
+    }
+  },
+  "required": [
+    "Component",
+    "HTAN Patient ID"
+  ],
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "Relative with Cancer History": {
+            "enum": [
+              "Yes - Cancer History Relative"
+            ]
+          }
+        },
+        "required": [
+          "Relative with Cancer History"
+        ]
+      },
+      "then": {
+        "properties": {
+          "Relatives with Cancer History Count": {}
+        },
+        "required": [
+          "Relatives with Cancer History Count"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "Relative with Cancer History": {
+            "enum": [
+              "Yes - Cancer History Relative"
+            ]
+          }
+        },
+        "required": [
+          "Relative with Cancer History"
+        ]
+      },
+      "then": {
+        "properties": {
+          "Relationship Gender": {
+            "enum": [
+              "unspecified",
+              "Not Reported",
+              "female",
+              "Unknown",
+              "male",
+              ""
+            ]
+          }
+        },
+        "required": [
+          "Relationship Gender"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "Relative with Cancer History": {
+            "enum": [
+              "Yes - Cancer History Relative"
+            ]
+          }
+        },
+        "required": [
+          "Relative with Cancer History"
+        ]
+      },
+      "then": {
+        "properties": {
+          "Relationship Age at Diagnosis": {}
+        },
+        "required": [
+          "Relationship Age at Diagnosis"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "Relative with Cancer History": {
+            "enum": [
+              "Yes - Cancer History Relative"
+            ]
+          }
+        },
+        "required": [
+          "Relative with Cancer History"
+        ]
+      },
+      "then": {
+        "properties": {
+          "Relationship Type": {
+            "enum": [
+              "Paternal Uncle",
+              "Grand Nephew",
+              "Spouse",
+              "Half Sister",
+              "Nephew",
+              "Identical Twin Brother",
+              "Mother-in-law",
+              "Aunt",
+              "Foster Father",
+              "Unrelated",
+              "Identical Twin Sister",
+              "Maternal First Cousin",
+              "Adopted Daughter",
+              "Natural Father",
+              "Mother",
+              "Adoptive Father",
+              "Ward",
+              "Stepsister",
+              "Maternal Aunt",
+              "Child",
+              "Son-in-law",
+              "Brother-in-law",
+              "Full Sister",
+              "Stepdaughter",
+              "Twin Sibling",
+              "Granddaughter",
+              "Half Sibling",
+              "Sister",
+              "Paternal Great Uncle",
+              "Fraternal Twin Brother",
+              "Niece",
+              "Fraternal Twin Sister",
+              "Paternal Aunt",
+              "Foster Sister",
+              "Grandfather",
+              "Paternal Grandmother",
+              "Maternal First Cousin Once Removed",
+              "Legal Guardian",
+              "First Cousin",
+              "Paternal Great Aunt",
+              "Foster Brother",
+              "Grandchild",
+              "Father",
+              "First Cousin Once Removed",
+              "Step Child",
+              "Parent",
+              "Maternal Grandparent",
+              "Paternal Half Brother",
+              "Foster Daughter",
+              "Daughter",
+              "Natural Daughter",
+              "Other",
+              "Grandparent",
+              "Sister-in-law",
+              "Stepfather",
+              "Maternal Great Uncle",
+              "Maternal Grandfather",
+              "Uncle",
+              "Half Brother",
+              "Male Cousin",
+              "Natural Grandparent",
+              "Step Sibling",
+              "Grandson",
+              "Unknown",
+              "Maternal Half Sister",
+              "Maternal Grandmother",
+              "Great Grandchild",
+              "Natural Grandchild",
+              "Adoptive Sister",
+              "Identical Twin Sibling",
+              "Fraternal Twin Sibling",
+              "Natural Sibling",
+              "Adoptive Mother",
+              "Natural Sister",
+              "Stepson",
+              "Maternal Great Aunt",
+              "Foster Mother",
+              "Maternal Half Sibling",
+              "Female Cousin",
+              "Natural Mother",
+              "Adoptive Brother",
+              "Sibling",
+              "Full Brother",
+              "Father-in-law",
+              "Stepbrother",
+              "Stepmother",
+              "Not Reported",
+              "Paternal Grandfather",
+              "Son",
+              "Adopted Son",
+              "Refused",
+              "Maternal Great Grandparent",
+              "Natural Grandmother",
+              "Paternal Great Grandparent",
+              "Husband",
+              "Paternal Half Sibling",
+              "Paternal Grandparent",
+              "Grandmother",
+              "Cousin",
+              "Natural Grandfather",
+              "Natural Son",
+              "Natural Child",
+              "Paternal First Cousin Once Removed",
+              "Daughter-in-law",
+              "Natural Brother",
+              "Foster Son",
+              "Maternal Uncle",
+              "Grand Niece",
+              "Paternal Half Sister",
+              "Paternal First Cousin",
+              "Natural Parent",
+              "Domestic Partner",
+              "Niece Second Degree Relative",
+              "Brother",
+              "Wife",
+              "Maternal Half Brother",
+              ""
+            ]
+          }
+        },
+        "required": [
+          "Relationship Type"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "Relative with Cancer History": {
+            "enum": [
+              "Yes - Cancer History Relative"
+            ]
+          }
+        },
+        "required": [
+          "Relative with Cancer History"
+        ]
+      },
+      "then": {
+        "properties": {
+          "Relationship Primary Diagnosis": {
+            "enum": [
+              "Uterine Cancer",
+              "Tongue Cancer",
+              "Hematologic Cancer",
+              "Laryngeal Cancer",
+              "Kaposi Sarcoma",
+              "Skin Cancer",
+              "Prostate Cancer",
+              "Throat Cancer",
+              "Melanoma",
+              "Wilms Tumor",
+              "Pancreas Cancer",
+              "Cervical Cancer",
+              "Ovarian Cancer",
+              "Cancer",
+              "Neuroblastoma",
+              "Testicular Cancer",
+              "Gynecologic Cancer",
+              "Lung Cancer",
+              "Mesothelioma",
+              "Adrenal Gland Cancer",
+              "Gallbladder Cancer",
+              "Sarcoma",
+              "Blood Cancer",
+              "Esophageal Cancer",
+              "Brain Cancer",
+              "Rhabdomyosarcoma",
+              "Lymphoma",
+              "CNS Cancer",
+              "Bile Duct Cancer",
+              "Kidney Cancer",
+              "Colorectal Cancer",
+              "Tonsillar Cancer",
+              "Ewing Sarcoma",
+              "Breast Cancer",
+              "Gastric Cancer",
+              "Head and Neck Cancer",
+              "Lymph Node Cancer",
+              "Leukemia",
+              "Spleen Cancer",
+              "Bone Cancer",
+              "Basal Cell Cancer",
+              "Multiple Myeloma",
+              "Osteosarcoma",
+              "Liver Cancer",
+              "Rectal Cancer",
+              "Not Reported",
+              "Thyroid Cancer",
+              "Chondrosarcoma",
+              "Bladder Cancer",
+              "Unknown",
+              "Glioblastoma",
+              ""
+            ]
+          }
+        },
+        "required": [
+          "Relationship Primary Diagnosis"
+        ]
+      }
+    }
+  ]
+}
