@@ -6,21 +6,29 @@ import time
 import synapseclient
 from synapseclient import File
 
-from SynapseStorage import SynapseStorage
+from ingresspipe.config.config import storage
 
-syn_store = SynapseStorage
+from ingresspipe.synapse.store import SynapseStorage
+
+USERNAME = storage["Synapse"]["username"]
+PASSWORD = storage["Synapse"]["password"]
+
+syn = synapseclient.Synapse()
+syn.login(USERNAME, PASSWORD, rememberMe=False)
+
+syn_store = SynapseStorage(syn=syn)
 
 ### "Testing retrieval of project list from Synapse
-get_projects_list = syn_store.getStorageProjects
+# get_projects_list = syn_store.getStorageProjects
 
 ###print("Testing retrieval of folder list within a given storage project from Synapse")
-get_folder_list = syn_store.getStorageDatasetsInProject
+# get_folder_list = syn_store.getStorageDatasetsInProject
 
 ### print("Testing retrieval of file list within a given storage dataseyt from Synapse")
-get_file_list = syn_store.getFilesInStorageDataset
+# get_file_list = syn_store.getFilesInStorageDataset
 
 ### print("Testing association of antities with annotation from manifest")
-get_associated_manifestId = syn_store.associateMetadataWithFiles
+# get_associated_manifestId = syn_store.associateMetadataWithFiles
 
 ### getting all manifests associated with a project accessible by user
 ### returns a list, empty if manifest isn't there

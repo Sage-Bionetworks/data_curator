@@ -1,7 +1,12 @@
 import synapseclient
 
+from ingresspipe.config.config import storage
+
+USERNAME = storage["Synapse"]["username"]
+PASSWORD = storage["Synapse"]["password"]
+
 syn = synapseclient.Synapse()
-syn_login = syn.login
+syn.login(USERNAME, PASSWORD, rememberMe=False)
 syn_getUserProfile = syn.getUserProfile
 syn_tableQuery = syn.tableQuery
 syn_get = syn.get
