@@ -29,11 +29,19 @@ Install the backend (`ingresspipe` package) within the conda virtual environment
 
 Note: _For more instructions see, [Data Ingress Pipeline Docs](https://github.com/Sage-Bionetworks/HTAN-data-pipeline/tree/organized-into-packages#readme)_.
 
-To verify that the backend is installed do (either of) the following:
+To verify that the backend is installed do either of the following:
+
+A.
 
     pip list
 
-See if you can find the `ingresspipe` package in the list of packages installed using `pip`.
+or 
+
+    conda list
+   
+See if you can find the `ingresspipe` package in the list of packages installed.
+
+B.
 
 Run any example(s) from within the `ingresspipe` package as follows:
 
