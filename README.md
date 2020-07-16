@@ -13,11 +13,11 @@ Notes:
 2. Once you run the app it will create a `token.pickle` file within the same directory, and that file will be used for subsequent authorizations/verifications to the Google services.
 3. Configure the `config.py` file with your Syanpse credentials (_username/password_) found in `ingresspipe/config/config.py`.
 
-Create a conda environment in the cloned directory:
+Create a conda environment in the cloned directory from the environment.yml which has all the required package dependencies:
 
-    conda create --name data_curator_env
+    conda env create -f environment.yml
 
-Here we are calling our conda environment `data_curator_env`. You can change it anything you like, but please note that you will need to make changes accordingly in the `app.R` file.
+Here our conda environment name `data_curator_env` set from the environment.yml . You can change it anything you like, but please note that you will need to make changes accordingly in the `app.R` file.
 
 Activate the `data_curator_env` environment:
 
