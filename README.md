@@ -5,7 +5,7 @@ Follow the steps below to make sure the _Data Curator App_ (frontend) is fully s
 
 Navigate to the location where you want to setup the application (i.e., the Shiny Server). Clone the code on this github branch (_shiny-server-packaged-backend_):
 
-    git clone --single-branch --branch shiny-server-packaged-backend https://github.com/sujaypatil96/HTAN_data_curator.git
+    git clone --single-branch --branch shiny-server-packaged-backend https://github.com/Sage-Bionetworks/HTAN_data_curator.git
 
 Notes:
 
