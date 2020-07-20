@@ -11,7 +11,6 @@ SYN_PWD = storage["Synapse"]["password"]
 
 def download_creds_file():
     if not os.path.exists("./credentials.json"):
-    
         print("Retrieving Google API credentials from Synapse...")
         syn = synapseclient.Synapse()
         syn.login(SYN_UNAME, SYN_PWD, rememberMe=False)

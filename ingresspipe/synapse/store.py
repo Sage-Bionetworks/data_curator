@@ -420,8 +420,6 @@ class SynapseStorage(object):
                 if anno_k in metadataSyn:
                     annos[anno_k] = metadataSyn[anno_k]
 
-            print(annos)
-
             self.syn.set_annotations(annos)
             # self.syn.set_annotations(metadataSyn) -- deprecated code
 
@@ -445,22 +443,3 @@ class SynapseStorage(object):
         manifestSynapseFileId = self.syn.store(manifestSynapseFile).id
 
         return manifestSynapseFileId
-
-# if __name__ == "__main__":
-#     # create an instance of synapseclient.Synapse() and login
-#     syn = synapseclient.Synapse()
-
-#     try:
-#         syn.login("sujaypatil", "Sujay123@#@")
-#     except synapseclient.core.exceptions.SynapseNoCredentialsError:
-#         print("Please make sure the 'username' and 'password' keys in config have been filled out.")
-#     except synapseclient.core.exceptions.SynapseAuthenticationError:
-#         print("Please make sure the credentials in the config file are correct.")
-
-#     syn_store = SynapseStorage(syn=syn)
-
-#     # testing the association of entities with annotation(s) from manifest
-#     # synapse ID of "HTAN_CenterA_FamilyHistory" dataset and associating with it a validated manifest
-#     print("Testing association of entities with annotation from manifest...")
-#     manifest_syn_id = syn_store.associateMetadataWithFiles("./data/manifests/synapse_storage_manifest.csv", "syn21984120")
-#     print(manifest_syn_id)
