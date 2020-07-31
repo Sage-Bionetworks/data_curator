@@ -51,4 +51,4 @@ This will prompt you with a URL on your console. Copy and paste the URL in your 
 
 _Note:_
 
-- In order to run the `synapse.store_usage` example, you need to configure your Synapse credentials in the `.synapseConfig` file (which can be found in the `HTAN-data-pipeline` directory), as described [here](https://github.com/Sage-Bionetworks/HTAN-data-pipeline/tree/organized-into-packages#configure-synapse-credentials).
+- In order to run the `ingresspipe/synapse/example/store_usage.py` example, you need to configure your Synapse credentials in the `.synapseConfig` file (which can be found in the `HTAN-data-pipeline` directory), as described [here](https://github.com/Sage-Bionetworks/HTAN-data-pipeline/tree/organized-into-packages#configure-synapse-credentials).
