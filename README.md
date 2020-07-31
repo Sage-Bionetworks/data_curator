@@ -41,7 +41,11 @@ See if you can find the `ingresspipe` package in the list of packages installed.
 
     `synapse get syn21088684`
 
-_Note: `syn21088684` is the synapse ID of the `credentials.json` file/entity on Synapse._
+_Notes:_ 
+
+- `syn21088684` is the synapse ID of the `credentials.json` file/entity on Synapse.
+
+- You need to have access to the above mentioned synapse entity in order to be able to download it through the client. Please contact: milen.nikolov@sagebase.org for access to the file on Synapse.
 
 4. Next, we need to make sure we have the `token.pickle` file which is also necessary for authentication. To acquire that, run the `metadata_usage` example as follows:
 
