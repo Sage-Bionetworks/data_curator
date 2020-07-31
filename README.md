@@ -17,7 +17,7 @@ Activate the `data_curator_env` environment:
 
     conda activate data_curator_env
 
-======
+----------
 
 The next step is to install the latest release of the [Data Ingress Pipeline](https://github.com/Sage-Bionetworks/HTAN-data-pipeline/tree/organized-into-packages) (backend) and tie it together with this frontend. To do so carry out the following steps:
 
@@ -27,15 +27,13 @@ The next step is to install the latest release of the [Data Ingress Pipeline](ht
 
 2. Navigate into the created `HTAN-data-pipeline` directory. Install the backend (`ingresspipe` package) within the conda virtual environment by running:
 
-    pip install -e .
+    `pip install -e .`
 
 _Notes:_
 
 - You need to be within the `HTAN-data-pipeline` directory in order to run the command as above. Else you can install the package by changing from anywhere else by changing the `.` to whatever the path is to the to where you have downloaded the package (`pip install -e /path/to/package`).
 
-- To verify that the backend do this:
-
-    `pip list`
+- To verify that the backend do this: `pip list`
 
 See if you can find the `ingresspipe` package in the list of packages installed.
 
@@ -54,5 +52,3 @@ This will prompt you with a URL on your console. Copy and paste the URL in your 
 _Note:_
 
 - In order to run the `synapse.store_usage` example, you need to configure your Synapse credentials in the `.synapseConfig` file (which can be found in the `HTAN-data-pipeline` directory), as described [here](https://github.com/Sage-Bionetworks/HTAN-data-pipeline/tree/organized-into-packages#configure-synapse-credentials).
-
-======
