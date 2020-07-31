@@ -1,1 +1,0 @@
-from ingresspipe.manifest.generator import ManifestGenerator
