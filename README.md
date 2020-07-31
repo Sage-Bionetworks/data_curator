@@ -33,7 +33,7 @@ _Notes:_
 
 - You need to be within the `HTAN-data-pipeline` directory in order to run the command as above. Else you can install the package by changing from anywhere else by changing the `.` to whatever the path is to the to where you have downloaded the package (`pip install -e /path/to/package`).
 
-- To verify that the backend do this: `pip list`
+- To verify that the backend is installed, do this: `pip list`
 
 See if you can find the `ingresspipe` package in the list of packages installed.
 
