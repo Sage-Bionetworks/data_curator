@@ -17,13 +17,13 @@ Activate the `data_curator_env` environment:
 
     conda activate data_curator_env
 
-----------
+-------
 
 The next step is to install the latest release of the [Data Ingress Pipeline](https://github.com/Sage-Bionetworks/HTAN-data-pipeline/tree/organized-into-packages) (backend) and tie it together with this frontend. To do so carry out the following steps:
 
 1. Clone the repo from this [location](https://github.com/Sage-Bionetworks/HTAN-data-pipeline/tree/organized-into-packages), by running the following command:
 
-    git clone --single-branch --branch organized-into-packages https://github.com/Sage-Bionetworks/HTAN-data-pipeline.git
+    `git clone --single-branch --branch organized-into-packages https://github.com/Sage-Bionetworks/HTAN-data-pipeline.git`
 
 2. Navigate into the created `HTAN-data-pipeline` directory. Install the backend (`ingresspipe` package) within the conda virtual environment by running:
 
@@ -39,13 +39,13 @@ See if you can find the `ingresspipe` package in the list of packages installed.
 
 3. Then, you need to download the `credentials.json` file, which is the credentials file that is used in order to authenticate user access to Google API services (such as gDrive, gSheets, etc.). After the step above you will have installed the `synapseclient` package via pip which has a powerful command line utility that lets you access files on Synapse. To download the `credentials.json` file, run the below command (within `HTAN-data-pipeline`):
 
-    synapse get syn21088684
+    `synapse get syn21088684`
 
 _Note: `syn21088684` is the synapse ID of the `credentials.json` file/entity on Synapse._
 
 4. Next, we need to make sure we have the `token.pickle` file which is also necessary for authentication. To acquire that, run the `metadata_usage` example as follows:
 
-    python ingresspipe/models/examples/metadata_usage.py
+    `python ingresspipe/models/examples/metadata_usage.py`
 
 This will prompt you with a URL on your console. Copy and paste the URL in your browser. Use your email ID to go through the authentication process and allow the application/script (called _Quickstart_) to access Drive/Sheets/etc. You will generate an authentication/authorization code at the end. Copy and paste the code in the console. The `token.pickle` file will automatically get downloaded to the required location after that.
 
