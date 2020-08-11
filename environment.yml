@@ -91,5 +91,6 @@ dependencies:
     - urllib3==1.25.9
     - wrapt==1.12.1
     - zipp==3.1.0
+    - pyyaml==5.3.1
 prefix: /home/xdoan/bin/home/xdoan/bin/miniconda3/envs/data_curator_env
 

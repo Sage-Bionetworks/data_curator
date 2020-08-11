@@ -1,13 +1,23 @@
 # import json
-# import os
+import os
+import sys
 from ingresspipe.models.metadata import MetadataModel
 from ingresspipe.manifest.generator import ManifestGenerator
+
+from ingresspipe.utils.config_utils import load_yaml
+from definitions import ROOT_DIR, CONFIG_PATH, CREDS_PATH, DATA_PATH
+
+# load config data from yaml file into config_data dict
+config_data = load_yaml(CONFIG_PATH)
+
+if config_data is None:
+    sys.exit("Your config file may be empty.")
 
 #inputMModelLocation = "./schemas/exampleSchemaReq.jsonld"
 #inputMModelLocation = "./HTAN-data-pipeline/schemas/scRNASeq.jsonld"
 # inputMModelLocation = "./HTAN-data-pipeline/schemas/HTAPP.jsonld"
-inputMModelLocation = "./data/schema_org_schemas/HTAN.jsonld"
-inputMModelLocationType = "local"
+inputMModelLocation = os.path.join(DATA_PATH, config_data["model"]["input"]["location"])
+inputMModelLocationType = config_data["model"]["input"]["file_type"]
 # datasetType = "scRNASeq"
 # modelType = "TableA"
 
