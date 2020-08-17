@@ -1,6 +1,7 @@
 # HTAN Data Curator App
 ## Development Environment Setup
 
+### Data Curator App Setup (frontend)
 Follow the steps below to make sure the _Data Curator App_ (frontend) is fully setup to work with the [Data Ingress Pipeline](https://github.com/Sage-Bionetworks/HTAN-data-pipeline/tree/organized-into-packages) (backend):
 
 Navigate to the location where you want to setup the application (i.e., the _Shiny Server_). Clone the code on this github branch (_shiny-server-packaged-backend_):
@@ -11,48 +12,53 @@ Create a conda environment in the cloned directory from the `environment.yml` fi
 
     conda env create -f environment.yml
 
-Here, our conda environment name `data_curator_env` is set from the `environment.yml` file . You can change it anything you like, but please note that you will need to make changes accordingly in the `app.R` file.
+Here, our conda environment name `data_curator_env` is set from the `environment.yml` file .
 
 Activate the `data_curator_env` environment:
 
     conda activate data_curator_env
+    
+_Note_:
+- You can change the name of your conda environment inside `environment.yml` or even use another environment, but please note that you will need to make changes accordingly in the `app.R` file line 16.
 
 -------
 
-The next step is to install the latest release of the [Data Ingress Pipeline](https://github.com/Sage-Bionetworks/HTAN-data-pipeline/tree/organized-into-packages) (backend) and tie it together with this frontend. To do so carry out the following steps:
+### Data Ingress Pipeline Setup (backend)
 
-1. Clone the repo from this [location](https://github.com/Sage-Bionetworks/HTAN-data-pipeline/tree/organized-into-packages), by running the following command:
+The next step is to install the latest release of the [Data Ingress Pipeline](https://github.com/Sage-Bionetworks/HTAN-data-pipeline/tree/organized-into-packages) (backend) as the folder `HTAN-data-pipeline` inside of the `HTAN_data_curator folder` and tie it together with this frontend. To do so carry out the following steps:
+
+1. Inside the HTAN_data_curator folder, clone the repo from this [location](https://github.com/Sage-Bionetworks/HTAN-data-pipeline/tree/organized-into-packages), by running the following command:
 
     `git clone --single-branch --branch organized-into-packages https://github.com/Sage-Bionetworks/HTAN-data-pipeline.git`
+
+This creates a folder named `HTAN-data-pipeline` inside the the `HTAN_data_curator folder` .
 
 2. Navigate into the created `HTAN-data-pipeline` directory. Install the backend (`ingresspipe` package) within the conda virtual environment by running:
 
     `pip install -e .`
 
-_Notes:_
+To verify that the backend is installed, do this: `pip list`
 
-- You need to be within the `HTAN-data-pipeline` directory in order to run the command as above. Else you can install the package by changing from anywhere else by changing the `.` to whatever the path is to the to where you have downloaded the package (`pip install -e /path/to/package`).
+If you can find the `ingresspipe` package in the list of packages installed it was successful.
 
-- To verify that the backend is installed, do this: `pip list`
 
-See if you can find the `ingresspipe` package in the list of packages installed.
-
-3. Then, you need to download the `credentials.json` file, which is the credentials file that is used in order to authenticate user access to Google API services (such as gDrive, gSheets, etc.). After the step above you will have installed the `synapseclient` package via pip which has a powerful command line utility that lets you access files on Synapse. To download the `credentials.json` file, run the below command (within `HTAN-data-pipeline`):
+3. Obtain the `credentials.json` file in `HTAN-data-pipeline` to authenticate user access to Google API services which create the metadata templates. If you do not already have this file, make sure you are authorized (see Notes below) and run the below command within `HTAN-data-pipeline` to download the HTAN credentials file `syn21088684` through the `synapseclient` (part of the backend):
 
     `synapse get syn21088684`
 
-_Notes:_ 
 
-- `syn21088684` is the synapse ID of the `credentials.json` file/entity on Synapse.
-
-- You need to have access to the above mentioned synapse entity in order to be able to download it through the client. Please contact: milen.nikolov@sagebase.org for access to the file on Synapse.
-
-4. Next, we need to make sure we have the `token.pickle` file which is also necessary for authentication. To acquire that, run the `metadata_usage` example as follows:
+4. Obtain the `token.pickle` file in `HTAN-data-pipeline` which is also necessary for authentication. If you do not already have this file run the `metadata_usage` example as follows inside `HTAN-data-pipeline`:
 
     `python ingresspipe/models/examples/metadata_usage.py`
 
-This will prompt you with a URL on your console. Copy and paste the URL in your browser. Use your email ID to go through the authentication process and allow the application/script (called _Quickstart_) to access Drive/Sheets/etc. You will generate an authentication/authorization code at the end. Copy and paste the code in the console. The `token.pickle` file will automatically get downloaded to the required location after that.
+This will prompt you with a URL on your console. Copy and paste the URL in your browser. Use your email associated with the Google account to go through the authentication process and allow the application/script (called _Quickstart_) to access Drive/Sheets/etc. You will receive an authentication/authorization code, copy and paste the code in the console. The `token.pickle` file will automatically be downloaded to the required location after that.
 
-_Note:_
+_Notes:_
 
-- In order to run the `ingresspipe/synapse/example/store_usage.py` example, you need to configure your Synapse credentials in the `.synapseConfig` file (which can be found in the `HTAN-data-pipeline` directory), as described [here](https://github.com/Sage-Bionetworks/HTAN-data-pipeline/tree/organized-into-packages#configure-synapse-credentials).
+- You can install the package by changing from anywhere else by changing the `.` to whatever the path is to the to where you have downloaded the package (`pip install -e /path/to/package`).
+
+- `syn21088684` is the Synapse ID of the HTAN specific `credentials.json` file on Synapse that corresponds to the Google service account that creates HTAN templates.
+
+- You need to be authorized to download protected Synapse files such as credentials. Please contact milen.nikolov@sagebase.org for access to the HTAN credentials.
+
+- If you want to test the backend you can run other things inside `HTAN-data-pipeline`, but in order to run the `ingresspipe/synapse/example/store_usage.py` example, you need to configure your Synapse credentials in the `.synapseConfig` file (which can be found in the `HTAN-data-pipeline` directory), as described [here](https://github.com/Sage-Bionetworks/HTAN-data-pipeline/tree/organized-into-packages#configure-synapse-credentials).
