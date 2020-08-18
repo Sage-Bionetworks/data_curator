@@ -51,7 +51,7 @@ If you can find the `ingresspipe` package in the list of packages installed it w
 
     `python ingresspipe/models/examples/metadata_usage.py`
 
-This will prompt you with a URL on your console. Copy and paste the URL in your browser. Use your email associated with the Google account to go through the authentication process and allow the application/script (called _Quickstart_) to access Drive/Sheets/etc. You will receive an authentication/authorization code, copy and paste the code in the console. The `token.pickle` file will automatically be downloaded to the required location after that.
+This will prompt you with a URL on your console to Google's authorization process. Follow that and upon completion the `token.pickle` file will automatically be downloaded to the required location.
 
 _Notes:_
 
