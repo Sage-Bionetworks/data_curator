@@ -31,7 +31,7 @@ The next step is to install the latest release of the [Data Ingress Pipeline](ht
 
     `git clone --single-branch --branch organized-into-packages https://github.com/Sage-Bionetworks/HTAN-data-pipeline.git`
 
-This creates a folder named `HTAN-data-pipeline` inside the the `HTAN_data_curator folder` .
+This creates a folder named `HTAN-data-pipeline` inside the the `HTAN_data_curator folder`.
 
 2. Navigate into the created `HTAN-data-pipeline` directory. Install the backend (`ingresspipe` package) within the conda virtual environment by running:
 
