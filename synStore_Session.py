@@ -6,7 +6,7 @@ import time
 import synapseclient
 from synapseclient import File
 
-from ingresspipe.synapse.store import SynapseStorage
+from schematic.synapse.store import SynapseStorage
 
 syn_store = SynapseStorage
 

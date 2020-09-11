@@ -19,7 +19,7 @@ reticulate::import("sys")
 source_python("synLoginFun.py")
 source_python("metadataModelFuns.py")
 
-# ingresspipe <- reticulate::import("ingresspipe")
+# schematic <- reticulate::import("schematic")
 
 # source("functions.R")
 
