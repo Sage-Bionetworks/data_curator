@@ -311,7 +311,7 @@ output$manifest_display_name <- renderUI({
 
 })
 
-schema_to_display_lookup <- config$manifest_schema
+schema_to_display_lookup <- data.frame(schema_name, display_name)
 
   ###shows new metadata link when get gsheets template button pressed OR updates old metadata if is exists 
   observeEvent(
