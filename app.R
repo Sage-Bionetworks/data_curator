@@ -311,7 +311,7 @@ output$manifest_display_name <- renderUI({
 
 })
 
-schema_to_display_lookup <- config$manifest_schemas
+schema_to_display_lookup <- data.frame(schema_name, display_name)
 
   ###shows new metadata link when get gsheets template button pressed OR updates old metadata if is exists 
   observeEvent(
@@ -349,9 +349,6 @@ schema_to_display_lookup <- config$manifest_schemas
         file_namedList[file_list[[i]][[2]]] <- file_list[[i]][[1]]
       }
       filename_list <- names(file_namedList)
-      
-      cat(file=stderr(), input$template_type)
-      cat(file=stderr(), template_type)
 
       manifest_url <- metadata_model$getModelManifest(paste0("NF ", input$template_type), template_type, filenames = as.list(filename_list))
       ### make sure not scalar if length of list is 1 in R
