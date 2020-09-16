@@ -10,3 +10,13 @@ www/bootstrap.css
 www/bootstrap.min.css
 www/getdata.js
 www/message-handler.js
+files/synapse_storage_manifest.csv
+.Rproj.user
+HTAN-data-pipeline/schema_explorer/__pycache__/*
+HTAN-data-pipeline/__pycache__/*
+HTAN-data-pipeline/.DS_Store
+HTAN-data-pipeline/credentials.json
+HTAN-data-pipeline/token.pickle
+credentials.json
+token.pickle
+**/__pychache__

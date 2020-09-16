@@ -1,8 +1,10 @@
-
+###!!!! use synStore_Session for server instead
 import synapseclient
 from SynapseStorage import SynapseStorage
 
-storage_fileview = "syn20446927"
+syn_get = syn.get
+
+storage_fileview = "syn16858331"
 
 syn = synapseclient.Synapse()
 syn.login()
@@ -16,7 +18,7 @@ get_projects_list = syn_store.getStorageProjects()
 #"syn19557917"
 get_folder_list = syn_store.getStorageDatasetsInProject
 
-### print("Testing retrieval of file list within a given storage dataseyt from Synapse")
+### print("Testing retrieval of file list within a given storage dataset from Synapse")
 # "syn19557948"
 get_file_list = syn_store.getFilesInStorageDataset
 
@@ -24,5 +26,5 @@ get_file_list = syn_store.getFilesInStorageDataset
 # "./synapse_storage_manifest.csv", "syn20685746"
 get_manifest_syn_id = syn_store.associateMetadataWithFiles
 
-syn_get = syn.get
+
 
