@@ -25,8 +25,6 @@ source_python("metadataModelFuns.py")
 
 #########
 
-source(file= "./functions.R")
-
 ui <- dashboardPage(
   skin = "purple",
   dashboardHeader(
@@ -236,6 +234,7 @@ server <- function(input, output, session) {
     ### updates project dropdown
     updateSelectizeInput(session, 'var', choices = names(projects_namedList))
     removeNotification(id = "processing",)
+
   })
 
 
@@ -312,7 +311,7 @@ output$manifest_display_name <- renderUI({
 
 })
 
-schema_to_display_lookup <- config$manifest_schema
+schema_to_display_lookup <- config$manifest_schemas
 
   ###shows new metadata link when get gsheets template button pressed OR updates old metadata if is exists 
   observeEvent(
@@ -350,9 +349,11 @@ schema_to_display_lookup <- config$manifest_schema
         file_namedList[file_list[[i]][[2]]] <- file_list[[i]][[1]]
       }
       filename_list <- names(file_namedList)
+      
+      cat(file=stderr(), input$template_type)
+      cat(file=stderr(), template_type)
 
-
-      manifest_url <- metadata_model$getModelManifest(paste0("HTAN ", input$template_type), template_type, filenames = as.list(filename_list))
+      manifest_url <- metadata_model$getModelManifest(paste0("NF ", input$template_type), template_type, filenames = as.list(filename_list))
       ### make sure not scalar if length of list is 1 in R
       ## add in the step to convert names later ###
 
@@ -371,7 +372,7 @@ schema_to_display_lookup <- config$manifest_schema
       ### if the manifest already exists
       manifest_entity <- syn_get(existing_manifestID)
       # prepopulatedManifestURL = mm.populateModelManifest("test_update", entity.path, component)
-      manifest_url <- metadata_model$populateModelManifest(paste0("HTAN ", input$template_type), manifest_entity$path, template_type)
+      manifest_url <- metadata_model$populateModelManifest(paste0("NF ", input$template_type), manifest_entity$path, template_type)
       toggle('text_div3')
 
       output$text <- renderUI({
@@ -424,7 +425,7 @@ schema_to_display_lookup <- config$manifest_schema
     if (length(annotation_status) != 0) {
 
       ## if error not empty aka there is an error
-      filled_manifest <- metadata_model$populateModelManifest(paste0("HTAN ", input$template_type), input$file1$datapath, template_type)
+      filled_manifest <- metadata_model$populateModelManifest(paste0("NF ", input$template_type), input$file1$datapath, template_type)
 
       ### create list of string names for the error messages if there is more than one at a time 
       str_names <- c()
