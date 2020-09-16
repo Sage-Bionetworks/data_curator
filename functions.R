@@ -48,7 +48,7 @@ get_filename_list <- function(synStore_obj, folder_synID) {
 #   ### project to folder dataframe generation
 #   # get fileview of folders and files
 #   syn <- syn_login(sessionToken = sessionToken)
-#   tab <- syn_tableQuery("select * from syn20446927", resultsAs='csv')
+#   tab <- syn_tableQuery("select * from syn16858331", resultsAs='csv')
 #   tab <- read.csv(tab$filepath)
 #   # get just folders and match parent ID to project name
 #   projects_df <- stack(projects_namedList)
@@ -77,7 +77,7 @@ get_filename_list <- function(synStore_obj, folder_synID) {
 #   proj_folder_manifest <- inner_join(folders_manifest_df, proj_folder_df, by = "id")
 
 #   ### get the manifest synID
-#   # entity <- syn_tableQuery(  ("select id, name from syn20446927 where name = 'synapse_storage_manifest.csv' " ), resultsAs='csv'  )
+#   # entity <- syn_tableQuery(  ("select id, name from syn16858331 where name = 'synapse_storage_manifest.csv' " ), resultsAs='csv'  )
 #   # entity <- read.csv(entity$filepath)
 #   # 
 #   # manifest_path_df <- data.frame()

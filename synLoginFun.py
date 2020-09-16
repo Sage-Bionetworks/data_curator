@@ -11,7 +11,7 @@ syn_get = syn.get
 def get_storage_manifest_path (token, folderID):
     syn = synapseclient.Synapse()
     syn.login(sessionToken = token)
-    entity = syn.tableQuery(  ("select id, name from syn20446927 where parentId = '"+ folderID + "' " ) )
+    entity = syn.tableQuery(  ("select id, name from syn16858331 where parentId = '"+ folderID + "' " ) )
     df = entity.asDataFrame()
     if ("synapse_storage_manifest.csv" in df.loc[:,'name'].values ) == True:
         row = df.loc[df['name'] == "synapse_storage_manifest.csv"]

@@ -222,7 +222,7 @@ server <- function(input, output, session) {
     })
 
     ### updating global vars with values for projects
-    synStore_obj <<- syn_store("syn20446927", token = input$cookie)
+    synStore_obj <<- syn_store("syn16858331", token = input$cookie)
 
     # get_projects_list(synStore_obj)
     projects_list <<- syn_store$getStorageProjects(synStore_obj)
