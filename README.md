@@ -1,4 +1,13 @@
-# HTAN Data Curator App
+# NF Data Curator App
+
+## Making changes 
+
+Please make PRs against `develop` (no review needed, but PR for easy revert). Once they've been deployed and tested, PR against `production`.
+
+For the latest documentation on how to deploy this app and backend, please visit https://github.com/Sage-Bionetworks/HTAN_data_curator and  https://github.com/Sage-Bionetworks/schematic.
+
+We've made forks of both of these repositories here and here: https://github.com/Sage-Bionetworks/schematic.
+
 ## Development Environment Setup
 
 ### Data Curator App Setup (frontend)
