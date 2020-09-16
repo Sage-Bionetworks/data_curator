@@ -6,7 +6,7 @@ Please make PRs against `develop` (no review needed, but PR for easy revert). On
 
 For the latest documentation on how to deploy this app and backend, please visit https://github.com/Sage-Bionetworks/HTAN_data_curator and  https://github.com/Sage-Bionetworks/schematic.
 
-We've made forks of both of these repositories here and here: https://github.com/Sage-Bionetworks/schematic.
+We've made forks of both of these repositories here and here: https://github.com/nf-osi/schematic.
 
 ## Development Environment Setup
 
