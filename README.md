@@ -15,6 +15,10 @@ For the latest documentation on how to deploy this app and backend, please visit
 
 We've made forks of both of these repositories here and here: https://github.com/Sage-Bionetworks/schematic.
 
+## Test/Demo Project
+
+Use [this](https://www.synapse.org/#!Synapse:syn22410511/files/) sandbox Synapse project (shortlink: synapse.org/nfdemo) for demos and testing. 
+
 ## Development Environment Setup
 
 You likely won't need the instructions below unless a major change happens, but we've left them here just in case: 
