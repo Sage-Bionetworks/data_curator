@@ -1,8 +1,15 @@
 # NF Data Curator App
 
+## Shiny app configuration
+
+There are two editions of the front end: 
+
+- https://shiny.synapse.org/users/rallaway/NF_data_curator_staging/ (pulling from the `develop` branch)
+- https://shiny.synapse.org/users/rallaway/NF_data_curator/ (pulling from the `production` branch)
+
 ## Making changes 
 
-Please make PRs against `develop` (no review needed, but PR for easy revert). Once they've been deployed and tested, PR against `production`.
+To make changes, please branch off of `develop`, make changes, and then file a PR against `develop` (no review needed, but PR for easy revert). Once the changes have been deployed and tested, PR against `production`. Note - as with all Shiny apps, `touch restart.txt` any time you make changes to make sure they are reflected in your testing. 
 
 For the latest documentation on how to deploy this app and backend, please visit https://github.com/Sage-Bionetworks/HTAN_data_curator and  https://github.com/Sage-Bionetworks/schematic.
 
@@ -10,12 +17,14 @@ We've made forks of both of these repositories here and here: https://github.com
 
 ## Development Environment Setup
 
+You likely won't need the instructions below unless a major change happens, but we've left them here just in case: 
+
 ### Data Curator App Setup (frontend)
-Follow the steps below to make sure the _Data Curator App_ (frontend) is fully setup to work with the [Data Ingress Pipeline](https://github.com/Sage-Bionetworks/HTAN-data-pipeline/tree/develop) (backend):
+Follow the steps below to make sure the _Data Curator App_ (frontend) is fully setup to work with the [Data Ingress Pipeline](https://github.com/nf-osi/schematic/) (backend):
 
-Navigate to the location where you want to setup the application (i.e., the _Shiny Server_). Clone the code on this github branch (_shiny-server-packaged-backend_):
+Navigate to the location where you want to setup the application (i.e., the _Shiny Server_). Clone the code on this github branch (_production_):
 
-    git clone --single-branch --branch shiny-server-1.0.0.rc1 https://github.com/Sage-Bionetworks/HTAN_data_curator.git
+    git clone --single-branch --branch production https://github.com/nf-osi/NF_data_curator.git
 
 Create a conda environment in the cloned directory from the `environment.yml` file which has all the required package dependencies:
 
@@ -26,25 +35,22 @@ Here, our conda environment name `data_curator_env` is set from the `environment
 Activate the `data_curator_env` environment:
 
     conda activate data_curator_env
-    
-_Note_:
-- You can change the name of your conda environment inside `environment.yml` or even use another environment, but please note that you will need to make changes accordingly in the `app.R` file line 16.
 
 -------
 
 ### Data Ingress Pipeline Setup (backend)
 
-The next step is to install the latest release of the [Data Ingress Pipeline](https://github.com/Sage-Bionetworks/HTAN-data-pipeline/tree/develop) (backend) as a folder `HTAN-data-pipeline` inside the `HTAN_data_curator` folder and tie it together with this frontend. 
+The next step is to install the latest release of the [Data Ingress Pipeline](https://github.com/Sage-Bionetworks/schematic) (backend) as a folder `schematic` inside the `NF_data_curator` folder and tie it together with this frontend. 
 
 To do so carry out the following steps:
 
-1. Inside the `HTAN_data_curator` folder, clone the repo from this [location](https://github.com/Sage-Bionetworks/HTAN-data-pipeline/tree/develop), by running the following command:
+1. Inside the `HTAN_data_curator` folder, clone the repo from this [location](https://github.com/Sage-Bionetworks/schematic), by running the following command:
 
-    `git clone --single-branch --branch organized-into-packages https://github.com/Sage-Bionetworks/HTAN-data-pipeline.git`
+    `git clone --single-branch --branch production https://github.com/nf-osi/schematic.git`
 
-This creates a folder named `HTAN-data-pipeline` inside the the `HTAN_data_curator folder`.
+This creates a folder named `schematic` inside the the `NF_data_curator folder`.
 
-2. Navigate into the created `HTAN-data-pipeline` directory. Install the backend (`schematic` package) within the conda virtual environment by running:
+2. Navigate into the created `schematic` directory. Install the backend (`schematic` package) within the conda virtual environment by running:
 
     `pip install -e .`
 
@@ -52,11 +58,11 @@ To verify that the backend is installed, do this: `pip list`
 
 If you can find the `schematic` package in the list of packages installed it was successful.
 
-3. Obtain the `credentials.json` file in `HTAN-data-pipeline` to authenticate user access to Google API services which will be used to create the metadata templates. If you do not already have this file, make sure you are authorized (see _Notes_ below) and run the below command within `HTAN-data-pipeline` to download the HTAN credentials file `syn21088684` through the `synapseclient` (part of the backend):
+3. Obtain the `credentials.json` file in `schematic` to authenticate user access to Google API services which will be used to create the metadata templates. If you do not already have this file, make sure you are authorized (see _Notes_ below) and run the below command within `HTAN-data-pipeline` to download the HTAN credentials file `syn21088684` through the `synapseclient` (part of the backend):
 
     `synapse get syn21088684`
 
-4. Obtain the `token.pickle` file in `HTAN-data-pipeline` which is also necessary for authentication. If you do not already have this file run the `metadata_usage` example as follows inside `HTAN-data-pipeline`:
+4. Obtain the `token.pickle` file in `schematic` which is also necessary for authentication. If you do not already have this file run the `metadata_usage` example as follows inside `schematic`:
 
     `python examples/metadata_model.py`
 
@@ -70,4 +76,4 @@ _Notes:_
 
 - You need to be authorized to download protected Synapse files such as credentials. Please contact milen.nikolov@sagebase.org for access to the HTAN credentials.
 
-- If you want to test the backend you can run other things inside `HTAN-data-pipeline`, but in order to run the `examples/synapse_store.py` example, you need to configure your Synapse credentials in the `.synapseConfig` file (which can be found in the `HTAN-data-pipeline` directory), as described [here](https://github.com/Sage-Bionetworks/HTAN-data-pipeline/tree/develop#configure-synapse-credentials).
+- If you want to test the backend you can run other things inside `schematic`, but in order to run the `examples/synapse_store.py` example, you need to configure your Synapse credentials in the `.synapseConfig` file (which can be found in the `schematic` directory), as described [here](https://github.com/Sage-Bionetworks/schematic/tree/develop#configure-synapse-credentials).
