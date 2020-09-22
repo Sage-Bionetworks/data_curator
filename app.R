@@ -255,8 +255,7 @@ server <- function(input, output, session) {
     }
     
     ### updates project dropdown
-    updateSelectizeInput(session, 'var', choices = names(projects_namedList))
-    
+    updateSelectizeInput(session, 'var', choices = sort(names(projects_namedList)))
     waiter::waiter_hide()
     
   })
