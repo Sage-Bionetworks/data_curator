@@ -311,16 +311,12 @@ server <- function(input, output, session) {
                      
                      ### gets folders per project
                      # folder_list <- syn_store$getStorageDatasetsInProject(synStore_obj, project_synID)
+                     #TODO: replace multiple queries with one main fileview query and then filter in memory
                      folder_df <- syn_tableQuery(sprintf("select name, id from %s where type = 'folder' and projectId = '%s'", config$main_fileview, project_synID))$asDataFrame()
                      
                      folders_namedList <- setNames(as.list(folder_df$id), folder_df$name)
                      
-                     folder_synID <- folders_namedList[[selected_folder]]
-                     
-                     validate(
-                       need(length(folder_synID)==1, 'Duplicate folder names detected. Please make sure folders have distinct names.'),
-                     )
-                     
+                     folder_names <- names(folders_namedList)
                      
                      ### updates foldernames
                      selectInput(inputId = "dataset", label = "Folder:", choices = folderNames)
@@ -362,7 +358,11 @@ server <- function(input, output, session) {
       
       folders_namedList <- setNames(as.list(folder_df$id), folder_df$name)
       
-      folder_names <- names(folders_namedList)
+      folder_synID <- folders_namedList[[selected_folder]]
+      
+      validate(
+        need(length(folder_synID)==1, 'Duplicate folder names detected. Please make sure folders have distinct names.'),
+      )
       
       # showNotification( folder_synID, duration = NULL, type = "warning")
       
