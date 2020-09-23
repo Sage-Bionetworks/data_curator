@@ -16,6 +16,7 @@ library(waiter)
 #########global
 use_condaenv('data_curator_env', required = TRUE)
 reticulate::import("sys")
+reticulate::import('synapseutils')
 
 source_python("synLoginFun.py")
 source_python("metadataModelFuns.py")
@@ -361,7 +362,7 @@ server <- function(input, output, session) {
       folder_synID <- folders_namedList[[selected_folder]]
       
       validate(
-        need(length(folder_synID)==1, 'Duplicate folder names detected. Please make sure folders have distinct names.'),
+        need(length(folder_synID)==1, 'Duplicate folder names detected. Please make sure folders have distinct names.')
       )
       
       # showNotification( folder_synID, duration = NULL, type = "warning")
@@ -372,6 +373,7 @@ server <- function(input, output, session) {
       
       ### if there isn't an existing manifest make a new one 
       if (existing_manifestID == '') {
+        
         file_list <- syn_store$getFilesInStorageDataset(synStore_obj, folder_synID)
         file_namedList <- c()
         for (i in seq_along(file_list)) {
