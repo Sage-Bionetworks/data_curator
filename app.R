@@ -361,8 +361,8 @@ server <- function(input, output, session) {
       
       folder_synID <- folders_namedList[[selected_folder]]
       
-      validate(
-        need(length(folder_synID)==1, 'Duplicate folder names detected. Please make sure folders have distinct names.')
+      shiny::validate(
+        shiny::need(length(folder_synID)==1, 'Duplicate folder names detected. Please make sure folders have distinct names.')
       )
       
       # showNotification( folder_synID, duration = NULL, type = "warning")
