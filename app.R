@@ -316,7 +316,7 @@ server <- function(input, output, session) {
                      
                      folders_namedList <- setNames(as.list(folder_df$id), folder_df$name)
                      
-                     folder_names <- names(folders_namedList)
+                     folderNames <- names(folders_namedList)
                      
                      ### updates foldernames
                      selectInput(inputId = "dataset", label = "Folder:", choices = folderNames)
