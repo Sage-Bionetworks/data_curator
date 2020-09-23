@@ -310,12 +310,17 @@ server <- function(input, output, session) {
                      project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
                      
                      ### gets folders per project
-                     folder_list <- syn_store$getStorageDatasetsInProject(synStore_obj, project_synID)
-                     folders_namedList <- c()
-                     for (i in seq_along(folder_list)) {
-                       folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
-                     }
-                     folderNames <- names(folders_namedList)
+                     # folder_list <- syn_store$getStorageDatasetsInProject(synStore_obj, project_synID)
+                     folder_df <- syn_tableQuery(sprintf("select name, id from %s where type = 'folder' and projectId = '%s'", config$main_fileview, project_synID))$asDataFrame()
+                     
+                     folders_namedList <- setNames(as.list(folder_df$id), folder_df$name)
+                     
+                     folder_synID <- folders_namedList[[selected_folder]]
+                     
+                     validate(
+                       need(length(folder_synID)==1, 'Duplicate folder names detected. Please make sure folders have distinct names.'),
+                     )
+                     
                      
                      ### updates foldernames
                      selectInput(inputId = "dataset", label = "Folder:", choices = folderNames)
@@ -352,12 +357,17 @@ server <- function(input, output, session) {
       
       project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
       
-      folder_list <- syn_store$getStorageDatasetsInProject(synStore_obj, project_synID)
-      folders_namedList <- c()
-      for (i in seq_along(folder_list)) {
-        folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
-      }
+      # folder_list <- syn_store$getStorageDatasetsInProject(synStore_obj, project_synID)
+      folder_df <- syn_tableQuery(sprintf("select name, id from %s where type = 'folder' and projectId = '%s'", config$main_fileview, project_synID))$asDataFrame()
+      
+      folders_namedList <- setNames(as.list(folder_df$id), folder_df$name)
+      
       folder_synID <- folders_namedList[[selected_folder]]
+      
+      validate(
+        need(length(folder_synID)==1, 'Duplicate folder names detected. Please make sure folders have distinct names.'),
+      )
+      
       # showNotification( folder_synID, duration = NULL, type = "warning")
       
       ### checks if a manifest already exists
@@ -548,13 +558,16 @@ server <- function(input, output, session) {
           selected_project <- input$var
           
           project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
-          folder_list <- syn_store$getStorageDatasetsInProject(synStore_obj, project_synID)
-          folders_namedList <- c()
-          for (i in seq_along(folder_list)) {
-            folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
-          }
+          # folder_list <- syn_store$getStorageDatasetsInProject(synStore_obj, project_synID)
+          folder_df <- syn_tableQuery(sprintf("select name, id from %s where type = 'folder' and projectId = '%s'", config$main_fileview, project_synID))$asDataFrame()
+          
+          folders_namedList <- setNames(as.list(folder_df$id), folder_df$name)
           
           folder_synID <- folders_namedList[[selected_folder]]
+          
+          validate(
+            need(length(folder_synID)==1, 'Duplicate folder names detected. Please make sure folders have distinct names.'),
+          )
           
           file_list <- syn_store$getFilesInStorageDataset(synStore_obj, folder_synID)
           file_namedList <- c()
@@ -573,12 +586,16 @@ server <- function(input, output, session) {
         
         project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
         
-        folder_list <- syn_store$getStorageDatasetsInProject(synStore_obj, project_synID)
-        folders_namedList <- c()
-        for (i in seq_along(folder_list)) {
-          folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
-        }
+        # folder_list <- syn_store$getStorageDatasetsInProject(synStore_obj, project_synID)
+        folder_df <- syn_tableQuery(sprintf("select name, id from %s where type = 'folder' and projectId = '%s'", config$main_fileview, project_synID))$asDataFrame()
+        
+        folders_namedList <- setNames(as.list(folder_df$id), folder_df$name)
+        
         folder_synID <- folders_namedList[[selected_folder]]
+        
+        validate(
+          need(length(folder_synID)==1, 'Duplicate folder names detected. Please make sure folders have distinct names.'),
+        )
         
         ### associates metadata with data and returns manifest id
         manifest_id <- syn_store$associateMetadataWithFiles(synStore_obj, "./files/synapse_storage_manifest.csv", folder_synID)
@@ -625,12 +642,16 @@ server <- function(input, output, session) {
         project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
         # folder_synID <- get_folder_synID(synStore_obj, project_synID, selected_folder)
         
-        folder_list <- syn_store$getStorageDatasetsInProject(synStore_obj, project_synID)
-        folders_namedList <- c()
-        for (i in seq_along(folder_list)) {
-          folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
-        }
+        # folder_list <- syn_store$getStorageDatasetsInProject(synStore_obj, project_synID)
+        folder_df <- syn_tableQuery(sprintf("select name, id from %s where type = 'folder' and projectId = '%s'", config$main_fileview, project_synID))$asDataFrame()
+        
+        folders_namedList <- setNames(as.list(folder_df$id), folder_df$name)
+        
         folder_synID <- folders_namedList[[selected_folder]]
+        
+        validate(
+          need(length(folder_synID)==1, 'Duplicate folder names detected. Please make sure folders have distinct names.'),
+        )
         
         ### associates metadata with data and returns manifest id
         manifest_id <- syn_store$associateMetadataWithFiles(synStore_obj, "./files/synapse_storage_manifest.csv", folder_synID)
