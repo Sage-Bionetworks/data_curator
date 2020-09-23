@@ -362,11 +362,7 @@ server <- function(input, output, session) {
       
       folders_namedList <- setNames(as.list(folder_df$id), folder_df$name)
       
-      folder_synID <- folders_namedList[[selected_folder]]
-      
-      validate(
-        need(length(folder_synID)==1, 'Duplicate folder names detected. Please make sure folders have distinct names.'),
-      )
+      folder_names <- names(folders_namedList)
       
       # showNotification( folder_synID, duration = NULL, type = "warning")
       
