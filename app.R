@@ -76,7 +76,7 @@ ui <- dashboardPage(
       style="color:white;",
       spin_flowers(),
       h3("logging in...")
-    )),-
+    )),
     use_notiflix_report(), 
     tabItems(
       # First tab content
