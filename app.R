@@ -74,9 +74,9 @@ ui <- dashboardPage(
     use_waiter(),
     waiter::waiter_show_on_load(html = span(
       style="color:white;",
-      spin_heartbeat(),
+      spin_flowers(),
       h3("logging in...")
-    )),
+    )),-
     use_notiflix_report(), 
     tabItems(
       # First tab content
@@ -224,7 +224,7 @@ server <- function(input, output, session) {
     
     waiter::waiter_update(html = span(
       style="color:white;",
-      spin_heartbeat(),
+      spin_flowers(),
       h3("logging in...")
     ))
     ### logs in 
@@ -235,7 +235,7 @@ server <- function(input, output, session) {
     waiter::waiter_hide()
     waiter::waiter_show(html = span(
       style="color:white;",
-      spin_heartbeat(),
+      spin_flowers(),
       h3(login_msg)
     ))
     
@@ -245,7 +245,7 @@ server <- function(input, output, session) {
     # get_projects_list(synStore_obj)
     waiter::waiter_update(html = span(
       style="color:white;",
-      spin_heartbeat(),
+      spin_flowers(),
       h3("retrieving projects...")
     ))
     
@@ -350,8 +350,13 @@ server <- function(input, output, session) {
       template_type <- as.character(template_type_df$schema_name)
       
       ### progess notif
-      showNotification(id = "processing", "Generating link...", duration = NULL, type = "warning")
+      waiter::waiter_show(html = span(
+        style="color:white;",
+        spin_flowers(),
+        h3("generating manifest...")
+      ))
       
+
       project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
       
       # folder_list <- syn_store$getStorageDatasetsInProject(synStore_obj, project_synID)
@@ -395,7 +400,7 @@ server <- function(input, output, session) {
         })
         
         ### when done remove progress notif
-        removeNotification(id = "processing")
+        waiter::waiter_hide()
       } else {
         ### if the manifest already exists
         manifest_entity <- syn_get(existing_manifestID)
@@ -406,7 +411,7 @@ server <- function(input, output, session) {
         output$text <- renderUI({
           tags$a(href = manifest_url, manifest_url, target = "_blank")
         })
-        removeNotification(id = "processing")
+        waiter::waiter_hide()
       }
     }
   )
@@ -448,7 +453,11 @@ server <- function(input, output, session) {
       
       toggle('text_div2')
       
-      showNotification(id = "processing", "Processing...", duration = NULL, type = "default")
+      waiter::waiter_show(html = span(
+        style="color:white;",
+        spin_flowers(),
+        h3("validating annotations...")
+      ))
       
       if (length(annotation_status) != 0) {
         
@@ -514,12 +523,12 @@ server <- function(input, output, session) {
           ) %>% formatStyle(unlist(column_names),
                             backgroundColor = styleEqual( unlist(error_values), rep("yellow", length(error_values) ) )) ## how to have multiple errors
         })
-        removeNotification(id = "processing")
+        waiter::waiter_hide()
       } else {
         output$text2 <- renderUI({
           HTML("Your metadata is valid!")
         })
-        removeNotification(id = "processing")
+        waiter::waiter_hide()
         ### show submit button
         output$submit <- renderUI({
           actionButton("submitButton", "Submit to Synapse")
