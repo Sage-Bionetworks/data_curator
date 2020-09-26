@@ -193,7 +193,6 @@ server <- function(input, output, session) {
 
   ########### session global variables
   reticulate::source_python("synStore_Session.py")
-  source("functions.R")
 
   ### logs in and gets list of projects they have access to
   synStore_obj <- NULL
