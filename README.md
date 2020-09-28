@@ -31,11 +31,11 @@ To do so carry out the following steps:
 
 1. Inside the `HTAN_data_curator` folder, clone the repo from this [location](https://github.com/Sage-Bionetworks/HTAN-data-pipeline/tree/develop), by running the following command:
 
-    `git clone --single-branch --branch organized-into-packages https://github.com/Sage-Bionetworks/HTAN-data-pipeline.git`
+    `git clone --single-branch --branch  develop https://github.com/Sage-Bionetworks/schematic.git`
 
-This creates a folder named `HTAN-data-pipeline` inside the the `HTAN_data_curator folder`.
+This creates a folder named `schematic` inside the the `HTAN_data_curator folder`.
 
-2. Navigate into the created `HTAN-data-pipeline` directory. Install the backend (`schematic` package) within the conda virtual environment by running:
+2. Navigate into the created `schematic` directory. Install the backend (`schematic` package) within the conda virtual environment by running:
 
     `pip install -e .`
 
@@ -43,11 +43,11 @@ To verify that the backend is installed, do this: `pip list`
 
 If you can find the `schematic` package in the list of packages installed it was successful.
 
-3. Obtain the `credentials.json` file in `HTAN-data-pipeline` to authenticate user access to Google API services which will be used to create the metadata templates. If you do not already have this file, make sure you are authorized (see _Notes_ below) and run the below command within `HTAN-data-pipeline` to download the HTAN credentials file `syn21088684` through the `synapseclient` (part of the backend):
+3. Obtain the `credentials.json` file in `schematic` to authenticate user access to Google API services which will be used to create the metadata templates. If you do not already have this file, make sure you are authorized (see _Notes_ below) and run the below command within `schematic` to download the HTAN credentials file `syn21088684` through the `synapseclient` (part of the backend):
 
     `synapse get syn21088684`
 
-4. Obtain the `token.pickle` file in `HTAN-data-pipeline` which is also necessary for authentication. If you do not already have this file run the `metadata_usage` example as follows inside `HTAN-data-pipeline`:
+4. Obtain the `token.pickle` file in `schematic` which is also necessary for authentication. If you do not already have this file run the `metadata_usage` example as follows inside `HTAN-data-pipeline`:
 
     `python examples/metadata_model.py`
 
@@ -61,4 +61,4 @@ _Notes:_
 
 - You need to be authorized to download protected Synapse files such as credentials. Please contact milen.nikolov@sagebase.org for access to the HTAN credentials.
 
-- If you want to test the backend you can run other things inside `HTAN-data-pipeline`, but in order to run the `examples/synapse_store.py` example, you need to configure your Synapse credentials in the `.synapseConfig` file (which can be found in the `HTAN-data-pipeline` directory), as described [here](https://github.com/Sage-Bionetworks/HTAN-data-pipeline/tree/develop#configure-synapse-credentials).
+- If you want to test the backend you can run other things inside `schematic`, but in order to run the `examples/synapse_store.py` example, you need to configure your Synapse credentials in the `.synapseConfig` file (which can be found in the `HTAN-data-pipeline` directory), as described [here](https://github.com/Sage-Bionetworks/HTAN-data-pipeline/tree/develop#configure-synapse-credentials).

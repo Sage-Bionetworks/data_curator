@@ -31,41 +31,28 @@ ui <- dashboardPage(
     titleWidth = 250,
     title = "Data Curator",
     tags$li(class = "dropdown",
-            tags$style(".main-header {max-height: 50px}"),
-            tags$style(".main-header .logo {height: 70px; font-size: 28px; padding-top: 10px}"),
-            tags$style(".sidebar-toggle {height: 15px; padding-top: 25px !important;}"),
-            tags$style(".navbar {min-height:50px !important}"),
-            tags$style(".messages-menu {padding-top :5px}"),
             tags$a(href = "https://humantumoratlas.org/", target = "_blank",
                    tags$img(height = "40px", alt = "HTAN LOGO",
                             src = "HTAN_text_logo.png")))
     ),
   dashboardSidebar(
     width = 250,
-    tags$style(".left-side, .main-sidebar {padding-top: 80px; font-weight: bold; font-size: 1.1em } "),
     sidebarMenu(
     id = "tabs", 
     menuItem("Instructions", tabName = "instructions", icon = icon("book-open")),
     menuItem("Select your Dataset", tabName = "data", icon = icon("mouse-pointer")),
     menuItem("Get Metadata Template", tabName = "template", icon = icon("table")),
-    menuItem("Submit & Validate Metadata", tabName = "upload", icon = icon("upload"))  
+    menuItem("Submit & Validate Metadata", tabName = "upload", icon = icon("upload")),  
+    HTML('<footer>
+            Supported by the Human Tumor Atlas Network <br/>
+            (U24-CA233243-01)<br/>
+            Powered by Sage Bionetworks
+        </footer>')
     )
   ),
   dashboardBody(
     tags$head(
-      tags$style(
-        HTML(".shiny-notification {
-              position:fixed;
-              bottom: 0;
-              right: 0;
-              width: 100%;
-             }
-             "),
-                "#shiny-notification-error {height: 500px; padding :20px; display: table-cell}
-                 #shiny-notification-processing {background-color: #F7DC6F}
-                 #shiny-notification-success {background-color : #82E0AA}"
-                 
-      ),
+      tags$link(rel = "stylesheet", type = "text/css", href = "styles.css"),
       singleton(
         includeScript("www/readCookie.js")
       )),
@@ -187,7 +174,6 @@ server <- function(input, output, session) {
 
   ########### session global variables
   reticulate::source_python("synStore_Session.py")
-  source("functions.R")
 
   ### read config in
   config <- jsonlite::fromJSON('www/config.json')
