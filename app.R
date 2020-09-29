@@ -85,13 +85,7 @@ ui <- dashboardPage(
                   solidHeader = TRUE,
                   width = 6,
                   title = "Choose a Metadata Template Type: ",
-                  selectInput(
-                    inputId = "template_type",
-                    label = "Template:",
-                    # choices = list("ScRNA-seqAssay", "BulkRNA-seqAssay", "BulkRNA-seqAlignment", "Demographics", "Diagnosis", "FamilyHistory", "Exposure", "FollowUp", "Therapy")
-                    choices = list("scRNA-seq Level 1", "Bulk RNA-seq Level 1", "Bulk RNA-seq Level 2"," Clinical Tier 1: Demographics"," Clinical Tier 1: Diagnosis"," Clinical Tier 1: FamilyHistory"," Clinical Tier 1: Exposure"," Clinical Tier 1: FollowUp"," Clinical Tier 1: Therapy")
-## add mapping step from string to input when I have more time ##
-                  )
+                  uiOutput("manifest_display_name")
                 )
               )
               ),
@@ -180,6 +174,9 @@ server <- function(input, output, session) {
 
   ########### session global variables
   reticulate::source_python("synStore_Session.py")
+
+  ### read config in
+  config <- jsonlite::fromJSON('www/config.json')
 
   ### logs in and gets list of projects they have access to
   synStore_obj <- NULL
@@ -290,8 +287,15 @@ list_tabs <- c("instructions", "data", "template", "upload")
   })
 
 ### mapping from display name to schema name
-schema_name  <- c("ScRNA-seqAssay", "BulkRNA-seqAssay", "BulkRNA-seqAlignment", "Demographics", "Diagnosis", "FamilyHistory", "Exposure", "FollowUp", "Therapy")
-display_name <- c("scRNA-seq Level 1", "Bulk RNA-seq Level 1", "Bulk RNA-seq Level 2"," Clinical Tier 1: Demographics"," Clinical Tier 1: Diagnosis"," Clinical Tier 1: FamilyHistory"," Clinical Tier 1: Exposure"," Clinical Tier 1: FollowUp"," Clinical Tier 1: Therapy")
+schema_name  <- config$manifest_schemas$schema_name
+display_name <- config$manifest_schemas$display_name
+
+output$manifest_display_name <- renderUI({
+	selectInput(inputId = "template_type",
+                    label = "Template:",
+                    choices = display_name)
+
+})
 
 schema_to_display_lookup <- data.frame(schema_name, display_name)
 
@@ -490,9 +494,12 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
     ### reads in csv 
     infile <- readr::read_csv(input$file1$datapath, na = c("", "NA"))
 
-    ### IF an assay component selected 
+    ### IF an assay component selected (define assay components)
+    ## note for future - the type to filter (eg assay) on could probably also be a config choice
+    assay_schemas <- config$manifest_schemas$display_name[config$manifest_schemas$type=="assay"]
+
     ### and adds entityID, saves it as synapse_storage_manifest.csv, then associates with synapse files 
-    if ( input$template_type %in% list("scRNA-seq Level 1", "Bulk RNA-seq Level 1", "Bulk RNA-seq Level 2") ) {
+    if ( input$template_type %in% assay_schemas ) {
       
       ### make into a csv or table for assay components
       ### already has entityId
