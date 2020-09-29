@@ -36,7 +36,7 @@ ui <- dashboardPage(
 
             tags$a(href = "https://nf.synapse.org/", target = "_blank",
                    tags$img(height = "40px", alt = "NF LOGO",
-                            src = "NF_text_logo.png")))
+                            src = "NF_logo.png")))
     ),
   dashboardSidebar(
     width = 250,
