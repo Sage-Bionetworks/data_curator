@@ -54,6 +54,7 @@ To do so carry out the following steps:
 
 This creates a folder named `schematic` inside the the `NF_data_curator folder`.
 
+
 2. Navigate into the created `schematic` directory. Install the backend (`schematic` package) within the conda virtual environment by running:
 
     `pip install -e .`

@@ -6,6 +6,7 @@ syn_getUserProfile = syn.getUserProfile
 syn_tableQuery = syn.tableQuery
 syn_get = syn.get
 
+<<<<<<< HEAD
 ### function to get previously uploaded manifest
 ### returns statement if no manifest uploaded instead of path
 def get_storage_manifest_path (token, folderID):
@@ -21,3 +22,5 @@ def get_storage_manifest_path (token, folderID):
         return(path_to_file)
     else:
         return None
+=======
+>>>>>>> 89daf04925b772d9fa63ab8b7c522c5ea57427b6
