@@ -2,7 +2,7 @@
 ## Development Environment Setup
 
 ### Data Curator App Setup (frontend)
-Follow the steps below to make sure the _Data Curator App_ (frontend) is fully setup to work with the [Data Ingress Pipeline](https://github.com/Sage-Bionetworks/schematic/tree/main) (backend):
+Follow the steps below to make sure the _Data Curator App_ (frontend) is fully setup to work with the [schematic](https://github.com/Sage-Bionetworks/schematic/tree/main) (backend):
 
 Navigate to the location where you want to setup the application (i.e., the _Shiny Server_). Clone the code on this github branch (_shiny-server-1.0.0.rc1_):
 
@@ -23,9 +23,9 @@ _Note_:
 
 -------
 
-### Data Ingress Pipeline Setup (backend)
+### Schematic Setup (backend)
 
-The next step is to install the latest release of the [Data Ingress Pipeline](https://github.com/Sage-Bionetworks/schematic/tree/main) (backend) as a folder `schematic` inside the `HTAN_data_curator` folder and tie it together with this frontend. 
+The next step is to install the latest release of the [schematic](https://github.com/Sage-Bionetworks/schematic/tree/main) (backend) as a folder `schematic` inside the `HTAN_data_curator` folder and tie it together with this frontend. 
 
 To do so carry out the following steps:
 
