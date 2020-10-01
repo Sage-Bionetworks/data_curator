@@ -173,15 +173,6 @@ ui <- dashboardPage(
 )
 
 server <- function(input, output, session) {
-  ## Show message if user is not logged in to synapse
-  unauthorized <- observeEvent(input$authorized, {
-    showModal(
-      modalDialog(
-        title = "Not logged in",
-        HTML("You must log in to <a href=\"https://www.synapse.org/\">Synapse</a> to use this application. Please log in, and then refresh this page.")
-      )
-    )
-  })
 
   ########### session global variables
   reticulate::source_python("synStore_Session.py")
