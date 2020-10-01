@@ -11,6 +11,7 @@ library(ggplot2)
 library(purrr)
 library(plotly)
 library(shinypop)
+library(waiter)
 
 #########global
 use_condaenv('data_curator_env', required = TRUE)
@@ -157,7 +158,17 @@ ui <- dashboardPage(
         )
       )
     ),
-    uiOutput("Next_Previous")
+    uiOutput("Next_Previous"),
+
+    ## waiter loading screen
+    use_waiter(),
+    waiter_show_on_load(
+      html = tagList(
+        img(src = "loading.gif"),
+        h4("Retrieving Synapse information...")
+      ),
+      color = "#424874"
+    )
   )
 )
 
@@ -197,7 +208,6 @@ server <- function(input, output, session) {
 
   ### initial login front page items
   observeEvent(input$cookie, {
-    showNotification(id = "processing", "Please wait while we log you in...", duration = NULL, type = "warning")
 
     ### logs in 
     syn_login(sessionToken = input$cookie, rememberMe = FALSE)
@@ -219,7 +229,16 @@ server <- function(input, output, session) {
 
     ### updates project dropdown
     updateSelectizeInput(session, 'var', choices = names(projects_namedList))
-    removeNotification(id = "processing",)
+
+    ### update waiter loading screen once login successful
+    waiter_update(
+      html = tagList(
+        img(src = "synapse_logo.png", height = "120px"),
+        h3(sprintf("Welcome, %s!", syn_getUserProfile()$userName))
+      )
+    )
+    Sys.sleep(2)
+    waiter_hide()
 
   })
 
@@ -299,9 +318,20 @@ output$manifest_display_name <- renderUI({
 
 schema_to_display_lookup <- data.frame(schema_name, display_name)
 
+  # loading screen for template link generation
+  manifest_w <- Waiter$new(
+    html = tagList(
+      spin_plus(), br(),
+      h4("Generating link...")
+    ),
+    color = "rgba(66, 72, 116, .9)"
+  )
+
   ###shows new metadata link when get gsheets template button pressed OR updates old metadata if is exists 
   observeEvent(
     input$download, {
+
+    manifest_w$show()
 
     selected_folder <- input$dataset
     selected_project <- input$var
@@ -309,9 +339,6 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
     ###lookup schema template name 
     template_type_df <- schema_to_display_lookup[match(input$template_type, schema_to_display_lookup$display_name), 1, drop = F ]
     template_type <- as.character(template_type_df$schema_name)
-
-    ### progess notif
-    showNotification(id = "processing", "Generating link...", duration = NULL, type = "warning")
 
     project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
 
@@ -321,11 +348,9 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
       folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
     }
     folder_synID <- folders_namedList[[selected_folder]]
-    # showNotification( folder_synID, duration = NULL, type = "warning")
 
     ### checks if a manifest already exists
     existing_manifestID <- syn_store$updateDatasetManifestFiles(synStore_obj, folder_synID)
-    # showNotification( paste0("existing manifest: ", existing_manifestID) , duration = NULL, type = "warning")
 
     ### if there isn't an existing manifest make a new one 
     if (existing_manifestID == '') {
@@ -349,9 +374,6 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
       output$text <- renderUI({
         tags$a(href = manifest_url, manifest_url, target = "_blank") ### add link to data dictionary when we have it ###
       })
-
-      ### when done remove progress notif
-      removeNotification(id = "processing")
     } else {
       ### if the manifest already exists
       manifest_entity <- syn_get(existing_manifestID)
@@ -362,8 +384,8 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
       output$text <- renderUI({
         tags$a(href = manifest_url, manifest_url, target = "_blank")
       })
-      removeNotification(id = "processing")
     }
+    manifest_w$hide()
     }
   )
 
@@ -392,19 +414,29 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
   }
   )
 
+  ## loading screen for validating metadata
+  validate_w <- Waiter$new(
+    html = tagList(
+      spin_plus(), br(),
+      h4("Validating...")
+    ),
+    color = "rgba(66, 72, 116, .9)"
+  )
+
   ### toggles validation status when validate button pressed
   observeEvent(
     input$validate, {
+
+    validate_w$show()
+
     ###lookup schema template name 
     template_type_df <- schema_to_display_lookup[match(input$template_type, schema_to_display_lookup$display_name), 1, drop = F ]
     template_type <- as.character(template_type_df$schema_name)
 
     annotation_status <- metadata_model$validateModelManifest(input$file1$datapath, template_type)
-    # showNotification(input$file1$datapath, duration = NULL, type = "default")
     
     toggle('text_div2')
 
-    showNotification(id = "processing", "Processing...", duration = NULL, type = "default")
 
     if (length(annotation_status) != 0) {
 
@@ -446,8 +478,10 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
                               "</b>in ", "<b>", column, "</b>",
                               message, paste0("</b>", "<br/>"), sep = " ")
       }
-
-        
+ 
+      validate_w$update(
+        html = h3(sprintf("%d errors found", length(annotation_status)))
+      )
 
 
       ### format output text
@@ -470,26 +504,36 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
           ) %>% formatStyle(unlist(column_names),
                             backgroundColor = styleEqual( unlist(error_values), rep("yellow", length(error_values) ) )) ## how to have multiple errors
       })
-      removeNotification(id = "processing")
     } else {
       output$text2 <- renderUI({
         HTML("Your metadata is valid!")
       })
-      removeNotification(id = "processing")
+
       ### show submit button
       output$submit <- renderUI({
         actionButton("submitButton", "Submit to Synapse")
       })
 
     }
+    Sys.sleep(2)
+    validate_w$hide()
   }
+  )
+
+  ## loading screen for submitting data
+  submit_w <- Waiter$new(
+    html = tagList(
+      img(src = "loading.gif"),
+      h4("Submitting...")
+    ),
+    color = "#424874"
   )
 
   ###submit button
   observeEvent(
     input$submitButton, {
 
-    showNotification(id = "processing", "Submitting...", duration = NULL, type = "default")
+    submit_w$show()
 
     ### reads in csv 
     infile <- readr::read_csv(input$file1$datapath, na = c("", "NA"))
@@ -550,8 +594,6 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
       manifest_path <- paste0("synapse.org/#!Synapse:", manifest_id)
       ### if no error 
       if (startsWith(manifest_id, "syn") == TRUE) {
-        removeNotification(id = "processing")
-        # showNotification(id = "success", paste0("Submit Manifest to: ", manifest_path), duration = NULL, type = "message")
         nx_report_success("Success!", paste0("Manifest submitted to: ", manifest_path))
         rm("./files/synapse_storage_manifest.csv")
 
@@ -575,12 +617,17 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
           )
 
       } else {
-        showNotification(id = "error", paste0("error ", manifest_id), duration = NULL, type = "error")
+        submit_w$update(
+          html = tagList(
+            img(src = "synapse_logo.png", height = "115px"),
+            h3("Uh oh, looks like something went wrong!"),
+            span(manifest_id, " is not a valid Synapse ID. Try again?")
+          )
+        )
         rm("/tmp/synapse_storage_manifest.csv")
       }
 
     } else {
-      # showNotification( "no FIlename", duration = NULL, type = "default")
       write.csv(infile, file = "./files/synapse_storage_manifest.csv", quote = FALSE, row.names = FALSE, na = "")
 
       selected_project <- input$var
@@ -603,8 +650,6 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
 
       ### if uploaded provided valid synID message
       if (startsWith(manifest_id, "syn") == TRUE) {
-        removeNotification(id = "processing")
-        # showNotification(id = "success", paste0("Submit Manifest to: ", manifest_path), duration = NULL, type = "message")
         nx_report_success("Success!", paste0("Manifest submitted to: ", manifest_path))
         rm("./files/synapse_storage_manifest.csv")
 
@@ -628,11 +673,18 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
           )
 
       } else {
-        showNotification(id = "error", paste0("error ", manifest_id), duration = NULL, type = "error")
+        submit_w$update(
+          html = tagList(
+            img(src = "synapse_logo.png", height = "115px"),
+            h3("Uh oh, looks like something went wrong!"),
+            span(manifest_id, " is not a valid Synapse ID. Try again?")
+          )
+        )
         rm("/tmp/synapse_storage_manifest.csv")
       }
     }
-
+    Sys.sleep(3)
+    submit_w$hide()
 
   })
 
