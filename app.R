@@ -209,37 +209,50 @@ server <- function(input, output, session) {
   ### initial login front page items
   observeEvent(input$cookie, {
 
-    ### logs in 
-    syn_login(sessionToken = input$cookie, rememberMe = FALSE)
+    ## login and update session; otherwise, notify to login to Synapse first
+    tryCatch({
 
-    ### welcome message
-    output$title <- renderUI({
-      titlePanel(h4(sprintf("Welcome, %s", syn_getUserProfile()$userName)))
-    })
+      ### logs in 
+      syn_login(sessionToken = input$cookie, rememberMe = FALSE)
 
-    ### updating global vars with values for projects
-    synStore_obj <<- syn_store("syn20446927", token = input$cookie)
+      ### welcome message
+      output$title <- renderUI({
+        titlePanel(h4(sprintf("Welcome, %s", syn_getUserProfile()$userName)))
+      })
 
-    # get_projects_list(synStore_obj)
-    projects_list <<- syn_store$getStorageProjects(synStore_obj)
+      ### updating global vars with values for projects
+      synStore_obj <<- syn_store("syn20446927", token = input$cookie)
 
-    for (i in seq_along(projects_list)) {
-      projects_namedList[projects_list[[i]][[2]]] <<- projects_list[[i]][[1]]
-    }
+      # get_projects_list(synStore_obj)
+      projects_list <<- syn_store$getStorageProjects(synStore_obj)
 
-    ### updates project dropdown
-    updateSelectizeInput(session, 'var', choices = names(projects_namedList))
+      for (i in seq_along(projects_list)) {
+        projects_namedList[projects_list[[i]][[2]]] <<- projects_list[[i]][[1]]
+      }
 
-    ### update waiter loading screen once login successful
-    waiter_update(
-      html = tagList(
-        img(src = "synapse_logo.png", height = "120px"),
-        h3(sprintf("Welcome, %s!", syn_getUserProfile()$userName))
+      ### updates project dropdown
+      updateSelectizeInput(session, 'var', choices = names(projects_namedList))
+
+      ### update waiter loading screen once login successful
+      waiter_update(
+        html = tagList(
+          img(src = "synapse_logo.png", height = "120px"),
+          h3(sprintf("Welcome, %s!", syn_getUserProfile()$userName))
+        )
       )
-    )
-    Sys.sleep(2)
-    waiter_hide()
-
+      Sys.sleep(2)
+      waiter_hide()
+    }, error = function(err) {
+      Sys.sleep(2)
+      waiter_update(
+        html = tagList(
+          img(src = "synapse_logo.png", height = "120px"),
+          h3("Looks like you're not logged in!"),
+          span("Please ", a("login", href = "https://www.synapse.org/#!LoginPlace:0", target = "_blank"), 
+            " to Synapse, then refresh this page.")
+        )
+      )
+    })
   })
 
 
