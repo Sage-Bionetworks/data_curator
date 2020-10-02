@@ -1,5 +1,6 @@
 {
   "manifest_schemas": [
       {"display_name": "Genomics Assay", "schema_name": "GenomicsAssay", "type": "assay"}
-  ]
+  ],
+  "main_fileview" : "syn16858331"
 }
