@@ -28,7 +28,7 @@ source_python("metadataModelFuns.py")
 #########
 
 ui <- dashboardPage(
-  skin = "green",
+  skin = "#108894",
   dashboardHeader(
     titleWidth = 250,
     title = "NF Data Curator",
@@ -47,7 +47,8 @@ ui <- dashboardPage(
     menuItem("Get Metadata Template", tabName = "template", icon = icon("table")),
     menuItem("Submit & Validate Metadata", tabName = "upload", icon = icon("upload")),  
     HTML('<footer>
-            Supported by the Human Tumor Atlas Network <br/>
+            Supported by the Neurofibromatosis Open Science Initiative </br>
+            Originally created by the Human Tumor Atlas Network <br/>
             (U24-CA233243-01)<br/>
             Powered by Sage Bionetworks
         </footer>')
