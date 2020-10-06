@@ -28,18 +28,18 @@ source_python("metadataModelFuns.py")
 #########
 
 ui <- dashboardPage(
-  skin = "#108894",
+  skin = "blue",
   dashboardHeader(
-    titleWidth = 250,
+    titleWidth = 275,
     title = "NF Data Curator",
     tags$li(class = "dropdown",
 
             tags$a(href = "https://nf.synapse.org/", target = "_blank",
                    tags$img(height = "40px", alt = "NF LOGO",
-                            src = "NF_logo.png")))
+                            src = "nflogo_whitebkgrd.png")))
     ),
   dashboardSidebar(
-    width = 250,
+    width = 275,
     sidebarMenu(
     id = "tabs", 
     menuItem("Instructions", tabName = "instructions", icon = icon("book-open")),
@@ -47,9 +47,8 @@ ui <- dashboardPage(
     menuItem("Get Metadata Template", tabName = "template", icon = icon("table")),
     menuItem("Submit & Validate Metadata", tabName = "upload", icon = icon("upload")),  
     HTML('<footer>
-            Supported by the Neurofibromatosis Open Science Initiative </br>
-            Originally created by the Human Tumor Atlas Network <br/>
-            (U24-CA233243-01)<br/>
+            Supported by the</br>
+            Neurofibromatosis Open Science Initiative</br>
             Powered by Sage Bionetworks
         </footer>')
     )
