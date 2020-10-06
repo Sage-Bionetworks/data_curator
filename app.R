@@ -49,6 +49,8 @@ ui <- dashboardPage(
     HTML('<footer>
             Supported by the</br>
             Neurofibromatosis Open Science Initiative</br>
+            Created by the Human Tumor Atlas Network</br>
+            (U24-CA233243-01)</br>
             Powered by Sage Bionetworks
         </footer>')
     )
