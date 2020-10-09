@@ -1,6 +1,7 @@
 {
   "manifest_schemas": [
       {"display_name": "scRNA-seq Level 1", "schema_name": "ScRNA-seqAssay", "type": "assay"},
+      {"display_name": "scATAC-seq Level 1", "schema_name": "ScATAC-seqLevel1", "type": "assay"},
       {"display_name": "Bulk RNA-seq Level 1", "schema_name": "BulkRNA-seqAssay", "type": "assay"},
       {"display_name": "Bulk RNA-seq Level 2", "schema_name": "BulkRNA-seqAlignment", "type": "assay"},
       {"display_name": "Clinical Tier 1: Demographics", "schema_name": "Demographics", "type": "clinical"},
@@ -8,6 +9,7 @@
       {"display_name": "Clinical Tier 1: FamilyHistory", "schema_name": "FamilyHistory", "type": "clinical"},
       {"display_name": "Clinical Tier 1: Exposure", "schema_name": "Exposure", "type": "clinical"},
       {"display_name": "Clinical Tier 1: FollowUp", "schema_name": "FollowUp", "type": "clinical"},
-      {"display_name": "Clinical Tier 1: Therapy", "schema_name": "Therapy", "type": "clinical"}
+      {"display_name": "Clinical Tier 1: Therapy", "schema_name": "Therapy", "type": "clinical"},
+      {"display_name": "Other Assay (Minimal Metadata)", "schema_name": "OtherAssay", "type": "assay"}
   ]
 }
