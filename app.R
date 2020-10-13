@@ -34,9 +34,9 @@ ui <- dashboardPage(
     title = "NF Data Curator",
     tags$li(class = "dropdown",
 
-            tags$a(href = "https://nf.synapse.org/", target = "_blank",
-                   tags$img(height = "40px", alt = "NF LOGO",
-                            src = "nflogo_whitebkgrd.png")))
+            tags$a(href = "https://www.synapse.org/#!Wiki:syn17083165/ENTITY/591007", target = "_blank",
+                   tags$img(height = "50px", alt = "NF LOGO",
+                            src = "nfosi_logo_crop.png")))
     ),
   dashboardSidebar(
     width = 275,
@@ -61,6 +61,9 @@ ui <- dashboardPage(
       singleton(
         includeScript("www/readCookie.js")
       )),
+    tags$head(
+      tags$link(rel = "shortcut icon", href = "favicon.ico")
+      ),
     use_waiter(),
     waiter::waiter_show_on_load(html = span(
       style="color:white;",
