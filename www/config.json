@@ -2,8 +2,9 @@
   "manifest_schemas": [
       {"display_name": "scRNA-seq Level 1", "schema_name": "ScRNA-seqLevel1", "type": "assay"},
       {"display_name": "scATAC-seq Level 1", "schema_name": "ScATAC-seqLevel1", "type": "assay"},
-      {"display_name": "Bulk RNA-seq Level 1", "schema_name": "BulkRNA-seqAssay", "type": "assay"},
-      {"display_name": "Bulk RNA-seq Level 2", "schema_name": "BulkRNA-seqAlignment", "type": "assay"},
+      {"display_name": "Bulk RNA-seq Level 1", "schema_name": "BulkRNA-seqLevel1", "type": "assay"},
+      {"display_name": "Bulk RNA-seq Level 2", "schema_name": "BulkRNA-seqLevel2", "type": "assay"},
+      {"display_name": "Bulk RNA-seq Level 3", "schema_name": "BulkRNA-seqLevel3", "type": "assay"},
       {"display_name": "Bulk DNAseq Level 1", "schema_name": "BulkWESLevel1", "type": "assay"},
       {"display_name": "Bulk DNAseq Level 2", "schema_name": "BulkWESLevel2", "type": "assay"},
       {"display_name": "Bulk DNAseq Level 3", "schema_name": "BulkWESLevel3", "type": "assay"},
