@@ -23,7 +23,7 @@
       {"display_name": "Clinical Tier 3: Acute Lymphoblastic Leukemia", "schema_name": "AcuteLymphoblasticLeukemiaTier3", "type": "clinical"},
       {"display_name": "Clinical Tier 3: Breast Precancer and Cancer ", "schema_name": "BreastCancerTier3", "type": "clinical"},
       {"display_name": "Clinical Tier 3: Colorectal Precancer and Cancer", "schema_name": "ColorectalCancerTier3", "type": "clinical"},
-      {"display_name": "Clinical Tier 3: Lung Precancer and Cancer", "schema_name": "LungCancer", "type": "clinical"},
+      {"display_name": "Clinical Tier 3: Lung Precancer and Cancer", "schema_name": "LungCancerTier3", "type": "clinical"},
       {"display_name": "Clinical Tier 3: Neuroblastoma and Glioma", "schema_name": "BrainCancerTier3", "type": "clinical"},
       {"display_name": "Clinical Tier 3: Melanoma", "schema_name": "MelanomaTier3", "type": "clinical"},
       {"display_name": "Clinical Tier 3: Ovarian Precancer and Cancer ", "schema_name": "OvarianCancerTier3", "type": "clinical"},
