@@ -543,7 +543,7 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
     infile <- readr::read_csv(input$file1$datapath, na = c("", "NA"))
 
     ### IF an assay component selected (define assay components)
-    ## note for future - the type to filter (eg assay) on could probably also be a config choice
+    ##the type to filter (eg assay) is part of the config 
     assay_schemas <- config$manifest_schemas$display_name[config$manifest_schemas$type=="assay"]
 
     ### and adds entityID, saves it as synapse_storage_manifest.csv, then associates with synapse files 
