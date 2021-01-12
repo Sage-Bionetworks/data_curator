@@ -542,11 +542,10 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
     ### reads in csv 
     infile <- readr::read_csv(input$file1$datapath, na = c("", "NA"))
 
-    ### IF an assay component selected (define assay components)
-    ##the type to filter (eg assay) is part of the config 
+    ### (defined assay components in config)
     assay_schemas <- config$manifest_schemas$display_name[config$manifest_schemas$type=="assay"]
 
-    ### and adds entityID, saves it as synapse_storage_manifest.csv, then associates with synapse files 
+    ### IF an assay component selected, adds entityID, saves it as synapse_storage_manifest.csv, then associates with synapse files 
     if ( input$template_type %in% assay_schemas ) {
       
       ### make into a csv or table for assay components
@@ -631,7 +630,7 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
         rm("/tmp/synapse_storage_manifest.csv")
       }
 
-    } else {
+    } else { ### if not an assay component
       write.csv(infile, file = "./files/synapse_storage_manifest.csv", quote = FALSE, row.names = FALSE, na = "")
 
       selected_project <- input$var
