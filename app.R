@@ -32,7 +32,7 @@ ui <- dashboardPage(
     titleWidth = 250,
     title = "Data Curator",
     tags$li(class = "dropdown",
-            tags$a(href = "https://humantumoratlas.org/", target = "_blank",
+            tags$a(href = "https://humantumoratlas.org/", target = "_blank", ##insert links and logos of your choice, this is just an example
                    tags$img(height = "40px", alt = "HTAN LOGO",
                             src = "HTAN_text_logo.png")))
     ),
@@ -366,7 +366,7 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
       filename_list <- names(file_namedList)
 
 
-      manifest_url <- metadata_model$getModelManifest(paste0("HTAN ", input$template_type), template_type, filenames = as.list(filename_list))
+      manifest_url <- metadata_model$getModelManifest(paste0("[project] ", input$template_type), template_type, filenames = as.list(filename_list))
       ### make sure not scalar if length of list is 1 in R
       ## add in the step to convert names later ###
 
@@ -382,7 +382,7 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
       ### if the manifest already exists
       manifest_entity <- syn_get(existing_manifestID)
       # prepopulatedManifestURL = mm.populateModelManifest("test_update", entity.path, component)
-      manifest_url <- metadata_model$populateModelManifest(paste0("HTAN ", input$template_type), manifest_entity$path, template_type)
+      manifest_url <- metadata_model$populateModelManifest(paste0("[project] ", input$template_type), manifest_entity$path, template_type)
       toggle('text_div3')
 
       output$text <- renderUI({
@@ -445,7 +445,7 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
     if (length(annotation_status) != 0) {
 
       ## if error not empty aka there is an error
-      filled_manifest <- metadata_model$populateModelManifest(paste0("HTAN ", input$template_type), input$file1$datapath, template_type)
+      filled_manifest <- metadata_model$populateModelManifest(paste0("[project] ", input$template_type), input$file1$datapath, template_type)
 
       ### create list of string names for the error messages if there is more than one at a time 
       str_names <- c()
@@ -552,7 +552,7 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
       ### make into a csv or table for assay components
       ### already has entityId
       if ("entityId" %in% colnames(infile)) {
-        write.csv(infile, file = "./files/synapse_storage_manifest.csv", quote = FALSE, row.names = FALSE, na = "")
+        write.csv(infile, file = "./files/synapse_storage_manifest.csv", quote = TRUE, row.names = FALSE, na = "")
 
       } else {
         # if not get ids
@@ -578,7 +578,7 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
         colnames(files_df) <- c("entityId", "Filename")
         files_entity <- inner_join(infile, files_df, by = "Filename")
 
-        write.csv(files_entity, file = "./files/synapse_storage_manifest.csv", quote = FALSE, row.names = FALSE, na = "")
+        write.csv(files_entity, file = "./files/synapse_storage_manifest.csv", quote = TRUE, row.names = FALSE, na = "")
       }
       selected_project <- input$var
       selected_folder <- input$dataset
@@ -632,7 +632,7 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
       }
 
     } else {
-      write.csv(infile, file = "./files/synapse_storage_manifest.csv", quote = FALSE, row.names = FALSE, na = "")
+      write.csv(infile, file = "./files/synapse_storage_manifest.csv", quote = TRUE, row.names = FALSE, na = "")
 
       selected_project <- input$var
       selected_folder <- input$dataset
