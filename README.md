@@ -4,6 +4,7 @@
 ### Data Curator App Setup (frontend)
 Follow the steps below to make sure the _Data Curator App_ (frontend) is fully setup to work with the [schematic](https://github.com/Sage-Bionetworks/schematic/tree/main) (backend):
 
+
 Navigate to the location where you want to setup the application (i.e., the _Shiny Server_). Clone the code on this github branch (_shiny-server-1.2.1.rc1_):
 
     git clone --single-branch --branch shiny-server-1.2.1.rc1 https://github.com/ncihtan/HTAN_data_curator.git
