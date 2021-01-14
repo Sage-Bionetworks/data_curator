@@ -552,7 +552,7 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
       ### make into a csv or table for assay components
       ### already has entityId
       if ("entityId" %in% colnames(infile)) {
-        write.csv(infile, file = "./files/synapse_storage_manifest.csv", quote = FALSE, row.names = FALSE, na = "")
+        write.csv(infile, file = "./files/synapse_storage_manifest.csv", quote = TRUE, row.names = FALSE, na = "")
 
       } else {
         # if not get ids
@@ -578,7 +578,7 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
         colnames(files_df) <- c("entityId", "Filename")
         files_entity <- inner_join(infile, files_df, by = "Filename")
 
-        write.csv(files_entity, file = "./files/synapse_storage_manifest.csv", quote = FALSE, row.names = FALSE, na = "")
+        write.csv(files_entity, file = "./files/synapse_storage_manifest.csv", quote = TRUE, row.names = FALSE, na = "")
       }
       selected_project <- input$var
       selected_folder <- input$dataset
@@ -632,7 +632,7 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
       }
 
     } else {
-      write.csv(infile, file = "./files/synapse_storage_manifest.csv", quote = FALSE, row.names = FALSE, na = "")
+      write.csv(infile, file = "./files/synapse_storage_manifest.csv", quote = TRUE, row.names = FALSE, na = "")
 
       selected_project <- input$var
       selected_folder <- input$dataset
