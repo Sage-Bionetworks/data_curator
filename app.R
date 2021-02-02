@@ -75,10 +75,14 @@ ui <- dashboardPage(
       # First tab content
       tabItem(tabName = "instructions",
               h2("Instructions for the Data Curator App:"),
-              h3("1. Go to", strong("Select your Dataset"), "tab - select your project; choose your folder and metadata template type matching your metadata."),
-              h3("2. Go to", strong("Get Metadata Template"), "tab - click on the link to generate the metadata template, then fill out and download the file as a CSV. If you already have an annotated metadata template, you may skip this step."),
-              h3("3. Go to", strong("Submit and Validate Metadata"), "tab - upload your filled CSV and validate your metadata. If you receive errors correct them, reupload your CSV, and revalidate until you receive no more errors. When your metadata is valid, you will be able to see a 'Submit' button. Press it to submit your metadata.")
-      ),
+              h3("1. Go to", strong("Select your Dataset"), "tab - select your project; choose the folder where your data are stored; and, choose your metadata template based on the type of data you’ll be annotating (e.g., Genomics Assay, Imaging Assay, etc.)."),
+              h3("2. Go to", strong("Get Metadata Template"), "tab - click the button to generate a metadata template in Google Sheets; once generated (this may take a few moments), click the link that appears, fill out the sheet (columns in blue are required; columns in yellow are optional), and then download the file as a CSV."),
+              h3("3. Go to", strong("Submit and Validate Metadata"), "tab - upload your filled CSV and validate your metadata. If you receive errors: correct them in the CSV, re-upload, and revalidate until you receive no more errors. Once your CSV is error-free, please submit it to nf-osi@sagebionetworks.org. (Please note: the submit to Synapse button is not currently functional!)"),
+	      h2("About"),
+	      h3("The NF Data Curator App allows you to annotate your data files — stored in Sage Bionetworks’ data storage platform, Synapse — using metadata templates with preset attributes (a.k.a, keys or column headers) and values. The app also provides validation, to ensure metadata templates are completed according to the Neurofibromatosis Open Science Initiative’s (NF-OSI) metadata dictionary. Ultimately, this process enables data discovery on the NF Data Portal, once data are released."),
+	      h2("Note"),
+	      h3("Please note that this app is still in beta, and may not always work as designed. If you receive a ‘disconnected from the server’ error — this could mean that you’re not logged into Synapse (you must be logged in to use this app), or that something went wrong with the app — we apologize if this happens! You may have to reload the app and try again. If you experience repeated issues, please contact us at nf-osi@sagebionetworks.org. In addition, the third tab, Submit and Validate Metadata, is not fully functional. You won’t be able to submit your completed template to Synapse using this app. For now, please email your completed manifest to nf-osi@sagebionetworks.org.")     
+      	      ),
       # second tab content
       tabItem(tabName = "data",
               h2("Set Dataset and Metadata Template for Curation"),
@@ -161,7 +165,7 @@ ui <- dashboardPage(
                   ),
                   helpText("Errors are evaluated one column at a time, if you have an error please reupload your CSV and press the validate button as needed.")
                 ),
-                box(title = "Submit Validated Metadata to Synapse",
+                box(title = "Submit Validated Metadata to Synapse - Warning: not currently functional!",
                     status = "primary",
                     solidHeader = TRUE,
                     width = 12,

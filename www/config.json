@@ -1,6 +1,11 @@
 {
   "manifest_schemas": [
-      {"display_name": "Genomics Assay", "schema_name": "GenomicsAssay", "type": "assay"}
+      {"display_name": "Genomics Assay", "schema_name": "GenomicsAssay", "type": "assay"},
+      {"display_name": "Imaging Assay", "schema_name": "ImagingAssay", "type": "assay"},
+      {"display_name": "Epigenetics Assay", "schema_name": "EpigeneticsAssay", "type": "assay"},
+      {"display_name": "Pharmacokinetics Assay", "schema_name": "PharmacokineticsAssay", "type": "assay"},
+      {"display_name": "Proteomics Assay", "schema_name": "ProteomicsAssay", "type": "assay"},
+      {"display_name": "Plate-Based Reporter Assay", "schema_name": "PlateBasedReporterAssay", "type": "assay"}
   ],
   "main_fileview" : "syn16858331"
 }
