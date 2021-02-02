@@ -165,7 +165,7 @@ ui <- dashboardPage(
                   ),
                   helpText("Errors are evaluated one column at a time, if you have an error please reupload your CSV and press the validate button as needed.")
                 ),
-                box(title = "Submit Validated Metadata to Synapse - Warning: not yet fully functional!",
+                box(title = "Submit Validated Metadata to Synapse - Warning: not currently functional!",
                     status = "primary",
                     solidHeader = TRUE,
                     width = 12,
