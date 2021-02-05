@@ -415,7 +415,6 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
         })
         waiter::waiter_hide()
       }
-=======
     manifest_w$show()
 
     selected_folder <- input$dataset
