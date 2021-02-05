@@ -25,7 +25,6 @@ Use [this](https://www.synapse.org/#!Synapse:syn22410511/files/) sandbox Synapse
 You likely won't need the instructions below unless a major change happens, but we've left them here just in case: 
 
 ### Data Curator App Setup (frontend)
-<<<<<<< HEAD
 Follow the steps below to make sure the _Data Curator App_ (frontend) is fully setup to work with the [Data Ingress Pipeline](https://github.com/nf-osi/schematic/) (backend):
 
 Navigate to the location where you want to setup the application (i.e., the _Shiny Server_). Clone the code on this github branch (_production_):
@@ -47,7 +46,6 @@ Activate the `data_curator_env` environment:
 
 ### Schematic Setup (backend)
 
-
 The next step is to install the latest release of the [Data Ingress Pipeline](https://github.com/Sage-Bionetworks/schematic) (backend) as a folder `schematic` inside the `NF_data_curator` folder and tie it together with this frontend. 
 
 To do so carry out the following steps:
@@ -57,7 +55,6 @@ To do so carry out the following steps:
     `git clone --single-branch --branch production https://github.com/nf-osi/schematic.git`
 
 This creates a folder named `schematic` inside the the `NF_data_curator folder`.
-
 2. Navigate into the created `schematic` directory. Install the backend (`schematic` package) within the conda virtual environment by running:
 
     `pip install -e .`
