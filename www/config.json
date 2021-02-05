@@ -7,5 +7,6 @@
       {"display_name": "Proteomics Assay", "schema_name": "ProteomicsAssay", "type": "assay"},
       {"display_name": "Plate-Based Reporter Assay", "schema_name": "PlateBasedReporterAssay", "type": "assay"}
   ],
-  "main_fileview" : "syn16858331"
+  "main_fileview" : "syn16858331",
+  "community" : "NF"
 }
