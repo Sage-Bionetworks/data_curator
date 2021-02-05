@@ -1,3 +1,4 @@
+
 # NF Data Curator App
 
 ## Shiny app configuration
@@ -24,11 +25,13 @@ Use [this](https://www.synapse.org/#!Synapse:syn22410511/files/) sandbox Synapse
 You likely won't need the instructions below unless a major change happens, but we've left them here just in case: 
 
 ### Data Curator App Setup (frontend)
+<<<<<<< HEAD
 Follow the steps below to make sure the _Data Curator App_ (frontend) is fully setup to work with the [Data Ingress Pipeline](https://github.com/nf-osi/schematic/) (backend):
 
 Navigate to the location where you want to setup the application (i.e., the _Shiny Server_). Clone the code on this github branch (_production_):
 
     git clone --single-branch --branch production https://github.com/nf-osi/NF_data_curator.git
+
 
 Create a conda environment in the cloned directory from the `environment.yml` file which has all the required package dependencies:
 
@@ -42,7 +45,8 @@ Activate the `data_curator_env` environment:
 
 -------
 
-### Data Ingress Pipeline Setup (backend)
+### Schematic Setup (backend)
+
 
 The next step is to install the latest release of the [Data Ingress Pipeline](https://github.com/Sage-Bionetworks/schematic) (backend) as a folder `schematic` inside the `NF_data_curator` folder and tie it together with this frontend. 
 
@@ -54,7 +58,6 @@ To do so carry out the following steps:
 
 This creates a folder named `schematic` inside the the `NF_data_curator folder`.
 
-
 2. Navigate into the created `schematic` directory. Install the backend (`schematic` package) within the conda virtual environment by running:
 
     `pip install -e .`
@@ -63,7 +66,8 @@ To verify that the backend is installed, do this: `pip list`
 
 If you can find the `schematic` package in the list of packages installed it was successful.
 
-3. Obtain the `credentials.json` file in `schematic` to authenticate user access to Google API services which will be used to create the metadata templates. If you do not already have this file, make sure you are authorized (see _Notes_ below) and run the below command within `HTAN-data-pipeline` to download the HTAN credentials file `syn21088684` through the `synapseclient` (part of the backend):
+
+3. Obtain the `credentials.json` file in `schematic` to authenticate user access to Google API services which will be used to create the metadata templates. If you do not already have this file, make sure you are authorized (see _Notes_ below) and run the below command within `schematic` to download the you credentials file, e.g. `syn21088684` (for HTAN) through the `synapseclient` (part of the backend):
 
     `synapse get syn21088684`
 
@@ -79,6 +83,6 @@ _Notes:_
 
 - `syn21088684` is the Synapse ID of the HTAN specific `credentials.json` file on Synapse that corresponds to the Google service account that creates HTAN templates.
 
-- You need to be authorized to download protected Synapse files such as credentials. Please contact milen.nikolov@sagebase.org for access to the HTAN credentials.
+- You need to be authorized to download protected Synapse files such as credentials. Please contact your project manager for access.
 
-- If you want to test the backend you can run other things inside `schematic`, but in order to run the `examples/synapse_store.py` example, you need to configure your Synapse credentials in the `.synapseConfig` file (which can be found in the `schematic` directory), as described [here](https://github.com/Sage-Bionetworks/schematic/tree/develop#configure-synapse-credentials).
+- If you want to test the backend you can run other things inside `schematic`, but in order to run the `examples/synapse_store.py` example, you need to configure your Synapse credentials in the `.synapseConfig` file (which can be found in the `schematic` directory), as described [here](https://github.com/Sage-Bionetworks/schematic/tree/main#configure-synapse-credentials).
