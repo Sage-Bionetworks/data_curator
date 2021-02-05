@@ -17,5 +17,7 @@
       {"display_name": "Clinical Tier 1: Therapy", "schema_name": "Therapy", "type": "clinical"},
       {"display_name": "Biospecimen Tier 1 & 2", "schema_name": "Biospecimen", "type": "biospecimen"},
       {"display_name": "Other Assay (Minimal Metadata)", "schema_name": "OtherAssay", "type": "assay"}
-  ]
+  ],
+  "main_fileview" : "syn20446927",
+  "community" : "HTAN"
 }
