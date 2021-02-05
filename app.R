@@ -33,8 +33,7 @@ ui <- dashboardPage(
     titleWidth = 275,
     title = "NF Data Curator",
     tags$li(class = "dropdown",
-
-            tags$a(href = "https://www.synapse.org/#!Wiki:syn17083165/ENTITY/591007", target = "_blank",
+            tags$a(href = "https://nf-osi.github.io/", target = "_blank",
                    tags$img(height = "50px", alt = "NF LOGO",
                             src = "nfosi_logo_crop.png")))
     ),
@@ -174,22 +173,22 @@ ui <- dashboardPage(
               )
       )
     ),
-    uiOutput("Next_Previous")
+    uiOutput("Next_Previous"),
+
+    ## waiter loading screen
+    use_waiter(),
+    waiter_show_on_load(
+      html = tagList(
+        img(src = "loading.gif"),
+        h4("Retrieving Synapse information...")
+      ),
+      color = "#424874"
+    )
   )
 )
 
 server <- function(input, output, session) {
-  ## Show message if user is not logged in to synapse
-  
-  unauthorized <- observeEvent(input$authorized, {
-    showModal(
-      modalDialog(
-        title = "Not logged in",
-        HTML("You must log in to <a href=\"https://www.synapse.org/\">Synapse</a> to use this application. Please log in, and then refresh this page.")
-      )
-    )
-  })
-  
+
   ########### session global variables
   reticulate::source_python("synStore_Session.py")
   
@@ -217,44 +216,51 @@ server <- function(input, output, session) {
   
   ### initial login front page items
   observeEvent(input$cookie, {
-    
-    waiter::waiter_update(html = span(
-      style="color:white;",
-      spin_flowers(),
-      h3("logging in...")
-    ))
-    ### logs in 
-    
-    syn_login(sessionToken = input$cookie, rememberMe = FALSE)
-    login_msg <- sprintf("welcome, %s !", syn_getUserProfile()$userName)
-    
-    waiter::waiter_hide()
-    waiter::waiter_show(html = span(
-      style="color:white;",
-      spin_flowers(),
-      h3(login_msg)
-    ))
-    
-    ### updating global vars with values for projects
-    synStore_obj <<- syn_store("syn16858331", token = input$cookie)
-    
-    # get_projects_list(synStore_obj)
-    waiter::waiter_update(html = span(
-      style="color:white;",
-      spin_flowers(),
-      h3("retrieving projects...")
-    ))
-    
-    projects_list <<- syn_store$getStorageProjects(synStore_obj)
-    
-    for (i in seq_along(projects_list)) {
-      projects_namedList[projects_list[[i]][[2]]] <<- projects_list[[i]][[1]]
-    }
-    
-    ### updates project dropdown
-    updateSelectizeInput(session, 'var', choices = sort(names(projects_namedList)))
-    waiter::waiter_hide()
-    
+
+    ## login and update session; otherwise, notify to login to Synapse first
+    tryCatch({
+
+      ### logs in 
+      syn_login(sessionToken = input$cookie, rememberMe = FALSE)
+
+      ### welcome message
+      output$title <- renderUI({
+        titlePanel(h4(sprintf("Welcome, %s", syn_getUserProfile()$userName)))
+      })
+
+      ### updating global vars with values for projects
+      synStore_obj <<- syn_store("syn16858331", token = input$cookie)
+
+      # get_projects_list(synStore_obj)
+      projects_list <<- syn_store$getStorageProjects(synStore_obj)
+
+      for (i in seq_along(projects_list)) {
+        projects_namedList[projects_list[[i]][[2]]] <<- projects_list[[i]][[1]]
+      }
+
+      ### updates project dropdown
+      updateSelectizeInput(session, 'var', choices = names(projects_namedList))
+
+      ### update waiter loading screen once login successful
+      waiter_update(
+        html = tagList(
+          img(src = "synapse_logo.png", height = "120px"),
+          h3(sprintf("Welcome, %s!", syn_getUserProfile()$userName))
+        )
+      )
+      Sys.sleep(2)
+      waiter_hide()
+    }, error = function(err) {
+      Sys.sleep(2)
+      waiter_update(
+        html = tagList(
+          img(src = "synapse_logo.png", height = "120px"),
+          h3("Looks like you're not logged in!"),
+          span("Please ", a("login", href = "https://www.synapse.org/#!LoginPlace:0", target = "_blank"), 
+            " to Synapse, then refresh this page.")
+        )
+      )
+    })
   })
   
   
@@ -335,6 +341,15 @@ output$manifest_display_name <- renderUI({
 
 schema_to_display_lookup <- data.frame(schema_name, display_name)
 
+  # loading screen for template link generation
+  manifest_w <- Waiter$new(
+    html = tagList(
+      spin_plus(), br(),
+      h4("Generating link...")
+    ),
+    color = "rgba(66, 72, 116, .9)"
+  )
+
   ###shows new metadata link when get gsheets template button pressed OR updates old metadata if is exists 
   observeEvent(
     input$download, {
@@ -354,18 +369,7 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
       ))
       
 
-      project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
-      
-      # folder_list <- syn_store$getStorageDatasetsInProject(synStore_obj, project_synID)
-      folder_df <- syn_tableQuery(sprintf("select name, id from %s where type = 'folder' and projectId = '%s'", config$main_fileview, project_synID))$asDataFrame()
-      
-      folders_namedList <- setNames(as.list(folder_df$id), folder_df$name)
-      
-      folder_synID <- folders_namedList[[selected_folder]]
-      
-      shiny::validate(
-        shiny::need(length(folder_synID)==1, 'Duplicate folder names detected. Please make sure folders have distinct names.')
-      )
+
       
       # showNotification( folder_synID, duration = NULL, type = "warning")
       
@@ -410,6 +414,66 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
         })
         waiter::waiter_hide()
       }
+    manifest_w$show()
+
+    selected_folder <- input$dataset
+    selected_project <- input$var
+
+    ###lookup schema template name 
+    template_type_df <- schema_to_display_lookup[match(input$template_type, schema_to_display_lookup$display_name), 1, drop = F ]
+    template_type <- as.character(template_type_df$schema_name)
+    
+      project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
+      
+      # folder_list <- syn_store$getStorageDatasetsInProject(synStore_obj, project_synID)
+      folder_df <- syn_tableQuery(sprintf("select name, id from %s where type = 'folder' and projectId = '%s'", config$main_fileview, project_synID))$asDataFrame()
+      
+      folders_namedList <- setNames(as.list(folder_df$id), folder_df$name)
+      
+      folder_synID <- folders_namedList[[selected_folder]]
+      
+      shiny::validate(
+        shiny::need(length(folder_synID)==1, 'Duplicate folder names detected. Please make sure folders have distinct names.')
+      )
+
+
+    ### checks if a manifest already exists
+    existing_manifestID <- syn_store$updateDatasetManifestFiles(synStore_obj, folder_synID)
+
+    ### if there isn't an existing manifest make a new one 
+    if (existing_manifestID == '') {
+      file_list <- syn_store$getFilesInStorageDataset(synStore_obj, folder_synID)
+      file_namedList <- c()
+      for (i in seq_along(file_list)) {
+        file_namedList[file_list[[i]][[2]]] <- file_list[[i]][[1]]
+      }
+      filename_list <- names(file_namedList)
+
+
+      manifest_url <- metadata_model$getModelManifest(paste0("[project] ", input$template_type), template_type, filenames = as.list(filename_list))
+      ### make sure not scalar if length of list is 1 in R
+      ## add in the step to convert names later ###
+
+
+      ## links shows in text box
+      toggle('text_div')
+      ### if want a progress bar need more feedback from API to know how to increment progress bar ###
+
+      output$text <- renderUI({
+        tags$a(href = manifest_url, manifest_url, target = "_blank") ### add link to data dictionary when we have it ###
+      })
+    } else {
+      ### if the manifest already exists
+      manifest_entity <- syn_get(existing_manifestID)
+      # prepopulatedManifestURL = mm.populateModelManifest("test_update", entity.path, component)
+      manifest_url <- metadata_model$populateModelManifest(paste0("[project] ", input$template_type), manifest_entity$path, template_type)
+      toggle('text_div3')
+
+      output$text <- renderUI({
+        tags$a(href = manifest_url, manifest_url, target = "_blank")
+      })
+    }
+    manifest_w$hide()
     }
   )
   
@@ -437,26 +501,46 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
       
     }
   )
-  
+
+
+  ## loading screen for validating metadata
+  validate_w <- Waiter$new(
+    html = tagList(
+      spin_plus(), br(),
+      h4("Validating...")
+    ),
+    color = "rgba(66, 72, 116, .9)"
+  )
+
   ### toggles validation status when validate button pressed
   observeEvent(
     input$validate, {
-      ###lookup schema template name 
-      template_type_df <- schema_to_display_lookup[match(input$template_type, schema_to_display_lookup$display_name), 1, drop = F ]
-      template_type <- as.character(template_type_df$schema_name)
-      
-      annotation_status <- metadata_model$validateModelManifest(input$file1$datapath, template_type)
-      # showNotification(input$file1$datapath, duration = NULL, type = "default")
-      
-      toggle('text_div2')
-      
-      waiter::waiter_show(html = span(
-        style="color:white;",
-        spin_flowers(),
-        h3("validating annotations...")
-      ))
-      
-      if (length(annotation_status) != 0) {
+
+    validate_w$show()
+
+    ###lookup schema template name 
+    template_type_df <- schema_to_display_lookup[match(input$template_type, schema_to_display_lookup$display_name), 1, drop = F ]
+    template_type <- as.character(template_type_df$schema_name)
+
+    annotation_status <- metadata_model$validateModelManifest(input$file1$datapath, template_type)
+    
+    toggle('text_div2')
+
+
+    if (length(annotation_status) != 0) {
+
+      ## if error not empty aka there is an error
+      filled_manifest <- metadata_model$populateModelManifest(paste0("[project] ", input$template_type), input$file1$datapath, template_type)
+
+      ### create list of string names for the error messages if there is more than one at a time 
+      str_names <- c()
+
+      ### initialize list of errors and column names to highlight 
+      error_values <- c()
+      column_names <- c()
+
+      ### loop through the multiple error messages
+      for (i in seq_along(annotation_status)) {
         
         ## if error not empty aka there is an error
         filled_manifest <- metadata_model$populateModelManifest(paste0("NF ", input$template_type), input$file1$datapath, template_type)
@@ -497,11 +581,23 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
                                  message, paste0("</b>", "<br/>"), sep = " ")
         }
         
-        
-        
-        
-        ### format output text
-        output$text2 <- renderUI({
+
+        error_values[i] <- error_value
+        column_names[i] <- column
+        str_names[i] <- paste( paste0(i, "."),
+                              "At row <b>", row, 
+                              "</b>value <b>", error_value,
+                              "</b>in ", "<b>", column, "</b>",
+                              message, paste0("</b>", "<br/>"), sep = " ")
+      }
+ 
+      validate_w$update(
+        html = h3(sprintf("%d errors found", length(annotation_status)))
+      )
+
+
+      ### format output text
+      output$text2 <- renderUI({
           tagList( 
             HTML("Your metadata is invalid according to the data model.<br/> ",
                  "You have", length(annotation_status), " errors: <br/>"),
@@ -519,72 +615,56 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
                     options = list(lengthChange = FALSE, scrollX = TRUE)
           ) %>% formatStyle(unlist(column_names),
                             backgroundColor = styleEqual( unlist(error_values), rep("yellow", length(error_values) ) )) ## how to have multiple errors
-        })
-        waiter::waiter_hide()
-      } else {
-        output$text2 <- renderUI({
-          HTML("Your metadata is valid!")
-        })
-        waiter::waiter_hide()
-        ### show submit button
-        output$submit <- renderUI({
-          actionButton("submitButton", "Submit to Synapse")
-        })
-        
-      }
+
+      })
+    } else {
+      output$text2 <- renderUI({
+        HTML("Your metadata is valid!")
+      })
+
+      ### show submit button
+      output$submit <- renderUI({
+        actionButton("submitButton", "Submit to Synapse")
+      })
+
     }
+    Sys.sleep(2)
+    validate_w$hide()
+  }
   )
-  
+
+  ## loading screen for submitting data
+  submit_w <- Waiter$new(
+    html = tagList(
+      img(src = "loading.gif"),
+      h4("Submitting...")
+    ),
+    color = "#424874"
+  )
+
   ###submit button
   observeEvent(
     input$submitButton, {
+
+    submit_w$show()
+
+    ### reads in csv 
+    infile <- readr::read_csv(input$file1$datapath, na = c("", "NA"))
+
+    ### IF an assay component selected (define assay components)
+    ## note for future - the type to filter (eg assay) on could probably also be a config choice
+    assay_schemas <- config$manifest_schemas$display_name[config$manifest_schemas$type=="assay"]
+
+    ### and adds entityID, saves it as synapse_storage_manifest.csv, then associates with synapse files 
+    if ( input$template_type %in% assay_schemas ) {
       
-      showNotification(id = "processing", "Submitting...", duration = NULL, type = "default")
-      
-      ### reads in csv 
-      infile <- readr::read_csv(input$file1$datapath, na = c("", "NA"))
-      
-      ### IF an assay component selected (define assay components)
-      ## note for future - the type to filter (eg assay) on could probably also be a config choice
-      assay_schemas <- config$manifest_schemas$display_name[config$manifest_schemas$type=="assay"]
-      
-      ### and adds entityID, saves it as synapse_storage_manifest.csv, then associates with synapse files 
-      if ( input$template_type %in% assay_schemas ) {
-        
-        ### make into a csv or table for assay components
-        ### already has entityId
-        if ("entityId" %in% colnames(infile)) {
-          write.csv(infile, file = "./files/synapse_storage_manifest.csv", quote = FALSE, row.names = FALSE, na = "")
-          
-        } else {
-          # if not get ids
-          selected_folder <- input$dataset
-          selected_project <- input$var
-          
-          project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
-          # folder_list <- syn_store$getStorageDatasetsInProject(synStore_obj, project_synID)
-          folder_df <- syn_tableQuery(sprintf("select name, id from %s where type = 'folder' and projectId = '%s'", config$main_fileview, project_synID))$asDataFrame()
-          
-          folders_namedList <- setNames(as.list(folder_df$id), folder_df$name)
-          
-          folder_synID <- folders_namedList[[selected_folder]]
-          
-          validate(
-            need(length(folder_synID)==1, 'Duplicate folder names detected. Please make sure folders have distinct names.'),
-          )
-          
-          file_list <- syn_store$getFilesInStorageDataset(synStore_obj, folder_synID)
-          file_namedList <- c()
-          for (i in seq_along(file_list)) {
-            file_namedList[file_list[[i]][[2]]] <- file_list[[i]][[1]]
-          }
-          
-          files_df <- stack(file_namedList)
-          colnames(files_df) <- c("entityId", "Filename")
-          files_entity <- inner_join(infile, files_df, by = "Filename")
-          
-          write.csv(files_entity, file = "./files/synapse_storage_manifest.csv", quote = FALSE, row.names = FALSE, na = "")
-        }
+      ### make into a csv or table for assay components
+      ### already has entityId
+      if ("entityId" %in% colnames(infile)) {
+        write.csv(infile, file = "./files/synapse_storage_manifest.csv", quote = TRUE, row.names = FALSE, na = "")
+
+      } else {
+        # if not get ids
         selected_project <- input$var
         selected_folder <- input$dataset
         
@@ -596,39 +676,57 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
         folders_namedList <- setNames(as.list(folder_df$id), folder_df$name)
         
         folder_synID <- folders_namedList[[selected_folder]]
-        
-        validate(
-          need(length(folder_synID)==1, 'Duplicate folder names detected. Please make sure folders have distinct names.'),
-        )
-        
-        ### associates metadata with data and returns manifest id
-        manifest_id <- syn_store$associateMetadataWithFiles(synStore_obj, "./files/synapse_storage_manifest.csv", folder_synID)
-        print(manifest_id)
-        manifest_path <- paste0("synapse.org/#!Synapse:", manifest_id)
-        ### if no error 
-        if (startsWith(manifest_id, "syn") == TRUE) {
-          removeNotification(id = "processing")
-          # showNotification(id = "success", paste0("Submit Manifest to: ", manifest_path), duration = NULL, type = "message")
-          nx_report_success("Success!", paste0("Manifest submitted to: ", manifest_path))
-          rm("./files/synapse_storage_manifest.csv")
-          
-          ### clear inputs 
-          output$text2 <- renderUI({
-            HTML("")
-          })
-          output$submit <- renderUI({
-          })
-          
-          ### rerenders fileinput UI
-          output$fileInput_ui <- renderUI({
-            fileInput("file1", "Upload CSV File",
-                      accept = c('text/csv',
-                                 'text/comma-separated-values',
-                                 '.csv'))
-          })
-          ### renders empty df
-          output$tbl <- DT::renderDT(
-            datatable(as.data.frame(matrix(0, ncol = 0, nrow = 0)))
+
+        file_list <- syn_store$getFilesInStorageDataset(synStore_obj, folder_synID)
+        file_namedList <- c()
+        for (i in seq_along(file_list)) {
+          file_namedList[file_list[[i]][[2]]] <- file_list[[i]][[1]]
+        }
+
+        files_df <- stack(file_namedList)
+        colnames(files_df) <- c("entityId", "Filename")
+        files_entity <- inner_join(infile, files_df, by = "Filename")
+
+        write.csv(files_entity, file = "./files/synapse_storage_manifest.csv", quote = TRUE, row.names = FALSE, na = "")
+      }
+      selected_project <- input$var
+      selected_folder <- input$dataset
+
+      project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
+
+      folder_list <- syn_store$getStorageDatasetsInProject(synStore_obj, project_synID)
+      folders_namedList <- c()
+      for (i in seq_along(folder_list)) {
+        folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
+      }
+      folder_synID <- folders_namedList[[selected_folder]]
+
+      ### associates metadata with data and returns manifest id
+      manifest_id <- syn_store$associateMetadataWithFiles(synStore_obj, "./files/synapse_storage_manifest.csv", folder_synID)
+      print(manifest_id)
+      manifest_path <- paste0("synapse.org/#!Synapse:", manifest_id)
+      ### if no error 
+      if (startsWith(manifest_id, "syn") == TRUE) {
+        nx_report_success("Success!", paste0("Manifest submitted to: ", manifest_path))
+        rm("./files/synapse_storage_manifest.csv")
+
+        ### clear inputs 
+        output$text2 <- renderUI({
+          HTML("")
+        })
+        output$submit <- renderUI({
+        })
+
+        ### rerenders fileinput UI
+        output$fileInput_ui <- renderUI({
+          fileInput("file1", "Upload CSV File",
+                                  accept = c('text/csv',
+                                          'text/comma-separated-values',
+                                          '.csv'))
+        })
+        ### renders empty df
+        output$tbl <- DT::renderDT(
+          datatable(as.data.frame(matrix(0, ncol = 0, nrow = 0)))
           )
           
         } else {
@@ -637,67 +735,77 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
         }
         
       } else {
-        # showNotification( "no FIlename", duration = NULL, type = "default")
-        write.csv(infile, file = "./files/synapse_storage_manifest.csv", quote = FALSE, row.names = FALSE, na = "")
-        
-        selected_project <- input$var
-        selected_folder <- input$dataset
-        
-        project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
-        # folder_synID <- get_folder_synID(synStore_obj, project_synID, selected_folder)
-        
-        # folder_list <- syn_store$getStorageDatasetsInProject(synStore_obj, project_synID)
-        folder_df <- syn_tableQuery(sprintf("select name, id from %s where type = 'folder' and projectId = '%s'", config$main_fileview, project_synID))$asDataFrame()
-        
-        folders_namedList <- setNames(as.list(folder_df$id), folder_df$name)
-        
-        folder_synID <- folders_namedList[[selected_folder]]
-        
-        validate(
-          need(length(folder_synID)==1, 'Duplicate folder names detected. Please make sure folders have distinct names.'),
-        )
-        
-        ### associates metadata with data and returns manifest id
-        manifest_id <- syn_store$associateMetadataWithFiles(synStore_obj, "./files/synapse_storage_manifest.csv", folder_synID)
-        print(manifest_id)
-        manifest_path <- paste0("synapse.org/#!Synapse:", manifest_id)
-        
-        ### if uploaded provided valid synID message
-        if (startsWith(manifest_id, "syn") == TRUE) {
-          removeNotification(id = "processing")
-          # showNotification(id = "success", paste0("Submit Manifest to: ", manifest_path), duration = NULL, type = "message")
-          nx_report_success("Success!", paste0("Manifest submitted to: ", manifest_path))
-          rm("./files/synapse_storage_manifest.csv")
-          
-          ### clear inputs 
-          output$text2 <- renderUI({
-            HTML("")
-          })
-          output$submit <- renderUI({
-          })
-          
-          ### rerenders fileinput UI
-          output$fileInput_ui <- renderUI({
-            fileInput("file1", "Upload CSV File",
-                      accept = c('text/csv',
-                                 'text/comma-separated-values',
-                                 '.csv'))
-          })
-          ### renders empty df
-          output$tbl <- DT::renderDT(
-            datatable(as.data.frame(matrix(0, ncol = 0, nrow = 0)))
+        submit_w$update(
+          html = tagList(
+            img(src = "synapse_logo.png", height = "115px"),
+            h3("Uh oh, looks like something went wrong!"),
+            span(manifest_id, " is not a valid Synapse ID. Try again?")
           )
-          
-        } else {
-          showNotification(id = "error", paste0("error ", manifest_id), duration = NULL, type = "error")
-          rm("/tmp/synapse_storage_manifest.csv")
-        }
+        )
+        rm("/tmp/synapse_storage_manifest.csv")
       }
-      
-      
-    })
-  
-  
+
+    } else {
+      write.csv(infile, file = "./files/synapse_storage_manifest.csv", quote = TRUE, row.names = FALSE, na = "")
+
+      selected_project <- input$var
+      selected_folder <- input$dataset
+
+      project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
+      # folder_synID <- get_folder_synID(synStore_obj, project_synID, selected_folder)
+
+      folder_list <- syn_store$getStorageDatasetsInProject(synStore_obj, project_synID)
+      folders_namedList <- c()
+      for (i in seq_along(folder_list)) {
+        folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
+      }
+      folder_synID <- folders_namedList[[selected_folder]]
+
+      ### associates metadata with data and returns manifest id
+      manifest_id <- syn_store$associateMetadataWithFiles(synStore_obj, "./files/synapse_storage_manifest.csv", folder_synID)
+      print(manifest_id)
+      manifest_path <- paste0("synapse.org/#!Synapse:", manifest_id)
+
+      ### if uploaded provided valid synID message
+      if (startsWith(manifest_id, "syn") == TRUE) {
+        nx_report_success("Success!", paste0("Manifest submitted to: ", manifest_path))
+        rm("./files/synapse_storage_manifest.csv")
+
+        ### clear inputs 
+        output$text2 <- renderUI({
+          HTML("")
+        })
+        output$submit <- renderUI({
+        })
+
+        ### rerenders fileinput UI
+        output$fileInput_ui <- renderUI({
+          fileInput("file1", "Upload CSV File",
+                                  accept = c('text/csv',
+                                          'text/comma-separated-values',
+                                          '.csv'))
+        })
+        ### renders empty df
+        output$tbl <- DT::renderDT(
+          datatable(as.data.frame(matrix(0, ncol = 0, nrow = 0)))
+          )
+
+      } else {
+        submit_w$update(
+          html = tagList(
+            img(src = "synapse_logo.png", height = "115px"),
+            h3("Uh oh, looks like something went wrong!"),
+            span(manifest_id, " is not a valid Synapse ID. Try again?")
+          )
+        )
+        rm("/tmp/synapse_storage_manifest.csv")
+      }
+    }
+    Sys.sleep(3)
+    submit_w$hide()
+
+  })
+
 }
 
 
