@@ -369,7 +369,6 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
       ))
       
 
-<<<<<<< HEAD
 
       
       # showNotification( folder_synID, duration = NULL, type = "warning")
