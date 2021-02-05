@@ -68,11 +68,11 @@ _Notes:_
 
 Use the app configuration file `www/config.json` to adapt this app to your DCC. 
 
-`manifest schemas`: defines the list of schemas displayed under the "Choose a Metadata Template Type:" dropdown in the application.
-    `display_name` : The display name for the dropdown. (e.g. "Genomics Assay")
-    `schema_name`: The name of the manifest in the JSON-LD schema (e.g. "GenomicsAssay")  
-    `type`: The type of manifest. As currently configured in `app.R`, will only display manifests of type "assay".
+* `manifest schemas`: defines the list of schemas displayed under the "Choose a Metadata Template Type:" dropdown in the application.
+    * `display_name` : The display name for the dropdown. (e.g. "Genomics Assay")
+    * `schema_name`: The name of the manifest in the JSON-LD schema (e.g. "GenomicsAssay")  
+    * `type`: The type of manifest. As currently configured in `app.R`, will only display manifests of type "assay".
 
- `main_fileview` : The Synapse ID of a fileview that is scoped to all files, folders, & projects in your community.  (e.g. "syn20446927")
- `community` : the abbreviated name of the community or project. (e.g. "HTAN")
+* `main_fileview` : The Synapse ID of a fileview that is scoped to all files, folders, & projects in your community.  (e.g. "syn20446927")
+* `community` : the abbreviated name of the community or project. (e.g. "HTAN")
 }
