@@ -598,7 +598,7 @@ server <- function(input, output, session) {
         folder_synID <- folders_namedList[[selected_folder]]
         
         ### associates metadata with data and returns manifest id
-        manifest_id <- syn_store$associateMetadataWithFiles(synStore_obj, "./files/synapse_storage_manifest.csv", folder_synID, useSchemaLabel = TRUE)
+        manifest_id <- syn_store$associateMetadataWithFiles(synStore_obj, "./files/synapse_storage_manifest.csv", folder_synID, useSchemaLabel = FALSE)
         print(manifest_id)
         manifest_path <- paste0("synapse.org/#!Synapse:", manifest_id)
         ### if no error 
@@ -653,7 +653,7 @@ server <- function(input, output, session) {
         folder_synID <- folders_namedList[[selected_folder]]
         
         ### associates metadata with data and returns manifest id
-        manifest_id <- syn_store$associateMetadataWithFiles(synStore_obj, "./files/synapse_storage_manifest.csv", folder_synID, useSchemaLabel = TRUE)
+        manifest_id <- syn_store$associateMetadataWithFiles(synStore_obj, "./files/synapse_storage_manifest.csv", folder_synID, useSchemaLabel = FALSE)
         print(manifest_id)
         manifest_path <- paste0("synapse.org/#!Synapse:", manifest_id)
         
