@@ -16,7 +16,6 @@ library(waiter)
 #########global
 use_condaenv('data_curator_env', required = TRUE)
 reticulate::import("sys")
-reticulate::import('synapseutils')
 
 source_python("synLoginFun.py")
 source_python("metadataModelFuns.py")
@@ -30,24 +29,23 @@ source_python("metadataModelFuns.py")
 ui <- dashboardPage(
   skin = "blue",
   dashboardHeader(
-    titleWidth = 275,
+    titleWidth = 250,
     title = "NF Data Curator",
     tags$li(class = "dropdown",
-
-            tags$a(href = "https://www.synapse.org/#!Wiki:syn17083165/ENTITY/591007", target = "_blank",
+            tags$a(href = "https://nf-osi.github.io/", target = "_blank", ##insert links and logos of your choice, this is just an example
                    tags$img(height = "50px", alt = "NF LOGO",
                             src = "nfosi_logo_crop.png")))
-    ),
+  ),
   dashboardSidebar(
-    width = 275,
+    width = 250,
     sidebarMenu(
-    id = "tabs", 
-    menuItem("Instructions", tabName = "instructions", icon = icon("book-open")),
-    menuItem("Select your Dataset", tabName = "data", icon = icon("mouse-pointer")),
-    menuItem("Get Metadata Template", tabName = "template", icon = icon("table")),
-    menuItem("Submit & Validate Metadata", tabName = "upload", icon = icon("upload")),  
-    HTML('<footer>
-            Supported by the</br>
+      id = "tabs", 
+      menuItem("Instructions", tabName = "instructions", icon = icon("book-open")),
+      menuItem("Select your Dataset", tabName = "data", icon = icon("mouse-pointer")),
+      menuItem("Get Metadata Template", tabName = "template", icon = icon("table")),
+      menuItem("Submit & Validate Metadata", tabName = "upload", icon = icon("upload")),  
+      HTML('<footer>
+            Managed by the</br>
             Neurofibromatosis Open Science Initiative</br>
             Created by the Human Tumor Atlas Network</br>
             (U24-CA233243-01)</br>
@@ -61,15 +59,7 @@ ui <- dashboardPage(
       singleton(
         includeScript("www/readCookie.js")
       )),
-    tags$head(
-      tags$link(rel = "shortcut icon", href = "favicon.ico")
-      ),
-    use_waiter(),
-    waiter::waiter_show_on_load(html = span(
-      style="color:white;",
-      spin_flowers(),
-      h3("logging in...")
-    )),
+    uiOutput("title"),
     use_notiflix_report(), 
     tabItems(
       # First tab content
@@ -77,12 +67,12 @@ ui <- dashboardPage(
               h2("Instructions for the Data Curator App:"),
               h3("1. Go to", strong("Select your Dataset"), "tab - select your project; choose the folder where your data are stored; and, choose your metadata template based on the type of data you’ll be annotating (e.g., Genomics Assay, Imaging Assay, etc.)."),
               h3("2. Go to", strong("Get Metadata Template"), "tab - click the button to generate a metadata template in Google Sheets; once generated (this may take a few moments), click the link that appears, fill out the sheet (columns in blue are required; columns in yellow are optional), and then download the file as a CSV."),
-              h3("3. Go to", strong("Submit and Validate Metadata"), "tab - upload your filled CSV and validate your metadata. If you receive errors: correct them in the CSV, re-upload, and revalidate until you receive no more errors. Once your CSV is error-free, please submit it to nf-osi@sagebionetworks.org. (Please note: the submit to Synapse button is not currently functional!)"),
-	      h2("About"),
-	      h3("The NF Data Curator App allows you to annotate your data files — stored in Sage Bionetworks’ data storage platform, Synapse — using metadata templates with preset attributes (a.k.a, keys or column headers) and values. The app also provides validation, to ensure metadata templates are completed according to the Neurofibromatosis Open Science Initiative’s (NF-OSI) metadata dictionary. Ultimately, this process enables data discovery on the NF Data Portal, once data are released."),
-	      h2("Note"),
-	      h3("Please note that this app is still in beta, and may not always work as designed. If you receive a ‘disconnected from the server’ error — this could mean that you’re not logged into Synapse (you must be logged in to use this app), or that something went wrong with the app — we apologize if this happens! You may have to reload the app and try again. If you experience repeated issues, please contact us at nf-osi@sagebionetworks.org. In addition, the third tab, Submit and Validate Metadata, is not fully functional. You won’t be able to submit your completed template to Synapse using this app. For now, please email your completed manifest to nf-osi@sagebionetworks.org.")     
-      	      ),
+              h3("3. Go to", strong("Submit and Validate Metadata"), "tab - upload your filled CSV and validate your metadata. If you receive errors: correct them in the CSV, re-upload, and revalidate until you receive no more errors. Once your CSV is error-free, please submit it to nf-osi@sagebionetworks.org."),
+              h2("About"),
+              h3("The NF Data Curator App allows you to annotate your data files — stored in Sage Bionetworks’ data storage platform, Synapse — using metadata templates with preset attributes (a.k.a, keys or column headers) and values. The app also provides validation, to ensure metadata templates are completed according to the Neurofibromatosis Open Science Initiative’s (NF-OSI) metadata dictionary. Ultimately, this process enables data discovery on the NF Data Portal, once data are released."),
+              h2("Note"),
+              h3("Please note that this app is still in beta, and may not always work as designed. If you receive a ‘disconnected from the server’ error — this could mean that you’re not logged into Synapse (you must be logged in to use this app), or that something went wrong with the app — we apologize if this happens! You may have to reload the app and try again. If you experience repeated issues, please contact us at nf-osi@sagebionetworks.org. In addition, the third tab, Submit and Validate Metadata, is not fully functional. You won’t be able to submit your completed template to Synapse using this app. For now, please email your completed manifest to nf-osi@sagebionetworks.org.")     
+      ),
       # second tab content
       tabItem(tabName = "data",
               h2("Set Dataset and Metadata Template for Curation"),
@@ -165,7 +155,7 @@ ui <- dashboardPage(
                   ),
                   helpText("Errors are evaluated one column at a time, if you have an error please reupload your CSV and press the validate button as needed.")
                 ),
-                box(title = "Submit Validated Metadata to Synapse - Warning: not currently functional!",
+                box(title = "Submit Validated Metadata to Synapse",
                     status = "primary",
                     solidHeader = TRUE,
                     width = 12,
@@ -174,21 +164,21 @@ ui <- dashboardPage(
               )
       )
     ),
-    uiOutput("Next_Previous")
+    uiOutput("Next_Previous"),
+    
+    ## waiter loading screen
+    use_waiter(),
+    waiter_show_on_load(
+      html = tagList(
+        img(src = "loading.gif"),
+        h4("Retrieving Synapse information...")
+      ),
+      color = "#424874"
+    )
   )
 )
 
 server <- function(input, output, session) {
-  ## Show message if user is not logged in to synapse
-  
-  unauthorized <- observeEvent(input$authorized, {
-    showModal(
-      modalDialog(
-        title = "Not logged in",
-        HTML("You must log in to <a href=\"https://www.synapse.org/\">Synapse</a> to use this application. Please log in, and then refresh this page.")
-      )
-    )
-  })
   
   ########### session global variables
   reticulate::source_python("synStore_Session.py")
@@ -213,48 +203,53 @@ server <- function(input, output, session) {
   ### synapse cookies
   session$sendCustomMessage(type = "readCookie", message = list())
   
-  
-  
   ### initial login front page items
   observeEvent(input$cookie, {
     
-    waiter::waiter_update(html = span(
-      style="color:white;",
-      spin_flowers(),
-      h3("logging in...")
-    ))
-    ### logs in 
-    
-    syn_login(sessionToken = input$cookie, rememberMe = FALSE)
-    login_msg <- sprintf("welcome, %s !", syn_getUserProfile()$userName)
-    
-    waiter::waiter_hide()
-    waiter::waiter_show(html = span(
-      style="color:white;",
-      spin_flowers(),
-      h3(login_msg)
-    ))
-    
-    ### updating global vars with values for projects
-    synStore_obj <<- syn_store("syn16858331", token = input$cookie)
-    
-    # get_projects_list(synStore_obj)
-    waiter::waiter_update(html = span(
-      style="color:white;",
-      spin_flowers(),
-      h3("retrieving projects...")
-    ))
-    
-    projects_list <<- syn_store$getStorageProjects(synStore_obj)
-    
-    for (i in seq_along(projects_list)) {
-      projects_namedList[projects_list[[i]][[2]]] <<- projects_list[[i]][[1]]
-    }
-    
-    ### updates project dropdown
-    updateSelectizeInput(session, 'var', choices = sort(names(projects_namedList)))
-    waiter::waiter_hide()
-    
+    ## login and update session; otherwise, notify to login to Synapse first
+    tryCatch({
+      
+      ### logs in 
+      syn_login(sessionToken = input$cookie, rememberMe = FALSE)
+      
+      ### welcome message
+      output$title <- renderUI({
+        titlePanel(h4(sprintf("Welcome, %s", syn_getUserProfile()$userName)))
+      })
+      
+      ### updating global vars with values for projects
+      synStore_obj <<- syn_store(config$main_fileview, token = input$cookie)
+      
+      # get_projects_list(synStore_obj)
+      projects_list <<- syn_store$getStorageProjects(synStore_obj)
+      
+      for (i in seq_along(projects_list)) {
+        projects_namedList[projects_list[[i]][[2]]] <<- projects_list[[i]][[1]]
+      }
+      
+      ### updates project dropdown
+      updateSelectizeInput(session, 'var', choices = sort(names(projects_namedList)))
+      
+      ### update waiter loading screen once login successful
+      waiter_update(
+        html = tagList(
+          img(src = "synapse_logo.png", height = "120px"),
+          h3(sprintf("Welcome, %s!", syn_getUserProfile()$userName))
+        )
+      )
+      Sys.sleep(2)
+      waiter_hide()
+    }, error = function(err) {
+      Sys.sleep(2)
+      waiter_update(
+        html = tagList(
+          img(src = "synapse_logo.png", height = "120px"),
+          h3("Looks like you're not logged in!"),
+          span("Please ", a("login", href = "https://www.synapse.org/#!LoginPlace:0", target = "_blank"), 
+               " to Synapse, then refresh this page.")
+        )
+      )
+    })
   })
   
   
@@ -307,12 +302,11 @@ server <- function(input, output, session) {
                      project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
                      
                      ### gets folders per project
-                     # folder_list <- syn_store$getStorageDatasetsInProject(synStore_obj, project_synID)
-                     #TODO: replace multiple queries with one main fileview query and then filter in memory
+                     #folder_list <- syn_store$getStorageDatasetsInProject(synStore_obj, project_synID)
+                     folders_namedList <- c()
                      folder_df <- syn_tableQuery(sprintf("select name, id from %s where type = 'folder' and projectId = '%s'", config$main_fileview, project_synID))$asDataFrame()
                      
-                     folders_namedList <- setNames(as.list(folder_df$id), folder_df$name)
-                     
+                       folders_namedList <- setNames(as.list(folder_df$id), folder_df$name)
                      folderNames <- names(folders_namedList)
                      
                      ### updates foldernames
@@ -321,23 +315,33 @@ server <- function(input, output, session) {
                  })
                })
   
-
-### mapping from display name to schema name
-schema_name  <- config$manifest_schemas$schema_name
-display_name <- config$manifest_schemas$display_name
-
-output$manifest_display_name <- renderUI({
-	selectInput(inputId = "template_type",
-                    label = "Template:",
-                    choices = display_name)
-
-})
-
-schema_to_display_lookup <- data.frame(schema_name, display_name)
-
+  ### mapping from display name to schema name
+  schema_name  <- config$manifest_schemas$schema_name
+  display_name <- config$manifest_schemas$display_name
+  
+  output$manifest_display_name <- renderUI({
+    selectInput(inputId = "template_type",
+                label = "Template:",
+                choices = display_name)
+    
+  })
+  
+  schema_to_display_lookup <- data.frame(schema_name, display_name)
+  
+  # loading screen for template link generation
+  manifest_w <- Waiter$new(
+    html = tagList(
+      spin_plus(), br(),
+      h4("Generating link...")
+    ),
+    color = "rgba(66, 72, 116, .9)"
+  )
+  
   ###shows new metadata link when get gsheets template button pressed OR updates old metadata if is exists 
   observeEvent(
     input$download, {
+      
+      manifest_w$show()
       
       selected_folder <- input$dataset
       selected_project <- input$var
@@ -346,17 +350,8 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
       template_type_df <- schema_to_display_lookup[match(input$template_type, schema_to_display_lookup$display_name), 1, drop = F ]
       template_type <- as.character(template_type_df$schema_name)
       
-      ### progess notif
-      waiter::waiter_show(html = span(
-        style="color:white;",
-        spin_flowers(),
-        h3("generating manifest...")
-      ))
-      
-
       project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
       
-      # folder_list <- syn_store$getStorageDatasetsInProject(synStore_obj, project_synID)
       folder_df <- syn_tableQuery(sprintf("select name, id from %s where type = 'folder' and projectId = '%s'", config$main_fileview, project_synID))$asDataFrame()
       
       folders_namedList <- setNames(as.list(folder_df$id), folder_df$name)
@@ -367,15 +362,11 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
         shiny::need(length(folder_synID)==1, 'Duplicate folder names detected. Please make sure folders have distinct names.')
       )
       
-      # showNotification( folder_synID, duration = NULL, type = "warning")
-      
       ### checks if a manifest already exists
       existing_manifestID <- syn_store$updateDatasetManifestFiles(synStore_obj, folder_synID)
-      # showNotification( paste0("existing manifest: ", existing_manifestID) , duration = NULL, type = "warning")
       
       ### if there isn't an existing manifest make a new one 
       if (existing_manifestID == '') {
-        
         file_list <- syn_store$getFilesInStorageDataset(synStore_obj, folder_synID)
         file_namedList <- c()
         for (i in seq_along(file_list)) {
@@ -383,7 +374,8 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
         }
         filename_list <- names(file_namedList)
         
-        manifest_url <- metadata_model$getModelManifest(paste0("NF ", input$template_type), template_type, filenames = as.list(filename_list))
+        
+        manifest_url <- metadata_model$getModelManifest(paste0(config$community," ", input$template_type), template_type, filenames = as.list(filename_list))
         ### make sure not scalar if length of list is 1 in R
         ## add in the step to convert names later ###
         
@@ -395,21 +387,18 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
         output$text <- renderUI({
           tags$a(href = manifest_url, manifest_url, target = "_blank") ### add link to data dictionary when we have it ###
         })
-        
-        ### when done remove progress notif
-        waiter::waiter_hide()
       } else {
         ### if the manifest already exists
         manifest_entity <- syn_get(existing_manifestID)
         # prepopulatedManifestURL = mm.populateModelManifest("test_update", entity.path, component)
-        manifest_url <- metadata_model$populateModelManifest(paste0("NF ", input$template_type), manifest_entity$path, template_type)
+        manifest_url <- metadata_model$populateModelManifest(paste0(config$community," ", input$template_type), manifest_entity$path, template_type)
         toggle('text_div3')
         
         output$text <- renderUI({
           tags$a(href = manifest_url, manifest_url, target = "_blank")
         })
-        waiter::waiter_hide()
       }
+      manifest_w$hide()
     }
   )
   
@@ -438,28 +427,34 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
     }
   )
   
+  ## loading screen for validating metadata
+  validate_w <- Waiter$new(
+    html = tagList(
+      spin_plus(), br(),
+      h4("Validating...")
+    ),
+    color = "rgba(66, 72, 116, .9)"
+  )
+  
   ### toggles validation status when validate button pressed
   observeEvent(
     input$validate, {
+      
+      validate_w$show()
+      
       ###lookup schema template name 
       template_type_df <- schema_to_display_lookup[match(input$template_type, schema_to_display_lookup$display_name), 1, drop = F ]
       template_type <- as.character(template_type_df$schema_name)
       
       annotation_status <- metadata_model$validateModelManifest(input$file1$datapath, template_type)
-      # showNotification(input$file1$datapath, duration = NULL, type = "default")
       
       toggle('text_div2')
       
-      waiter::waiter_show(html = span(
-        style="color:white;",
-        spin_flowers(),
-        h3("validating annotations...")
-      ))
       
       if (length(annotation_status) != 0) {
         
         ## if error not empty aka there is an error
-        filled_manifest <- metadata_model$populateModelManifest(paste0("NF ", input$template_type), input$file1$datapath, template_type)
+        filled_manifest <- metadata_model$populateModelManifest(paste0(config$community," ", input$template_type), input$file1$datapath, template_type)
         
         ### create list of string names for the error messages if there is more than one at a time 
         str_names <- c()
@@ -497,7 +492,9 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
                                  message, paste0("</b>", "<br/>"), sep = " ")
         }
         
-        
+        validate_w$update(
+          html = h3(sprintf("%d errors found", length(annotation_status)))
+        )
         
         
         ### format output text
@@ -520,26 +517,36 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
           ) %>% formatStyle(unlist(column_names),
                             backgroundColor = styleEqual( unlist(error_values), rep("yellow", length(error_values) ) )) ## how to have multiple errors
         })
-        waiter::waiter_hide()
       } else {
         output$text2 <- renderUI({
           HTML("Your metadata is valid!")
         })
-        waiter::waiter_hide()
+        
         ### show submit button
         output$submit <- renderUI({
           actionButton("submitButton", "Submit to Synapse")
         })
         
       }
+      Sys.sleep(2)
+      validate_w$hide()
     }
+  )
+  
+  ## loading screen for submitting data
+  submit_w <- Waiter$new(
+    html = tagList(
+      img(src = "loading.gif"),
+      h4("Submitting...")
+    ),
+    color = "#424874"
   )
   
   ###submit button
   observeEvent(
     input$submitButton, {
       
-      showNotification(id = "processing", "Submitting...", duration = NULL, type = "default")
+      submit_w$show()
       
       ### reads in csv 
       infile <- readr::read_csv(input$file1$datapath, na = c("", "NA"))
@@ -554,7 +561,7 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
         ### make into a csv or table for assay components
         ### already has entityId
         if ("entityId" %in% colnames(infile)) {
-          write.csv(infile, file = "./files/synapse_storage_manifest.csv", quote = FALSE, row.names = FALSE, na = "")
+          write.csv(infile, file = "./files/synapse_storage_manifest.csv", quote = TRUE, row.names = FALSE, na = "")
           
         } else {
           # if not get ids
@@ -562,16 +569,13 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
           selected_project <- input$var
           
           project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
-          # folder_list <- syn_store$getStorageDatasetsInProject(synStore_obj, project_synID)
-          folder_df <- syn_tableQuery(sprintf("select name, id from %s where type = 'folder' and projectId = '%s'", config$main_fileview, project_synID))$asDataFrame()
-          
-          folders_namedList <- setNames(as.list(folder_df$id), folder_df$name)
+          folder_list <- syn_store$getStorageDatasetsInProject(synStore_obj, project_synID)
+          folders_namedList <- c()
+          for (i in seq_along(folder_list)) {
+            folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
+          }
           
           folder_synID <- folders_namedList[[selected_folder]]
-          
-          validate(
-            need(length(folder_synID)==1, 'Duplicate folder names detected. Please make sure folders have distinct names.'),
-          )
           
           file_list <- syn_store$getFilesInStorageDataset(synStore_obj, folder_synID)
           file_namedList <- c()
@@ -583,32 +587,26 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
           colnames(files_df) <- c("entityId", "Filename")
           files_entity <- inner_join(infile, files_df, by = "Filename")
           
-          write.csv(files_entity, file = "./files/synapse_storage_manifest.csv", quote = FALSE, row.names = FALSE, na = "")
+          write.csv(files_entity, file = "./files/synapse_storage_manifest.csv", quote = TRUE, row.names = FALSE, na = "")
         }
         selected_project <- input$var
         selected_folder <- input$dataset
         
         project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
         
-        # folder_list <- syn_store$getStorageDatasetsInProject(synStore_obj, project_synID)
-        folder_df <- syn_tableQuery(sprintf("select name, id from %s where type = 'folder' and projectId = '%s'", config$main_fileview, project_synID))$asDataFrame()
-        
-        folders_namedList <- setNames(as.list(folder_df$id), folder_df$name)
-        
+        folder_list <- syn_store$getStorageDatasetsInProject(synStore_obj, project_synID)
+        folders_namedList <- c()
+        for (i in seq_along(folder_list)) {
+          folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
+        }
         folder_synID <- folders_namedList[[selected_folder]]
         
-        validate(
-          need(length(folder_synID)==1, 'Duplicate folder names detected. Please make sure folders have distinct names.'),
-        )
-        
         ### associates metadata with data and returns manifest id
-        manifest_id <- syn_store$associateMetadataWithFiles(synStore_obj, "./files/synapse_storage_manifest.csv", folder_synID)
+        manifest_id <- syn_store$associateMetadataWithFiles(synStore_obj, "./files/synapse_storage_manifest.csv", folder_synID, useSchemaLabel = FALSE)
         print(manifest_id)
         manifest_path <- paste0("synapse.org/#!Synapse:", manifest_id)
         ### if no error 
         if (startsWith(manifest_id, "syn") == TRUE) {
-          removeNotification(id = "processing")
-          # showNotification(id = "success", paste0("Submit Manifest to: ", manifest_path), duration = NULL, type = "message")
           nx_report_success("Success!", paste0("Manifest submitted to: ", manifest_path))
           rm("./files/synapse_storage_manifest.csv")
           
@@ -632,13 +630,18 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
           )
           
         } else {
-          showNotification(id = "error", paste0("error ", manifest_id), duration = NULL, type = "error")
+          submit_w$update(
+            html = tagList(
+              img(src = "synapse_logo.png", height = "115px"),
+              h3("Uh oh, looks like something went wrong!"),
+              span(manifest_id, " is not a valid Synapse ID. Try again?")
+            )
+          )
           rm("/tmp/synapse_storage_manifest.csv")
         }
         
       } else {
-        # showNotification( "no FIlename", duration = NULL, type = "default")
-        write.csv(infile, file = "./files/synapse_storage_manifest.csv", quote = FALSE, row.names = FALSE, na = "")
+        write.csv(infile, file = "./files/synapse_storage_manifest.csv", quote = TRUE, row.names = FALSE, na = "")
         
         selected_project <- input$var
         selected_folder <- input$dataset
@@ -646,26 +649,20 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
         project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
         # folder_synID <- get_folder_synID(synStore_obj, project_synID, selected_folder)
         
-        # folder_list <- syn_store$getStorageDatasetsInProject(synStore_obj, project_synID)
-        folder_df <- syn_tableQuery(sprintf("select name, id from %s where type = 'folder' and projectId = '%s'", config$main_fileview, project_synID))$asDataFrame()
-        
-        folders_namedList <- setNames(as.list(folder_df$id), folder_df$name)
-        
+        folder_list <- syn_store$getStorageDatasetsInProject(synStore_obj, project_synID)
+        folders_namedList <- c()
+        for (i in seq_along(folder_list)) {
+          folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
+        }
         folder_synID <- folders_namedList[[selected_folder]]
         
-        validate(
-          need(length(folder_synID)==1, 'Duplicate folder names detected. Please make sure folders have distinct names.'),
-        )
-        
         ### associates metadata with data and returns manifest id
-        manifest_id <- syn_store$associateMetadataWithFiles(synStore_obj, "./files/synapse_storage_manifest.csv", folder_synID)
+        manifest_id <- syn_store$associateMetadataWithFiles(synStore_obj, "./files/synapse_storage_manifest.csv", folder_synID, useSchemaLabel = FALSE)
         print(manifest_id)
         manifest_path <- paste0("synapse.org/#!Synapse:", manifest_id)
         
         ### if uploaded provided valid synID message
         if (startsWith(manifest_id, "syn") == TRUE) {
-          removeNotification(id = "processing")
-          # showNotification(id = "success", paste0("Submit Manifest to: ", manifest_path), duration = NULL, type = "message")
           nx_report_success("Success!", paste0("Manifest submitted to: ", manifest_path))
           rm("./files/synapse_storage_manifest.csv")
           
@@ -689,11 +686,18 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
           )
           
         } else {
-          showNotification(id = "error", paste0("error ", manifest_id), duration = NULL, type = "error")
+          submit_w$update(
+            html = tagList(
+              img(src = "synapse_logo.png", height = "115px"),
+              h3("Uh oh, looks like something went wrong!"),
+              span(manifest_id, " is not a valid Synapse ID. Try again?")
+            )
+          )
           rm("/tmp/synapse_storage_manifest.csv")
         }
       }
-      
+      Sys.sleep(3)
+      submit_w$hide()
       
     })
   
