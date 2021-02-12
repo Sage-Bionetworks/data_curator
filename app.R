@@ -298,10 +298,12 @@ server <- function(input, output, session) {
                      project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
                      
                      ### gets folders per project
-                     folder_list <- syn_store$getStorageDatasetsInProject(synStore_obj, project_synID)
+                     #folder_list <- syn_store$getStorageDatasetsInProject(synStore_obj, project_synID)
                      folders_namedList <- c()
+                     folder_df <- syn_tableQuery(sprintf("select name, id from %s where type = 'folder' and projectId = '%s'", config$main_fileview, project_synID))$asDataFrame()
+                     
                      for (i in seq_along(folder_list)) {
-                       folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
+                       folders_namedList <- setNames(as.list(folder_df$id), folder_df$name)
                      }
                      folderNames <- names(folders_namedList)
                      
