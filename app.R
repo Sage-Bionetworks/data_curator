@@ -228,7 +228,7 @@ server <- function(input, output, session) {
       }
       
       ### updates project dropdown
-      updateSelectizeInput(session, 'var', choices = names(projects_namedList))
+      updateSelectizeInput(session, 'var', choices = sort(names(projects_namedList)))
       
       ### update waiter loading screen once login successful
       waiter_update(
