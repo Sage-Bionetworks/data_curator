@@ -302,9 +302,7 @@ server <- function(input, output, session) {
                      folders_namedList <- c()
                      folder_df <- syn_tableQuery(sprintf("select name, id from %s where type = 'folder' and projectId = '%s'", config$main_fileview, project_synID))$asDataFrame()
                      
-                     for (i in seq_along(folder_list)) {
                        folders_namedList <- setNames(as.list(folder_df$id), folder_df$name)
-                     }
                      folderNames <- names(folders_namedList)
                      
                      ### updates foldernames
