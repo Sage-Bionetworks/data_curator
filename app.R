@@ -213,10 +213,6 @@ server <- function(input, output, session) {
       ### logs in 
       syn_login(sessionToken = input$cookie, rememberMe = FALSE)
       
-      # ### get admin override status
-      # override <- get_override_status_from_synapse_user_id(config$admin_team_table)
-      # print(glue::glue("override = {override}"))
-      
       ### welcome message
       output$title <- renderUI({
         titlePanel(h4(sprintf("Welcome, %s", syn_getUserProfile()$userName)))
@@ -234,8 +230,7 @@ server <- function(input, output, session) {
       
       ### updates project dropdown
       updateSelectizeInput(session, 'var', choices = sort(names(projects_namedList)))
-    
-
+      
       ### update waiter loading screen once login successful
       waiter_update(
         html = tagList(
@@ -312,7 +307,7 @@ server <- function(input, output, session) {
                      folders_namedList <- c()
                      folder_df <- syn_tableQuery(sprintf("select name, id from %s where type = 'folder' and projectId = '%s'", config$main_fileview, project_synID))$asDataFrame()
                      
-                     folders_namedList <- setNames(as.list(folder_df$id), folder_df$name)
+                       folders_namedList <- setNames(as.list(folder_df$id), folder_df$name)
                      folderNames <- names(folders_namedList)
                      
                      ### updates foldernames
@@ -442,6 +437,9 @@ server <- function(input, output, session) {
     color = "rgba(66, 72, 116, .9)"
   )
   
+  ### get admin override status
+  override <- get_override_status_from_synapse_user_id(config$admin_team_table)
+  
   ### toggles validation status when validate button pressed
   observeEvent(
     input$validate, {
@@ -523,6 +521,16 @@ server <- function(input, output, session) {
           ) %>% formatStyle(unlist(column_names),
                             backgroundColor = styleEqual( unlist(error_values), rep("yellow", length(error_values) ) )) ## how to have multiple errors
         })
+      } else if(isTRUE(override)){
+        output$text2 <- renderUI({
+          HTML("Your metadata is invalid, but as an admin you can still submit. Proceed with caution!")
+        })
+        
+        ### show submit button
+        output$submit <- renderUI({
+          actionButton("submitButton", "Override and Submit to Synapse")
+        })
+        
       } else {
         output$text2 <- renderUI({
           HTML("Your metadata is valid!")
@@ -576,8 +584,10 @@ server <- function(input, output, session) {
           
           project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
           folder_list <- syn_store$getStorageDatasetsInProject(synStore_obj, project_synID)
-          
-          folders_namedList <- setNames(as.list(folder_df$id), folder_df$name)
+          folders_namedList <- c()
+          for (i in seq_along(folder_list)) {
+            folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
+          }
           
           folder_synID <- folders_namedList[[selected_folder]]
           
@@ -599,9 +609,10 @@ server <- function(input, output, session) {
         project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
         
         folder_list <- syn_store$getStorageDatasetsInProject(synStore_obj, project_synID)
-        
-        folders_namedList <- setNames(as.list(folder_df$id), folder_df$name)
-        
+        folders_namedList <- c()
+        for (i in seq_along(folder_list)) {
+          folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
+        }
         folder_synID <- folders_namedList[[selected_folder]]
         
         ### associates metadata with data and returns manifest id
@@ -653,9 +664,10 @@ server <- function(input, output, session) {
         # folder_synID <- get_folder_synID(synStore_obj, project_synID, selected_folder)
         
         folder_list <- syn_store$getStorageDatasetsInProject(synStore_obj, project_synID)
-        
-        folders_namedList <- setNames(as.list(folder_df$id), folder_df$name)
-        
+        folders_namedList <- c()
+        for (i in seq_along(folder_list)) {
+          folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
+        }
         folder_synID <- folders_namedList[[selected_folder]]
         
         ### associates metadata with data and returns manifest id
