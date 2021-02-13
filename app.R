@@ -17,7 +17,6 @@ library(waiter)
 use_condaenv('data_curator_env', required = TRUE)
 reticulate::import("sys")
 
-source("utils.R")
 source_python("synLoginFun.py")
 source_python("metadataModelFuns.py")
 
