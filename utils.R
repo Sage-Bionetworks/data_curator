@@ -1,4 +1,5 @@
 get_override_status_from_synapse_user_id <- function(permission_table){
+  source(synLoginFun.py)
   # The following code chunk ensures that only members of specific teams can override validation in the app.
 
   # the teams that user belongs to
