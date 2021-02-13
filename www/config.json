@@ -9,5 +9,6 @@
       {"display_name": "Plate-Based Reporter Assay", "schema_name": "PlateBasedReporterAssay", "type": "assay"}
   ],
   "main_fileview" : "syn16858331",
-  "community" : "NF"
+  "community" : "NF",
+  "admin_team_table" : "syn22279138"
 }
