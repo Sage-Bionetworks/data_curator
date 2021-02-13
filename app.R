@@ -233,13 +233,17 @@ server <- function(input, output, session) {
       user_teams <- syn_restGET(
         glue::glue("/user/{syn_getUserProfile()[['ownerId']]}/team?limit=10000"))$results 
       
+      print(user_teams)
       # the teams that user belongs to
       all_teams <- purrr::map_chr(user_teams, function(x) x$id)
         
+      print(all_teams)
       # the teams with override access
       dashboard_teams <- syn_tableQuery(glue::glue("select * from {permission_table}"))$asDataFrame()
+      print(dashboard_teams)
+      
       allowed_teams <- sapply(dashboard_teams$TeamID, jsonlite::fromJSON)
-        
+      print(allowed_teams)
       #final allowed agencies
       allowed_teams <- all_teams[all_teams %in% allowed_teams]
         
@@ -249,6 +253,8 @@ server <- function(input, output, session) {
           override <- FALSE
         }
 
+      print(override)
+      
       ### update waiter loading screen once login successful
       waiter_update(
         html = tagList(
