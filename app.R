@@ -231,6 +231,12 @@ server <- function(input, output, session) {
       ### updates project dropdown
       updateSelectizeInput(session, 'var', choices = sort(names(projects_namedList)))
       
+      user_teams <- syn_restGET(
+        glue::glue("/user/{syn_getUserProfile()[['ownerId']]}/team?limit=10000"))$results 
+      
+      ### get admin override status
+      override <- get_override_status_from_synapse_user_id(config$admin_team_table, user_teams)
+      
       ### update waiter loading screen once login successful
       waiter_update(
         html = tagList(
@@ -436,9 +442,6 @@ server <- function(input, output, session) {
     ),
     color = "rgba(66, 72, 116, .9)"
   )
-  
-  ### get admin override status
-  override <- get_override_status_from_synapse_user_id(config$admin_team_table)
   
   ### toggles validation status when validate button pressed
   observeEvent(

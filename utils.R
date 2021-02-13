@@ -1,10 +1,7 @@
-get_override_status_from_synapse_user_id <- function(permission_table){
-  source(synLoginFun.py)
+get_override_status_from_synapse_user_id <- function(permission_table, user_teams){
   # The following code chunk ensures that only members of specific teams can override validation in the app.
 
-  # the teams that user belongs to
-  user_teams <- syn_restGET(
-    glue::glue("/user/{syn_getUserProfile()[['ownerId']]}/team?limit=10000"))$results 
+  # the teams that user belongs t
   all_teams <- purrr::map_chr(user_teams, function(x) x$id)
   
   # the teams with override access
