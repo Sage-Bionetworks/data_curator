@@ -213,6 +213,10 @@ server <- function(input, output, session) {
       ### logs in 
       syn_login(sessionToken = input$cookie, rememberMe = FALSE)
       
+      # ### get admin override status
+      # override <- get_override_status_from_synapse_user_id(config$admin_team_table)
+      # print(glue::glue("override = {override}"))
+      
       ### welcome message
       output$title <- renderUI({
         titlePanel(h4(sprintf("Welcome, %s", syn_getUserProfile()$userName)))
@@ -230,10 +234,7 @@ server <- function(input, output, session) {
       
       ### updates project dropdown
       updateSelectizeInput(session, 'var', choices = sort(names(projects_namedList)))
-      
-      ### get admin override status
-      override <- get_override_status_from_synapse_user_id(config$admin_team_table)
-      print(glue::glue("override = {override}"))
+    
 
       ### update waiter loading screen once login successful
       waiter_update(
