@@ -366,7 +366,7 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
       filename_list <- names(file_namedList)
 
 
-      manifest_url <- metadata_model$getModelManifest(paste0(paste0(config$community," ", input$template_type), template_type, filenames = as.list(filename_list))
+      manifest_url <- metadata_model$getModelManifest(paste0(config$community," ", input$template_type), template_type, filenames = as.list(filename_list))
       ### make sure not scalar if length of list is 1 in R
       ## add in the step to convert names later ###
 
@@ -382,7 +382,7 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
       ### if the manifest already exists
       manifest_entity <- syn_get(existing_manifestID)
       # prepopulatedManifestURL = mm.populateModelManifest("test_update", entity.path, component)
-      manifest_url <- metadata_model$populateModelManifest(paste0(paste0(config$community," ", input$template_type), manifest_entity$path, template_type)
+      manifest_url <- metadata_model$populateModelManifest(paste0(config$community," ", input$template_type), manifest_entity$path, template_type)
       toggle('text_div3')
 
       output$text <- renderUI({
@@ -445,7 +445,7 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
     if (length(annotation_status) != 0) {
 
       ## if error not empty aka there is an error
-      filled_manifest <- metadata_model$populateModelManifest(paste0(paste0(config$community," ", input$template_type), input$file1$datapath, template_type)
+      filled_manifest <- metadata_model$populateModelManifest(paste0(config$community," ", input$template_type), input$file1$datapath, template_type)
 
       ### create list of string names for the error messages if there is more than one at a time 
       str_names <- c()
