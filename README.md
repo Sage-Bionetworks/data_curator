@@ -62,3 +62,17 @@ _Notes:_
 - You need to be authorized to download protected Synapse files such as credentials. Please contact your project manager for access.
 
 - If you want to test the backend you can run other things inside `schematic`, but in order to run the `examples/synapse_store.py` example, you need to configure your Synapse credentials in the `.synapseConfig` file (which can be found in the `schematic` directory), as described [here](https://github.com/Sage-Bionetworks/schematic/tree/main#configure-synapse-credentials).
+
+
+### App Configuration file
+
+Use the app configuration file `www/config.json` to adapt this app to your DCC. 
+
+* `manifest schemas`: defines the list of schemas displayed under the "Choose a Metadata Template Type:" dropdown in the application.
+    * `display_name` : The display name for the dropdown. (e.g. "Genomics Assay")
+    * `schema_name`: The name of the manifest in the JSON-LD schema (e.g. "GenomicsAssay")  
+    * `type`: The type of manifest. As currently configured in `app.R`, will only display manifests of type "assay".
+
+* `main_fileview` : The Synapse ID of a fileview that is scoped to all files, folders, & projects in your community.  (e.g. "syn20446927")
+* `community` : the abbreviated name of the community or project. (e.g. "HTAN")
+}
