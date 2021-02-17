@@ -1,5 +1,5 @@
 ---
-name: 'Bug report (app, not schema) '
+name: 'Bug report (app) '
 about: 'Create a report to help us improve the app. '
 title: ''
 labels: bug
