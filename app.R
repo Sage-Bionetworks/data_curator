@@ -325,7 +325,6 @@ server <- function(input, output, session) {
                      
                      ### gets folders per project
                      #folder_list <- syn_store$getStorageDatasetsInProject(synStore_obj, project_synID)
-                     folders_namedList <- c()
                      folder_df <- syn_tableQuery(sprintf("select name, id from %s where type = 'folder' and projectId = '%s'", config$main_fileview, project_synID))$asDataFrame()
                      
                        folders_namedList <- setNames(as.list(folder_df$id), folder_df$name)
@@ -601,11 +600,16 @@ server <- function(input, output, session) {
           selected_project <- input$var
           
           project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
-          folder_list <- syn_store$getStorageDatasetsInProject(synStore_obj, project_synID)
-          folders_namedList <- c()
-          for (i in seq_along(folder_list)) {
-            folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
-          }
+          
+          folder_df <- syn_tableQuery(sprintf("select name, id from %s where type = 'folder' and projectId = '%s'", config$main_fileview, project_synID))$asDataFrame()
+          
+          folders_namedList <- setNames(as.list(folder_df$id), folder_df$name)
+
+          # folder_list <- syn_store$getStorageDatasetsInProject(synStore_obj, project_synID)
+          # folders_namedList <- c()
+          # for (i in seq_along(folder_list)) {
+          #   folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
+          # }
           
           folder_synID <- folders_namedList[[selected_folder]]
           
@@ -626,11 +630,17 @@ server <- function(input, output, session) {
         
         project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
         
-        folder_list <- syn_store$getStorageDatasetsInProject(synStore_obj, project_synID)
-        folders_namedList <- c()
-        for (i in seq_along(folder_list)) {
-          folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
-        }
+        # folder_list <- syn_store$getStorageDatasetsInProject(synStore_obj, project_synID)
+        # folders_namedList <- c()
+        # for (i in seq_along(folder_list)) {
+        #   folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
+        # }
+        
+        folder_df <- syn_tableQuery(sprintf("select name, id from %s where type = 'folder' and projectId = '%s'", config$main_fileview, project_synID))$asDataFrame()
+        
+        folders_namedList <- setNames(as.list(folder_df$id), folder_df$name)
+        folderNames <- names(folders_namedList)
+        
         folder_synID <- folders_namedList[[selected_folder]]
         
         ### associates metadata with data and returns manifest id
@@ -681,11 +691,16 @@ server <- function(input, output, session) {
         project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
         # folder_synID <- get_folder_synID(synStore_obj, project_synID, selected_folder)
         
-        folder_list <- syn_store$getStorageDatasetsInProject(synStore_obj, project_synID)
-        folders_namedList <- c()
-        for (i in seq_along(folder_list)) {
-          folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
-        }
+        # folder_list <- syn_store$getStorageDatasetsInProject(synStore_obj, project_synID)
+        # folders_namedList <- c()
+        # for (i in seq_along(folder_list)) {
+        #   folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
+        # }
+        
+        folder_df <- syn_tableQuery(sprintf("select name, id from %s where type = 'folder' and projectId = '%s'", config$main_fileview, project_synID))$asDataFrame()
+        
+        folders_namedList <- setNames(as.list(folder_df$id), folder_df$name)
+
         folder_synID <- folders_namedList[[selected_folder]]
         
         ### associates metadata with data and returns manifest id
