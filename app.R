@@ -494,8 +494,8 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
           HTML("Your metadata is invalid according to the data model.<br/> ",
               "You have", length(annotation_status), " errors: <br/>"),
           HTML(str_names),
-          HTML("<br/>Edit your data locally or ",
-              paste0('<a target="_blank" href="', filled_manifest, '">on Google Sheets </a>')
+          HTML("<br/>Please edit your data locally and resubmit." # or ",
+            #  paste0('<a target="_blank" href="', filled_manifest, '">on Google Sheets </a>')
               )
 
           )
