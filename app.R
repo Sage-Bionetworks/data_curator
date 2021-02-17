@@ -230,6 +230,28 @@ server <- function(input, output, session) {
       ### updates project dropdown
       updateSelectizeInput(session, 'var', choices = sort(names(projects_namedList)))
       
+      
+      ### 
+      admin_team_table <- config$admin_team_table
+      
+      user_teams <- syn_restGET(glue::glue("/user/{syn_getUserProfile()[['ownerId']]}/team?limit=10000"))$results 
+      
+      # the teams that user belongs to
+      all_teams <- purrr::map_chr(user_teams, function(x) x$id)
+      
+      # the teams with override access
+      dashboard_teams <- syn_tableQuery(glue::glue("select * from {admin_team_table}"))$asDataFrame()
+      allowed_teams <- sapply(dashboard_teams$TeamID, jsonlite::fromJSON)
+
+      #final allowed agencies
+      allowed_teams <- all_teams[all_teams %in% allowed_teams]
+      
+      if(length(allowed_teams)>0){
+        override <<- TRUE
+      }else{
+        override <<- FALSE
+      }
+      
       ### update waiter loading screen once login successful
       waiter_update(
         html = tagList(
