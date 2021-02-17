@@ -212,7 +212,7 @@ server <- function(input, output, session) {
       })
 
       ### updating global vars with values for projects
-      synStore_obj <<- syn_store("syn20446927", token = input$cookie)
+      synStore_obj <<- syn_store(config$main_fileview, token = input$cookie)
 
       # get_projects_list(synStore_obj)
       projects_list <<- syn_store$getStorageProjects(synStore_obj)
@@ -222,7 +222,7 @@ server <- function(input, output, session) {
       }
 
       ### updates project dropdown
-      updateSelectizeInput(session, 'var', choices = names(projects_namedList))
+      updateSelectizeInput(session, 'var', choices = sort(names(projects_namedList)))
 
       ### update waiter loading screen once login successful
       waiter_update(
@@ -366,7 +366,7 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
       filename_list <- names(file_namedList)
 
 
-      manifest_url <- metadata_model$getModelManifest(paste0("[project] ", input$template_type), template_type, filenames = as.list(filename_list))
+      manifest_url <- metadata_model$getModelManifest(paste0(config$community," ", input$template_type), template_type, filenames = as.list(filename_list))
       ### make sure not scalar if length of list is 1 in R
       ## add in the step to convert names later ###
 
@@ -382,7 +382,7 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
       ### if the manifest already exists
       manifest_entity <- syn_get(existing_manifestID)
       # prepopulatedManifestURL = mm.populateModelManifest("test_update", entity.path, component)
-      manifest_url <- metadata_model$populateModelManifest(paste0("[project] ", input$template_type), manifest_entity$path, template_type)
+      manifest_url <- metadata_model$populateModelManifest(paste0(config$community," ", input$template_type), manifest_entity$path, template_type)
       toggle('text_div3')
 
       output$text <- renderUI({
@@ -445,7 +445,7 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
     if (length(annotation_status) != 0) {
 
       ## if error not empty aka there is an error
-      filled_manifest <- metadata_model$populateModelManifest(paste0("[project] ", input$template_type), input$file1$datapath, template_type)
+      filled_manifest <- metadata_model$populateModelManifest(paste0(config$community," ", input$template_type), input$file1$datapath, template_type)
 
       ### create list of string names for the error messages if there is more than one at a time 
       str_names <- c()
@@ -541,8 +541,13 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
 
     ### reads in csv 
     infile <- readr::read_csv(input$file1$datapath, na = c("", "NA"))
-
-    ### (defined assay components in config)
+   
+    ### remove empty rows/columns where readr called it "X[digit]" for unnamed col
+    infile <- infile[, -grep("^X\\d", colnames(infile))]
+    infile <- infile[rowSums(is.na(infile)) != ncol(infile), ]
+    
+    ### IF an assay component selected (define assay components)
+    ## note for future - the type to filter (eg assay) on could probably also be a config choice
     assay_schemas <- config$manifest_schemas$display_name[config$manifest_schemas$type=="assay"]
 
     ### IF an assay component selected, adds entityID, saves it as synapse_storage_manifest.csv, then associates with synapse files 
@@ -551,6 +556,7 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
       ### make into a csv or table for assay components
       ### already has entityId
       if ("entityId" %in% colnames(infile)) {
+
         write.csv(infile, file = "./files/synapse_storage_manifest.csv", quote = TRUE, row.names = FALSE, na = "")
 
       } else {
