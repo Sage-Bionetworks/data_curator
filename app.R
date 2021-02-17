@@ -541,7 +541,11 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
 
     ### reads in csv 
     infile <- readr::read_csv(input$file1$datapath, na = c("", "NA"))
-
+   
+    ### remove empty rows/columns where readr called it "X[digit]" for unnamed col
+    infile <- infile[, -grep("^X\\d", colnames(infile))]
+    infile <- infile[rowSums(is.na(infile)) != ncol(infile), ]
+    
     ### IF an assay component selected (define assay components)
     ## note for future - the type to filter (eg assay) on could probably also be a config choice
     assay_schemas <- config$manifest_schemas$display_name[config$manifest_schemas$type=="assay"]
@@ -552,6 +556,7 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
       ### make into a csv or table for assay components
       ### already has entityId
       if ("entityId" %in% colnames(infile)) {
+
         write.csv(infile, file = "./files/synapse_storage_manifest.csv", quote = TRUE, row.names = FALSE, na = "")
 
       } else {
