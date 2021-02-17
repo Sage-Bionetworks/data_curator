@@ -472,7 +472,7 @@ server <- function(input, output, session) {
       toggle('text_div2')
       
       
-      if (length(annotation_status) != 0) {
+      if (length(annotation_status) != 0 & !isTRUE(override)) {
         
         ## if error not empty aka there is an error
         filled_manifest <- metadata_model$populateModelManifest(paste0(config$community," ", input$template_type), input$file1$datapath, template_type)
