@@ -451,9 +451,8 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
 
     # if there is any error 
     if (length(annotation_status) != 0) {
-      val_res <- "invalid"
+
       inx_mt <- which(sapply(annotation_status, function(x) grepl("Component value provided is: .*, whereas the Template Type is: .*", x[[3]])))
-      inx_ws <- which(sapply(annotation_status, function(x) grepl("Wrong schema", x[[2]])))
       
       if (length(inx_mt) > 0) {  # mismatched error(s): selected template mismatched with validating template
         # get all mismatched components
@@ -465,14 +464,7 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
         errorDT <- data.frame(Column=sapply(annotation_status[inx_mt], function(i) i[[2]]),
                               Value=sapply(annotation_status[inx_mt], function(i) i[[4]][[1]]))
         
-      } else if (length(inx_ws) > 0) {  # wrong schema error(s): validating metadata miss any required columns
-
-        type_error <- paste0("The submitted metadata does not contain all required column(s)")
-        help_msg <- "Please refer the correct template in the <b>Get Metadata Template</b> tab and
-                     ensure your metadata contains all required columns."
-        is_update <- FALSE
-        
-      } else { # wrong value error(s)
+	} else { # wrong value error(s)
         # get google sheet link 
         filled_manifest <- metadata_model$populateModelManifest(paste0("[project] ", input$template_type), input$file1$datapath, template_type)
         
