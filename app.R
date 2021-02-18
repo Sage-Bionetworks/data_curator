@@ -407,7 +407,10 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
 
   ### reads csv file and previews
   rawData <- eventReactive(input$file1, {
-    readr::read_csv(input$file1$datapath, na = c("", "NA"))
+    infile <- readr::read_csv(input$file1$datapath, na = c("", "NA"))
+    ### remove empty rows/columns where readr called it "X[digit]" for unnamed col
+    infile <- infile[, -grep("^X\\d", colnames(infile))]
+    infile <- infile[rowSums(is.na(infile)) != ncol(infile), ]
   })
 
   ### renders in DT for preview 
