@@ -405,8 +405,8 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
   ### reads csv file and previews
   rawData <- eventReactive(input$file1, {
     infile <- readr::read_csv(input$file1$datapath, na = c("", "NA"))
-    ### remove empty rows/columns where readr called it "X[digit]" for unnamed col
-    infile <- infile[, -grep("^X\\d", colnames(infile))]
+    ### remove empty rows/columns where readr called it "X"[digit] for unnamed col
+    infile <- infile[, !grepl('^X', colnames(infile))]
     infile <- infile[rowSums(is.na(infile)) != ncol(infile), ]
   })
 
@@ -545,8 +545,8 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
     ### reads in csv 
     infile <- readr::read_csv(input$file1$datapath, na = c("", "NA"))
    
-    ### remove empty rows/columns where readr called it "X[digit]" for unnamed col
-    infile <- infile[, -grep("^X\\d", colnames(infile))]
+    ### remove empty rows/columns where readr called it "X"[digit] for unnamed col
+    infile <- infile[, !grepl('^X', colnames(infile))]
     infile <- infile[rowSums(is.na(infile)) != ncol(infile), ]
     
     ### IF an assay component selected (define assay components)
@@ -639,7 +639,7 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
         rm("/tmp/synapse_storage_manifest.csv")
       }
 
-    } else {
+    } else { ## if not assay type tempalte
       write.csv(infile, file = "./files/synapse_storage_manifest.csv", quote = TRUE, row.names = FALSE, na = "")
 
       selected_project <- input$var
