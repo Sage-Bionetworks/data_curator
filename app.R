@@ -230,6 +230,28 @@ server <- function(input, output, session) {
       ### updates project dropdown
       updateSelectizeInput(session, 'var', choices = sort(names(projects_namedList)))
       
+      
+      ### 
+      admin_team_table <- config$admin_team_table
+      
+      user_teams <- syn_restGET(glue::glue("/user/{syn_getUserProfile()[['ownerId']]}/team?limit=10000"))$results 
+      
+      # the teams that user belongs to
+      all_teams <- purrr::map_chr(user_teams, function(x) x$id)
+      
+      # the teams with override access
+      dashboard_teams <- syn_tableQuery(glue::glue("select * from {admin_team_table}"))$asDataFrame()
+      allowed_teams <- sapply(dashboard_teams$TeamID, jsonlite::fromJSON)
+
+      #final allowed agencies
+      allowed_teams <- all_teams[all_teams %in% allowed_teams]
+      
+      if(length(allowed_teams)>0){
+        override <<- TRUE
+      }else{
+        override <<- FALSE
+      }
+      
       ### update waiter loading screen once login successful
       waiter_update(
         html = tagList(
@@ -303,7 +325,6 @@ server <- function(input, output, session) {
                      
                      ### gets folders per project
                      #folder_list <- syn_store$getStorageDatasetsInProject(synStore_obj, project_synID)
-                     folders_namedList <- c()
                      folder_df <- syn_tableQuery(sprintf("select name, id from %s where type = 'folder' and projectId = '%s'", config$main_fileview, project_synID))$asDataFrame()
                      
                        folders_namedList <- setNames(as.list(folder_df$id), folder_df$name)
@@ -451,7 +472,7 @@ server <- function(input, output, session) {
       toggle('text_div2')
       
       
-      if (length(annotation_status) != 0) {
+      if (length(annotation_status) != 0 & !isTRUE(override)) {
         
         ## if error not empty aka there is an error
         filled_manifest <- metadata_model$populateModelManifest(paste0(config$community," ", input$template_type), input$file1$datapath, template_type)
@@ -517,6 +538,81 @@ server <- function(input, output, session) {
           ) %>% formatStyle(unlist(column_names),
                             backgroundColor = styleEqual( unlist(error_values), rep("yellow", length(error_values) ) )) ## how to have multiple errors
         })
+      }else if(length(annotation_status) != 0 & isTRUE(override)){
+        
+        ## if error not empty aka there is an error
+        filled_manifest <- metadata_model$populateModelManifest(paste0(config$community," ", input$template_type), input$file1$datapath, template_type)
+        
+        ### create list of string names for the error messages if there is more than one at a time 
+        str_names <- c()
+        
+        ### initialize list of errors and column names to highlight 
+        error_values <- c()
+        column_names <- c()
+        
+        ### loop through the multiple error messages
+        for (i in seq_along(annotation_status)) {
+          
+          
+          row <- annotation_status[i][[1]][1]
+          column <- annotation_status[i][[1]][2]
+          message <- annotation_status[i][[1]][3]
+          
+          error_value <- annotation_status[i][[1]][4]
+          
+          ## if empty value change to NA ### not reporting the value in the cell anymore!!!
+          if (unlist(error_value) == "") {
+            error_value <- NA
+            
+          } else {
+            
+            error_value <- error_value
+          }
+          
+          
+          error_values[i] <- error_value
+          column_names[i] <- column
+          str_names[i] <- paste( paste0(i, "."),
+                                 "At row <b>", row, 
+                                 "</b>value <b>", error_value,
+                                 "</b>in ", "<b>", column, "</b>",
+                                 message, paste0("</b>", "<br/>"), sep = " ")
+        }
+        
+        validate_w$update(
+          html = h3(sprintf("%d errors found", length(annotation_status)))
+        )
+        
+        
+        ### format output text
+        output$text2 <- renderUI({
+          tagList( 
+
+            HTML("Your metadata is invalid according to the data model.<br/> ",
+                 "You have", length(annotation_status), " errors: <br/>"),
+            HTML(str_names),
+            HTML(">Edit your data locally or ",
+                 paste0('<a target="_blank" href="', filled_manifest, '">on Google Sheets </a>'),
+            ),
+            HTML("<br/>Your metadata is invalid, but as an admin you can still submit. Proceed with caution!")
+            
+          )
+        })
+        ### update DT view with incorrect values
+        ### currently only one column, requires backend support of multiple
+        output$tbl <- DT::renderDT({
+          datatable(rawData(),
+                    options = list(lengthChange = FALSE, scrollX = TRUE)
+          ) %>% formatStyle(unlist(column_names),
+                            backgroundColor = styleEqual( unlist(error_values), rep("yellow", length(error_values) ) )) ## how to have multiple errors
+        })
+        
+        
+        ### show submit button
+        output$submit <- renderUI({
+          actionButton("submitButton", "Override and Submit to Synapse")
+        })
+        
       } else {
         output$text2 <- renderUI({
           HTML("Your metadata is valid!")
@@ -569,11 +665,16 @@ server <- function(input, output, session) {
           selected_project <- input$var
           
           project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
-          folder_list <- syn_store$getStorageDatasetsInProject(synStore_obj, project_synID)
-          folders_namedList <- c()
-          for (i in seq_along(folder_list)) {
-            folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
-          }
+          
+          folder_df <- syn_tableQuery(sprintf("select name, id from %s where type = 'folder' and projectId = '%s'", config$main_fileview, project_synID))$asDataFrame()
+          
+          folders_namedList <- setNames(as.list(folder_df$id), folder_df$name)
+
+          # folder_list <- syn_store$getStorageDatasetsInProject(synStore_obj, project_synID)
+          # folders_namedList <- c()
+          # for (i in seq_along(folder_list)) {
+          #   folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
+          # }
           
           folder_synID <- folders_namedList[[selected_folder]]
           
@@ -594,11 +695,17 @@ server <- function(input, output, session) {
         
         project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
         
-        folder_list <- syn_store$getStorageDatasetsInProject(synStore_obj, project_synID)
-        folders_namedList <- c()
-        for (i in seq_along(folder_list)) {
-          folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
-        }
+        # folder_list <- syn_store$getStorageDatasetsInProject(synStore_obj, project_synID)
+        # folders_namedList <- c()
+        # for (i in seq_along(folder_list)) {
+        #   folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
+        # }
+        
+        folder_df <- syn_tableQuery(sprintf("select name, id from %s where type = 'folder' and projectId = '%s'", config$main_fileview, project_synID))$asDataFrame()
+        
+        folders_namedList <- setNames(as.list(folder_df$id), folder_df$name)
+        folderNames <- names(folders_namedList)
+        
         folder_synID <- folders_namedList[[selected_folder]]
         
         ### associates metadata with data and returns manifest id
@@ -649,11 +756,16 @@ server <- function(input, output, session) {
         project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
         # folder_synID <- get_folder_synID(synStore_obj, project_synID, selected_folder)
         
-        folder_list <- syn_store$getStorageDatasetsInProject(synStore_obj, project_synID)
-        folders_namedList <- c()
-        for (i in seq_along(folder_list)) {
-          folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
-        }
+        # folder_list <- syn_store$getStorageDatasetsInProject(synStore_obj, project_synID)
+        # folders_namedList <- c()
+        # for (i in seq_along(folder_list)) {
+        #   folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
+        # }
+        
+        folder_df <- syn_tableQuery(sprintf("select name, id from %s where type = 'folder' and projectId = '%s'", config$main_fileview, project_synID))$asDataFrame()
+        
+        folders_namedList <- setNames(as.list(folder_df$id), folder_df$name)
+
         folder_synID <- folders_namedList[[selected_folder]]
         
         ### associates metadata with data and returns manifest id
