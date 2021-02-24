@@ -145,7 +145,8 @@ ui <- dashboardPage(
                         height = "100%",
                         htmlOutput("text2"),
                         style = "font-size:18px; background-color: white; border: 1px solid #ccc; border-radius: 3px; margin: 10px 0; padding: 10px"
-                    )
+                    ),
+                    DT::DTOutput("tbl2")
                   ),
                   helpText("Errors are evaluated one column at a time, if you have an error please reupload your CSV and press the validate button as needed.")
                 ),
@@ -446,45 +447,24 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
 
 
     if (length(annotation_status) != 0) {
-
+      
       ## if error not empty aka there is an error
       filled_manifest <- metadata_model$populateModelManifest(paste0(config$community," ", input$template_type), input$file1$datapath, template_type)
-
-      ### create list of string names for the error messages if there is more than one at a time 
-      str_names <- c()
-
-      ### initialize list of errors and column names to highlight 
-      error_values <- c()
-      column_names <- c()
-
-      ### loop through the multiple error messages
-      for (i in seq_along(annotation_status)) {
-        
-
-        row <- annotation_status[i][[1]][1]
-        column <- annotation_status[i][[1]][2]
-        message <- annotation_status[i][[1]][3]
-
-        error_value <- annotation_status[i][[1]][4]
-
-        ## if empty value change to NA ### not reporting the value in the cell anymore!!!
-        if (unlist(error_value) == "") {
-          error_value <- NA
-          
-        } else {
-
-          error_value <- error_value
-        }
-
-        
-        error_values[i] <- error_value
-        column_names[i] <- column
-        str_names[i] <- paste( paste0(i, "."),
-                              "At row <b>", row, 
-                              "</b>value <b>", error_value,
-                              "</b>in ", "<b>", column, "</b>",
-                              message, paste0("</b>", "<br/>"), sep = " ")
-      }
+      
+      errorDT <- data.frame(Column=sapply(annotation_status, function(i) i[[2]]),
+                            Value=sapply(annotation_status, function(i) i[[4]][[1]]),
+                            Error=sapply(annotation_status, function(i) i[[3]])) 
+      # sort rows based on input column names
+      errorDT <- errorDT[order(match(errorDT$Column, colnames(rawData()))),]
+      
+      # output error messages as data table
+      output$tbl2 <- DT::renderDT({
+        datatable(errorDT, caption = "The errors are also highlighted in the preview table above.", 
+                  rownames = FALSE, options = list(pageLength = 50, scrollX = TRUE, 
+                                                   scrollY = min(50*length(annotation_status), 400),
+                                                   lengthChange = FALSE, info = FALSE, searching = FALSE)
+        )
+      })
  
       validate_w$update(
         html = h3(sprintf("%d errors found", length(annotation_status)))
@@ -493,23 +473,22 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
 
       ### format output text
       output$text2 <- renderUI({
-          tagList( 
-          HTML("Your metadata is invalid according to the data model.<br/> ",
-              "You have", length(annotation_status), " errors: <br/>"),
-          HTML(str_names),
+        tagList( 
+          HTML("Your metadata is invalid according to the data model.<br/>"),
           HTML("<br/>Edit your data locally or ",
-              paste0('<a target="_blank" href="', filled_manifest, '">on Google Sheets </a>')
-              )
-
-          )
+               paste0('<a target="_blank" href="', filled_manifest, '">on Google Sheets</a>'),
+               ".<br/>"),
+          HTML("<br/>You have", length(annotation_status), " errors: <br/>")
+        )
       })
+      
       ### update DT view with incorrect values
       ### currently only one column, requires backend support of multiple
       output$tbl <- DT::renderDT({
         datatable(rawData(),
                     options = list(lengthChange = FALSE, scrollX = TRUE)
-          ) %>% formatStyle(unlist(column_names),
-                            backgroundColor = styleEqual( unlist(error_values), rep("yellow", length(error_values) ) )) ## how to have multiple errors
+          ) %>% formatStyle(errorDT$Column,
+                            backgroundColor = styleEqual(errorDT$Value, rep("yellow", length(errorDT$Value) ) )) ## how to have multiple errors
       })
     } else {
       output$text2 <- renderUI({
