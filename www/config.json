@@ -7,7 +7,7 @@
       {"display_name": "Pharmacokinetics Assay", "schema_name": "PharmacokineticsAssay", "type": "assay"},
       {"display_name": "Proteomics Assay", "schema_name": "ProteomicsAssay", "type": "assay"},
       {"display_name": "Plate-Based Reporter Assay", "schema_name": "PlateBasedReporterAssay", "type": "assay"},
-      {"display_name": "Update Milestone Report Values", "schema_name": "UpdateMilestoneReport", "type": "NF Template"}
+      {"display_name": "Update Milestone Report Values", "schema_name": "UpdateMilestoneReport", "type": "assay"}
   ],
   "main_fileview" : "syn16858331",
   "community" : "NF",
