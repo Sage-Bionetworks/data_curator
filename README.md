@@ -1,6 +1,6 @@
 # Data Curator App
 
-## App Setup
+## Setup
 
 ### Data Curator App Setup (frontend)
 Follow the steps below to make sure the _Data Curator App_ (frontend) is fully setup to work with the [schematic](https://github.com/Sage-Bionetworks/schematic/tree/main) (backend):
@@ -30,6 +30,7 @@ The next step is to install the latest release of the [schematic](https://github
 
 To do so, follow the instructions on the `schematic` repository [README](https://github.com/Sage-Bionetworks/schematic/tree/develop#12-installation-requirements-and-pre-requisites).
 
+-------
 
 ### App Configuration file
 
