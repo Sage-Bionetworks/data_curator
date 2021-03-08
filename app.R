@@ -20,10 +20,6 @@ reticulate::import("sys")
 source_python("synLoginFun.py")
 source_python("metadataModelFuns.py")
 
-# schematic <- reticulate::import("schematic")
-
-# source("functions.R")
-
 #########
 
 ui <- dashboardPage(
@@ -212,7 +208,8 @@ server <- function(input, output, session) {
       })
 
       ### updating global vars with values for projects
-      synStore_obj <<- syn_store(config$main_fileview, token = input$cookie)
+      # synStore_obj <<- syn_store(config$main_fileview, token = input$cookie)
+      synStore_obj <<- syn_store(token = input$cookie)
 
       # get_projects_list(synStore_obj)
       projects_list <<- syn_store$getStorageProjects(synStore_obj)
@@ -224,7 +221,7 @@ server <- function(input, output, session) {
       ### updates project dropdown
       updateSelectizeInput(session, 'var', choices = sort(names(projects_namedList)))
 
-      ### update waiter loading screen once login successful
+    ### update waiter loading screen once login successful
       waiter_update(
         html = tagList(
           img(src = "synapse_logo.png", height = "120px"),

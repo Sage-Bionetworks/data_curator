@@ -1,12 +1,4 @@
-import uuid
-import json
-import os
-import time
-
-import synapseclient
-from synapseclient import File
-
-from schematic.synapse.store import SynapseStorage
+from schematic.store.synapse import SynapseStorage
 
 syn_store = SynapseStorage
 

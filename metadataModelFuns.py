@@ -1,27 +1,24 @@
 # import json
-import os
-import sys
 from schematic.models.metadata import MetadataModel
-from schematic.manifest.generator import ManifestGenerator
 
-from schematic.utils.config_utils import load_yaml
-from definitions import ROOT_DIR, CONFIG_PATH, CREDS_PATH, DATA_PATH
+from schematic import CONFIG
 
-# load config data from yaml file into config_data dict
-config_data = load_yaml(CONFIG_PATH)
-
-if config_data is None:
-    sys.exit("Your config file may be empty.")
+config = CONFIG.load_config("./schematic/config.yml")
 
 #inputMModelLocation = "./schemas/exampleSchemaReq.jsonld"
 #inputMModelLocation = "./HTAN-data-pipeline/schemas/scRNASeq.jsonld"
 # inputMModelLocation = "./HTAN-data-pipeline/schemas/HTAPP.jsonld"
-inputMModelLocation = os.path.join(DATA_PATH, config_data["model"]["input"]["location"])
-inputMModelLocationType = config_data["model"]["input"]["file_type"]
+inputMModelLocation = CONFIG["model"]["input"]["location"]
+inputMModelLocationType = CONFIG["model"]["input"]["file_type"]
+
+manifest_title = CONFIG["manifest"]["title"]
+manifest_data_type = CONFIG["manifest"]["data_type"]
 # datasetType = "scRNASeq"
 # modelType = "TableA"
 
 metadata_model = MetadataModel(inputMModelLocation, inputMModelLocationType)
+metadata_model.getModelManifest(title=manifest_title, 
+                                rootNode=manifest_data_type)
 
 ### function for getting model Manifest
 #  mm.getModelManifest(modelType, additionalMetadata = {"Filename":["MantonCB1_HiSeq_1_S1_L001_R1_001.fastq.gz"]} )
