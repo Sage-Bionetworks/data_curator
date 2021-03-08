@@ -5,9 +5,9 @@
 ### Data Curator App Setup (frontend)
 Follow the steps below to make sure the _Data Curator App_ (frontend) is fully setup to work with the [schematic](https://github.com/Sage-Bionetworks/schematic/tree/main) (backend):
 
-Navigate to the location where you want to setup the application (i.e., the _Shiny Server_). Clone the code on this github branch (_shiny-server-develop_):
+Navigate to the location where you want to setup the application (i.e., the _Shiny Server_). Clone the code on this github branch (_shiny-server-main_):
 
-    git clone --single-branch --branch shiny-server-develop https://github.com/Sage-Bionetworks/data_curator.git
+    git clone --single-branch --branch shiny-server-main https://github.com/Sage-Bionetworks/data_curator.git
 
 Create a conda environment in the cloned directory from the `environment.yml` file which has all the required package dependencies:
 
