@@ -20,10 +20,6 @@ reticulate::import("sys")
 source_python("synLoginFun.py")
 source_python("metadataModelFuns.py")
 
-# schematic <- reticulate::import("schematic")
-
-# source("functions.R")
-
 #########
 
 ui <- dashboardPage(
@@ -145,7 +141,8 @@ ui <- dashboardPage(
                         height = "100%",
                         htmlOutput("text2"),
                         style = "font-size:18px; background-color: white; border: 1px solid #ccc; border-radius: 3px; margin: 10px 0; padding: 10px"
-                    )
+                    ),
+                    DT::DTOutput("tbl2")
                   ),
                   helpText("Errors are evaluated one column at a time, if you have an error please reupload your CSV and press the validate button as needed.")
                 ),
@@ -212,7 +209,8 @@ server <- function(input, output, session) {
       })
 
       ### updating global vars with values for projects
-      synStore_obj <<- syn_store(config$main_fileview, token = input$cookie)
+      # synStore_obj <<- syn_store(config$main_fileview, token = input$cookie)
+      synStore_obj <<- syn_store(token = input$cookie)
 
       # get_projects_list(synStore_obj)
       projects_list <<- syn_store$getStorageProjects(synStore_obj)
@@ -224,7 +222,7 @@ server <- function(input, output, session) {
       ### updates project dropdown
       updateSelectizeInput(session, 'var', choices = sort(names(projects_namedList)))
 
-      ### update waiter loading screen once login successful
+    ### update waiter loading screen once login successful
       waiter_update(
         html = tagList(
           img(src = "synapse_logo.png", height = "120px"),
@@ -446,14 +444,7 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
 
 
     if (length(annotation_status) != 0) {
-      ## if error not empty aka there is an error
-      ### create list of string names for the error messages if there is more than one at a time 
-      str_names <- c()
-      
-      ### initialize list of errors and column names to highlight 
-      error_values <- c()
-      column_names <- c()
-      
+
       # mismatched template index
       inx_mt <- which(sapply(annotation_status, function(x) grepl("Component value provided is: .*, whereas the Template Type is: .*", x[[3]])))
       
@@ -465,69 +456,58 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
         
         # error messages for mismatch
         mismatch_c <- error_values %>% sQuote %>% paste(collapse = ", ")
-        str_names <- paste0("The submitted metadata contains << <b>", mismatch_c, "</b> >> in the Component column, but requested validation for << <b>",  input$template_type, "</b> >>.")
+        type_error <- paste0("The submitted metadata contains << <b>", mismatch_c, "</b> >> in the Component column, but requested validation for << <b>",  input$template_type, "</b> >>.")
         help_msg <- paste0("Please check that you have selected the correct template in the <b>Select your Dataset</b> tab and 
                             ensure your metadata contains <b>only</b> one template, e.g. ", input$template_type, ".")
+        
+        # get wrong columns and values for updating preview table
+        errorDT <- data.frame(Column=sapply(annotation_status[inx_mt], function(i) i[[2]]),
+                              Value=sapply(annotation_status[inx_mt], function(i) i[[4]][[1]]))
 
       } else {
         
+        ## Generate google sheet
         filled_manifest <- metadata_model$populateModelManifest(paste0(config$community," ", input$template_type), input$file1$datapath, template_type)
-  
-        ### loop through the multiple error messages
-        for (i in seq_along(annotation_status)) {
-          
-  
-          row <- annotation_status[i][[1]][1]
-          column <- annotation_status[i][[1]][2]
-          message <- annotation_status[i][[1]][3]
-  
-          error_value <- annotation_status[i][[1]][4]
-  
-          ## if empty value change to NA ### not reporting the value in the cell anymore!!!
-          if (unlist(error_value) == "") {
-            error_value <- NA
-            
-          } else {
-  
-            error_value <- error_value
-          }
-  
-          
-          error_values[i] <- error_value
-          column_names[i] <- column
-          str_names[i] <- paste( paste0(i, "."),
-                                "At row <b>", row, 
-                                "</b>value <b>", error_value,
-                                "</b>in ", "<b>", column, "</b>",
-                                message, paste0("</b>", "<br/>"), sep = " ")
-        }
         
+        type_error <- paste0("The submitted metadata have ", length(annotation_status), " errors.")
         help_msg <- paste0("Please edit your data locally or ", '<a target="_blank" href="', filled_manifest, '">on Google Sheets </a>')
-        
-      }
-    
+
+        errorDT <- data.frame(Column=sapply(annotation_status, function(i) i[[2]]),
+                              Value=sapply(annotation_status, function(i) i[[4]][[1]]),
+                              Error=sapply(annotation_status, function(i) i[[3]])) 
+        # sort rows based on input column names
+        errorDT <- errorDT[order(match(errorDT$Column, colnames(rawData()))),]
+
+        # output error messages as data table
+        output$tbl2 <- DT::renderDT({
+          datatable(errorDT, caption = "The errors are also highlighted in the preview table above.", 
+                    rownames = FALSE, options = list(pageLength = 50, scrollX = TRUE, 
+                                                     scrollY = min(50*length(annotation_status), 400),
+                                                     lengthChange = FALSE, info = FALSE, searching = FALSE)
+          )
+        })
+      }                                     
  
       validate_w$update(
         html = h3(sprintf("%d errors found", length(annotation_status)))
       )
 
-
       ### format output text
       output$text2 <- renderUI({
-          tagList( 
-          HTML("Your metadata is invalid according to the data model. The submitted metadata have <b>", length(annotation_status), "</b> errors.<br/><br/>"),
-          HTML(str_names),
-          HTML("<br/><br/>", help_msg)
-
-          )
+        tagList( 
+          HTML("Your metadata is invalid according to the data model.<br/><br/>"),
+          HTML(type_error, "<br/><br/>"),
+          HTML(help_msg)
+        )
       })
+      
       ### update DT view with incorrect values
       ### currently only one column, requires backend support of multiple
       output$tbl <- DT::renderDT({
         datatable(rawData(),
                     options = list(lengthChange = FALSE, scrollX = TRUE)
-          ) %>% formatStyle(unlist(column_names),
-                            backgroundColor = styleEqual( unlist(error_values), rep("yellow", length(error_values) ) )) ## how to have multiple errors
+          ) %>% formatStyle(errorDT$Column,
+                            backgroundColor = styleEqual(errorDT$Value, rep("yellow", length(errorDT$Value) ) )) ## how to have multiple errors
       })
     } else {
       output$text2 <- renderUI({
