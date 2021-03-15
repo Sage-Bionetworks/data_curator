@@ -444,38 +444,60 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
 
 
     if (length(annotation_status) != 0) {
+
+      # mismatched template index
+      inx_mt <- which(sapply(annotation_status, function(x) grepl("Component value provided is: .*, whereas the Template Type is: .*", x[[3]])))
       
-      ## if error not empty aka there is an error
-      filled_manifest <- metadata_model$populateModelManifest(paste0(config$community," ", input$template_type), input$file1$datapath, template_type)
-      
-      errorDT <- data.frame(Column=sapply(annotation_status, function(i) i[[2]]),
-                            Value=sapply(annotation_status, function(i) i[[4]][[1]]),
-                            Error=sapply(annotation_status, function(i) i[[3]])) 
-      # sort rows based on input column names
-      errorDT <- errorDT[order(match(errorDT$Column, colnames(rawData()))),]
-      
-      # output error messages as data table
-      output$tbl2 <- DT::renderDT({
-        datatable(errorDT, caption = "The errors are also highlighted in the preview table above.", 
-                  rownames = FALSE, options = list(pageLength = 50, scrollX = TRUE, 
-                                                   scrollY = min(50*length(annotation_status), 400),
-                                                   lengthChange = FALSE, info = FALSE, searching = FALSE)
-        )
-      })
+      if (length(inx_mt) > 0) {  # mismatched error(s): selected template mismatched with validating template
+        
+        # get all mismatched components
+        error_values <- sapply(annotation_status[inx_mt], function(x) x[[4]][[1]]) %>% unique()
+        column_names <- "Component"
+        
+        # error messages for mismatch
+        mismatch_c <- error_values %>% sQuote %>% paste(collapse = ", ")
+        type_error <- paste0("The submitted metadata contains << <b>", mismatch_c, "</b> >> in the Component column, but requested validation for << <b>",  input$template_type, "</b> >>.")
+        help_msg <- paste0("Please check that you have selected the correct template in the <b>Select your Dataset</b> tab and 
+                            ensure your metadata contains <b>only</b> one template, e.g. ", input$template_type, ".")
+        
+        # get wrong columns and values for updating preview table
+        errorDT <- data.frame(Column=sapply(annotation_status[inx_mt], function(i) i[[2]]),
+                              Value=sapply(annotation_status[inx_mt], function(i) i[[4]][[1]]))
+
+      } else {
+        
+        ## Generate google sheet
+        filled_manifest <- metadata_model$populateModelManifest(paste0(config$community," ", input$template_type), input$file1$datapath, template_type)
+        
+        type_error <- paste0("The submitted metadata have ", length(annotation_status), " errors.")
+        help_msg <- paste0("Please edit your data locally or ", '<a target="_blank" href="', filled_manifest, '">on Google Sheets </a>')
+
+        errorDT <- data.frame(Column=sapply(annotation_status, function(i) i[[2]]),
+                              Value=sapply(annotation_status, function(i) i[[4]][[1]]),
+                              Error=sapply(annotation_status, function(i) i[[3]])) 
+        # sort rows based on input column names
+        errorDT <- errorDT[order(match(errorDT$Column, colnames(rawData()))),]
+
+        # output error messages as data table
+        output$tbl2 <- DT::renderDT({
+          datatable(errorDT, caption = "The errors are also highlighted in the preview table above.", 
+                    rownames = FALSE, options = list(pageLength = 50, scrollX = TRUE, 
+                                                     scrollY = min(50*length(annotation_status), 400),
+                                                     lengthChange = FALSE, info = FALSE, searching = FALSE)
+          )
+        })
+      }                                     
  
       validate_w$update(
         html = h3(sprintf("%d errors found", length(annotation_status)))
       )
 
-
       ### format output text
       output$text2 <- renderUI({
         tagList( 
-          HTML("Your metadata is invalid according to the data model.<br/>"),
-          HTML("<br/>Edit your data locally or ",
-               paste0('<a target="_blank" href="', filled_manifest, '">on Google Sheets</a>'),
-               ".<br/>"),
-          HTML("<br/>You have", length(annotation_status), " errors: <br/>")
+          HTML("Your metadata is invalid according to the data model.<br/><br/>"),
+          HTML(type_error, "<br/><br/>"),
+          HTML(help_msg)
         )
       })
       
