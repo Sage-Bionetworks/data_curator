@@ -387,7 +387,6 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
       manifest_entity <- syn_get(existing_manifestID)
       # prepopulatedManifestURL = mm.populateModelManifest("test_update", entity.path, component)
       manifest_url <- metadata_model$populateModelManifest(paste0(config$community," ", input$template_type), manifest_entity$path, template_type)
-      # toggle('text_div3') # no text_div3 in ui
 
       output$text <- renderUI({
         tags$a(href = manifest_url, manifest_url, target = "_blank")
