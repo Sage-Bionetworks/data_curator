@@ -88,6 +88,7 @@ ui <- dashboardPage(
               ),
 # Third tab item
       tabItem(tabName = "template",
+              useShinyjs(),
               h2("Download Template for Selected Folder"),
               fluidRow(
                 box(
@@ -112,7 +113,6 @@ ui <- dashboardPage(
 
 # Fourth tab content
       tabItem(tabName = "upload",
-# useShinyjs(),
               h2("Submit & Validate a Filled Metadata Template"),
               fluidRow(
                 box(
@@ -142,9 +142,18 @@ ui <- dashboardPage(
                         htmlOutput("text2"),
                         style = "font-size:18px; background-color: white; border: 1px solid #ccc; border-radius: 3px; margin: 10px 0; padding: 10px"
                     ),
-                    DT::DTOutput("tbl2")
+                    DT::DTOutput("tbl2"),
+                    actionButton("gsheet_btn", "  Click to Generate Google Sheet Link", icon = icon("table")),
+                    div(id = 'gsheet_div', 
+                        height = "100%",
+                        htmlOutput("gsheet_link"),
+                        style = "font-size:18px; background-color: white; border: 1px solid #ccc; border-radius: 3px; margin: 10px 0; padding: 10px"
+                    )
                   ),
-                  helpText("Errors are evaluated one column at a time, if you have an error please reupload your CSV and press the validate button as needed.")
+                  helpText(
+                    HTML("If you have an error, please try editing locally or on google sheet.<br/>
+                         Reupload your CSV and press the validate button as needed.")
+                  )
                 ),
                 box(title = "Submit Validated Metadata to Synapse",
                         status = "primary",
@@ -440,7 +449,7 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
 
     annotation_status <- metadata_model$validateModelManifest(input$file1$datapath, template_type)
     
-    toggle('text_div2')
+    show('text_div2')
 
 
     if (length(annotation_status) != 0) {
@@ -466,11 +475,8 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
 
       } else {
         
-        ## Generate google sheet
-        filled_manifest <- metadata_model$populateModelManifest(paste0(config$community," ", input$template_type), input$file1$datapath, template_type)
-        
         type_error <- paste0("The submitted metadata have ", length(annotation_status), " errors.")
-        help_msg <- paste0("Please edit your data locally or ", '<a target="_blank" href="', filled_manifest, '">on Google Sheets </a>')
+        help_msg <- NULL
 
         errorDT <- data.frame(Column=sapply(annotation_status, function(i) i[[2]]),
                               Value=sapply(annotation_status, function(i) i[[4]][[1]]),
@@ -509,6 +515,9 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
           ) %>% formatStyle(errorDT$Column,
                             backgroundColor = styleEqual(errorDT$Value, rep("yellow", length(errorDT$Value) ) )) ## how to have multiple errors
       })
+      
+      show('gsheet_btn')
+      
     } else {
       output$text2 <- renderUI({
         HTML("Your metadata is valid!")
@@ -524,7 +533,41 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
     validate_w$hide()
   }
   )
-
+  
+  # if user click gsheet_btn, generating gsheet
+  observeEvent(
+    input$gsheet_btn, {
+      
+      # loading screen for Google link generation
+      gsheet_w <- Waiter$new(
+        html = tagList(
+          spin_plus(), br(),
+          h4("Generating link...")
+        ),
+        color = "rgba(66, 72, 116, .9)"
+      )
+      
+      gsheet_w$show()
+      
+      ###lookup schema template name 
+      template_type_df <- schema_to_display_lookup[match(input$template_type, schema_to_display_lookup$display_name), 1, drop = F ]
+      template_type <- as.character(template_type_df$schema_name)
+      
+      ## if error not empty aka there is an error
+      filled_manifest <- metadata_model$populateModelManifest(paste0(config$community," ", input$template_type), input$file1$datapath, template_type)
+      
+      show('gsheet_div')
+      
+      output$gsheet_link <- renderUI({
+        # tags$a(href = filled_manifest, filled_manifest, target = "_blank")
+        HTML(paste0('<a target="_blank" href="', filled_manifest, '">Edit on the Google Sheet.</a>'))
+      })
+      
+      hide('gsheet_btn') # hide btn once link generated
+      
+      gsheet_w$hide()
+    })
+  
   ## loading screen for submitting data
   submit_w <- Waiter$new(
     html = tagList(
