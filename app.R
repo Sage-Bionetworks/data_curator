@@ -99,9 +99,9 @@ ui <- dashboardPage(
                   actionButton("download", "Click to Generate Google Sheets Template"),
                   hidden(
                     div(
-                      id = 'text_div',
+                      id = 'template_glink_div',
                       height = "100%",
-                      htmlOutput("text"),
+                      htmlOutput("template_glink"),
                       style = "font-size:18px; background-color: white; border: 1px solid #ccc; border-radius: 3px; margin: 10px 0; padding: 10px"
                     )
                   ),
@@ -127,7 +127,7 @@ ui <- dashboardPage(
                   solidHeader = TRUE,
                   status = "primary",
                   width = 12,
-                  DT::DTOutput("tbl"),
+                  DT::DTOutput("val_preview_tbl"),
                   helpText("Google spreadsheet row numbers are incremented from this table by 1")
                 ),
                 box(
@@ -137,14 +137,14 @@ ui <- dashboardPage(
                   width = 12,
                   actionButton("validate", "Validate Metadata"),
                   hidden(
-                    div(id = 'text_div2', 
+                    div(id = 'val_error_div', 
                         height = "100%",
-                        htmlOutput("text2"),
+                        htmlOutput("val_res"),
                         style = "font-size:18px; background-color: white; border: 1px solid #ccc; border-radius: 3px; margin: 10px 0; padding: 10px"
                     ),
-                    DT::DTOutput("tbl2"),
+                    DT::DTOutput("val_error_tbl"),
                     actionButton("gsheet_btn", "  Click to Generate Google Sheet Link", icon = icon("table")),
-                    div(id = 'gsheet_div', 
+                    div(id = 'val_glink_div', 
                         height = "100%",
                         htmlOutput("gsheet_link"),
                         style = "font-size:18px; background-color: white; border: 1px solid #ccc; border-radius: 3px; margin: 10px 0; padding: 10px"
@@ -330,7 +330,7 @@ output$manifest_display_name <- renderUI({
 observeEvent({input$dataset
               input$template_type
               }, {
-                sapply(c('text_div', 'text_div2', 'tbl2', 'gsheet_btn', 'gsheet_div', 'submitButton'), FUN=hide)
+                sapply(c('template_glink_div', 'val_error_div', 'val_error_tbl', 'gsheet_btn', 'val_glink_div', 'submitButton'), FUN=hide)
 })
 
 schema_to_display_lookup <- data.frame(schema_name, display_name)
@@ -385,10 +385,10 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
 
 
       ## links shows in text box
-      show('text_div')
+      show('template_glink_div')
       ### if want a progress bar need more feedback from API to know how to increment progress bar ###
 
-      output$text <- renderUI({
+      output$template_glink <- renderUI({
         tags$a(href = manifest_url, manifest_url, target = "_blank") ### add link to data dictionary when we have it ###
       })
     } else {
@@ -397,7 +397,7 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
       # prepopulatedManifestURL = mm.populateModelManifest("test_update", entity.path, component)
       manifest_url <- metadata_model$populateModelManifest(paste0(config$community," ", input$template_type), manifest_entity$path, template_type)
 
-      output$text <- renderUI({
+      output$template_glink <- renderUI({
         tags$a(href = manifest_url, manifest_url, target = "_blank")
       })
     }
@@ -423,13 +423,13 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
   })
   
   observeEvent(input$file1, {
-    sapply(c('text_div2', 'tbl2', 'gsheet_btn', 'gsheet_div', 'submitButton'), FUN=hide)
+    sapply(c('val_error_div', 'val_error_tbl', 'gsheet_btn', 'val_glink_div', 'submitButton'), FUN=hide)
   })
   
   ### renders in DT for preview 
   observeEvent(
   rawData(), {
-    output$tbl <- DT::renderDT({
+    output$val_preview_tbl <- DT::renderDT({
       datatable(rawData(), options = list(lengthChange = FALSE, scrollX = TRUE)
         )
     })
@@ -458,7 +458,7 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
 
     annotation_status <- metadata_model$validateModelManifest(input$file1$datapath, template_type)
     
-    show('text_div2')
+    show('val_error_div')
 
 
     if (length(annotation_status) != 0) {
@@ -494,7 +494,7 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
         errorDT <- errorDT[order(match(errorDT$Column, colnames(rawData()))),]
 
         # output error messages as data table
-        output$tbl2 <- DT::renderDT({
+        output$val_error_tbl <- DT::renderDT({
           datatable(errorDT, caption = "The errors are also highlighted in the preview table above.", 
                     rownames = FALSE, options = list(pageLength = 50, scrollX = TRUE, 
                                                      scrollY = min(50*length(annotation_status), 400),
@@ -508,7 +508,7 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
       )
 
       ### format output text
-      output$text2 <- renderUI({
+      output$val_res <- renderUI({
         tagList( 
           HTML("Your metadata is invalid according to the data model.<br/><br/>"),
           HTML(type_error, "<br/><br/>"),
@@ -518,7 +518,7 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
       
       ### update DT view with incorrect values
       ### currently only one column, requires backend support of multiple
-      output$tbl <- DT::renderDT({
+      output$val_preview_tbl <- DT::renderDT({
         datatable(rawData(),
                     options = list(lengthChange = FALSE, scrollX = TRUE)
           ) %>% formatStyle(errorDT$Column,
@@ -528,7 +528,7 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
       show('gsheet_btn')
       
     } else {
-      output$text2 <- renderUI({
+      output$val_res <- renderUI({
         HTML("Your metadata is valid!")
       })
 
@@ -565,7 +565,7 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
       ## if error not empty aka there is an error
       filled_manifest <- metadata_model$populateModelManifest(paste0(config$community," ", input$template_type), input$file1$datapath, template_type)
       
-      show('gsheet_div')
+      show('val_glink_div')
       
       output$gsheet_link <- renderUI({
         # tags$a(href = filled_manifest, filled_manifest, target = "_blank")
@@ -660,7 +660,7 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
         rm("./files/synapse_storage_manifest.csv")
 
         ### clear inputs 
-        output$text2 <- renderUI({
+        output$val_res <- renderUI({
           HTML("")
         })
         output$submit <- renderUI({
@@ -674,7 +674,7 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
                                           '.csv'))
         })
         ### renders empty df
-        output$tbl <- DT::renderDT(
+        output$val_preview_tbl <- DT::renderDT(
           datatable(as.data.frame(matrix(0, ncol = 0, nrow = 0)))
           )
 
@@ -730,7 +730,7 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
                                           '.csv'))
         })
         ### renders empty df
-        output$tbl <- DT::renderDT(
+        output$val_preview_tbl <- DT::renderDT(
           datatable(as.data.frame(matrix(0, ncol = 0, nrow = 0)))
           )
 
