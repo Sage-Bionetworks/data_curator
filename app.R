@@ -327,6 +327,12 @@ output$manifest_display_name <- renderUI({
 
 })
 
+observeEvent({input$dataset
+              input$template_type
+              }, {
+                sapply(c('text_div', 'text_div2', 'tbl2', 'gsheet_btn', 'gsheet_div', 'submitButton'), FUN=hide)
+})
+
 schema_to_display_lookup <- data.frame(schema_name, display_name)
 
   # loading screen for template link generation
@@ -379,7 +385,7 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
 
 
       ## links shows in text box
-      toggle('text_div')
+      show('text_div')
       ### if want a progress bar need more feedback from API to know how to increment progress bar ###
 
       output$text <- renderUI({
@@ -390,7 +396,6 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
       manifest_entity <- syn_get(existing_manifestID)
       # prepopulatedManifestURL = mm.populateModelManifest("test_update", entity.path, component)
       manifest_url <- metadata_model$populateModelManifest(paste0(config$community," ", input$template_type), manifest_entity$path, template_type)
-      toggle('text_div3')
 
       output$text <- renderUI({
         tags$a(href = manifest_url, manifest_url, target = "_blank")
@@ -416,7 +421,11 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
     infile <- infile[, !grepl('^X', colnames(infile))]
     infile <- infile[rowSums(is.na(infile)) != ncol(infile), ]
   })
-
+  
+  observeEvent(input$file1, {
+    sapply(c('text_div2', 'tbl2', 'gsheet_btn', 'gsheet_div', 'submitButton'), FUN=hide)
+  })
+  
   ### renders in DT for preview 
   observeEvent(
   rawData(), {
