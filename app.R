@@ -494,6 +494,7 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
         errorDT <- errorDT[order(match(errorDT$Column, colnames(rawData()))),]
 
         # output error messages as data table
+        show("val_error_tbl") # show DT table for error messages
         output$val_error_tbl <- DT::renderDT({
           datatable(errorDT, caption = "The errors are also highlighted in the preview table above.", 
                     rownames = FALSE, options = list(pageLength = 50, scrollX = TRUE, 
