@@ -19,7 +19,7 @@ reticulate::import("sys")
 
 source_python("synLoginFun.py")
 source_python("metadataModelFuns.py")
-
+options(stringsAsFactors = FALSE) # stringsAsFactors = TRUE by default for R < 4.0
 #########
 
 ui <- dashboardPage(
@@ -416,7 +416,8 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
 
   ### reads csv file and previews
   rawData <- eventReactive(input$file1, {
-    infile <- readr::read_csv(input$file1$datapath, na = c("", "NA"))
+    infile <- readr::read_csv(input$file1$datapath, na = c("", "NA"), col_types = readr::cols(.default = "c")) %>%
+                replace(., is.na(.), " ") # change NA to blank(one space) to match validateModelManifest output
     ### remove empty rows/columns where readr called it "X"[digit] for unnamed col
     infile <- infile[, !grepl('^X', colnames(infile))]
     infile <- infile[rowSums(is.na(infile)) != ncol(infile), ]
@@ -456,7 +457,9 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
     template_type_df <- schema_to_display_lookup[match(input$template_type, schema_to_display_lookup$display_name), 1, drop = F ]
     template_type <- as.character(template_type_df$schema_name)
 
-    annotation_status <- metadata_model$validateModelManifest(input$file1$datapath, template_type)
+    annotation_status <- metadata_model$validateModelManifest(input$file1$datapath, template_type) %>% 
+                          rapply(., function(x) gsub("\'\'", "\' \'", x), how = "replace") %>% # change '' to ' '
+                          rapply(., function(x) gsub("^$", " ", x), how = "replace") # change empty value to (one space) blank
     
     show('text_div2')
 
