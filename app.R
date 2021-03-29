@@ -128,7 +128,7 @@ ui <- dashboardPage(
                   status = "primary",
                   width = 12,
                   DT::DTOutput("tbl"),
-                  helpText("Google spreadsheet row numbers are incremented from this table by 1")
+                  helpText("Upload manifest to preview the metadata")
                 ),
                 box(
                   title = "Validate Filled Metadata",
@@ -431,7 +431,7 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
   observeEvent(
   rawData(), {
     output$tbl <- DT::renderDT({
-      datatable(rawData(), options = list(lengthChange = FALSE, scrollX = TRUE)
+      datatable(rawData(), options = list(lengthChange = FALSE, scrollX = TRUE), rownames = FALSE
         )
     })
 
@@ -523,7 +523,7 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
       ### currently only one column, requires backend support of multiple
       output$tbl <- DT::renderDT({
         datatable(rawData(),
-                    options = list(lengthChange = FALSE, scrollX = TRUE)
+                  options = list(lengthChange = FALSE, scrollX = TRUE), rownames = FALSE
           ) %>% formatStyle(errorDT$Column,
                             backgroundColor = styleEqual(errorDT$Value, rep("yellow", length(errorDT$Value) ) )) ## how to have multiple errors
       })
