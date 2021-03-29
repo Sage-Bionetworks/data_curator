@@ -465,6 +465,9 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
 
       # mismatched template index
       inx_mt <- which(sapply(annotation_status, function(x) grepl("Component value provided is: .*, whereas the Template Type is: .*", x[[3]])))
+      # missing column index
+      inx_ws <- which(sapply(annotation_status, function(x) grepl("Wrong schema", x[[2]])))
+      update_preview <- TRUE
       
       if (length(inx_mt) > 0) {  # mismatched error(s): selected template mismatched with validating template
         
@@ -482,6 +485,13 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
         errorDT <- data.frame(Column=sapply(annotation_status[inx_mt], function(i) i[[2]]),
                               Value=sapply(annotation_status[inx_mt], function(i) i[[4]][[1]]))
 
+      } else if (length(inx_ws) > 0) {  # wrong schema error(s): validating metadata miss any required columns
+        
+        type_error <- paste0("The submitted metadata does not contain all required column(s)")
+        help_msg <- "Please refer the correct template in the <b>Get Metadata Template</b> tab and
+                     ensure your metadata contains all required columns."
+        update_preview <- FALSE
+        
       } else {
         
         type_error <- paste0("The submitted metadata have ", length(annotation_status), " errors.")
@@ -517,13 +527,14 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
       })
       
       ### update DT view with incorrect values
-      ### currently only one column, requires backend support of multiple
-      output$tbl <- DT::renderDT({
-        datatable(rawData(),
-                    options = list(lengthChange = FALSE, scrollX = TRUE)
-          ) %>% formatStyle(errorDT$Column,
-                            backgroundColor = styleEqual(errorDT$Value, rep("yellow", length(errorDT$Value) ) )) ## how to have multiple errors
-      })
+      if (update_preview) {
+        output$tbl <- DT::renderDT({
+          datatable(rawData(),
+                      options = list(lengthChange = FALSE, scrollX = TRUE)
+            ) %>% formatStyle(errorDT$Column,
+                              backgroundColor = styleEqual(errorDT$Value, rep("yellow", length(errorDT$Value) ) ))
+        })
+      }
       
       show('gsheet_btn')
       
