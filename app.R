@@ -415,7 +415,9 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
   })
 
   ### reads csv file and previews
-  rawData <- eventReactive(input$file1, {
+  rawData <- eventReactive(ignoreNULL = FALSE, input$file1, {
+    # if no file uploaded, return null
+    if(is.null(input$file1)) return(NULL)
     infile <- readr::read_csv(input$file1$datapath, na = c("", "NA"))
     ### remove empty rows/columns where readr called it "X"[digit] for unnamed col
     infile <- infile[, !grepl('^X', colnames(infile))]
@@ -449,20 +451,24 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
   ### toggles validation status when validate button pressed
   observeEvent(
     input$validate, {
-
+    
+    validation_res <- NULL
+    type_error <- NULL
+    help_msg <- NULL
+    
     validate_w$show()
-
+    
+    if (!is.null(rawData()) & !is.null(input$template_type)) {
+    
     ###lookup schema template name 
     template_type_df <- schema_to_display_lookup[match(input$template_type, schema_to_display_lookup$display_name), 1, drop = F ]
     template_type <- as.character(template_type_df$schema_name)
 
     annotation_status <- metadata_model$validateModelManifest(input$file1$datapath, template_type)
     
-    show('text_div2')
-
-
     if (length(annotation_status) != 0) {
-
+      
+      validation_res <- "invalid"
       # mismatched template index
       inx_mt <- which(sapply(annotation_status, function(x) grepl("Component value provided is: .*, whereas the Template Type is: .*", x[[3]])))
       
@@ -506,15 +512,6 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
       validate_w$update(
         html = h3(sprintf("%d errors found", length(annotation_status)))
       )
-
-      ### format output text
-      output$text2 <- renderUI({
-        tagList( 
-          HTML("Your metadata is invalid according to the data model.<br/><br/>"),
-          HTML(type_error, "<br/><br/>"),
-          HTML(help_msg)
-        )
-      })
       
       ### update DT view with incorrect values
       ### currently only one column, requires backend support of multiple
@@ -528,16 +525,32 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
       show('gsheet_btn')
       
     } else {
-      output$text2 <- renderUI({
-        HTML("Your metadata is valid!")
-      })
-
+      
+      validation_res <- "Valid"
       ### show submit button
       output$submit <- renderUI({
         actionButton("submitButton", "Submit to Synapse")
       })
 
     }
+    }
+    
+    ### format output text
+    output$text2 <- renderUI({
+      # test if template is selected and filled manifest is uploaded
+      shiny::validate(need(!is.null(input$template_type), "Please choose a template in Select your Dataset tab !!!"),
+                      need(!is.null(rawData()), "Please upload a filled metadata !!!")
+      )
+      
+      tagList(
+        if (!is.null(validation_res)) HTML("Your metadata is <b>", validation_res, "</b>."),
+        if (!is.null(type_error)) HTML("<br/><br/>", type_error),
+        if (!is.null(help_msg)) HTML("<br/><br/>", help_msg)
+      )
+    })
+    
+    show('text_div2')
+    
     Sys.sleep(2)
     validate_w$hide()
   }
