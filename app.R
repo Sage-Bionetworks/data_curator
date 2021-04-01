@@ -418,6 +418,7 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
   rawData <- eventReactive(input$file1, {
     infile <- readr::read_csv(input$file1$datapath, na = c("", "NA"), col_types = readr::cols(.default = "c")) %>%
                 replace(., is.na(.), "") # change NA to blank to match schema output
+    ### remove empty rows/columns where readr called it "X"[digit] for unnamed col
     infile <- infile[, !grepl('^X', colnames(infile))]
     infile <- infile[rowSums(is.na(infile)) != ncol(infile), ]
   })
