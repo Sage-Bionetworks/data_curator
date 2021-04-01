@@ -477,7 +477,7 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
         # error messages for mismatch
         mismatch_c <- error_values %>% sQuote %>% paste(collapse = ", ")
         type_error <- paste0("The submitted metadata contains << <b>", mismatch_c, "</b> >> in the Component column, but requested validation for << <b>",  input$template_type, "</b> >>.")
-        help_msg <- paste0("Please check that you have selected the correct template in the <b>Select your Dataset</b> tab and 
+        help_msg <- paste0("Please check that you have selected the correct template in the <b>'Select your Dataset'</b> tab and 
                             ensure your metadata contains <b>only</b> one template, e.g. ", input$template_type, ".")
         
         # get wrong columns and values for updating preview table
@@ -486,8 +486,8 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
 
       } else if (length(inx_ws) > 0) {  # wrong schema error(s): validating metadata miss any required columns
         
-        type_error <- paste0("The submitted metadata does not contain all required column(s)")
-        help_msg <- "Please refer the correct template in the <b>Get Metadata Template</b> tab and
+        type_error <- paste0("The submitted metadata does not contain all required column(s).")
+        help_msg <- "Please check that you used the correct template in the <b>'Get Metadata Template'</b> tab and
                      ensure your metadata contains all required columns."
 
       } else {
