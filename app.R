@@ -526,7 +526,7 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
       
     } else {
       
-      validation_res <- "Valid"
+      validation_res <- "valid"
       ### show submit button
       output$submit <- renderUI({
         actionButton("submitButton", "Submit to Synapse")
