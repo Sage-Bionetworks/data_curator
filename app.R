@@ -383,11 +383,6 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
       ### make sure not scalar if length of list is 1 in R
       ## add in the step to convert names later ###
 
-
-      ## links shows in text box
-      show('text_div')
-      ### if want a progress bar need more feedback from API to know how to increment progress bar ###
-
       output$text <- renderUI({
         tags$a(href = manifest_url, manifest_url, target = "_blank") ### add link to data dictionary when we have it ###
       })
@@ -401,6 +396,10 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
         tags$a(href = manifest_url, manifest_url, target = "_blank")
       })
     }
+    ## links shows in text box
+    show('text_div')
+    ### if want a progress bar need more feedback from API to know how to increment progress bar ###
+    
     manifest_w$hide()
     }
   )
