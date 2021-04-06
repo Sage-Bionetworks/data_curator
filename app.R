@@ -349,58 +349,60 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
     input$download, {
 
     manifest_w$show()
-
-    selected_folder <- input$dataset
-    selected_project <- input$var
-
-    ###lookup schema template name 
-    template_type_df <- schema_to_display_lookup[match(input$template_type, schema_to_display_lookup$display_name), 1, drop = F ]
-    template_type <- as.character(template_type_df$schema_name)
-
-    project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
-
-    folder_list <- syn_store$getStorageDatasetsInProject(synStore_obj, project_synID)
-    folders_namedList <- c()
-    for (i in seq_along(folder_list)) {
-      folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
-    }
-    folder_synID <- folders_namedList[[selected_folder]]
-
-    ### checks if a manifest already exists
-    existing_manifestID <- syn_store$updateDatasetManifestFiles(synStore_obj, folder_synID)
-
-    ### if there isn't an existing manifest make a new one 
-    if (existing_manifestID == '') {
-      file_list <- syn_store$getFilesInStorageDataset(synStore_obj, folder_synID)
-      file_namedList <- c()
-      for (i in seq_along(file_list)) {
-        file_namedList[file_list[[i]][[2]]] <- file_list[[i]][[1]]
+    
+    if (is.null(input$template_type)) {
+      output$text <- renderUI({
+        tags$a( HTML(paste0('<span style="color: #E53935">', 
+                            "Please select a template from the 'Select your Dataset' tab !", '</span>'))) 
+      })
+    } else {
+      selected_folder <- input$dataset
+      selected_project <- input$var
+  
+      ###lookup schema template name 
+      template_type_df <- schema_to_display_lookup[match(input$template_type, schema_to_display_lookup$display_name), 1, drop = F ]
+      template_type <- as.character(template_type_df$schema_name)
+  
+      project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
+  
+      folder_list <- syn_store$getStorageDatasetsInProject(synStore_obj, project_synID)
+      folders_namedList <- c()
+      for (i in seq_along(folder_list)) {
+        folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
       }
-      filename_list <- names(file_namedList)
+      folder_synID <- folders_namedList[[selected_folder]]
+  
+      ### checks if a manifest already exists
+      existing_manifestID <- syn_store$updateDatasetManifestFiles(synStore_obj, folder_synID)
+  
+      ### if there isn't an existing manifest make a new one 
+      if (existing_manifestID == '') {
+        file_list <- syn_store$getFilesInStorageDataset(synStore_obj, folder_synID)
+        file_namedList <- c()
+        for (i in seq_along(file_list)) {
+          file_namedList[file_list[[i]][[2]]] <- file_list[[i]][[1]]
+        }
+        filename_list <- names(file_namedList)
+  
+        manifest_url <- metadata_model$getModelManifest(paste0(config$community," ", input$template_type), template_type, filenames = as.list(filename_list))
+        ### make sure not scalar if length of list is 1 in R
+        ## add in the step to convert names later ###
 
-
-      manifest_url <- metadata_model$getModelManifest(paste0(config$community," ", input$template_type), template_type, filenames = as.list(filename_list))
-      ### make sure not scalar if length of list is 1 in R
-      ## add in the step to convert names later ###
-
-
-      ## links shows in text box
-      show('text_div')
-      ### if want a progress bar need more feedback from API to know how to increment progress bar ###
-
+      } else {
+        ### if the manifest already exists
+        manifest_entity <- syn_get(existing_manifestID)
+        # prepopulatedManifestURL = mm.populateModelManifest("test_update", entity.path, component)
+        manifest_url <- metadata_model$populateModelManifest(paste0(config$community," ", input$template_type), manifest_entity$path, template_type)
+      }
+    
       output$text <- renderUI({
         tags$a(href = manifest_url, manifest_url, target = "_blank") ### add link to data dictionary when we have it ###
       })
-    } else {
-      ### if the manifest already exists
-      manifest_entity <- syn_get(existing_manifestID)
-      # prepopulatedManifestURL = mm.populateModelManifest("test_update", entity.path, component)
-      manifest_url <- metadata_model$populateModelManifest(paste0(config$community," ", input$template_type), manifest_entity$path, template_type)
-
-      output$text <- renderUI({
-        tags$a(href = manifest_url, manifest_url, target = "_blank")
-      })
     }
+      
+    ## links shows in text box
+    show('text_div')
+    ### if want a progress bar need more feedback from API to know how to increment progress bar ###
     manifest_w$hide()
     }
   )
