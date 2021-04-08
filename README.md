@@ -1,3 +1,9 @@
+<<<<<<< HEAD
+=======
+# Data Curator App
+
+## Setup
+>>>>>>> 4356f4913f936888401b1ca6f7fae48615a6f269
 
 # NF Data Curator App
 
@@ -14,7 +20,14 @@ To make changes, please branch off of `develop`, make changes, and then file a P
 
 For the latest documentation on how to deploy this app and backend, please visit https://github.com/Sage-Bionetworks/HTAN_data_curator and  https://github.com/Sage-Bionetworks/schematic.
 
+<<<<<<< HEAD
 We've made forks of both of these repositories here and here: https://github.com/Sage-Bionetworks/schematic.
+=======
+    conda activate data_curator_env
+    
+_Note_:
+- You can change the name of your conda environment inside `environment.yml` or even use another environment, but please note that you will need to make changes accordingly in the [`app.R`](https://github.com/Sage-Bionetworks/data_curator/blob/shiny-server-develop/app.R#L17) file.
+>>>>>>> 4356f4913f936888401b1ca6f7fae48615a6f269
 
 ## Test/Demo Project
 
@@ -24,6 +37,7 @@ Use [this](https://www.synapse.org/#!Synapse:syn22410511/files/) sandbox Synapse
 
 You likely won't need the instructions below unless a major change happens, but we've left them here just in case: 
 
+<<<<<<< HEAD
 ### Data Curator App Setup (frontend)
 Follow the steps below to make sure the _Data Curator App_ (frontend) is fully setup to work with the [Data Ingress Pipeline](https://github.com/nf-osi/schematic/) (backend):
 
@@ -54,6 +68,10 @@ The next step is to install the latest release of the [Data Ingress Pipeline](ht
 
 To do so, follow the instructions on the `schematic` repository [README](https://github.com/Sage-Bionetworks/schematic/tree/develop#12-installation-requirements-and-pre-requisites).
 
+=======
+To do so, follow the instructions on the `schematic` repository [README](https://github.com/Sage-Bionetworks/schematic/tree/develop#12-installation-requirements-and-pre-requisites).
+
+>>>>>>> 4356f4913f936888401b1ca6f7fae48615a6f269
 -------
 
 ### App Configuration file
@@ -67,3 +85,7 @@ Use the app configuration file `www/config.json` to adapt this app to your DCC.
 
 * `main_fileview` : The Synapse ID of a fileview that is scoped to all files, folders, & projects in your community.  (e.g. "syn20446927")
 * `community` : the abbreviated name of the community or project. (e.g. "HTAN")
+<<<<<<< HEAD
+=======
+}
+>>>>>>> 4356f4913f936888401b1ca6f7fae48615a6f269

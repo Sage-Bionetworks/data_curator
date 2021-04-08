@@ -236,6 +236,7 @@ server <- function(input, output, session) {
       
       ### updates project dropdown
       updateSelectizeInput(session, 'var', choices = sort(names(projects_namedList)))
+<<<<<<< HEAD
 
       ### 
       admin_team_table <- config$admin_team_table
@@ -259,6 +260,10 @@ server <- function(input, output, session) {
       }
       
       ### update waiter loading screen once login successful
+=======
+
+    ### update waiter loading screen once login successful
+>>>>>>> 4356f4913f936888401b1ca6f7fae48615a6f269
       waiter_update(
         html = tagList(
           img(src = "synapse_logo.png", height = "120px"),
@@ -422,11 +427,39 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
           tags$a(href = manifest_url, manifest_url, target = "_blank")
         })
       }
+<<<<<<< HEAD
       ## links shows in text box
       show('text_div')
       ### if want a progress bar need more feedback from API to know how to increment progress bar ###
       
       manifest_w$hide()
+=======
+      filename_list <- names(file_namedList)
+
+
+      manifest_url <- metadata_model$getModelManifest(paste0(config$community," ", input$template_type), template_type, filenames = as.list(filename_list))
+      ### make sure not scalar if length of list is 1 in R
+      ## add in the step to convert names later ###
+
+      output$text <- renderUI({
+        tags$a(href = manifest_url, manifest_url, target = "_blank") ### add link to data dictionary when we have it ###
+      })
+    } else {
+      ### if the manifest already exists
+      manifest_entity <- syn_get(existing_manifestID)
+      # prepopulatedManifestURL = mm.populateModelManifest("test_update", entity.path, component)
+      manifest_url <- metadata_model$populateModelManifest(paste0(config$community," ", input$template_type), manifest_entity$path, template_type)
+
+      output$text <- renderUI({
+        tags$a(href = manifest_url, manifest_url, target = "_blank")
+      })
+    }
+    ## links shows in text box
+    show('text_div')
+    ### if want a progress bar need more feedback from API to know how to increment progress bar ###
+    
+    manifest_w$hide()
+>>>>>>> 4356f4913f936888401b1ca6f7fae48615a6f269
     }
   )
   
@@ -447,7 +480,10 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
     infile <- infile[rowSums(is.na(infile)) != ncol(infile), ]
   })
   
+<<<<<<< HEAD
 
+=======
+>>>>>>> 4356f4913f936888401b1ca6f7fae48615a6f269
   observeEvent(input$file1, {
     sapply(c('text_div2', 'tbl2', 'gsheet_btn', 'gsheet_div', 'submitButton'), FUN=hide)
   })
@@ -487,7 +523,11 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
     show('text_div2')
 
 
+<<<<<<< HEAD
     if (length(annotation_status) != 0  & !isTRUE(override)) {
+=======
+    if (length(annotation_status) != 0) {
+>>>>>>> 4356f4913f936888401b1ca6f7fae48615a6f269
 
       # mismatched template index
       inx_mt <- which(sapply(annotation_status, function(x) grepl("Component value provided is: .*, whereas the Template Type is: .*", x[[3]])))
@@ -554,6 +594,7 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
       
       show('gsheet_btn')
       
+<<<<<<< HEAD
     } else if (length(annotation_status) != 0  & isTRUE(override)) {
       
       # mismatched template index
@@ -626,6 +667,8 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
         actionButton("submitButton", "Override and Submit to Synapse")
       })
       
+=======
+>>>>>>> 4356f4913f936888401b1ca6f7fae48615a6f269
     } else {
       output$text2 <- renderUI({
         HTML("Your metadata is valid!")
@@ -687,6 +730,7 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
   ###submit button
   observeEvent(
     input$submitButton, {
+<<<<<<< HEAD
       
       submit_w$show()
       
@@ -736,6 +780,34 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
           
           write.csv(files_entity, file = "./files/synapse_storage_manifest.csv", quote = TRUE, row.names = FALSE, na = "")
         }
+=======
+
+    submit_w$show()
+
+    ### reads in csv 
+    infile <- readr::read_csv(input$file1$datapath, na = c("", "NA"))
+   
+    ### remove empty rows/columns where readr called it "X"[digit] for unnamed col
+    infile <- infile[, !grepl('^X', colnames(infile))]
+    infile <- infile[rowSums(is.na(infile)) != ncol(infile), ]
+    
+    ### IF an assay component selected (define assay components)
+    ## note for future - the type to filter (eg assay) on could probably also be a config choice
+    assay_schemas <- config$manifest_schemas$display_name[config$manifest_schemas$type=="assay"]
+
+    ### and adds entityID, saves it as synapse_storage_manifest.csv, then associates with synapse files 
+    if ( input$template_type %in% assay_schemas ) {
+      
+      ### make into a csv or table for assay components
+      ### already has entityId
+      if ("entityId" %in% colnames(infile)) {
+
+        write.csv(infile, file = "./files/synapse_storage_manifest.csv", quote = TRUE, row.names = FALSE, na = "")
+
+      } else {
+        # if not get ids
+        selected_folder <- input$dataset
+>>>>>>> 4356f4913f936888401b1ca6f7fae48615a6f269
         selected_project <- input$var
         selected_folder <- input$dataset
         
@@ -784,6 +856,7 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
               span(manifest_id, " is not a valid Synapse ID. Try again?")
             )
           )
+<<<<<<< HEAD
           rm("/tmp/synapse_storage_manifest.csv")
         }
         
@@ -831,6 +904,55 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
           ### renders empty df
           output$tbl <- DT::renderDT(
             datatable(as.data.frame(matrix(0, ncol = 0, nrow = 0)))
+=======
+        )
+        rm("/tmp/synapse_storage_manifest.csv")
+      }
+
+    } else { ## if not assay type tempalte
+      write.csv(infile, file = "./files/synapse_storage_manifest.csv", quote = TRUE, row.names = FALSE, na = "")
+
+      selected_project <- input$var
+      selected_folder <- input$dataset
+
+      project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
+      # folder_synID <- get_folder_synID(synStore_obj, project_synID, selected_folder)
+
+      folder_list <- syn_store$getStorageDatasetsInProject(synStore_obj, project_synID)
+      folders_namedList <- c()
+      for (i in seq_along(folder_list)) {
+        folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
+      }
+      folder_synID <- folders_namedList[[selected_folder]]
+
+      ### associates metadata with data and returns manifest id
+      manifest_id <- syn_store$associateMetadataWithFiles(synStore_obj, "./files/synapse_storage_manifest.csv", folder_synID)
+      print(manifest_id)
+      manifest_path <- paste0("synapse.org/#!Synapse:", manifest_id)
+
+      ### if uploaded provided valid synID message
+      if (startsWith(manifest_id, "syn") == TRUE) {
+        nx_report_success("Success!", paste0("Manifest submitted to: ", manifest_path))
+        rm("./files/synapse_storage_manifest.csv")
+
+        ### clear inputs 
+        output$text2 <- renderUI({
+          HTML("")
+        })
+        output$submit <- renderUI({
+        })
+
+        ### rerenders fileinput UI
+        output$fileInput_ui <- renderUI({
+          fileInput("file1", "Upload CSV File",
+                                  accept = c('text/csv',
+                                          'text/comma-separated-values',
+                                          '.csv'))
+        })
+        ### renders empty df
+        output$tbl <- DT::renderDT(
+          datatable(as.data.frame(matrix(0, ncol = 0, nrow = 0)))
+>>>>>>> 4356f4913f936888401b1ca6f7fae48615a6f269
           )
           
         } else {
