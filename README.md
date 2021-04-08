@@ -1,9 +1,3 @@
-<<<<<<< HEAD
-=======
-# Data Curator App
-
-## Setup
->>>>>>> 4356f4913f936888401b1ca6f7fae48615a6f269
 
 # NF Data Curator App
 
@@ -20,14 +14,7 @@ To make changes, please branch off of `develop`, make changes, and then file a P
 
 For the latest documentation on how to deploy this app and backend, please visit https://github.com/Sage-Bionetworks/HTAN_data_curator and  https://github.com/Sage-Bionetworks/schematic.
 
-<<<<<<< HEAD
 We've made forks of both of these repositories here and here: https://github.com/Sage-Bionetworks/schematic.
-=======
-    conda activate data_curator_env
-    
-_Note_:
-- You can change the name of your conda environment inside `environment.yml` or even use another environment, but please note that you will need to make changes accordingly in the [`app.R`](https://github.com/Sage-Bionetworks/data_curator/blob/shiny-server-develop/app.R#L17) file.
->>>>>>> 4356f4913f936888401b1ca6f7fae48615a6f269
 
 ## Test/Demo Project
 
@@ -37,7 +24,6 @@ Use [this](https://www.synapse.org/#!Synapse:syn22410511/files/) sandbox Synapse
 
 You likely won't need the instructions below unless a major change happens, but we've left them here just in case: 
 
-<<<<<<< HEAD
 ### Data Curator App Setup (frontend)
 Follow the steps below to make sure the _Data Curator App_ (frontend) is fully setup to work with the [Data Ingress Pipeline](https://github.com/nf-osi/schematic/) (backend):
 
@@ -56,36 +42,44 @@ Activate the `data_curator_env` environment:
 
     conda activate data_curator_env
 
-
-_Note_:
-- You can change the name of your conda environment inside `environment.yml` or even use another environment, but please note that you will need to make changes accordingly in the [`app.R`](https://github.com/Sage-Bionetworks/data_curator/blob/shiny-server-develop/app.R#L17) file.
-
 -------
 
 ### Schematic Setup (backend)
 
 The next step is to install the latest release of the [Data Ingress Pipeline](https://github.com/Sage-Bionetworks/schematic) (backend) as a folder `schematic` inside the `NF_data_curator` folder and tie it together with this frontend. 
 
-To do so, follow the instructions on the `schematic` repository [README](https://github.com/Sage-Bionetworks/schematic/tree/develop#12-installation-requirements-and-pre-requisites).
+To do so carry out the following steps:
 
-=======
-To do so, follow the instructions on the `schematic` repository [README](https://github.com/Sage-Bionetworks/schematic/tree/develop#12-installation-requirements-and-pre-requisites).
+1. Inside the `HTAN_data_curator` folder, clone the repo from this [location](https://github.com/Sage-Bionetworks/schematic), by running the following command:
 
->>>>>>> 4356f4913f936888401b1ca6f7fae48615a6f269
--------
+    `git clone --single-branch --branch production https://github.com/nf-osi/schematic.git`
 
-### App Configuration file
+This creates a folder named `schematic` inside the the `NF_data_curator folder`.
+2. Navigate into the created `schematic` directory. Install the backend (`schematic` package) within the conda virtual environment by running:
 
-Use the app configuration file `www/config.json` to adapt this app to your DCC. 
+    `pip install -e .`
 
-* `manifest schemas`: defines the list of schemas displayed under the "Choose a Metadata Template Type:" dropdown in the application.
-    * `display_name` : The display name for the dropdown. (e.g. "Genomics Assay")
-    * `schema_name`: The name of the manifest in the JSON-LD schema (e.g. "GenomicsAssay")  
-    * `type`: The type of manifest. As currently configured in `app.R`, will only display manifests of type "assay".
+To verify that the backend is installed, do this: `pip list`
 
-* `main_fileview` : The Synapse ID of a fileview that is scoped to all files, folders, & projects in your community.  (e.g. "syn20446927")
-* `community` : the abbreviated name of the community or project. (e.g. "HTAN")
-<<<<<<< HEAD
-=======
-}
->>>>>>> 4356f4913f936888401b1ca6f7fae48615a6f269
+If you can find the `schematic` package in the list of packages installed it was successful.
+
+
+3. Obtain the `credentials.json` file in `schematic` to authenticate user access to Google API services which will be used to create the metadata templates. If you do not already have this file, make sure you are authorized (see _Notes_ below) and run the below command within `schematic` to download the you credentials file, e.g. `syn21088684` (for HTAN) through the `synapseclient` (part of the backend):
+
+    `synapse get syn21088684`
+
+4. Obtain the `token.pickle` file in `schematic` which is also necessary for authentication. If you do not already have this file run the `metadata_usage` example as follows inside `schematic`:
+
+    `python examples/metadata_model.py`
+
+This will prompt you with a URL on your console to Google's authorization process. Follow that and upon completion the `token.pickle` file will automatically be downloaded to the required location.
+
+_Notes:_
+
+- You can install the package by changing from anywhere else by changing the `.` to whatever the path is to the to where you have downloaded the package (`pip install -e /path/to/package`).
+
+- `syn21088684` is the Synapse ID of the HTAN specific `credentials.json` file on Synapse that corresponds to the Google service account that creates HTAN templates.
+
+- You need to be authorized to download protected Synapse files such as credentials. Please contact your project manager for access.
+
+- If you want to test the backend you can run other things inside `schematic`, but in order to run the `examples/synapse_store.py` example, you need to configure your Synapse credentials in the `.synapseConfig` file (which can be found in the `schematic` directory), as described [here](https://github.com/Sage-Bionetworks/schematic/tree/main#configure-synapse-credentials).
