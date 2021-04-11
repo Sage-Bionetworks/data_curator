@@ -1,0 +1,78 @@
+$error_col: #E53935;
+$success_col: #28a745;
+
+/*** Top navigation bar ***/
+.main-header {
+    max-height: 50px
+}
+
+.main-header .logo {
+    height: 70px;
+    font-size: 21px;
+    padding-top: 10px
+}
+
+.sidebar-toggle {
+    height: 15px;
+    padding-top: 25px !important
+}
+
+.navbar {
+    min-height: 50px !important
+}
+
+.message-menu {
+    padding-top: 5px
+}
+
+/*** Sidebar ***/
+.left-side, .main-sidebar {
+    padding-top: 80px; 
+    font-weight: bold; 
+    font-size: 1.1em 
+}
+
+#text_div, #text_div2, #gsheet_div {
+    font-size: 18px; 
+    background-color: white; 
+    margin: 10px 0; 
+    padding: 10px 0;
+}
+
+.error_msg {
+    color: $error_col;
+}
+
+.success_msg {
+    color: $success_col;
+}
+
+/*** Notification bar ***/
+.shiny-notification {
+    position:fixed;
+    bottom: 0;
+    right: 0;
+    width: 100%;
+}
+#shiny-notification-error {
+    height: 500px; 
+    padding :20px; 
+    display: table-cell
+}
+#shiny-notification-processing {background-color: #F7DC6F}
+#shiny-notification-success {background-color: #82E0AA}
+
+/*** Footer ***/
+footer {
+    position: absolute; 
+    padding: 18px; 
+    left: 0; 
+    bottom: 0; 
+    width: 100%; 
+    background-color: #D0D6DC; 
+    color: #465362; 
+    font-size: 10px;
+    text-align: center;
+    z-index: 1000
+}
+

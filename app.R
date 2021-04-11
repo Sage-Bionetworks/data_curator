@@ -49,7 +49,7 @@ ui <- dashboardPage(
   ),
   dashboardBody(
     tags$head(
-      tags$link(rel = "stylesheet", type = "text/css", href = "styles.css"),
+      tags$style(sass(sass_file("www/styles.scss"))),
       singleton(
         includeScript("www/readCookie.js")
       )),
@@ -101,8 +101,7 @@ ui <- dashboardPage(
                     div(
                       id = 'text_div',
                       height = "100%",
-                      htmlOutput("text"),
-                      style = "font-size:18px; background-color: white; border: 1px solid #ccc; border-radius: 3px; margin: 10px 0; padding: 10px"
+                      htmlOutput("text")
                     )
                   ),
                   helpText("This link will leads to an empty template or your previously submitted template with new files if applicable.")
@@ -139,15 +138,13 @@ ui <- dashboardPage(
                   hidden(
                     div(id = 'text_div2', 
                         height = "100%",
-                        htmlOutput("text2"),
-                        style = "font-size:18px; background-color: white; margin: 10px 0; padding: 10px"
+                        htmlOutput("text2")
                     ),
                     DT::DTOutput("tbl2"),
                     actionButton("gsheet_btn", "  Click to Generate Google Sheet Link", icon = icon("table")),
                     div(id = 'gsheet_div', 
                         height = "100%",
-                        htmlOutput("gsheet_link"),
-                        style = "font-size:18px; background-color: white; border: 1px solid #ccc; border-radius: 3px; margin: 10px 0; padding: 10px"
+                        htmlOutput("gsheet_link")
                     )
                   ),
                   helpText(
@@ -352,8 +349,8 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
     
     if (is.null(input$template_type)) {
       output$text <- renderUI({
-        tags$a( HTML(paste0('<span style="color: #E53935">', 
-                            "Please select a template from the 'Select your Dataset' tab !", '</span>'))) 
+        tags$span(class="error_msg", 
+                  HTML("Please <b>select a template</b> from the 'Select your Dataset' tab !")) 
       })
     } else {
       selected_folder <- input$dataset
@@ -538,20 +535,14 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
     
     ### format output text
     output$text2 <- renderUI({
-      # for now, manually change text color to red via html, it could be cleaner when we collect them to a css/scss file
-      val_text_col <- ifelse(!is.null(validation_res) && validation_res == "valid", "green", "#E53935")
+      text_class <- ifelse(!is.null(validation_res) && validation_res == "valid", "success_msg", "error_msg")
       
       tagList(
-        if (is.null(input$template_type)) HTML(paste0('<span style="color: ', val_text_col, '">', 
-                                                       "Please select a template from the 'Select your Dataset' tab !", '</span>', '<br/>')), 
-        if (is.null(rawData())) HTML(paste0('<span style="color: ', val_text_col, '">', 
-                                             "Please upload a filled template !", '</span>')), 
-        if (!is.null(validation_res)) HTML(paste0('<span style="color: ', val_text_col, '">', 
-                                                  "Your metadata is <b>", validation_res, "</b> !!!", '</span>')),
-        if (!is.null(type_error)) HTML(paste0('<span style="color: ', val_text_col, '">', 
-                                              '<br/><br/>', type_error, '</span>')),
-        if (!is.null(help_msg)) HTML(paste0('<span style="color: ', val_text_col, '">', 
-                                            '<br/><br/>', help_msg, '</span>'))
+        if (is.null(input$template_type)) span(class=text_class, HTML("Please <b>select a template</b> from the 'Select your Dataset' tab !<br><br>")), 
+        if (is.null(rawData())) span(class=text_class, HTML("Please <b>upload</b> a filled template !")), 
+        if (!is.null(validation_res)) span(class=text_class, HTML(paste0("Your metadata is <b>", validation_res, "</b> !!!"))),
+        if (!is.null(type_error)) span(class=text_class, HTML(paste0("<br><br>", type_error))),
+        if (!is.null(help_msg)) span(class=text_class, HTML(paste0("<br><br>", help_msg)))
       )
     })
     
