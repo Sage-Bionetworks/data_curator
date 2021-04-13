@@ -140,7 +140,7 @@ ui <- dashboardPage(
                     div(id = 'text_div2', 
                         height = "100%",
                         htmlOutput("text2"),
-                        style = "font-size:18px; background-color: white; margin: 10px 0; padding: 10px"
+                        style = "font-size:18px; background-color: white; border: 1px solid #ccc; border-radius: 3px; margin: 10px 0; padding: 10px"
                     ),
                     DT::DTOutput("tbl2"),
                     actionButton("gsheet_btn", "  Click to Generate Google Sheet Link", icon = icon("table")),
@@ -493,6 +493,7 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
       } else {
         
         type_error <- paste0("The submitted metadata have ", length(annotation_status), " errors.")
+        help_msg <- NULL
 
         errorDT <- data.frame(Column=sapply(annotation_status, function(i) i[[2]]),
                               Value=sapply(annotation_status, function(i) i[[4]][[1]]),
@@ -538,20 +539,15 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
     
     ### format output text
     output$text2 <- renderUI({
-      # for now, manually change text color to red via html, it could be cleaner when we collect them to a css/scss file
-      val_text_col <- ifelse(!is.null(validation_res) && validation_res == "valid", "green", "#E53935")
+      # test if template is selected and filled manifest is uploaded
+      shiny::validate(need(!is.null(input$template_type), "Please select a template from the 'Select your Dataset' tab !"),
+                      need(!is.null(rawData()), "Please upload a filled template !")
+      )
       
       tagList(
-        if (is.null(input$template_type)) HTML(paste0('<span style="color: ', val_text_col, '">', 
-                                                       "Please select a template from the 'Select your Dataset' tab !", '</span>', '<br/>')), 
-        if (is.null(rawData())) HTML(paste0('<span style="color: ', val_text_col, '">', 
-                                             "Please upload a filled template !", '</span>')), 
-        if (!is.null(validation_res)) HTML(paste0('<span style="color: ', val_text_col, '">', 
-                                                  "Your metadata is <b>", validation_res, "</b> !!!", '</span>')),
-        if (!is.null(type_error)) HTML(paste0('<span style="color: ', val_text_col, '">', 
-                                              '<br/><br/>', type_error, '</span>')),
-        if (!is.null(help_msg)) HTML(paste0('<span style="color: ', val_text_col, '">', 
-                                            '<br/><br/>', help_msg, '</span>'))
+        if (!is.null(validation_res)) HTML("Your metadata is <b>", validation_res, "</b>."),
+        if (!is.null(type_error)) HTML("<br/><br/>", type_error),
+        if (!is.null(help_msg)) HTML("<br/><br/>", help_msg)
       )
     })
     
