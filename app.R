@@ -464,9 +464,7 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
 
       # mismatched template index
       inx_mt <- which(sapply(annotation_status, function(x) grepl("Component value provided is: .*, whereas the Template Type is: .*", x[[3]])))
-      # missing column index
-      inx_ws <- which(sapply(annotation_status, function(x) grepl("Wrong schema", x[[2]])))
-
+      
       if (length(inx_mt) > 0) {  # mismatched error(s): selected template mismatched with validating template
         
         # get all mismatched components
@@ -476,18 +474,12 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
         # error messages for mismatch
         mismatch_c <- error_values %>% sQuote %>% paste(collapse = ", ")
         type_error <- paste0("The submitted metadata contains << <b>", mismatch_c, "</b> >> in the Component column, but requested validation for << <b>",  input$template_type, "</b> >>.")
-        help_msg <- paste0("Please check that you have selected the correct template in the <b>'Select your Dataset'</b> tab and 
+        help_msg <- paste0("Please check that you have selected the correct template in the <b>Select your Dataset</b> tab and 
                             ensure your metadata contains <b>only</b> one template, e.g. ", input$template_type, ".")
         
         # get wrong columns and values for updating preview table
         errorDT <- data.frame(Column=sapply(annotation_status[inx_mt], function(i) i[[2]]),
                               Value=sapply(annotation_status[inx_mt], function(i) i[[4]][[1]]))
-
-      } else if (length(inx_ws) > 0) {  # wrong schema error(s): validating metadata miss any required columns
-        
-        type_error <- paste0("The submitted metadata does not contain all required column(s).")
-        help_msg <- "Please check that you used the correct template in the <b>'Get Metadata Template'</b> tab and
-                     ensure your metadata contains all required columns."
 
       } else {
         
@@ -525,26 +517,13 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
       })
       
       ### update DT view with incorrect values
-      
+      ### currently only one column, requires backend support of multiple
       output$tbl <- DT::renderDT({
-        
-        if (length(inx_ws) > 0) {
-          
-          # if it is wrong schema error, highlight all cells
-          # for now, should we manually add 'T/F to highlight colnames' parameter into DT::datatbale/DT::formatStyle?
-          datatable(rawData() %>% rename_with(~ paste0('<span style="background-color:yellow">', .x, '</span>')),  
-                        escape = F, options = list(lengthChange = FALSE, scrollX = TRUE) ) %>% 
-            formatStyle(1, target = "row", backgroundColor = "yellow")
-
-        } else {
-
-          datatable(rawData(),
-                    options = list(lengthChange = FALSE, scrollX = TRUE) ) %>% 
-            formatStyle(errorDT$Column,
-                        backgroundColor = styleEqual(errorDT$Value, rep("yellow", length(errorDT$Value) ) ) )
-        } 
+        datatable(rawData(),
+                    options = list(lengthChange = FALSE, scrollX = TRUE)
+          ) %>% formatStyle(errorDT$Column,
+                            backgroundColor = styleEqual(errorDT$Value, rep("yellow", length(errorDT$Value) ) )) ## how to have multiple errors
       })
-      
       
       show('gsheet_btn')
       
