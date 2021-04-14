@@ -50,7 +50,7 @@ ui <- dashboardPage(
   ),
   dashboardBody(
     tags$head(
-      tags$style(sass(sass_file("www/styles.scss"))),
+      tags$style(sass(sass_file("www/scss/main.scss"))),
       singleton(
         includeScript("www/readCookie.js")
       )),
