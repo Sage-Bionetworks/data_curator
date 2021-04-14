@@ -12,7 +12,7 @@ library(purrr)
 library(plotly)
 library(shinypop)
 library(waiter)
-library(scss)  # read scss file
+library(sass)  # read scss file
 
 #########global
 use_condaenv('data_curator_env', required = TRUE)
