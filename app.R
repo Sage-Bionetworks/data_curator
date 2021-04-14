@@ -349,6 +349,7 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
     manifest_w$show()
     
     if (is.null(input$template_type)) {
+
       output$text <- renderUI({
         tags$span(class="error_msg", 
                   HTML("Please <b>select a template</b> from the 'Select your Dataset' tab !")) 
@@ -397,10 +398,11 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
         tags$a(href = manifest_url, manifest_url, target = "_blank") ### add link to data dictionary when we have it ###
       })
     }
-      
+
     ## links shows in text box
     show('text_div')
     ### if want a progress bar need more feedback from API to know how to increment progress bar ###
+    
     manifest_w$hide()
     }
   )
@@ -491,6 +493,7 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
       } else {
         
         type_error <- paste0("The submitted metadata have ", length(annotation_status), " errors.")
+        help_msg <- NULL
 
         errorDT <- data.frame(Column=sapply(annotation_status, function(i) i[[2]]),
                               Value=sapply(annotation_status, function(i) i[[4]][[1]]),
@@ -499,6 +502,7 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
         errorDT <- errorDT[order(match(errorDT$Column, colnames(rawData()))),]
 
         # output error messages as data table
+        show("tbl2")
         output$tbl2 <- DT::renderDT({
           datatable(errorDT, caption = "The errors are also highlighted in the preview table above.", 
                     rownames = FALSE, options = list(pageLength = 50, scrollX = TRUE, 
@@ -544,6 +548,7 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
         if (!is.null(validation_res)) span(class=text_class, HTML(paste0("Your metadata is <b>", validation_res, "</b> !!!"))),
         if (!is.null(type_error)) span(class=text_class, HTML(paste0("<br><br>", type_error))),
         if (!is.null(help_msg)) span(class=text_class, HTML(paste0("<br><br>", help_msg)))
+
       )
     })
     
