@@ -470,10 +470,10 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
 
       if (length(inx_mt) > 0) {  # mismatched error(s): selected template mismatched with validating template
         
+        waiter_msg <- "Mismatched Template Found !"
         # get all mismatched components
         error_values <- sapply(annotation_status[inx_mt], function(x) x[[4]][[1]]) %>% unique()
-        column_names <- "Component"
-        
+
         # error messages for mismatch
         mismatch_c <- error_values %>% sQuote %>% paste(collapse = ", ")
         type_error <- paste0("The submitted metadata contains << <b>", mismatch_c, "</b> >> in the Component column, but requested validation for << <b>",  input$template_type, "</b> >>.")
@@ -486,12 +486,14 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
 
       } else if (length(inx_ws) > 0) {  # wrong schema error(s): validating metadata miss any required columns
         
+        waiter_msg <- "Wrong Schema Used !"
         type_error <- paste0("The submitted metadata does not contain all required column(s).")
         help_msg <- "Please check that you used the correct template in the <b>'Get Metadata Template'</b> tab and
                      ensure your metadata contains all required columns."
 
       } else {
         
+        waiter_msg <- sprintf("%d errors found", length(annotation_status))
         type_error <- paste0("The submitted metadata have ", length(annotation_status), " errors.")
         help_msg <- NULL
 
@@ -512,7 +514,7 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
       }                                     
  
       validate_w$update(
-        html = h3(sprintf("%d errors found", length(annotation_status)))
+        html = h3(waiter_msg)
       )
 
       ### format output text
@@ -531,9 +533,7 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
         if (length(inx_ws) > 0) {
           
           # if it is wrong schema error, highlight all cells
-          # for now, should we manually add 'T/F to highlight colnames' parameter into DT::datatbale/DT::formatStyle?
-          datatable(rawData() %>% rename_with(~ paste0('<span style="background-color:yellow">', .x, '</span>')),  
-                        escape = F, options = list(lengthChange = FALSE, scrollX = TRUE) ) %>% 
+          datatable(rawData(), options = list(lengthChange = FALSE, scrollX = TRUE) ) %>% 
             formatStyle(1, target = "row", backgroundColor = "yellow")
 
         } else {
@@ -559,7 +559,7 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
       })
 
     }
-    Sys.sleep(2)
+    Sys.sleep(3)
     validate_w$hide()
   }
   )
