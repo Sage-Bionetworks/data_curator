@@ -128,7 +128,7 @@ ui <- dashboardPage(
                   status = "primary",
                   width = 12,
                   DT::DTOutput("tbl"),
-                  helpText("Upload manifest to preview the metadata")
+                  helpText("Upload filled template to preview the metadata")
                 ),
                 box(
                   title = "Validate Filled Metadata",
