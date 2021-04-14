@@ -349,58 +349,62 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
     input$download, {
 
     manifest_w$show()
+    
+    if (is.null(input$template_type)) {
 
-    selected_folder <- input$dataset
-    selected_project <- input$var
-
-    ###lookup schema template name 
-    template_type_df <- schema_to_display_lookup[match(input$template_type, schema_to_display_lookup$display_name), 1, drop = F ]
-    template_type <- as.character(template_type_df$schema_name)
-
-    project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
-
-    folder_list <- syn_store$getStorageDatasetsInProject(synStore_obj, project_synID)
-    folders_namedList <- c()
-    for (i in seq_along(folder_list)) {
-      folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
-    }
-    folder_synID <- folders_namedList[[selected_folder]]
-
-    ### checks if a manifest already exists
-    existing_manifestID <- syn_store$updateDatasetManifestFiles(synStore_obj, folder_synID)
-
-    ### if there isn't an existing manifest make a new one 
-    if (existing_manifestID == '') {
-      file_list <- syn_store$getFilesInStorageDataset(synStore_obj, folder_synID)
-      file_namedList <- c()
-      for (i in seq_along(file_list)) {
-        file_namedList[file_list[[i]][[2]]] <- file_list[[i]][[1]]
+      output$text <- renderUI({
+        tags$a( HTML(paste0('<span style="color: #E53935">', 
+                            "Please select a template from the 'Select your Dataset' tab !", '</span>'))) 
+      })
+    } else {
+      selected_folder <- input$dataset
+      selected_project <- input$var
+  
+      ###lookup schema template name 
+      template_type_df <- schema_to_display_lookup[match(input$template_type, schema_to_display_lookup$display_name), 1, drop = F ]
+      template_type <- as.character(template_type_df$schema_name)
+  
+      project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
+  
+      folder_list <- syn_store$getStorageDatasetsInProject(synStore_obj, project_synID)
+      folders_namedList <- c()
+      for (i in seq_along(folder_list)) {
+        folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
       }
-      filename_list <- names(file_namedList)
+      folder_synID <- folders_namedList[[selected_folder]]
+  
+      ### checks if a manifest already exists
+      existing_manifestID <- syn_store$updateDatasetManifestFiles(synStore_obj, folder_synID)
+  
+      ### if there isn't an existing manifest make a new one 
+      if (existing_manifestID == '') {
+        file_list <- syn_store$getFilesInStorageDataset(synStore_obj, folder_synID)
+        file_namedList <- c()
+        for (i in seq_along(file_list)) {
+          file_namedList[file_list[[i]][[2]]] <- file_list[[i]][[1]]
+        }
+        filename_list <- names(file_namedList)
+  
+        manifest_url <- metadata_model$getModelManifest(paste0(config$community," ", input$template_type), template_type, filenames = as.list(filename_list))
+        ### make sure not scalar if length of list is 1 in R
+        ## add in the step to convert names later ###
 
-
-      manifest_url <- metadata_model$getModelManifest(paste0(config$community," ", input$template_type), template_type, filenames = as.list(filename_list))
-      ### make sure not scalar if length of list is 1 in R
-      ## add in the step to convert names later ###
-
-
-      ## links shows in text box
-      show('text_div')
-      ### if want a progress bar need more feedback from API to know how to increment progress bar ###
-
+      } else {
+        ### if the manifest already exists
+        manifest_entity <- syn_get(existing_manifestID)
+        # prepopulatedManifestURL = mm.populateModelManifest("test_update", entity.path, component)
+        manifest_url <- metadata_model$populateModelManifest(paste0(config$community," ", input$template_type), manifest_entity$path, template_type)
+      }
+    
       output$text <- renderUI({
         tags$a(href = manifest_url, manifest_url, target = "_blank") ### add link to data dictionary when we have it ###
       })
-    } else {
-      ### if the manifest already exists
-      manifest_entity <- syn_get(existing_manifestID)
-      # prepopulatedManifestURL = mm.populateModelManifest("test_update", entity.path, component)
-      manifest_url <- metadata_model$populateModelManifest(paste0(config$community," ", input$template_type), manifest_entity$path, template_type)
-
-      output$text <- renderUI({
-        tags$a(href = manifest_url, manifest_url, target = "_blank")
-      })
     }
+
+    ## links shows in text box
+    show('text_div')
+    ### if want a progress bar need more feedback from API to know how to increment progress bar ###
+    
     manifest_w$hide()
     }
   )
@@ -415,7 +419,9 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
   })
 
   ### reads csv file and previews
-  rawData <- eventReactive(input$file1, {
+  rawData <- eventReactive(ignoreNULL = FALSE, input$file1, {
+    # if no file uploaded, return null
+    if(is.null(input$file1)) return(NULL)
     infile <- readr::read_csv(input$file1$datapath, na = c("", "NA"))
     ### remove empty rows/columns where readr called it "X"[digit] for unnamed col
     infile <- infile[, !grepl('^X', colnames(infile))]
@@ -449,25 +455,27 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
   ### toggles validation status when validate button pressed
   observeEvent(
     input$validate, {
-
+    
+    validation_res <- NULL
+    type_error <- NULL
+    help_msg <- NULL
+    
     validate_w$show()
-
+    
+    if (!is.null(rawData()) & !is.null(input$template_type)) {
+    
     ###lookup schema template name 
     template_type_df <- schema_to_display_lookup[match(input$template_type, schema_to_display_lookup$display_name), 1, drop = F ]
     template_type <- as.character(template_type_df$schema_name)
 
     annotation_status <- metadata_model$validateModelManifest(input$file1$datapath, template_type)
     
-    show('text_div2')
-
-
     if (length(annotation_status) != 0) {
-
+      
+      validation_res <- "invalid"
       # mismatched template index
       inx_mt <- which(sapply(annotation_status, function(x) grepl("Component value provided is: .*, whereas the Template Type is: .*", x[[3]])))
-      # missing column index
-      inx_ws <- which(sapply(annotation_status, function(x) grepl("Wrong schema", x[[2]])))
-
+      
       if (length(inx_mt) > 0) {  # mismatched error(s): selected template mismatched with validating template
         
         waiter_msg <- "Mismatched Template Found !"
@@ -477,7 +485,7 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
         # error messages for mismatch
         mismatch_c <- error_values %>% sQuote %>% paste(collapse = ", ")
         type_error <- paste0("The submitted metadata contains << <b>", mismatch_c, "</b> >> in the Component column, but requested validation for << <b>",  input$template_type, "</b> >>.")
-        help_msg <- paste0("Please check that you have selected the correct template in the <b>'Select your Dataset'</b> tab and 
+        help_msg <- paste0("Please check that you have selected the correct template in the <b>Select your Dataset</b> tab and 
                             ensure your metadata contains <b>only</b> one template, e.g. ", input$template_type, ".")
         
         # get wrong columns and values for updating preview table
@@ -487,7 +495,7 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
       } else if (length(inx_ws) > 0) {  # wrong schema error(s): validating metadata miss any required columns
         
         waiter_msg <- "Wrong Schema Used !"
-        type_error <- paste0("The submitted metadata does not contain all required column(s).")
+        type_error <- "The submitted metadata does not contain all required column(s)."
         help_msg <- "Please check that you used the correct template in the <b>'Get Metadata Template'</b> tab and
                      ensure your metadata contains all required columns."
 
@@ -504,6 +512,7 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
         errorDT <- errorDT[order(match(errorDT$Column, colnames(rawData()))),]
 
         # output error messages as data table
+        show("tbl2")
         output$tbl2 <- DT::renderDT({
           datatable(errorDT, caption = "The errors are also highlighted in the preview table above.", 
                     rownames = FALSE, options = list(pageLength = 50, scrollX = TRUE, 
@@ -516,18 +525,9 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
       validate_w$update(
         html = h3(waiter_msg)
       )
-
-      ### format output text
-      output$text2 <- renderUI({
-        tagList( 
-          HTML("Your metadata is invalid according to the data model.<br/><br/>"),
-          HTML(type_error, "<br/><br/>"),
-          HTML(help_msg)
-        )
-      })
       
       ### update DT view with incorrect values
-      
+      ### currently only one column, requires backend support of multiple
       output$tbl <- DT::renderDT({
         
         if (length(inx_ws) > 0) {
@@ -545,20 +545,35 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
         } 
       })
       
-      
       show('gsheet_btn')
       
     } else {
-      output$text2 <- renderUI({
-        HTML("Your metadata is valid!")
-      })
-
+      
+      validation_res <- "valid"
       ### show submit button
       output$submit <- renderUI({
         actionButton("submitButton", "Submit to Synapse")
       })
 
     }
+    }
+    
+    ### format output text
+    output$text2 <- renderUI({
+      # test if template is selected and filled manifest is uploaded
+      shiny::validate(need(!is.null(input$template_type), "Please select a template from the 'Select your Dataset' tab !"),
+                      need(!is.null(rawData()), "Please upload a filled template !")
+      )
+      
+      tagList(
+        if (!is.null(validation_res)) HTML("Your metadata is <b>", validation_res, "</b>."),
+        if (!is.null(type_error)) HTML("<br/><br/>", type_error),
+        if (!is.null(help_msg)) HTML("<br/><br/>", help_msg)
+      )
+    })
+    
+    show('text_div2')
+    
     Sys.sleep(3)
     validate_w$hide()
   }
