@@ -265,7 +265,7 @@ server <- function(input, output, session) {
     tryCatch(
       {
         ### logs in
-        syn_login(sessionToken = input$cookie, rememberMe = FALSE)
+        syn_login(sessionToken = token, rememberMe = FALSE)
 
         ### welcome message
         output$title <- renderUI({
@@ -276,7 +276,7 @@ server <- function(input, output, session) {
 
         ### updating global vars with values for projects
         # synStore_obj <<- syn_store(config$main_fileview, token = input$cookie)
-        synStore_obj <<- syn_store(token = input$cookie)
+        synStore_obj <<- syn_store(token = token)
 
         # get_projects_list(synStore_obj)
         projects_list <<- syn_store$getStorageProjects(synStore_obj)
@@ -589,7 +589,9 @@ server <- function(input, output, session) {
         validation_res <- "invalid"
         # mismatched template index
         inx_mt <- which(sapply(annotation_status, function(x) grepl("Component value provided is: .*, whereas the Template Type is: .*", x[[3]])))
-
+        # missing column index
+        inx_ws <- which(sapply(annotation_status, function(x) grepl("Wrong schema", x[[2]])))
+        
         if (length(inx_mt) > 0) {  # mismatched error(s): selected template mismatched with validating template
 
           waiter_msg <- "Mismatched Template Found !"
