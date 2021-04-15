@@ -265,7 +265,7 @@ server <- function(input, output, session) {
     tryCatch(
       {
         ### logs in
-        syn_login(sessionToken = token, rememberMe = FALSE)
+        syn_login(sessionToken = input$cookie, rememberMe = FALSE)
 
         ### welcome message
         output$title <- renderUI({
@@ -276,7 +276,7 @@ server <- function(input, output, session) {
 
         ### updating global vars with values for projects
         # synStore_obj <<- syn_store(config$main_fileview, token = input$cookie)
-        synStore_obj <<- syn_store(token = token)
+        synStore_obj <<- syn_store(token = input$cookie)
 
         # get_projects_list(synStore_obj)
         projects_list <<- syn_store$getStorageProjects(synStore_obj)
