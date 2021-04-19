@@ -23,22 +23,14 @@ source_python("metadataModelFuns.py")
 #########
 
 ui <- dashboardPage(
-  skin = "purple",
+  skin = "blue",
   dashboardHeader(
     titleWidth = 250,
-    title = "Data Curator",
-    tags$li(
-      class = "dropdown",
-      tags$a(
-        href = "https://humantumoratlas.org/",
-        target = "_blank",
-        ## insert links and logos of your choice, this is just an example
-        tags$img(
-          height = "40px", alt = "HTAN LOGO",
-          src = "HTAN_text_logo.png"
-        )
-      )
-    )
+    title = "NF Data Curator",
+    tags$li(class = "dropdown",
+            tags$a(href = "https://nf-osi.github.io/", target = "_blank", ##insert links and logos of your choice, this is just an example
+                   tags$img(height = "50px", alt = "NF LOGO",
+                            src = "nfosi_logo_crop.png")))
   ),
   dashboardSidebar(
     width = 250,
@@ -64,10 +56,11 @@ ui <- dashboardPage(
         tabName = "upload",
         icon = icon("upload")
       ),
-      HTML(
-        "<footer>
-            Supported by the Human Tumor Atlas Network <br/>
-            (U24-CA233243-01)<br/>
+      HTML('<footer>
+            Managed by the</br>
+            Neurofibromatosis Open Science Initiative</br>
+            Created by the Human Tumor Atlas Network</br>
+            (U24-CA233243-01)</br>
             Powered by Sage Bionetworks
         </footer>"
       )
@@ -222,7 +215,7 @@ ui <- dashboardPage(
       )
     ),
     uiOutput("Next_Previous"),
-
+    
     ## waiter loading screen
     use_waiter(),
     waiter_show_on_load(
@@ -235,11 +228,11 @@ ui <- dashboardPage(
   )
 )
 
-
 server <- function(input, output, session) {
+
   ########### session global variables
   reticulate::source_python("synStore_Session.py")
-
+  
   ### read config in
   config <- jsonlite::fromJSON("www/config.json")
 
@@ -247,19 +240,19 @@ server <- function(input, output, session) {
   synStore_obj <- NULL
   # get_projects_list(synStore_obj)
   projects_list <- c()
-
+  
   projects_namedList <- c()
-
+  
   proj_folder_manifest_cells <- c()
-
+  
   folder_synID <- NULL
-
+  
   filename_list <- c()
   ############
-
+  
   ### synapse cookies
   session$sendCustomMessage(type = "readCookie", message = list())
-
+  
   ### initial login front page items
   observeEvent(input$cookie, {
     ## login and update session; otherwise, notify to login to Synapse first
@@ -365,7 +358,7 @@ server <- function(input, output, session) {
   })
 
   ####### BUTTONS END
-
+  
   ### lists folder datasets if exists in project
   observeEvent(
     ignoreNULL = TRUE,
@@ -381,13 +374,12 @@ server <- function(input, output, session) {
             projects_namedList[[selected_project]] ### get synID of selected project
 
           ### gets folders per project
-          folder_list <-
-            syn_store$getStorageDatasetsInProject(synStore_obj, project_synID)
-          folders_namedList <- c()
-          for (i in seq_along(folder_list)) {
-            folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
-          }
-          folderNames <- names(folders_namedList)
+                     ### gets folders per project
+                     #folder_list <- syn_store$getStorageDatasetsInProject(synStore_obj, project_synID)
+                     folder_df <- syn_tableQuery(sprintf("select name, id from %s where type = 'folder' and projectId = '%s'", config$main_fileview, project_synID))$asDataFrame()
+                     
+                     folders_namedList <- setNames(as.list(folder_df$id), folder_df$name)
+                     folderNames <- names(folders_namedList)
 
           ### updates foldernames
           selectInput(
@@ -433,7 +425,7 @@ server <- function(input, output, session) {
   )
 
   schema_to_display_lookup <- data.frame(schema_name, display_name)
-
+    
   # loading screen for template link generation
   manifest_w <- Waiter$new(
     html = tagList(
@@ -442,7 +434,7 @@ server <- function(input, output, session) {
     ),
     color = "rgba(66, 72, 116, .9)"
   )
-
+    
   ### shows new metadata link when get gsheets template button pressed OR updates old metadata if is exists
   observeEvent(input$download, {
     manifest_w$show()
@@ -469,16 +461,17 @@ server <- function(input, output, session) {
         ), 1, drop = F]
       template_type <- as.character(template_type_df$schema_name)
 
-      project_synID <-
-        projects_namedList[[selected_project]] ### get synID of selected project
-
-      folder_list <-
-        syn_store$getStorageDatasetsInProject(synStore_obj, project_synID)
-      folders_namedList <- c()
-      for (i in seq_along(folder_list)) {
-        folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
-      }
+       project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
+      
+      folder_df <- syn_tableQuery(sprintf("select name, id from %s where type = 'folder' and projectId = '%s'", config$main_fileview, project_synID))$asDataFrame()
+      
+      folders_namedList <- setNames(as.list(folder_df$id), folder_df$name)
+      
       folder_synID <- folders_namedList[[selected_folder]]
+      
+      shiny::validate(
+        shiny::need(length(folder_synID)==1, 'Duplicate folder names detected. Please make sure folders have distinct names.')
+      )
 
       ### checks if a manifest already exists
       existing_manifestID <-
@@ -538,7 +531,7 @@ server <- function(input, output, session) {
       )
     )
   })
-
+  
   ### reads csv file and previews
   rawData <- eventReactive(ignoreNULL = FALSE, input$file1, {
     # if no file uploaded, return null
@@ -579,7 +572,7 @@ server <- function(input, output, session) {
     ),
     color = "rgba(66, 72, 116, .9)"
   )
-
+  
   ### toggles validation status when validate button pressed
   observeEvent(input$validate, {
     validation_res <- NULL
@@ -808,7 +801,7 @@ server <- function(input, output, session) {
     ),
     color = "#424874"
   )
-
+    
   ### submit button
   observeEvent(input$submitButton, {
     submit_w$show()
@@ -843,16 +836,15 @@ server <- function(input, output, session) {
         selected_folder <- input$dataset
         selected_project <- input$var
 
-        project_synID <-
-          projects_namedList[[selected_project]] ### get synID of selected project
-        folder_list <-
-          syn_store$getStorageDatasetsInProject(synStore_obj, project_synID)
-        folders_namedList <- c()
-        for (i in seq_along(folder_list)) {
-          folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
-        }
-
-        folder_synID <- folders_namedList[[selected_folder]]
+                  
+          project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
+          folder_df <- syn_tableQuery(sprintf("select name, id from %s where type = 'folder' and projectId = '%s'", config$main_fileview, project_synID))$asDataFrame()
+          
+          folders_namedList <- setNames(as.list(folder_df$id), folder_df$name)
+          folderNames <- names(folders_namedList)
+          
+          folder_synID <- folders_namedList[[selected_folder]]
+          
 
         file_list <-
           syn_store$getFilesInStorageDataset(synStore_obj, folder_synID)
@@ -951,18 +943,14 @@ server <- function(input, output, session) {
 
       selected_project <- input$var
       selected_folder <- input$dataset
-
-      project_synID <-
-        projects_namedList[[selected_project]] ### get synID of selected project
-      # folder_synID <- get_folder_synID(synStore_obj, project_synID, selected_folder)
-
-      folder_list <-
-        syn_store$getStorageDatasetsInProject(synStore_obj, project_synID)
-      folders_namedList <- c()
-      for (i in seq_along(folder_list)) {
-        folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
-      }
-      folder_synID <- folders_namedList[[selected_folder]]
+      
+          project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
+          folder_df <- syn_tableQuery(sprintf("select name, id from %s where type = 'folder' and projectId = '%s'", config$main_fileview, project_synID))$asDataFrame()
+          
+          folders_namedList <- setNames(as.list(folder_df$id), folder_df$name)
+          folderNames <- names(folders_namedList)
+          
+          folder_synID <- folders_namedList[[selected_folder]]
 
       ### associates metadata with data and returns manifest id
       manifest_id <-
