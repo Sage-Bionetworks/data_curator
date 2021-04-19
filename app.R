@@ -56,7 +56,7 @@ ui <- dashboardPage(
         tabName = "upload",
         icon = icon("upload")
       ),
-      HTML('<footer>
+      HTML("<footer>
             Managed by the</br>
             Neurofibromatosis Open Science Initiative</br>
             Created by the Human Tumor Atlas Network</br>
