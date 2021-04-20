@@ -12,6 +12,7 @@ library(purrr)
 library(plotly)
 library(shinypop)
 library(waiter)
+library(sass)  # read scss file
 
 #########global
 use_condaenv('data_curator_env', required = TRUE)
@@ -75,9 +76,11 @@ ui <- dashboardPage(
   ),
   dashboardBody(
     tags$head(
-      tags$link(rel = "stylesheet", type = "text/css", href = "styles.css"),
-      singleton(includeScript("www/readCookie.js"))
-    ),
+      tags$style(sass(sass_file("www/scss/main.scss"))),
+      singleton(
+        includeScript("www/readCookie.js")
+      )),
+
     uiOutput("title"),
     use_notiflix_report(),
     tabItems(
@@ -131,8 +134,7 @@ ui <- dashboardPage(
         )
       ),
       # Third tab item
-      tabItem(
-        tabName = "template",
+      tabItem(tabName = "template",
         useShinyjs(),
         h2("Download Template for Selected Folder"),
         fluidRow(
@@ -144,16 +146,14 @@ ui <- dashboardPage(
             actionButton("download", "Click to Generate Google Sheets Template"),
             hidden(
               div(
-                id = "text_div",
+                id = 'text_div',
                 height = "100%",
-                htmlOutput("text"),
-                style = "font-size:18px; background-color: white; border: 1px solid #ccc; border-radius: 3px; margin: 10px 0; padding: 10px"
+                htmlOutput("text")
               )
             ),
-            helpText(
-              "This link will leads to an empty template or your previously submitted template with new files if applicable."
-            )
-          )
+            helpText("This link will leads to an empty template or your previously submitted template with new files if applicable.")
+          ) 
+
         )
       ),
       # Fourth tab content
@@ -172,9 +172,8 @@ ui <- dashboardPage(
             solidHeader = TRUE,
             status = "primary",
             width = 12,
-            DT::DTOutput("tbl"),
-            helpText("Upload filled template to preview the metadata")
-          ),
+            DT::DTOutput("tbl")
+            ),
           box(
             title = "Validate Filled Metadata",
             status = "primary",
@@ -184,15 +183,13 @@ ui <- dashboardPage(
             hidden(
               div(id = 'text_div2', 
                   height = "100%",
-                  htmlOutput("text2"),
-                  style = "font-size:18px; background-color: white; border: 1px solid #ccc; border-radius: 3px; margin: 10px 0; padding: 10px"
+                  htmlOutput("text2")
               ),
               DT::DTOutput("tbl2"),
               actionButton("gsheet_btn", "  Click to Generate Google Sheet Link", icon = icon("table")),
               div(id = 'gsheet_div', 
                   height = "100%",
-                  htmlOutput("gsheet_link"),
-                  style = "font-size:18px; background-color: white; border: 1px solid #ccc; border-radius: 3px; margin: 10px 0; padding: 10px"
+                  htmlOutput("gsheet_link")
               )
             ),
             helpText(
@@ -201,10 +198,10 @@ ui <- dashboardPage(
             )
           ),
           box(title = "Submit Validated Metadata to Synapse",
-                  status = "primary",
-                  solidHeader = TRUE,
-                  width = 12,
-                  uiOutput("submit")
+              status = "primary",
+              solidHeader = TRUE,
+              width = 12,
+              uiOutput("submit")
           )
         )
       )
@@ -427,14 +424,10 @@ server <- function(input, output, session) {
 
     if (is.null(input$template_type)) {
       output$text <- renderUI({
-        tags$a(HTML(
-          paste0(
-            '<span style="color: #E53935">',
-            "Please select a template from the 'Select your Dataset' tab !",
-            "</span>"
-          )
-        ))
+        tags$span(class="error_msg", 
+                  HTML("Please <b>select a template</b> from the 'Select your Dataset' tab !")) 
       })
+      
     } else {
       selected_folder <- input$dataset
       selected_project <- input$var
@@ -660,16 +653,14 @@ server <- function(input, output, session) {
 
     ### format output text
     output$text2 <- renderUI({
-      # test if template is selected and filled manifest is uploaded
-      shiny::validate(
-        need(!is.null(input$template_type), "Please select a template from the 'Select your Dataset' tab !"),
-        need(!is.null(rawData()), "Please upload a filled template !")
-      )
-
+      text_class <- ifelse(!is.null(validation_res) && validation_res == "valid", "success_msg", "error_msg")
+      
       tagList(
-        if (!is.null(validation_res)) HTML("Your metadata is <b>", validation_res, "</b>."),
-        if (!is.null(type_error)) HTML("<br/><br/>", type_error),
-        if (!is.null(help_msg)) HTML("<br/><br/>", help_msg)
+        if (is.null(input$template_type)) span(class=text_class, HTML("Please <b>select a template</b> from the 'Select your Dataset' tab !<br><br>")), 
+        if (is.null(rawData())) span(class=text_class, HTML("Please <b>upload</b> a filled template !")), 
+        if (!is.null(validation_res)) span(class=text_class, HTML(paste0("Your metadata is <b>", validation_res, "</b> !!!"))),
+        if (!is.null(type_error)) span(class=text_class, HTML(paste0("<br><br>", type_error))),
+        if (!is.null(help_msg)) span(class=text_class, HTML(paste0("<br><br>", help_msg)))
       )
     })
     
