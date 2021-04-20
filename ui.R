@@ -1,4 +1,3 @@
-
 # This is the user-interface definition of a Shiny web application.
 # You can find out more about building applications with Shiny here:
 #
@@ -77,8 +76,10 @@ ui <- dashboardPage(
   ),
   dashboardBody(
     tags$head(
-      tags$link(rel = "stylesheet", type = "text/css", href = "styles.css"),
-      singleton(includeScript("www/readCookie.js"))
+      tags$style(sass(sass_file("www/scss/main.scss"))),
+      singleton(
+        includeScript("www/readCookie.js")
+      )
     ),
     uiOutput("title"),
     use_notiflix_report(),
@@ -148,13 +149,10 @@ ui <- dashboardPage(
               div(
                 id = "text_div",
                 height = "100%",
-                htmlOutput("text"),
-                style = "font-size:18px; background-color: white; border: 1px solid #ccc; border-radius: 3px; margin: 10px 0; padding: 10px"
+                htmlOutput("text")
               )
             ),
-            helpText(
-              "This link will leads to an empty template or your previously submitted template with new files if applicable."
-            )
+            helpText("This link will leads to an empty template or your previously submitted template with new files if applicable.")
           )
         )
       ),
@@ -175,10 +173,7 @@ ui <- dashboardPage(
             solidHeader = TRUE,
             status = "primary",
             width = 12,
-            DT::DTOutput("tbl"),
-            helpText(
-              "Google spreadsheet row numbers are incremented from this table by 1"
-            )
+            DT::DTOutput("tbl")
           ),
           box(
             title = "Validate Filled Metadata",
@@ -190,27 +185,19 @@ ui <- dashboardPage(
               div(
                 id = "text_div2",
                 height = "100%",
-                htmlOutput("text2"),
-                style = "font-size:18px; background-color: white; border: 1px solid #ccc; border-radius: 3px; margin: 10px 0; padding: 10px"
+                htmlOutput("text2")
               ),
               DT::DTOutput("tbl2"),
-              actionButton(
-                "gsheet_btn",
-                "  Click to Generate Google Sheet Link",
-                icon = icon("table")
-              ),
+              actionButton("gsheet_btn", "  Click to Generate Google Sheet Link", icon = icon("table")),
               div(
                 id = "gsheet_div",
                 height = "100%",
-                htmlOutput("gsheet_link"),
-                style = "font-size:18px; background-color: white; border: 1px solid #ccc; border-radius: 3px; margin: 10px 0; padding: 10px"
+                htmlOutput("gsheet_link")
               )
             ),
             helpText(
-              HTML(
-                "If you have an error, please try editing locally or on google sheet.<br/>
-                         Reupload your CSV and press the validate button as needed."
-              )
+              HTML("If you have an error, please try editing locally or on google sheet.<br/>
+                   Reupload your CSV and press the validate button as needed.")
             )
           ),
           box(
@@ -239,9 +226,11 @@ ui <- dashboardPage(
 
 uiFunc <- function(req) {
   if (!has_auth_code(parseQueryString(req$QUERY_STRING))) {
-    authorization_url = oauth2.0_authorize_url(api, app, scope = scope)
-    return(tags$script(HTML(sprintf("location.replace(\"%s\");",
-                                    authorization_url))))
+    authorization_url <- oauth2.0_authorize_url(api, app, scope = scope)
+    return(tags$script(HTML(sprintf(
+      "location.replace(\"%s\");",
+      authorization_url
+    ))))
   } else {
     ui
   }

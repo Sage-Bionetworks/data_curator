@@ -91,11 +91,11 @@ shinyServer(function(input, output, session) {
         })
 
         ### updating global vars with values for projects
-        # synStore_obj <<- synapse_driver$SynapseStorage(config$main_fileview, token = input$cookie)
-        synStore_obj <<- synapse_driver$SynapseStorage(token = input$cookie)
+        # synStore_obj <<- syn_store(config$main_fileview, token = input$cookie)
+        synStore_obj <<- syn_store(token = input$cookie)
 
         # get_projects_list(synStore_obj)
-        projects_list <<- synapse_driver$SynapseStorage$getStorageProjects(synStore_obj)
+        projects_list <<- syn_store$getStorageProjects(synStore_obj)
 
         for (i in seq_along(projects_list)) {
           projects_namedList[projects_list[[i]][[2]]] <<-
@@ -134,15 +134,11 @@ shinyServer(function(input, output, session) {
   ###### BUTTONS STUFF  !!! remove last arrow
   Previous_Button <- tags$div(actionButton(
     "Prev_Tab",
-    HTML(
-      '<div class="col-sm-4"><i class="fa fa-angle-double-left fa-2x"></i></div>'
-    )
+    HTML('<div class="col-sm-4"><i class="fa fa-angle-double-left fa-2x"></i></div>')
   ))
   Next_Button <- div(actionButton(
     "Next_Tab",
-    HTML(
-      '<div class="col-sm-4"><i class="fa fa-angle-double-right fa-2x"></i></div>'
-    )
+    HTML('<div class="col-sm-4"><i class="fa fa-angle-double-right fa-2x"></i></div>')
   ))
 
   list_tabs <- c("instructions", "data", "template", "upload")
@@ -164,15 +160,13 @@ shinyServer(function(input, output, session) {
   observeEvent(input$Prev_Tab, {
     tab_list <- list_tabs
     current_tab <- which(tab_list == input[["tabs"]])
-    updateTabItems(session, "tabs", selected = tab_list[current_tab -
-      1])
+    updateTabItems(session, "tabs", selected = tab_list[current_tab - 1])
   })
 
   observeEvent(input$Next_Tab, {
     tab_list <- list_tabs
     current_tab <- which(tab_list == input[["tabs"]])
-    updateTabItems(session, "tabs", selected = tab_list[current_tab +
-      1])
+    updateTabItems(session, "tabs", selected = tab_list[current_tab + 1])
   })
 
   ####### BUTTONS END
@@ -193,7 +187,7 @@ shinyServer(function(input, output, session) {
 
           ### gets folders per project
           folder_list <-
-            synapse_driver$SynapseStorage$getStorageDatasetsInProject(synStore_obj, project_synID)
+            syn_store$getStorageDatasetsInProject(synStore_obj, project_synID)
           folders_namedList <- c()
           for (i in seq_along(folder_list)) {
             folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
@@ -260,13 +254,10 @@ shinyServer(function(input, output, session) {
 
     if (is.null(input$template_type)) {
       output$text <- renderUI({
-        tags$a(HTML(
-          paste0(
-            '<span style="color: #E53935">',
-            "Please select a template from the 'Select your Dataset' tab !",
-            "</span>"
-          )
-        ))
+        tags$span(
+          class = "error_msg",
+          HTML("Please <b>select a template</b> from the 'Select your Dataset' tab !")
+        )
       })
     } else {
       selected_folder <- input$dataset
@@ -284,7 +275,7 @@ shinyServer(function(input, output, session) {
         projects_namedList[[selected_project]] ### get synID of selected project
 
       folder_list <-
-        synapse_driver$SynapseStorage$getStorageDatasetsInProject(synStore_obj, project_synID)
+        syn_store$getStorageDatasetsInProject(synStore_obj, project_synID)
       folders_namedList <- c()
       for (i in seq_along(folder_list)) {
         folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
@@ -293,12 +284,12 @@ shinyServer(function(input, output, session) {
 
       ### checks if a manifest already exists
       existing_manifestID <-
-        synapse_driver$SynapseStorage$getDatasetManifest(synStore_obj, folder_synID)
+        syn_store$getDatasetManifest(synStore_obj, folder_synID)
 
       ### if there isn't an existing manifest make a new one
       if (existing_manifestID == "") {
         file_list <-
-          synapse_driver$SynapseStorage$getFilesInStorageDataset(synStore_obj, folder_synID)
+          syn_store$getFilesInStorageDataset(synStore_obj, folder_synID)
         file_namedList <- c()
         for (i in seq_along(file_list)) {
           file_namedList[file_list[[i]][[2]]] <- file_list[[i]][[1]]
@@ -352,12 +343,14 @@ shinyServer(function(input, output, session) {
 
   ### reads csv file and previews
   rawData <- eventReactive(ignoreNULL = FALSE, input$file1, {
-    # if no file uploaded, return null
     if (is.null(input$file1)) {
       return(NULL)
-    }
-    infile <-
-      readr::read_csv(input$file1$datapath, na = c("", "NA"))
+    } # if no file uploaded, return null
+    infile <- readr::read_csv(input$file1$datapath,
+      na = c("", "NA"),
+      col_types = readr::cols(.default = "c")
+    ) %>%
+      replace(., is.na(.), "") # change NA to blank to match schema output)
     ### remove empty rows/columns where readr called it "X"[digit] for unnamed col
     infile <- infile[, !grepl("^X", colnames(infile))]
     infile <- infile[rowSums(is.na(infile)) != ncol(infile), ]
@@ -378,7 +371,7 @@ shinyServer(function(input, output, session) {
   ### renders in DT for preview
   observeEvent(rawData(), {
     output$tbl <- DT::renderDT({
-      datatable(rawData(), options = list(lengthChange = FALSE, scrollX = TRUE))
+      datatable(rawData(), options = list(lengthChange = FALSE, scrollX = TRUE), rownames = FALSE)
     })
   })
 
@@ -401,127 +394,88 @@ shinyServer(function(input, output, session) {
 
     if (!is.null(rawData()) & !is.null(input$template_type)) {
       ### lookup schema template name
-      template_type_df <-
-        schema_to_display_lookup[match(
-          input$template_type,
-          schema_to_display_lookup$display_name
-        ), 1, drop = F]
+      template_type_df <- schema_to_display_lookup[match(input$template_type, schema_to_display_lookup$display_name), 1, drop = F]
       template_type <- as.character(template_type_df$schema_name)
 
-      annotation_status <-
-        metadata_model$validateModelManifest(input$file1$datapath, template_type)
+      annotation_status <- metadata_model$validateModelManifest(input$file1$datapath, template_type)
 
       if (length(annotation_status) != 0) {
         validation_res <- "invalid"
         # mismatched template index
-        inx_mt <-
-          which(sapply(annotation_status, function(x) {
-            grepl(
-              "Component value provided is: .*, whereas the Template Type is: .*",
-              x[[3]]
-            )
-          }))
+        inx_mt <- which(sapply(annotation_status, function(x) grepl("Component value provided is: .*, whereas the Template Type is: .*", x[[3]])))
+        # missing column index
+        inx_ws <- which(sapply(annotation_status, function(x) grepl("Wrong schema", x[[2]])))
 
-        if (length(inx_mt) > 0) {
-          # mismatched error(s): selected template mismatched with validating template
+        if (length(inx_mt) > 0) { # mismatched error(s): selected template mismatched with validating template
 
+          waiter_msg <- "Mismatched Template Found !"
           # get all mismatched components
-          error_values <-
-            sapply(annotation_status[inx_mt], function(x) {
-              x[[4]][[1]]
-            }) %>% unique()
+          error_values <- sapply(annotation_status[inx_mt], function(x) x[[4]][[1]]) %>% unique()
           column_names <- "Component"
 
           # error messages for mismatch
-          mismatch_c <-
-            error_values %>%
+          mismatch_c <- error_values %>%
             sQuote() %>%
             paste(collapse = ", ")
-          type_error <-
-            paste0(
-              "The submitted metadata contains << <b>",
-              mismatch_c,
-              "</b> >> in the Component column, but requested validation for << <b>",
-              input$template_type,
-              "</b> >>."
-            )
-          help_msg <-
-            paste0(
-              "Please check that you have selected the correct template in the <b>Select your Dataset</b> tab and
-                            ensure your metadata contains <b>only</b> one template, e.g. ",
-              input$template_type,
-              "."
-            )
+          type_error <- paste0("The submitted metadata contains << <b>", mismatch_c, "</b> >> in the Component column, but requested validation for << <b>", input$template_type, "</b> >>.")
+          help_msg <- paste0("Please check that you have selected the correct template in the <b>Select your Dataset</b> tab and
+                              ensure your metadata contains <b>only</b> one template, e.g. ", input$template_type, ".")
 
           # get wrong columns and values for updating preview table
-          errorDT <-
-            data.frame(
-              Column = sapply(annotation_status[inx_mt], function(i) {
-                i[[2]]
-              }),
-              Value = sapply(annotation_status[inx_mt], function(i) {
-                i[[4]][[1]]
-              })
-            )
+          errorDT <- data.frame(
+            Column = sapply(annotation_status[inx_mt], function(i) i[[2]]),
+            Value = sapply(annotation_status[inx_mt], function(i) i[[4]][[1]])
+          )
+        } else if (length(inx_ws) > 0) { # wrong schema error(s): validating metadata miss any required columns
+
+          waiter_msg <- "Wrong Schema Used !"
+          type_error <- "The submitted metadata does not contain all required column(s)."
+          help_msg <- "Please check that you used the correct template in the <b>'Get Metadata Template'</b> tab and
+                       ensure your metadata contains all required columns."
         } else {
-          type_error <-
-            paste0(
-              "The submitted metadata have ",
-              length(annotation_status),
-              " errors."
-            )
+          waiter_msg <- sprintf("%d errors found", length(annotation_status))
+          type_error <- paste0("The submitted metadata have ", length(annotation_status), " errors.")
           help_msg <- NULL
 
-          errorDT <-
-            data.frame(
-              Column = sapply(annotation_status, function(i) {
-                i[[2]]
-              }),
-              Value = sapply(annotation_status, function(i) {
-                i[[4]][[1]]
-              }),
-              Error = sapply(annotation_status, function(i) {
-                i[[3]]
-              })
-            )
+          errorDT <- data.frame(
+            Column = sapply(annotation_status, function(i) i[[2]]),
+            Value = sapply(annotation_status, function(i) i[[4]][[1]]),
+            Error = sapply(annotation_status, function(i) i[[3]])
+          )
           # sort rows based on input column names
-          errorDT <-
-            errorDT[order(match(errorDT$Column, colnames(rawData()))), ]
+          errorDT <- errorDT[order(match(errorDT$Column, colnames(rawData()))), ]
 
           # output error messages as data table
           show("tbl2")
           output$tbl2 <- DT::renderDT({
-            datatable(
-              errorDT,
+            datatable(errorDT,
               caption = "The errors are also highlighted in the preview table above.",
-              rownames = FALSE,
-              options = list(
-                pageLength = 50,
-                scrollX = TRUE,
-                scrollY = min(50 *
-                  length(annotation_status), 400),
-                lengthChange = FALSE,
-                info = FALSE,
-                searching = FALSE
+              rownames = FALSE, options = list(
+                pageLength = 50, scrollX = TRUE,
+                scrollY = min(50 * length(annotation_status), 400),
+                lengthChange = FALSE, info = FALSE, searching = FALSE
               )
             )
           })
         }
 
-        validate_w$update(html = h3(sprintf(
-          "%d errors found", length(annotation_status)
-        )))
+        validate_w$update(
+          html = h3(waiter_msg)
+        )
 
         ### update DT view with incorrect values
         ### currently only one column, requires backend support of multiple
         output$tbl <- DT::renderDT({
-          datatable(rawData(),
-            options = list(lengthChange = FALSE, scrollX = TRUE)
-          ) %>% formatStyle(errorDT$Column,
-            backgroundColor = styleEqual(errorDT$Value, rep(
-              "yellow", length(errorDT$Value)
-            ))
-          ) ## how to have multiple errors
+          if (length(inx_ws) > 0) {
+            # if it is wrong schema error, highlight all cells
+            datatable(rawData(), options = list(lengthChange = FALSE, scrollX = TRUE)) %>%
+              formatStyle(1, target = "row", backgroundColor = "yellow")
+          } else {
+            datatable(rawData(), options = list(lengthChange = FALSE, scrollX = TRUE)) %>%
+              formatStyle(errorDT$Column,
+                backgroundColor = styleEqual(errorDT$Value, rep("yellow", length(errorDT$Value)))
+              )
+          }
         })
 
         show("gsheet_btn")
@@ -536,31 +490,21 @@ shinyServer(function(input, output, session) {
 
     ### format output text
     output$text2 <- renderUI({
-      # test if template is selected and filled manifest is uploaded
-      shiny::validate(
-        need(
-          !is.null(input$template_type),
-          "Please select a template from the 'Select your Dataset' tab !"
-        ),
-        need(!is.null(rawData()), "Please upload a filled template !")
-      )
+      text_class <- ifelse(!is.null(validation_res) && validation_res == "valid", "success_msg", "error_msg")
 
       tagList(
-        if (!is.null(validation_res)) {
-          HTML("Your metadata is <b>", validation_res, "</b>.")
-        },
-        if (!is.null(type_error)) {
-          HTML("<br/><br/>", type_error)
-        },
-        if (!is.null(help_msg)) {
-          HTML("<br/><br/>", help_msg)
-        }
+        if (is.null(input$template_type)) span(class = text_class, HTML("Please <b>select a template</b> from the 'Select your Dataset' tab !<br><br>")),
+        if (is.null(rawData())) span(class = text_class, HTML("Please <b>upload</b> a filled template !")),
+        if (!is.null(validation_res)) span(class = text_class, HTML(paste0("Your metadata is <b>", validation_res, "</b> !!!"))),
+        if (!is.null(type_error)) span(class = text_class, HTML(paste0("<br><br>", type_error))),
+        if (!is.null(help_msg)) span(class = text_class, HTML(paste0("<br><br>", help_msg)))
       )
     })
 
     show("text_div2")
 
-    Sys.sleep(2)
+    Sys.sleep(2.5)
+
     validate_w$hide()
   })
 
@@ -657,7 +601,7 @@ shinyServer(function(input, output, session) {
         project_synID <-
           projects_namedList[[selected_project]] ### get synID of selected project
         folder_list <-
-          synapse_driver$SynapseStorage$getStorageDatasetsInProject(synStore_obj, project_synID)
+          syn_store$getStorageDatasetsInProject(synStore_obj, project_synID)
         folders_namedList <- c()
         for (i in seq_along(folder_list)) {
           folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
@@ -666,7 +610,7 @@ shinyServer(function(input, output, session) {
         folder_synID <- folders_namedList[[selected_folder]]
 
         file_list <-
-          synapse_driver$SynapseStorage$getFilesInStorageDataset(synStore_obj, folder_synID)
+          syn_store$getFilesInStorageDataset(synStore_obj, folder_synID)
         file_namedList <- c()
         for (i in seq_along(file_list)) {
           file_namedList[file_list[[i]][[2]]] <- file_list[[i]][[1]]
@@ -692,7 +636,7 @@ shinyServer(function(input, output, session) {
         projects_namedList[[selected_project]] ### get synID of selected project
 
       folder_list <-
-        synapse_driver$SynapseStorage$getStorageDatasetsInProject(synStore_obj, project_synID)
+        syn_store$getStorageDatasetsInProject(synStore_obj, project_synID)
       folders_namedList <- c()
       for (i in seq_along(folder_list)) {
         folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
@@ -701,7 +645,7 @@ shinyServer(function(input, output, session) {
 
       ### associates metadata with data and returns manifest id
       manifest_id <-
-        synapse_driver$SynapseStorage$associateMetadataWithFiles(
+        syn_store$associateMetadataWithFiles(
           synStore_obj,
           "./files/synapse_storage_manifest.csv",
           folder_synID
@@ -768,7 +712,7 @@ shinyServer(function(input, output, session) {
       # folder_synID <- get_folder_synID(synStore_obj, project_synID, selected_folder)
 
       folder_list <-
-        synapse_driver$SynapseStorage$getStorageDatasetsInProject(synStore_obj, project_synID)
+        syn_store$getStorageDatasetsInProject(synStore_obj, project_synID)
       folders_namedList <- c()
       for (i in seq_along(folder_list)) {
         folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
@@ -777,7 +721,7 @@ shinyServer(function(input, output, session) {
 
       ### associates metadata with data and returns manifest id
       manifest_id <-
-        synapse_driver$SynapseStorage$associateMetadataWithFiles(
+        syn_store$associateMetadataWithFiles(
           synStore_obj,
           "./files/synapse_storage_manifest.csv",
           folder_synID
