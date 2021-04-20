@@ -19,7 +19,7 @@ reticulate::import("sys")
 
 source_python("synLoginFun.py")
 source_python("metadataModelFuns.py")
-
+options(stringsAsFactors = FALSE) # stringsAsFactors = TRUE by default for R < 4.0
 #########
 
 ui <- dashboardPage(
@@ -157,8 +157,7 @@ ui <- dashboardPage(
         )
       ),
       # Fourth tab content
-      tabItem(
-        tabName = "upload",
+      tabItem(tabName = "upload",
         h2("Submit & Validate a Filled Metadata Template"),
         fluidRow(
           box(
@@ -166,7 +165,7 @@ ui <- dashboardPage(
             solidHeader = TRUE,
             status = "primary",
             width = 12,
-            uiOutput("fileInput_ui")
+            uiOutput('fileInput_ui')
           ),
           box(
             title = "Metadata Preview",
@@ -174,9 +173,7 @@ ui <- dashboardPage(
             status = "primary",
             width = 12,
             DT::DTOutput("tbl"),
-            helpText(
-              "Google spreadsheet row numbers are incremented from this table by 1"
-            )
+            helpText("Upload filled template to preview the metadata")
           ),
           box(
             title = "Validate Filled Metadata",
@@ -185,37 +182,29 @@ ui <- dashboardPage(
             width = 12,
             actionButton("validate", "Validate Metadata"),
             hidden(
-              div(
-                id = "text_div2",
-                height = "100%",
-                htmlOutput("text2"),
-                style = "font-size:18px; background-color: white; border: 1px solid #ccc; border-radius: 3px; margin: 10px 0; padding: 10px"
+              div(id = 'text_div2', 
+                  height = "100%",
+                  htmlOutput("text2"),
+                  style = "font-size:18px; background-color: white; border: 1px solid #ccc; border-radius: 3px; margin: 10px 0; padding: 10px"
               ),
               DT::DTOutput("tbl2"),
-              actionButton(
-                "gsheet_btn",
-                "  Click to Generate Google Sheet Link",
-                icon = icon("table")
-              ),
-              div(
-                id = "gsheet_div",
-                height = "100%",
-                htmlOutput("gsheet_link"),
-                style = "font-size:18px; background-color: white; border: 1px solid #ccc; border-radius: 3px; margin: 10px 0; padding: 10px"
+              actionButton("gsheet_btn", "  Click to Generate Google Sheet Link", icon = icon("table")),
+              div(id = 'gsheet_div', 
+                  height = "100%",
+                  htmlOutput("gsheet_link"),
+                  style = "font-size:18px; background-color: white; border: 1px solid #ccc; border-radius: 3px; margin: 10px 0; padding: 10px"
               )
             ),
             helpText(
               HTML("If you have an error, please try editing locally or on google sheet.<br/>
-                    Reupload your CSV and press the validate button as needed."
-              )
+                   Reupload your CSV and press the validate button as needed.")
             )
           ),
-          box(
-            title = "Submit Validated Metadata to Synapse",
-            status = "primary",
-            solidHeader = TRUE,
-            width = 12,
-            uiOutput("submit")
+          box(title = "Submit Validated Metadata to Synapse",
+                  status = "primary",
+                  solidHeader = TRUE,
+                  width = 12,
+                  uiOutput("submit")
           )
         )
       )
@@ -530,12 +519,10 @@ server <- function(input, output, session) {
 
   ### reads csv file and previews
   rawData <- eventReactive(ignoreNULL = FALSE, input$file1, {
-    # if no file uploaded, return null
-    if (is.null(input$file1)) {
-      return(NULL)
-    }
-    infile <-
-      readr::read_csv(input$file1$datapath, na = c("", "NA"))
+    if(is.null(input$file1)) return(NULL) # if no file uploaded, return null
+    infile <- readr::read_csv(input$file1$datapath, na = c("", "NA"), 
+                              col_types = readr::cols(.default = "c")) %>%
+                replace(., is.na(.), "") # change NA to blank to match schema output)
     ### remove empty rows/columns where readr called it "X"[digit] for unnamed col
     infile <- infile[, !grepl("^X", colnames(infile))]
     infile <- infile[rowSums(is.na(infile)) != ncol(infile), ]
@@ -556,7 +543,8 @@ server <- function(input, output, session) {
   ### renders in DT for preview
   observeEvent(rawData(), {
     output$tbl <- DT::renderDT({
-      datatable(rawData(), options = list(lengthChange = FALSE, scrollX = TRUE))
+      datatable(rawData(), options = list(lengthChange = FALSE, scrollX = TRUE), rownames = FALSE
+        )
     })
   })
 
@@ -582,7 +570,7 @@ server <- function(input, output, session) {
       template_type_df <- schema_to_display_lookup[match(input$template_type, schema_to_display_lookup$display_name), 1, drop = F]
       template_type <- as.character(template_type_df$schema_name)
 
-      annotation_status <- metadata_model$validateModelManifest(input$file1$datapath, template_type)
+      annotation_status <- metadata_model$validateModelManifest(input$file1$datapath, template_type) 
 
       if (length(annotation_status) != 0) {
 
@@ -591,12 +579,13 @@ server <- function(input, output, session) {
         inx_mt <- which(sapply(annotation_status, function(x) grepl("Component value provided is: .*, whereas the Template Type is: .*", x[[3]])))
         # missing column index
         inx_ws <- which(sapply(annotation_status, function(x) grepl("Wrong schema", x[[2]])))
-        
+
         if (length(inx_mt) > 0) {  # mismatched error(s): selected template mismatched with validating template
 
           waiter_msg <- "Mismatched Template Found !"
           # get all mismatched components
           error_values <- sapply(annotation_status[inx_mt], function(x) x[[4]][[1]]) %>% unique()
+          column_names <- "Component"
 
           # error messages for mismatch
           mismatch_c <- error_values %>% sQuote %>% paste(collapse = ", ")
@@ -645,15 +634,11 @@ server <- function(input, output, session) {
         ### update DT view with incorrect values
         ### currently only one column, requires backend support of multiple
         output$tbl <- DT::renderDT({
-
           if (length(inx_ws) > 0) {
-
             # if it is wrong schema error, highlight all cells
             datatable(rawData(), options = list(lengthChange = FALSE, scrollX = TRUE) ) %>% 
               formatStyle(1, target = "row", backgroundColor = "yellow")
-
           } else {
-
             datatable(rawData(), options = list(lengthChange = FALSE, scrollX = TRUE) ) %>% 
               formatStyle(errorDT$Column, 
                           backgroundColor = styleEqual(errorDT$Value, rep("yellow", length(errorDT$Value))))
