@@ -1,3 +1,13 @@
+# This is the server logic for a Shiny web application.
+# You can find out more about building applications with Shiny here:
+#
+# http://shiny.rstudio.com
+#
+# This server has been modified to be used specifically on Sage Bionetworks Synapse pages
+# to log into Synapse as the currently logged in user from the web portal using the session token.
+#
+# https://www.synapse.org
+
 library(shiny)
 library(shinyjs)
 library(dplyr)
@@ -13,232 +23,37 @@ library(plotly)
 library(shinypop)
 library(waiter)
 
-#########global
-use_condaenv('data_curator_env', required = TRUE)
-reticulate::import("sys")
+# Don't necessarily have to set `RETICULATE_PYTHON` env variable
+reticulate::use_condaenv("data_curator_env_oauth")
 
-source_python("synLoginFun.py")
-source_python("metadataModelFuns.py")
-
-#########
-
-ui <- dashboardPage(
-  skin = "purple",
-  dashboardHeader(
-    titleWidth = 250,
-    title = "Data Curator",
-    tags$li(
-      class = "dropdown",
-      tags$a(
-        href = "https://humantumoratlas.org/",
-        target = "_blank",
-        ## insert links and logos of your choice, this is just an example
-        tags$img(
-          height = "40px", alt = "HTAN LOGO",
-          src = "HTAN_text_logo.png"
-        )
-      )
-    )
-  ),
-  dashboardSidebar(
-    width = 250,
-    sidebarMenu(
-      id = "tabs",
-      menuItem(
-        "Instructions",
-        tabName = "instructions",
-        icon = icon("book-open")
-      ),
-      menuItem(
-        "Select your Dataset",
-        tabName = "data",
-        icon = icon("mouse-pointer")
-      ),
-      menuItem(
-        "Get Metadata Template",
-        tabName = "template",
-        icon = icon("table")
-      ),
-      menuItem(
-        "Submit & Validate Metadata",
-        tabName = "upload",
-        icon = icon("upload")
-      ),
-      HTML(
-        "<footer>
-            Supported by the Human Tumor Atlas Network <br/>
-            (U24-CA233243-01)<br/>
-            Powered by Sage Bionetworks
-        </footer>"
-      )
-    )
-  ),
-  dashboardBody(
-    tags$head(
-      tags$link(rel = "stylesheet", type = "text/css", href = "styles.css"),
-      singleton(includeScript("www/readCookie.js"))
-    ),
-    uiOutput("title"),
-    use_notiflix_report(),
-    tabItems(
-      # First tab content
-      tabItem(
-        tabName = "instructions",
-        h2("Instructions for the Data Curator App:"),
-        h3(
-          "1. Go to",
-          strong("Select your Dataset"),
-          "tab - select your project; choose your folder and metadata template type matching your metadata."
-        ),
-        h3(
-          "2. Go to",
-          strong("Get Metadata Template"),
-          "tab - click on the link to generate the metadata template, then fill out and download the file as a CSV. If you already have an annotated metadata template, you may skip this step."
-        ),
-        h3(
-          "3. Go to",
-          strong("Submit and Validate Metadata"),
-          "tab - upload your filled CSV and validate your metadata. If you receive errors correct them, reupload your CSV, and revalidate until you receive no more errors. When your metadata is valid, you will be able to see a 'Submit' button. Press it to submit your metadata."
-        )
-      ),
-      # second tab content
-      tabItem(
-        tabName = "data",
-        h2("Set Dataset and Metadata Template for Curation"),
-        fluidRow(
-          box(
-            status = "primary",
-            solidHeader = TRUE,
-            width = 6,
-            title = "Choose a Project and Folder: ",
-            selectizeInput(
-              inputId = "var",
-              label = "Project:",
-              choices = "Generating..."
-            ),
-            uiOutput("folders"),
-            helpText(
-              "If your recently updated folder does not appear, please wait for Synapse to sync and refresh"
-            )
-          ),
-          box(
-            status = "primary",
-            solidHeader = TRUE,
-            width = 6,
-            title = "Choose a Metadata Template Type: ",
-            uiOutput("manifest_display_name")
-          )
-        )
-      ),
-      # Third tab item
-      tabItem(
-        tabName = "template",
-        useShinyjs(),
-        h2("Download Template for Selected Folder"),
-        fluidRow(
-          box(
-            title = "Get Link, Annotate, and Download Template as CSV",
-            status = "primary",
-            solidHeader = TRUE,
-            width = 12,
-            actionButton("download", "Click to Generate Google Sheets Template"),
-            hidden(
-              div(
-                id = "text_div",
-                height = "100%",
-                htmlOutput("text"),
-                style = "font-size:18px; background-color: white; border: 1px solid #ccc; border-radius: 3px; margin: 10px 0; padding: 10px"
-              )
-            ),
-            helpText(
-              "This link will leads to an empty template or your previously submitted template with new files if applicable."
-            )
-          )
-        )
-      ),
-      # Fourth tab content
-      tabItem(
-        tabName = "upload",
-        h2("Submit & Validate a Filled Metadata Template"),
-        fluidRow(
-          box(
-            title = "Upload Filled Metadata as a CSV",
-            solidHeader = TRUE,
-            status = "primary",
-            width = 12,
-            uiOutput("fileInput_ui")
-          ),
-          box(
-            title = "Metadata Preview",
-            solidHeader = TRUE,
-            status = "primary",
-            width = 12,
-            DT::DTOutput("tbl"),
-            helpText(
-              "Google spreadsheet row numbers are incremented from this table by 1"
-            )
-          ),
-          box(
-            title = "Validate Filled Metadata",
-            status = "primary",
-            solidHeader = TRUE,
-            width = 12,
-            actionButton("validate", "Validate Metadata"),
-            hidden(
-              div(
-                id = "text_div2",
-                height = "100%",
-                htmlOutput("text2"),
-                style = "font-size:18px; background-color: white; border: 1px solid #ccc; border-radius: 3px; margin: 10px 0; padding: 10px"
-              ),
-              DT::DTOutput("tbl2"),
-              actionButton(
-                "gsheet_btn",
-                "  Click to Generate Google Sheet Link",
-                icon = icon("table")
-              ),
-              div(
-                id = "gsheet_div",
-                height = "100%",
-                htmlOutput("gsheet_link"),
-                style = "font-size:18px; background-color: white; border: 1px solid #ccc; border-radius: 3px; margin: 10px 0; padding: 10px"
-              )
-            ),
-            helpText(
-              HTML(
-                "If you have an error, please try editing locally or on google sheet.<br/>
-                         Reupload your CSV and press the validate button as needed."
-              )
-            )
-          ),
-          box(
-            title = "Submit Validated Metadata to Synapse",
-            status = "primary",
-            solidHeader = TRUE,
-            width = 12,
-            uiOutput("submit")
-          )
-        )
-      )
-    ),
-    uiOutput("Next_Previous"),
-
-    ## waiter loading screen
-    use_waiter(),
-    waiter_show_on_load(
-      html = tagList(
-        img(src = "loading.gif"),
-        h4("Retrieving Synapse information...")
-      ),
-      color = "#424874"
-    )
-  )
-)
-
-
-server <- function(input, output, session) {
+shinyServer(function(input, output, session) {
   ########### session global variables
-  reticulate::source_python("synStore_Session.py")
+  source_python("python/synapse_func_alias.py")
+  source_python("python/metadata_model.py")
+
+  params <- parseQueryString(isolate(session$clientData$url_search))
+  if (!has_auth_code(params)) {
+    return()
+  }
+  redirect_url <- paste0(
+    api$access, "?", "redirect_uri=",
+    APP_URL, "&grant_type=",
+    "authorization_code", "&code=", params$code
+  )
+  # get the access_token and userinfo token
+  req <- POST(redirect_url,
+    encode = "form",
+    body = "",
+    authenticate(app$key, app$secret, type = "basic"),
+    config = list()
+  )
+  # Stop the code if anything other than 2XX status code is returned
+  stop_for_status(req, task = "get an access token")
+  token_response <- content(req, type = NULL)
+  access_token <- token_response$access_token
+
+  # import module that contains SynapseStorage class
+  synapse_driver <- import("schematic.store.synapse")
 
   ### read config in
   config <- jsonlite::fromJSON("www/config.json")
@@ -276,11 +91,11 @@ server <- function(input, output, session) {
         })
 
         ### updating global vars with values for projects
-        # synStore_obj <<- syn_store(config$main_fileview, token = input$cookie)
-        synStore_obj <<- syn_store(token = input$cookie)
+        # synStore_obj <<- synapse_driver$SynapseStorage(config$main_fileview, token = input$cookie)
+        synStore_obj <<- synapse_driver$SynapseStorage(token = input$cookie)
 
         # get_projects_list(synStore_obj)
-        projects_list <<- syn_store$getStorageProjects(synStore_obj)
+        projects_list <<- synapse_driver$SynapseStorage$getStorageProjects(synStore_obj)
 
         for (i in seq_along(projects_list)) {
           projects_namedList[projects_list[[i]][[2]]] <<-
@@ -320,17 +135,13 @@ server <- function(input, output, session) {
   Previous_Button <- tags$div(actionButton(
     "Prev_Tab",
     HTML(
-      '
-  <div class="col-sm-4"><i class="fa fa-angle-double-left fa-2x"></i></div>
-  '
+      '<div class="col-sm-4"><i class="fa fa-angle-double-left fa-2x"></i></div>'
     )
   ))
   Next_Button <- div(actionButton(
     "Next_Tab",
     HTML(
-      '
-  <div class="col-sm-4"><i class="fa fa-angle-double-right fa-2x"></i></div>
-  '
+      '<div class="col-sm-4"><i class="fa fa-angle-double-right fa-2x"></i></div>'
     )
   ))
 
@@ -382,7 +193,7 @@ server <- function(input, output, session) {
 
           ### gets folders per project
           folder_list <-
-            syn_store$getStorageDatasetsInProject(synStore_obj, project_synID)
+            synapse_driver$SynapseStorage$getStorageDatasetsInProject(synStore_obj, project_synID)
           folders_namedList <- c()
           for (i in seq_along(folder_list)) {
             folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
@@ -473,7 +284,7 @@ server <- function(input, output, session) {
         projects_namedList[[selected_project]] ### get synID of selected project
 
       folder_list <-
-        syn_store$getStorageDatasetsInProject(synStore_obj, project_synID)
+        synapse_driver$SynapseStorage$getStorageDatasetsInProject(synStore_obj, project_synID)
       folders_namedList <- c()
       for (i in seq_along(folder_list)) {
         folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
@@ -482,12 +293,12 @@ server <- function(input, output, session) {
 
       ### checks if a manifest already exists
       existing_manifestID <-
-        syn_store$getDatasetManifest(synStore_obj, folder_synID)
+        synapse_driver$SynapseStorage$getDatasetManifest(synStore_obj, folder_synID)
 
       ### if there isn't an existing manifest make a new one
       if (existing_manifestID == "") {
         file_list <-
-          syn_store$getFilesInStorageDataset(synStore_obj, folder_synID)
+          synapse_driver$SynapseStorage$getFilesInStorageDataset(synStore_obj, folder_synID)
         file_namedList <- c()
         for (i in seq_along(file_list)) {
           file_namedList[file_list[[i]][[2]]] <- file_list[[i]][[1]]
@@ -846,7 +657,7 @@ server <- function(input, output, session) {
         project_synID <-
           projects_namedList[[selected_project]] ### get synID of selected project
         folder_list <-
-          syn_store$getStorageDatasetsInProject(synStore_obj, project_synID)
+          synapse_driver$SynapseStorage$getStorageDatasetsInProject(synStore_obj, project_synID)
         folders_namedList <- c()
         for (i in seq_along(folder_list)) {
           folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
@@ -855,7 +666,7 @@ server <- function(input, output, session) {
         folder_synID <- folders_namedList[[selected_folder]]
 
         file_list <-
-          syn_store$getFilesInStorageDataset(synStore_obj, folder_synID)
+          synapse_driver$SynapseStorage$getFilesInStorageDataset(synStore_obj, folder_synID)
         file_namedList <- c()
         for (i in seq_along(file_list)) {
           file_namedList[file_list[[i]][[2]]] <- file_list[[i]][[1]]
@@ -881,7 +692,7 @@ server <- function(input, output, session) {
         projects_namedList[[selected_project]] ### get synID of selected project
 
       folder_list <-
-        syn_store$getStorageDatasetsInProject(synStore_obj, project_synID)
+        synapse_driver$SynapseStorage$getStorageDatasetsInProject(synStore_obj, project_synID)
       folders_namedList <- c()
       for (i in seq_along(folder_list)) {
         folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
@@ -890,7 +701,7 @@ server <- function(input, output, session) {
 
       ### associates metadata with data and returns manifest id
       manifest_id <-
-        syn_store$associateMetadataWithFiles(
+        synapse_driver$SynapseStorage$associateMetadataWithFiles(
           synStore_obj,
           "./files/synapse_storage_manifest.csv",
           folder_synID
@@ -957,7 +768,7 @@ server <- function(input, output, session) {
       # folder_synID <- get_folder_synID(synStore_obj, project_synID, selected_folder)
 
       folder_list <-
-        syn_store$getStorageDatasetsInProject(synStore_obj, project_synID)
+        synapse_driver$SynapseStorage$getStorageDatasetsInProject(synStore_obj, project_synID)
       folders_namedList <- c()
       for (i in seq_along(folder_list)) {
         folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
@@ -966,7 +777,7 @@ server <- function(input, output, session) {
 
       ### associates metadata with data and returns manifest id
       manifest_id <-
-        syn_store$associateMetadataWithFiles(
+        synapse_driver$SynapseStorage$associateMetadataWithFiles(
           synStore_obj,
           "./files/synapse_storage_manifest.csv",
           folder_synID
@@ -1020,7 +831,4 @@ server <- function(input, output, session) {
     Sys.sleep(3)
     submit_w$hide()
   })
-}
-
-
-shinyApp(ui, server)
+})
