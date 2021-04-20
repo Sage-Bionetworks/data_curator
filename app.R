@@ -294,9 +294,9 @@ server <- function(input, output, session) {
           img(src = "synapse_logo.png", height = "120px"),
           h3("Looks like you're not logged in!"),
           span(
-            "Please ",
-            a("login", href = "https://www.synapse.org/#!LoginPlace:0", target = "_blank"),
-            " to Synapse, then refresh this page."
+               "Please ",
+               a("login", href = "https://www.synapse.org/#!LoginPlace:0", target = "_blank"),
+               " to Synapse, then refresh this page."
           )
         ))
       }
@@ -307,19 +307,11 @@ server <- function(input, output, session) {
   ###### BUTTONS STUFF  !!! remove last arrow
   Previous_Button <- tags$div(actionButton(
     "Prev_Tab",
-    HTML(
-      '
-  <div class="col-sm-4"><i class="fa fa-angle-double-left fa-2x"></i></div>
-  '
-    )
+    HTML('<div class="col-sm-4"><i class="fa fa-angle-double-left fa-2x"></i></div>')
   ))
   Next_Button <- div(actionButton(
     "Next_Tab",
-    HTML(
-      '
-  <div class="col-sm-4"><i class="fa fa-angle-double-right fa-2x"></i></div>
-  '
-    )
+    HTML('<div class="col-sm-4"><i class="fa fa-angle-double-right fa-2x"></i></div>')
   ))
 
   list_tabs <- c("instructions", "data", "template", "upload")
@@ -341,15 +333,13 @@ server <- function(input, output, session) {
   observeEvent(input$Prev_Tab, {
     tab_list <- list_tabs
     current_tab <- which(tab_list == input[["tabs"]])
-    updateTabItems(session, "tabs", selected = tab_list[current_tab -
-      1])
+    updateTabItems(session, "tabs", selected = tab_list[current_tab - 1])
   })
 
   observeEvent(input$Next_Tab, {
     tab_list <- list_tabs
     current_tab <- which(tab_list == input[["tabs"]])
-    updateTabItems(session, "tabs", selected = tab_list[current_tab +
-      1])
+    updateTabItems(session, "tabs", selected = tab_list[current_tab + 1])
   })
 
   ####### BUTTONS END
@@ -577,11 +567,7 @@ server <- function(input, output, session) {
 
     if (!is.null(rawData()) & !is.null(input$template_type)) {
       ### lookup schema template name
-      template_type_df <-
-        schema_to_display_lookup[match(
-          input$template_type,
-          schema_to_display_lookup$display_name
-        ), 1, drop = F]
+      template_type_df <- schema_to_display_lookup[match(input$template_type, schema_to_display_lookup$display_name), 1, drop = F]
       template_type <- as.character(template_type_df$schema_name)
 
       annotation_status <- metadata_model$validateModelManifest(input$file1$datapath, template_type) 
@@ -591,9 +577,12 @@ server <- function(input, output, session) {
         validation_res <- "invalid"
         # mismatched template index
         inx_mt <- which(sapply(annotation_status, function(x) grepl("Component value provided is: .*, whereas the Template Type is: .*", x[[3]])))
+        # missing column index
+        inx_ws <- which(sapply(annotation_status, function(x) grepl("Wrong schema", x[[2]])))
 
         if (length(inx_mt) > 0) {  # mismatched error(s): selected template mismatched with validating template
 
+          waiter_msg <- "Mismatched Template Found !"
           # get all mismatched components
           error_values <- sapply(annotation_status[inx_mt], function(x) x[[4]][[1]]) %>% unique()
           column_names <- "Component"
@@ -608,8 +597,16 @@ server <- function(input, output, session) {
           errorDT <- data.frame(Column=sapply(annotation_status[inx_mt], function(i) i[[2]]),
                                 Value=sapply(annotation_status[inx_mt], function(i) i[[4]][[1]]))
 
+        } else if (length(inx_ws) > 0) {  # wrong schema error(s): validating metadata miss any required columns
+
+          waiter_msg <- "Wrong Schema Used !"
+          type_error <- "The submitted metadata does not contain all required column(s)."
+          help_msg <- "Please check that you used the correct template in the <b>'Get Metadata Template'</b> tab and
+                       ensure your metadata contains all required columns."
+
         } else {
 
+          waiter_msg <- sprintf("%d errors found", length(annotation_status))
           type_error <- paste0("The submitted metadata have ", length(annotation_status), " errors.")
           help_msg <- NULL
 
@@ -631,24 +628,33 @@ server <- function(input, output, session) {
         }                                     
 
         validate_w$update(
-          html = h3(sprintf("%d errors found", length(annotation_status)))
+          html = h3(waiter_msg)
         )
 
         ### update DT view with incorrect values
         ### currently only one column, requires backend support of multiple
         output$tbl <- DT::renderDT({
-          datatable(rawData(),
-                    options = list(lengthChange = FALSE, scrollX = TRUE), rownames = FALSE) %>% 
-          formatStyle(errorDT$Column, backgroundColor = styleEqual(errorDT$Value, rep("yellow", length(errorDT$Value)))) 
+          if (length(inx_ws) > 0) {
+            # if it is wrong schema error, highlight all cells
+            datatable(rawData(), options = list(lengthChange = FALSE, scrollX = TRUE) ) %>% 
+              formatStyle(1, target = "row", backgroundColor = "yellow")
+          } else {
+            datatable(rawData(), options = list(lengthChange = FALSE, scrollX = TRUE) ) %>% 
+              formatStyle(errorDT$Column, 
+                          backgroundColor = styleEqual(errorDT$Value, rep("yellow", length(errorDT$Value))))
+          } 
         })
 
-        show("gsheet_btn")
+        show('gsheet_btn')
+
       } else {
+
         validation_res <- "valid"
         ### show submit button
         output$submit <- renderUI({
           actionButton("submitButton", "Submit to Synapse")
         })
+
       }
     }
 
@@ -656,30 +662,22 @@ server <- function(input, output, session) {
     output$text2 <- renderUI({
       # test if template is selected and filled manifest is uploaded
       shiny::validate(
-        need(
-          !is.null(input$template_type),
-          "Please select a template from the 'Select your Dataset' tab !"
-        ),
+        need(!is.null(input$template_type), "Please select a template from the 'Select your Dataset' tab !"),
         need(!is.null(rawData()), "Please upload a filled template !")
       )
 
       tagList(
-        if (!is.null(validation_res)) {
-          HTML("Your metadata is <b>", validation_res, "</b>.")
-        },
-        if (!is.null(type_error)) {
-          HTML("<br/><br/>", type_error)
-        },
-        if (!is.null(help_msg)) {
-          HTML("<br/><br/>", help_msg)
-        }
+        if (!is.null(validation_res)) HTML("Your metadata is <b>", validation_res, "</b>."),
+        if (!is.null(type_error)) HTML("<br/><br/>", type_error),
+        if (!is.null(help_msg)) HTML("<br/><br/>", help_msg)
       )
     })
+    
+  show('text_div2')
 
-    show("text_div2")
+  Sys.sleep(2.5)
 
-    Sys.sleep(2)
-    validate_w$hide()
+  validate_w$hide()
   })
 
   # if user click gsheet_btn, generating gsheet
