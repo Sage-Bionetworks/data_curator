@@ -127,8 +127,7 @@ ui <- dashboardPage(
                   solidHeader = TRUE,
                   status = "primary",
                   width = 12,
-                  DT::DTOutput("tbl"),
-                  helpText("Google spreadsheet row numbers are incremented from this table by 1")
+                  DT::DTOutput("tbl")
                 ),
                 box(
                   title = "Validate Filled Metadata",
