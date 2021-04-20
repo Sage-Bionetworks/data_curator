@@ -8,7 +8,7 @@ config = CONFIG.load_config("./schematic/config.yml")
 #inputMModelLocation = "./schemas/exampleSchemaReq.jsonld"
 #inputMModelLocation = "./HTAN-data-pipeline/schemas/scRNASeq.jsonld"
 # inputMModelLocation = "./HTAN-data-pipeline/schemas/HTAPP.jsonld"
-inputMModelLocation = CONFIG["model"]["input"]["location"]
+inputMModelLocation = "./schematic/data/schema_org_schemas/NF.jsonld"
 inputMModelLocationType = CONFIG["model"]["input"]["file_type"]
 
 manifest_title = CONFIG["manifest"]["title"]
