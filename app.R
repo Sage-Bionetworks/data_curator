@@ -491,6 +491,7 @@ server <- function(input, output, session) {
           metadata_model$getModelManifest(
             paste0(config$community, " ", input$template_type),
             template_type,
+	    datasetId = folder_synID,
             filenames = as.list(filename_list),
             useAnnotations = T
           )
