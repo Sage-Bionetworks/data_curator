@@ -18,7 +18,8 @@ manifest_data_type = CONFIG["manifest"]["data_type"]
 
 metadata_model = MetadataModel(inputMModelLocation, inputMModelLocationType)
 metadata_model.getModelManifest(title=manifest_title, 
-                                rootNode=manifest_data_type)
+                                rootNode=manifest_data_type,
+                                useAnnotations=True)
 
 ### function for getting model Manifest
 #  mm.getModelManifest(modelType, additionalMetadata = {"Filename":["MantonCB1_HiSeq_1_S1_L001_R1_001.fastq.gz"]} )
