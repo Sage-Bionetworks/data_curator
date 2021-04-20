@@ -379,7 +379,13 @@ schema_to_display_lookup <- data.frame(schema_name, display_name)
       filename_list <- names(file_namedList)
 
 
-      manifest_url <- metadata_model$getModelManifest(paste0(config$community," ", input$template_type), template_type, filenames = as.list(filename_list))
+      manifest_url <- metadata_model$getModelManifest(paste0(config$community," ", input$template_type), 
+						      template_type, 
+						      filenames = as.list(filename_list),
+						      datasetId = folder_synID,
+						      filenames = as.list(filename_list),
+						      useAnnotations = F,
+						      sheetUrl = F)
       ### make sure not scalar if length of list is 1 in R
       ## add in the step to convert names later ###
 
