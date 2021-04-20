@@ -91,11 +91,11 @@ shinyServer(function(input, output, session) {
         })
 
         ### updating global vars with values for projects
-        # synStore_obj <<- syn_store(config$main_fileview, token = input$cookie)
-        synStore_obj <<- syn_store(token = input$cookie)
+        # synStore_obj <<- synapse_driver$SynapseStorage(config$main_fileview, token = input$cookie)
+        synStore_obj <<- synapse_driver$SynapseStorage(token = input$cookie)
 
         # get_projects_list(synStore_obj)
-        projects_list <<- syn_store$getStorageProjects(synStore_obj)
+        projects_list <<- synapse_driver$SynapseStorage$getStorageProjects(synStore_obj)
 
         for (i in seq_along(projects_list)) {
           projects_namedList[projects_list[[i]][[2]]] <<-
@@ -187,7 +187,7 @@ shinyServer(function(input, output, session) {
 
           ### gets folders per project
           folder_list <-
-            syn_store$getStorageDatasetsInProject(synStore_obj, project_synID)
+            synapse_driver$SynapseStorage$getStorageDatasetsInProject(synStore_obj, project_synID)
           folders_namedList <- c()
           for (i in seq_along(folder_list)) {
             folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
@@ -275,7 +275,7 @@ shinyServer(function(input, output, session) {
         projects_namedList[[selected_project]] ### get synID of selected project
 
       folder_list <-
-        syn_store$getStorageDatasetsInProject(synStore_obj, project_synID)
+        synapse_driver$SynapseStorage$getStorageDatasetsInProject(synStore_obj, project_synID)
       folders_namedList <- c()
       for (i in seq_along(folder_list)) {
         folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
@@ -284,12 +284,12 @@ shinyServer(function(input, output, session) {
 
       ### checks if a manifest already exists
       existing_manifestID <-
-        syn_store$getDatasetManifest(synStore_obj, folder_synID)
+        synapse_driver$SynapseStorage$getDatasetManifest(synStore_obj, folder_synID)
 
       ### if there isn't an existing manifest make a new one
       if (existing_manifestID == "") {
         file_list <-
-          syn_store$getFilesInStorageDataset(synStore_obj, folder_synID)
+          synapse_driver$SynapseStorage$getFilesInStorageDataset(synStore_obj, folder_synID)
         file_namedList <- c()
         for (i in seq_along(file_list)) {
           file_namedList[file_list[[i]][[2]]] <- file_list[[i]][[1]]
@@ -601,7 +601,7 @@ shinyServer(function(input, output, session) {
         project_synID <-
           projects_namedList[[selected_project]] ### get synID of selected project
         folder_list <-
-          syn_store$getStorageDatasetsInProject(synStore_obj, project_synID)
+          synapse_driver$SynapseStorage$getStorageDatasetsInProject(synStore_obj, project_synID)
         folders_namedList <- c()
         for (i in seq_along(folder_list)) {
           folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
@@ -610,7 +610,7 @@ shinyServer(function(input, output, session) {
         folder_synID <- folders_namedList[[selected_folder]]
 
         file_list <-
-          syn_store$getFilesInStorageDataset(synStore_obj, folder_synID)
+          synapse_driver$SynapseStorage$getFilesInStorageDataset(synStore_obj, folder_synID)
         file_namedList <- c()
         for (i in seq_along(file_list)) {
           file_namedList[file_list[[i]][[2]]] <- file_list[[i]][[1]]
@@ -636,7 +636,7 @@ shinyServer(function(input, output, session) {
         projects_namedList[[selected_project]] ### get synID of selected project
 
       folder_list <-
-        syn_store$getStorageDatasetsInProject(synStore_obj, project_synID)
+        synapse_driver$SynapseStorage$getStorageDatasetsInProject(synStore_obj, project_synID)
       folders_namedList <- c()
       for (i in seq_along(folder_list)) {
         folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
@@ -645,7 +645,7 @@ shinyServer(function(input, output, session) {
 
       ### associates metadata with data and returns manifest id
       manifest_id <-
-        syn_store$associateMetadataWithFiles(
+        synapse_driver$SynapseStorage$associateMetadataWithFiles(
           synStore_obj,
           "./files/synapse_storage_manifest.csv",
           folder_synID
@@ -712,7 +712,7 @@ shinyServer(function(input, output, session) {
       # folder_synID <- get_folder_synID(synStore_obj, project_synID, selected_folder)
 
       folder_list <-
-        syn_store$getStorageDatasetsInProject(synStore_obj, project_synID)
+        synapse_driver$SynapseStorage$getStorageDatasetsInProject(synStore_obj, project_synID)
       folders_namedList <- c()
       for (i in seq_along(folder_list)) {
         folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
@@ -721,7 +721,7 @@ shinyServer(function(input, output, session) {
 
       ### associates metadata with data and returns manifest id
       manifest_id <-
-        syn_store$associateMetadataWithFiles(
+        synapse_driver$SynapseStorage$associateMetadataWithFiles(
           synStore_obj,
           "./files/synapse_storage_manifest.csv",
           folder_synID
