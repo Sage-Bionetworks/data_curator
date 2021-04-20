@@ -19,7 +19,7 @@ reticulate::import("sys")
 
 source_python("synLoginFun.py")
 source_python("metadataModelFuns.py")
-
+options(stringsAsFactors = FALSE) # stringsAsFactors = TRUE by default for R < 4.0
 #########
 
 ui <- dashboardPage(
@@ -157,8 +157,7 @@ ui <- dashboardPage(
         )
       ),
       # Fourth tab content
-      tabItem(
-        tabName = "upload",
+      tabItem(tabName = "upload",
         h2("Submit & Validate a Filled Metadata Template"),
         fluidRow(
           box(
@@ -166,7 +165,7 @@ ui <- dashboardPage(
             solidHeader = TRUE,
             status = "primary",
             width = 12,
-            uiOutput("fileInput_ui")
+            uiOutput('fileInput_ui')
           ),
           box(
             title = "Metadata Preview",
@@ -174,9 +173,7 @@ ui <- dashboardPage(
             status = "primary",
             width = 12,
             DT::DTOutput("tbl"),
-            helpText(
-              "Google spreadsheet row numbers are incremented from this table by 1"
-            )
+            helpText("Upload filled template to preview the metadata")
           ),
           box(
             title = "Validate Filled Metadata",
@@ -185,38 +182,29 @@ ui <- dashboardPage(
             width = 12,
             actionButton("validate", "Validate Metadata"),
             hidden(
-              div(
-                id = "text_div2",
-                height = "100%",
-                htmlOutput("text2"),
-                style = "font-size:18px; background-color: white; border: 1px solid #ccc; border-radius: 3px; margin: 10px 0; padding: 10px"
+              div(id = 'text_div2', 
+                  height = "100%",
+                  htmlOutput("text2"),
+                  style = "font-size:18px; background-color: white; border: 1px solid #ccc; border-radius: 3px; margin: 10px 0; padding: 10px"
               ),
               DT::DTOutput("tbl2"),
-              actionButton(
-                "gsheet_btn",
-                "  Click to Generate Google Sheet Link",
-                icon = icon("table")
-              ),
-              div(
-                id = "gsheet_div",
-                height = "100%",
-                htmlOutput("gsheet_link"),
-                style = "font-size:18px; background-color: white; border: 1px solid #ccc; border-radius: 3px; margin: 10px 0; padding: 10px"
+              actionButton("gsheet_btn", "  Click to Generate Google Sheet Link", icon = icon("table")),
+              div(id = 'gsheet_div', 
+                  height = "100%",
+                  htmlOutput("gsheet_link"),
+                  style = "font-size:18px; background-color: white; border: 1px solid #ccc; border-radius: 3px; margin: 10px 0; padding: 10px"
               )
             ),
             helpText(
-              HTML(
-                "If you have an error, please try editing locally or on google sheet.<br/>
-                         Reupload your CSV and press the validate button as needed."
-              )
+              HTML("If you have an error, please try editing locally or on google sheet.<br/>
+                   Reupload your CSV and press the validate button as needed.")
             )
           ),
-          box(
-            title = "Submit Validated Metadata to Synapse",
-            status = "primary",
-            solidHeader = TRUE,
-            width = 12,
-            uiOutput("submit")
+          box(title = "Submit Validated Metadata to Synapse",
+                  status = "primary",
+                  solidHeader = TRUE,
+                  width = 12,
+                  uiOutput("submit")
           )
         )
       )
@@ -541,12 +529,10 @@ server <- function(input, output, session) {
 
   ### reads csv file and previews
   rawData <- eventReactive(ignoreNULL = FALSE, input$file1, {
-    # if no file uploaded, return null
-    if (is.null(input$file1)) {
-      return(NULL)
-    }
-    infile <-
-      readr::read_csv(input$file1$datapath, na = c("", "NA"))
+    if(is.null(input$file1)) return(NULL) # if no file uploaded, return null
+    infile <- readr::read_csv(input$file1$datapath, na = c("", "NA"), 
+                              col_types = readr::cols(.default = "c")) %>%
+                replace(., is.na(.), "") # change NA to blank to match schema output)
     ### remove empty rows/columns where readr called it "X"[digit] for unnamed col
     infile <- infile[, !grepl("^X", colnames(infile))]
     infile <- infile[rowSums(is.na(infile)) != ncol(infile), ]
@@ -567,7 +553,8 @@ server <- function(input, output, session) {
   ### renders in DT for preview
   observeEvent(rawData(), {
     output$tbl <- DT::renderDT({
-      datatable(rawData(), options = list(lengthChange = FALSE, scrollX = TRUE))
+      datatable(rawData(), options = list(lengthChange = FALSE, scrollX = TRUE), rownames = FALSE
+        )
     })
   })
 
@@ -597,120 +584,62 @@ server <- function(input, output, session) {
         ), 1, drop = F]
       template_type <- as.character(template_type_df$schema_name)
 
-      annotation_status <-
-        metadata_model$validateModelManifest(input$file1$datapath, template_type)
+      annotation_status <- metadata_model$validateModelManifest(input$file1$datapath, template_type) 
 
       if (length(annotation_status) != 0) {
+
         validation_res <- "invalid"
         # mismatched template index
-        inx_mt <-
-          which(sapply(annotation_status, function(x) {
-            grepl(
-              "Component value provided is: .*, whereas the Template Type is: .*",
-              x[[3]]
-            )
-          }))
+        inx_mt <- which(sapply(annotation_status, function(x) grepl("Component value provided is: .*, whereas the Template Type is: .*", x[[3]])))
 
-        if (length(inx_mt) > 0) {
-          # mismatched error(s): selected template mismatched with validating template
+        if (length(inx_mt) > 0) {  # mismatched error(s): selected template mismatched with validating template
 
           # get all mismatched components
-          error_values <-
-            sapply(annotation_status[inx_mt], function(x) {
-              x[[4]][[1]]
-            }) %>% unique()
+          error_values <- sapply(annotation_status[inx_mt], function(x) x[[4]][[1]]) %>% unique()
           column_names <- "Component"
 
           # error messages for mismatch
-          mismatch_c <-
-            error_values %>%
-            sQuote() %>%
-            paste(collapse = ", ")
-          type_error <-
-            paste0(
-              "The submitted metadata contains << <b>",
-              mismatch_c,
-              "</b> >> in the Component column, but requested validation for << <b>",
-              input$template_type,
-              "</b> >>."
-            )
-          help_msg <-
-            paste0(
-              "Please check that you have selected the correct template in the <b>Select your Dataset</b> tab and
-                            ensure your metadata contains <b>only</b> one template, e.g. ",
-              input$template_type,
-              "."
-            )
+          mismatch_c <- error_values %>% sQuote %>% paste(collapse = ", ")
+          type_error <- paste0("The submitted metadata contains << <b>", mismatch_c, "</b> >> in the Component column, but requested validation for << <b>",  input$template_type, "</b> >>.")
+          help_msg <- paste0("Please check that you have selected the correct template in the <b>Select your Dataset</b> tab and 
+                              ensure your metadata contains <b>only</b> one template, e.g. ", input$template_type, ".")
 
           # get wrong columns and values for updating preview table
-          errorDT <-
-            data.frame(
-              Column = sapply(annotation_status[inx_mt], function(i) {
-                i[[2]]
-              }),
-              Value = sapply(annotation_status[inx_mt], function(i) {
-                i[[4]][[1]]
-              })
-            )
+          errorDT <- data.frame(Column=sapply(annotation_status[inx_mt], function(i) i[[2]]),
+                                Value=sapply(annotation_status[inx_mt], function(i) i[[4]][[1]]))
+
         } else {
-          type_error <-
-            paste0(
-              "The submitted metadata have ",
-              length(annotation_status),
-              " errors."
-            )
+
+          type_error <- paste0("The submitted metadata have ", length(annotation_status), " errors.")
           help_msg <- NULL
 
-          errorDT <-
-            data.frame(
-              Column = sapply(annotation_status, function(i) {
-                i[[2]]
-              }),
-              Value = sapply(annotation_status, function(i) {
-                i[[4]][[1]]
-              }),
-              Error = sapply(annotation_status, function(i) {
-                i[[3]]
-              })
-            )
+          errorDT <- data.frame(Column=sapply(annotation_status, function(i) i[[2]]),
+                                Value=sapply(annotation_status, function(i) i[[4]][[1]]),
+                                Error=sapply(annotation_status, function(i) i[[3]])) 
           # sort rows based on input column names
-          errorDT <-
-            errorDT[order(match(errorDT$Column, colnames(rawData()))), ]
+          errorDT <- errorDT[order(match(errorDT$Column, colnames(rawData()))),]
 
           # output error messages as data table
           show("tbl2")
           output$tbl2 <- DT::renderDT({
-            datatable(
-              errorDT,
-              caption = "The errors are also highlighted in the preview table above.",
-              rownames = FALSE,
-              options = list(
-                pageLength = 50,
-                scrollX = TRUE,
-                scrollY = min(50 *
-                  length(annotation_status), 400),
-                lengthChange = FALSE,
-                info = FALSE,
-                searching = FALSE
-              )
+            datatable(errorDT, caption = "The errors are also highlighted in the preview table above.", 
+                      rownames = FALSE, options = list(pageLength = 50, scrollX = TRUE, 
+                                                       scrollY = min(50*length(annotation_status), 400),
+                                                       lengthChange = FALSE, info = FALSE, searching = FALSE)
             )
           })
-        }
+        }                                     
 
-        validate_w$update(html = h3(sprintf(
-          "%d errors found", length(annotation_status)
-        )))
+        validate_w$update(
+          html = h3(sprintf("%d errors found", length(annotation_status)))
+        )
 
         ### update DT view with incorrect values
         ### currently only one column, requires backend support of multiple
         output$tbl <- DT::renderDT({
           datatable(rawData(),
-            options = list(lengthChange = FALSE, scrollX = TRUE)
-          ) %>% formatStyle(errorDT$Column,
-            backgroundColor = styleEqual(errorDT$Value, rep(
-              "yellow", length(errorDT$Value)
-            ))
-          ) ## how to have multiple errors
+                    options = list(lengthChange = FALSE, scrollX = TRUE), rownames = FALSE) %>% 
+          formatStyle(errorDT$Column, backgroundColor = styleEqual(errorDT$Value, rep("yellow", length(errorDT$Value)))) 
         })
 
         show("gsheet_btn")
