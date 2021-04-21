@@ -19,3 +19,4 @@ schematic/token.pickle
 credentials.json
 token.pickle
 **/__pycache__
+config.yaml
