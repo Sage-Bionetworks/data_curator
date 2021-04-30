@@ -1,0 +1,12 @@
+footer {
+    position: absolute; 
+    padding: 18px; 
+    left: 0; 
+    bottom: 0; 
+    width: 100%; 
+    background-color: $footer_bg_col; 
+    color: $footer_col; 
+    font-size: 10px;
+    text-align: center;
+    z-index: 1000
+}

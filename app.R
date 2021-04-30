@@ -12,6 +12,7 @@ library(purrr)
 library(plotly)
 library(shinypop)
 library(waiter)
+library(sass)  # read scss file
 
 #########global
 use_condaenv('data_curator_env_staging', required = TRUE)
@@ -19,7 +20,7 @@ reticulate::import("sys")
 
 source_python("synLoginFun.py")
 source_python("metadataModelFuns.py")
-
+options(stringsAsFactors = FALSE) # stringsAsFactors = TRUE by default for R < 4.0
 #########
 
 ui <- dashboardPage(
@@ -68,9 +69,11 @@ ui <- dashboardPage(
   ),
   dashboardBody(
     tags$head(
-      tags$link(rel = "stylesheet", type = "text/css", href = "styles.css"),
-      singleton(includeScript("www/readCookie.js"))
-    ),
+      tags$style(sass(sass_file("www/scss/main.scss"))),
+      singleton(
+        includeScript("www/readCookie.js")
+      )),
+
     uiOutput("title"),
     use_notiflix_report(),
     tabItems(
@@ -124,8 +127,7 @@ ui <- dashboardPage(
         )
       ),
       # Third tab item
-      tabItem(
-        tabName = "template",
+      tabItem(tabName = "template",
         useShinyjs(),
         h2("Download Template for Selected Folder"),
         fluidRow(
@@ -137,21 +139,18 @@ ui <- dashboardPage(
             actionButton("download", "Click to Generate Google Sheets Template"),
             hidden(
               div(
-                id = "text_div",
+                id = 'text_div',
                 height = "100%",
-                htmlOutput("text"),
-                style = "font-size:18px; background-color: white; border: 1px solid #ccc; border-radius: 3px; margin: 10px 0; padding: 10px"
+                htmlOutput("text")
               )
             ),
-            helpText(
-              "This link will leads to an empty template or your previously submitted template with new files if applicable."
-            )
-          )
+            helpText("This link will leads to an empty template or your previously submitted template with new files if applicable.")
+          ) 
+
         )
       ),
       # Fourth tab content
-      tabItem(
-        tabName = "upload",
+      tabItem(tabName = "upload",
         h2("Submit & Validate a Filled Metadata Template"),
         fluidRow(
           box(
@@ -159,18 +158,15 @@ ui <- dashboardPage(
             solidHeader = TRUE,
             status = "primary",
             width = 12,
-            uiOutput("fileInput_ui")
+            uiOutput('fileInput_ui')
           ),
           box(
             title = "Metadata Preview",
             solidHeader = TRUE,
             status = "primary",
             width = 12,
-            DT::DTOutput("tbl"),
-            helpText(
-              "Google spreadsheet row numbers are incremented from this table by 1"
-            )
-          ),
+            DT::DTOutput("tbl")
+            ),
           box(
             title = "Validate Filled Metadata",
             status = "primary",
@@ -178,44 +174,33 @@ ui <- dashboardPage(
             width = 12,
             actionButton("validate", "Validate Metadata"),
             hidden(
-              div(
-                id = "text_div2",
-                height = "100%",
-                htmlOutput("text2"),
-                style = "font-size:18px; background-color: white; border: 1px solid #ccc; border-radius: 3px; margin: 10px 0; padding: 10px"
+              div(id = 'text_div2', 
+                  height = "100%",
+                  htmlOutput("text2")
               ),
               DT::DTOutput("tbl2"),
-              actionButton(
-                "gsheet_btn",
-                "  Click to Generate Google Sheet Link",
-                icon = icon("table")
-              ),
-              div(
-                id = "gsheet_div",
-                height = "100%",
-                htmlOutput("gsheet_link"),
-                style = "font-size:18px; background-color: white; border: 1px solid #ccc; border-radius: 3px; margin: 10px 0; padding: 10px"
+              actionButton("gsheet_btn", "  Click to Generate Google Sheet Link", icon = icon("table")),
+              div(id = 'gsheet_div', 
+                  height = "100%",
+                  htmlOutput("gsheet_link")
               )
             ),
             helpText(
-              HTML(
-                "If you have an error, please try editing locally or on google sheet.<br/>
-                         Reupload your CSV and press the validate button as needed."
-              )
+              HTML("If you have an error, please try editing locally or on google sheet.<br/>
+                   Reupload your CSV and press the validate button as needed.")
             )
           ),
-          box(
-            title = "Submit Validated Metadata to Synapse",
-            status = "primary",
-            solidHeader = TRUE,
-            width = 12,
-            uiOutput("submit")
+          box(title = "Submit Validated Metadata to Synapse",
+              status = "primary",
+              solidHeader = TRUE,
+              width = 12,
+              uiOutput("submit")
           )
         )
       )
     ),
     uiOutput("Next_Previous"),
-    
+
     ## waiter loading screen
     use_waiter(),
     waiter_show_on_load(
@@ -228,11 +213,11 @@ ui <- dashboardPage(
   )
 )
 
-server <- function(input, output, session) {
 
+server <- function(input, output, session) {
   ########### session global variables
   reticulate::source_python("synStore_Session.py")
-  
+
   ### read config in
   config <- jsonlite::fromJSON("www/config.json")
 
@@ -240,19 +225,19 @@ server <- function(input, output, session) {
   synStore_obj <- NULL
   # get_projects_list(synStore_obj)
   projects_list <- c()
-  
+
   projects_namedList <- c()
-  
+
   proj_folder_manifest_cells <- c()
-  
+
   folder_synID <- NULL
-  
+
   filename_list <- c()
   ############
-  
+
   ### synapse cookies
   session$sendCustomMessage(type = "readCookie", message = list())
-  
+
   ### initial login front page items
   observeEvent(input$cookie, {
     ## login and update session; otherwise, notify to login to Synapse first
@@ -299,9 +284,9 @@ server <- function(input, output, session) {
           img(src = "synapse_logo.png", height = "120px"),
           h3("Looks like you're not logged in!"),
           span(
-            "Please ",
-            a("login", href = "https://www.synapse.org/#!LoginPlace:0", target = "_blank"),
-            " to Synapse, then refresh this page."
+               "Please ",
+               a("login", href = "https://www.synapse.org/#!LoginPlace:0", target = "_blank"),
+               " to Synapse, then refresh this page."
           )
         ))
       }
@@ -312,19 +297,11 @@ server <- function(input, output, session) {
   ###### BUTTONS STUFF  !!! remove last arrow
   Previous_Button <- tags$div(actionButton(
     "Prev_Tab",
-    HTML(
-      '
-  <div class="col-sm-4"><i class="fa fa-angle-double-left fa-2x"></i></div>
-  '
-    )
+    HTML('<div class="col-sm-4"><i class="fa fa-angle-double-left fa-2x"></i></div>')
   ))
   Next_Button <- div(actionButton(
     "Next_Tab",
-    HTML(
-      '
-  <div class="col-sm-4"><i class="fa fa-angle-double-right fa-2x"></i></div>
-  '
-    )
+    HTML('<div class="col-sm-4"><i class="fa fa-angle-double-right fa-2x"></i></div>')
   ))
 
   list_tabs <- c("instructions", "data", "template", "upload")
@@ -346,19 +323,17 @@ server <- function(input, output, session) {
   observeEvent(input$Prev_Tab, {
     tab_list <- list_tabs
     current_tab <- which(tab_list == input[["tabs"]])
-    updateTabItems(session, "tabs", selected = tab_list[current_tab -
-      1])
+    updateTabItems(session, "tabs", selected = tab_list[current_tab - 1])
   })
 
   observeEvent(input$Next_Tab, {
     tab_list <- list_tabs
     current_tab <- which(tab_list == input[["tabs"]])
-    updateTabItems(session, "tabs", selected = tab_list[current_tab +
-      1])
+    updateTabItems(session, "tabs", selected = tab_list[current_tab + 1])
   })
 
   ####### BUTTONS END
-  
+
   ### lists folder datasets if exists in project
   observeEvent(
     ignoreNULL = TRUE,
@@ -374,12 +349,11 @@ server <- function(input, output, session) {
             projects_namedList[[selected_project]] ### get synID of selected project
 
           ### gets folders per project
-                     ### gets folders per project
-                     #folder_list <- syn_store$getStorageDatasetsInProject(synStore_obj, project_synID)
-                     folder_df <- syn_tableQuery(sprintf("select name, id from %s where type = 'folder' and projectId = '%s'", config$main_fileview, project_synID))$asDataFrame()
-                     
-                     folders_namedList <- setNames(as.list(folder_df$id), folder_df$name)
-                     folderNames <- names(folders_namedList)
+          #folder_list <- syn_store$getStorageDatasetsInProject(synStore_obj, project_synID)
+          folder_df <- syn_tableQuery(sprintf("select name, id from %s where type = 'folder' and projectId = '%s'", config$main_fileview, project_synID))$asDataFrame()
+          
+          folders_namedList <- setNames(as.list(folder_df$id), folder_df$name)
+          folderNames <- names(folders_namedList)
 
           ### updates foldernames
           selectInput(
@@ -425,7 +399,7 @@ server <- function(input, output, session) {
   )
 
   schema_to_display_lookup <- data.frame(schema_name, display_name)
-    
+
   # loading screen for template link generation
   manifest_w <- Waiter$new(
     html = tagList(
@@ -434,21 +408,17 @@ server <- function(input, output, session) {
     ),
     color = "rgba(66, 72, 116, .9)"
   )
-    
+
   ### shows new metadata link when get gsheets template button pressed OR updates old metadata if is exists
   observeEvent(input$download, {
     manifest_w$show()
 
     if (is.null(input$template_type)) {
       output$text <- renderUI({
-        tags$a(HTML(
-          paste0(
-            '<span style="color: #E53935">',
-            "Please select a template from the 'Select your Dataset' tab !",
-            "</span>"
-          )
-        ))
+        tags$span(class="error_msg", 
+                  HTML("Please <b>select a template</b> from the 'Select your Dataset' tab !")) 
       })
+      
     } else {
       selected_folder <- input$dataset
       selected_project <- input$var
@@ -461,14 +431,14 @@ server <- function(input, output, session) {
         ), 1, drop = F]
       template_type <- as.character(template_type_df$schema_name)
 
-       project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
+      project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
       
       folder_df <- syn_tableQuery(sprintf("select name, id from %s where type = 'folder' and projectId = '%s'", config$main_fileview, project_synID))$asDataFrame()
       
       folders_namedList <- setNames(as.list(folder_df$id), folder_df$name)
-      
+
       folder_synID <- folders_namedList[[selected_folder]]
-      
+
       shiny::validate(
         shiny::need(length(folder_synID)==1, 'Duplicate folder names detected. Please make sure folders have distinct names.')
       )
@@ -491,14 +461,8 @@ server <- function(input, output, session) {
           metadata_model$getModelManifest(
             paste0(config$community, " ", input$template_type),
             template_type,
-	    datasetId = folder_synID,
-            filenames = as.list(filename_list),
-            useAnnotations = T,
-	    sheetUrl = T
+            filenames = as.list(filename_list)
           )
-
-	cat(file=stderr(), paste0(unlist(manifest_url), collapse = "\n"))
-	manifest_url
         ### make sure not scalar if length of list is 1 in R
         ## add in the step to convert names later ###
       } else {
@@ -537,15 +501,13 @@ server <- function(input, output, session) {
       )
     )
   })
-  
+
   ### reads csv file and previews
   rawData <- eventReactive(ignoreNULL = FALSE, input$file1, {
-    # if no file uploaded, return null
-    if (is.null(input$file1)) {
-      return(NULL)
-    }
-    infile <-
-      readr::read_csv(input$file1$datapath, na = c("", "NA"))
+    if(is.null(input$file1)) return(NULL) # if no file uploaded, return null
+    infile <- readr::read_csv(input$file1$datapath, na = c("", "NA"), 
+                              col_types = readr::cols(.default = "c")) %>%
+                replace(., is.na(.), "") # change NA to blank to match schema output)
     ### remove empty rows/columns where readr called it "X"[digit] for unnamed col
     infile <- infile[, !grepl("^X", colnames(infile))]
     infile <- infile[rowSums(is.na(infile)) != ncol(infile), ]
@@ -566,7 +528,8 @@ server <- function(input, output, session) {
   ### renders in DT for preview
   observeEvent(rawData(), {
     output$tbl <- DT::renderDT({
-      datatable(rawData(), options = list(lengthChange = FALSE, scrollX = TRUE))
+      datatable(rawData(), options = list(lengthChange = FALSE, scrollX = TRUE), rownames = FALSE
+        )
     })
   })
 
@@ -578,7 +541,7 @@ server <- function(input, output, session) {
     ),
     color = "rgba(66, 72, 116, .9)"
   )
-  
+
   ### toggles validation status when validate button pressed
   observeEvent(input$validate, {
     validation_res <- NULL
@@ -589,167 +552,115 @@ server <- function(input, output, session) {
 
     if (!is.null(rawData()) & !is.null(input$template_type)) {
       ### lookup schema template name
-      template_type_df <-
-        schema_to_display_lookup[match(
-          input$template_type,
-          schema_to_display_lookup$display_name
-        ), 1, drop = F]
+      template_type_df <- schema_to_display_lookup[match(input$template_type, schema_to_display_lookup$display_name), 1, drop = F]
       template_type <- as.character(template_type_df$schema_name)
 
-      annotation_status <-
-        metadata_model$validateModelManifest(input$file1$datapath, template_type)
+      annotation_status <- metadata_model$validateModelManifest(input$file1$datapath, template_type) 
 
       if (length(annotation_status) != 0) {
+
         validation_res <- "invalid"
         # mismatched template index
-        inx_mt <-
-          which(sapply(annotation_status, function(x) {
-            grepl(
-              "Component value provided is: .*, whereas the Template Type is: .*",
-              x[[3]]
-            )
-          }))
+        inx_mt <- which(sapply(annotation_status, function(x) grepl("Component value provided is: .*, whereas the Template Type is: .*", x[[3]])))
+        # missing column index
+        inx_ws <- which(sapply(annotation_status, function(x) grepl("Wrong schema", x[[2]])))
 
-        if (length(inx_mt) > 0) {
-          # mismatched error(s): selected template mismatched with validating template
+        if (length(inx_mt) > 0) {  # mismatched error(s): selected template mismatched with validating template
 
+          waiter_msg <- "Mismatched Template Found !"
           # get all mismatched components
-          error_values <-
-            sapply(annotation_status[inx_mt], function(x) {
-              x[[4]][[1]]
-            }) %>% unique()
+          error_values <- sapply(annotation_status[inx_mt], function(x) x[[4]][[1]]) %>% unique()
           column_names <- "Component"
 
           # error messages for mismatch
-          mismatch_c <-
-            error_values %>%
-            sQuote() %>%
-            paste(collapse = ", ")
-          type_error <-
-            paste0(
-              "The submitted metadata contains << <b>",
-              mismatch_c,
-              "</b> >> in the Component column, but requested validation for << <b>",
-              input$template_type,
-              "</b> >>."
-            )
-          help_msg <-
-            paste0(
-              "Please check that you have selected the correct template in the <b>Select your Dataset</b> tab and
-                            ensure your metadata contains <b>only</b> one template, e.g. ",
-              input$template_type,
-              "."
-            )
+          mismatch_c <- error_values %>% sQuote %>% paste(collapse = ", ")
+          type_error <- paste0("The submitted metadata contains << <b>", mismatch_c, "</b> >> in the Component column, but requested validation for << <b>",  input$template_type, "</b> >>.")
+          help_msg <- paste0("Please check that you have selected the correct template in the <b>Select your Dataset</b> tab and 
+                              ensure your metadata contains <b>only</b> one template, e.g. ", input$template_type, ".")
 
           # get wrong columns and values for updating preview table
-          errorDT <-
-            data.frame(
-              Column = sapply(annotation_status[inx_mt], function(i) {
-                i[[2]]
-              }),
-              Value = sapply(annotation_status[inx_mt], function(i) {
-                i[[4]][[1]]
-              })
-            )
+          errorDT <- data.frame(Column=sapply(annotation_status[inx_mt], function(i) i[[2]]),
+                                Value=sapply(annotation_status[inx_mt], function(i) i[[4]][[1]]))
+
+        } else if (length(inx_ws) > 0) {  # wrong schema error(s): validating metadata miss any required columns
+
+          waiter_msg <- "Wrong Schema Used !"
+          type_error <- "The submitted metadata does not contain all required column(s)."
+          help_msg <- "Please check that you used the correct template in the <b>'Get Metadata Template'</b> tab and
+                       ensure your metadata contains all required columns."
+
         } else {
-          type_error <-
-            paste0(
-              "The submitted metadata have ",
-              length(annotation_status),
-              " errors."
-            )
+
+          waiter_msg <- sprintf("%d errors found", length(annotation_status))
+          type_error <- paste0("The submitted metadata have ", length(annotation_status), " errors.")
           help_msg <- NULL
 
-          errorDT <-
-            data.frame(
-              Column = sapply(annotation_status, function(i) {
-                i[[2]]
-              }),
-              Value = sapply(annotation_status, function(i) {
-                i[[4]][[1]]
-              }),
-              Error = sapply(annotation_status, function(i) {
-                i[[3]]
-              })
-            )
+          errorDT <- data.frame(Column=sapply(annotation_status, function(i) i[[2]]),
+                                Value=sapply(annotation_status, function(i) i[[4]][[1]]),
+                                Error=sapply(annotation_status, function(i) i[[3]])) 
           # sort rows based on input column names
-          errorDT <-
-            errorDT[order(match(errorDT$Column, colnames(rawData()))), ]
+          errorDT <- errorDT[order(match(errorDT$Column, colnames(rawData()))),]
 
           # output error messages as data table
           show("tbl2")
           output$tbl2 <- DT::renderDT({
-            datatable(
-              errorDT,
-              caption = "The errors are also highlighted in the preview table above.",
-              rownames = FALSE,
-              options = list(
-                pageLength = 50,
-                scrollX = TRUE,
-                scrollY = min(50 *
-                  length(annotation_status), 400),
-                lengthChange = FALSE,
-                info = FALSE,
-                searching = FALSE
-              )
+            datatable(errorDT, caption = "The errors are also highlighted in the preview table above.", 
+                      rownames = FALSE, options = list(pageLength = 50, scrollX = TRUE, 
+                                                       scrollY = min(50*length(annotation_status), 400),
+                                                       lengthChange = FALSE, info = FALSE, searching = FALSE)
             )
           })
-        }
+        }                                     
 
-        validate_w$update(html = h3(sprintf(
-          "%d errors found", length(annotation_status)
-        )))
+        validate_w$update(
+          html = h3(waiter_msg)
+        )
 
         ### update DT view with incorrect values
         ### currently only one column, requires backend support of multiple
         output$tbl <- DT::renderDT({
-          datatable(rawData(),
-            options = list(lengthChange = FALSE, scrollX = TRUE)
-          ) %>% formatStyle(errorDT$Column,
-            backgroundColor = styleEqual(errorDT$Value, rep(
-              "yellow", length(errorDT$Value)
-            ))
-          ) ## how to have multiple errors
+          if (length(inx_ws) > 0) {
+            # if it is wrong schema error, highlight all cells
+            datatable(rawData(), options = list(lengthChange = FALSE, scrollX = TRUE) ) %>% 
+              formatStyle(1, target = "row", backgroundColor = "yellow")
+          } else {
+            datatable(rawData(), options = list(lengthChange = FALSE, scrollX = TRUE) ) %>% 
+              formatStyle(errorDT$Column, 
+                          backgroundColor = styleEqual(errorDT$Value, rep("yellow", length(errorDT$Value))))
+          } 
         })
 
-        show("gsheet_btn")
+        show('gsheet_btn')
+
       } else {
+
         validation_res <- "valid"
         ### show submit button
         output$submit <- renderUI({
           actionButton("submitButton", "Submit to Synapse")
         })
+
       }
     }
 
     ### format output text
     output$text2 <- renderUI({
-      # test if template is selected and filled manifest is uploaded
-      shiny::validate(
-        need(
-          !is.null(input$template_type),
-          "Please select a template from the 'Select your Dataset' tab !"
-        ),
-        need(!is.null(rawData()), "Please upload a filled template !")
-      )
-
+      text_class <- ifelse(!is.null(validation_res) && validation_res == "valid", "success_msg", "error_msg")
+      
       tagList(
-        if (!is.null(validation_res)) {
-          HTML("Your metadata is <b>", validation_res, "</b>.")
-        },
-        if (!is.null(type_error)) {
-          HTML("<br/><br/>", type_error)
-        },
-        if (!is.null(help_msg)) {
-          HTML("<br/><br/>", help_msg)
-        }
+        if (is.null(input$template_type)) span(class=text_class, HTML("Please <b>select a template</b> from the 'Select your Dataset' tab !<br><br>")), 
+        if (is.null(rawData())) span(class=text_class, HTML("Please <b>upload</b> a filled template !")), 
+        if (!is.null(validation_res)) span(class=text_class, HTML(paste0("Your metadata is <b>", validation_res, "</b> !!!"))),
+        if (!is.null(type_error)) span(class=text_class, HTML(paste0("<br><br>", type_error))),
+        if (!is.null(help_msg)) span(class=text_class, HTML(paste0("<br><br>", help_msg)))
       )
     })
+    
+  show('text_div2')
 
-    show("text_div2")
+  Sys.sleep(2.5)
 
-    Sys.sleep(2)
-    validate_w$hide()
+  validate_w$hide()
   })
 
   # if user click gsheet_btn, generating gsheet
@@ -807,7 +718,7 @@ server <- function(input, output, session) {
     ),
     color = "#424874"
   )
-    
+
   ### submit button
   observeEvent(input$submitButton, {
     submit_w$show()
@@ -842,15 +753,13 @@ server <- function(input, output, session) {
         selected_folder <- input$dataset
         selected_project <- input$var
 
-                  
-          project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
-          folder_df <- syn_tableQuery(sprintf("select name, id from %s where type = 'folder' and projectId = '%s'", config$main_fileview, project_synID))$asDataFrame()
-          
-          folders_namedList <- setNames(as.list(folder_df$id), folder_df$name)
-          folderNames <- names(folders_namedList)
-          
-          folder_synID <- folders_namedList[[selected_folder]]
-          
+       project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
+      
+      folder_df <- syn_tableQuery(sprintf("select name, id from %s where type = 'folder' and projectId = '%s'", config$main_fileview, project_synID))$asDataFrame()
+      
+      folders_namedList <- setNames(as.list(folder_df$id), folder_df$name)
+
+      folder_synID <- folders_namedList[[selected_folder]]
 
         file_list <-
           syn_store$getFilesInStorageDataset(synStore_obj, folder_synID)
@@ -875,15 +784,12 @@ server <- function(input, output, session) {
       selected_project <- input$var
       selected_folder <- input$dataset
 
-      project_synID <-
-        projects_namedList[[selected_project]] ### get synID of selected project
+      project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
+      
+      folder_df <- syn_tableQuery(sprintf("select name, id from %s where type = 'folder' and projectId = '%s'", config$main_fileview, project_synID))$asDataFrame()
+      
+      folders_namedList <- setNames(as.list(folder_df$id), folder_df$name)
 
-      folder_list <-
-        syn_store$getStorageDatasetsInProject(synStore_obj, project_synID)
-      folders_namedList <- c()
-      for (i in seq_along(folder_list)) {
-        folders_namedList[folder_list[[i]][[2]]] <- folder_list[[i]][[1]]
-      }
       folder_synID <- folders_namedList[[selected_folder]]
 
       ### associates metadata with data and returns manifest id
@@ -949,14 +855,14 @@ server <- function(input, output, session) {
 
       selected_project <- input$var
       selected_folder <- input$dataset
+
+      project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
       
-          project_synID <- projects_namedList[[selected_project]] ### get synID of selected project
-          folder_df <- syn_tableQuery(sprintf("select name, id from %s where type = 'folder' and projectId = '%s'", config$main_fileview, project_synID))$asDataFrame()
-          
-          folders_namedList <- setNames(as.list(folder_df$id), folder_df$name)
-          folderNames <- names(folders_namedList)
-          
-          folder_synID <- folders_namedList[[selected_folder]]
+      folder_df <- syn_tableQuery(sprintf("select name, id from %s where type = 'folder' and projectId = '%s'", config$main_fileview, project_synID))$asDataFrame()
+      
+      folders_namedList <- setNames(as.list(folder_df$id), folder_df$name)
+
+      folder_synID <- folders_namedList[[selected_folder]]
 
       ### associates metadata with data and returns manifest id
       manifest_id <-
