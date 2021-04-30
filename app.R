@@ -797,7 +797,8 @@ server <- function(input, output, session) {
         syn_store$associateMetadataWithFiles(
           synStore_obj,
           "./files/synapse_storage_manifest.csv",
-          folder_synID
+          folder_synID,
+          useSchemaLabel = FALSE
         )
       print(manifest_id)
       manifest_path <-
@@ -869,7 +870,8 @@ server <- function(input, output, session) {
         syn_store$associateMetadataWithFiles(
           synStore_obj,
           "./files/synapse_storage_manifest.csv",
-          folder_synID
+          folder_synID,
+          useSchemaLabel = FALSE
         )
       print(manifest_id)
       manifest_path <-
