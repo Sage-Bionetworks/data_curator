@@ -3,12 +3,12 @@ from schematic.models.metadata import MetadataModel
 
 from schematic import CONFIG
 
-config = CONFIG.load_config("./schematic/config.yml")
+config = CONFIG.load_config("config.yml")
 
 #inputMModelLocation = "./schemas/exampleSchemaReq.jsonld"
 #inputMModelLocation = "./HTAN-data-pipeline/schemas/scRNASeq.jsonld"
 # inputMModelLocation = "./HTAN-data-pipeline/schemas/HTAPP.jsonld"
-inputMModelLocation = "./schematic/data/schema_org_schemas/NF.jsonld"
+inputMModelLocation = "./NF.jsonld"
 inputMModelLocationType = CONFIG["model"]["input"]["file_type"]
 
 manifest_title = CONFIG["manifest"]["title"]
