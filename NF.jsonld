@@ -8621,6 +8621,9 @@
                     "@id": "bts:IsPrimaryCell"
                 },
                 {
+                    "@id": "bts:CellType"
+                },
+                {
                     "@id": "bts:TumorType"
                 },
                 {
@@ -8760,6 +8763,9 @@
                     "@id": "bts:IsPrimaryCell"
                 },
                 {
+                    "@id": "bts:CellType"
+                },
+                {
                     "@id": "bts:TumorType"
                 },
                 {
@@ -8883,6 +8889,9 @@
                     "@id": "bts:IsPrimaryCell"
                 },
                 {
+                    "@id": "bts:CellType"
+                },
+                {
                     "@id": "bts:TumorType"
                 },
                 {
@@ -8995,6 +9004,9 @@
                     "@id": "bts:IsPrimaryCell"
                 },
                 {
+                    "@id": "bts:CellType"
+                },
+                {
                     "@id": "bts:TumorType"
                 },
                 {
@@ -9098,6 +9110,12 @@
                     "@id": "bts:IsCellLine"
                 },
                 {
+                    "@id": "bts:IsPrimaryCell"
+                },
+                {
+                    "@id": "bts:CellType"
+                },
+                {
                     "@id": "bts:TumorType"
                 },
                 {
@@ -9196,6 +9214,9 @@
                 },
                 {
                     "@id": "bts:IsPrimaryCell"
+                },
+                {
+                    "@id": "bts:CellType"
                 },
                 {
                     "@id": "bts:TumorType"
