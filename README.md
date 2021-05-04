@@ -18,11 +18,11 @@ Create a conda environment in the cloned directory from the `environment.yml` fi
 
     conda env create -f environment.yml
 
-Here, our conda environment name `data_curator_env_oauth` is set from the `environment.yml` file .
+Here, our conda environment name `data_curator_env` is set from the `environment.yml` file .
 
-Activate the `data_curator_env_oauth` environment:
+Activate the `data_curator_env` environment:
 
-    conda activate data_curator_env_oauth
+    conda activate data_curator_env
 
 
 ### Schematic Setup
