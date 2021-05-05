@@ -22,9 +22,10 @@ library(purrr)
 library(plotly)
 library(shinypop)
 library(waiter)
+library(readr)
 
 # Don't necessarily have to set `RETICULATE_PYTHON` env variable
-reticulate::use_condaenv("data_curator_env")
+reticulate::use_condaenv("data_curator_env_oauth")
 
 shinyServer(function(input, output, session) {
   ########### session global variables
