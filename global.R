@@ -3,7 +3,6 @@ library(httr)
 library(rjson)
 library(yaml)
 
-
 # APP_URL <- "https://shinypro.synapse.org/users/spatil/HTAN-oauth/"
 
 has_auth_code <- function(params) {
