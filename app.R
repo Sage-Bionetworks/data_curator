@@ -15,7 +15,7 @@ library(waiter)
 library(sass)  # read scss file
 
 #########global
-use_condaenv('data_curator_env_staging', required = TRUE)
+use_condaenv('data_curator_env', required = TRUE)
 reticulate::import("sys")
 
 source_python("synLoginFun.py")
