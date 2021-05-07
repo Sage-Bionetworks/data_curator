@@ -12,9 +12,7 @@ There are two editions of the front end:
 
 To make changes, please branch off of `develop`, make changes, and then file a PR against `develop` (no review needed, but PR for easy revert). Once the changes have been deployed and tested, PR against `production`. Note - as with all Shiny apps, `touch restart.txt` any time you make changes to make sure they are reflected in your testing. 
 
-For the latest documentation on how to deploy this app and backend, please visit https://github.com/Sage-Bionetworks/HTAN_data_curator and  https://github.com/Sage-Bionetworks/schematic.
-
-We've made forks of both of these repositories here and here: https://github.com/Sage-Bionetworks/schematic.
+For the latest documentation on how to deploy this app and backend, please visit https://github.com/Sage-Bionetworks/schematic. To fulfill a couple of NF-specific requirements, we are currently running the `production` app using the `allaway/463` branch of schematic (can be installed as necessary `python -m pip install git+https://github.com/Sage-Bionetworks/schematic.git@allaway/463`). 
 
 ## Test/Demo Project
 
@@ -46,4 +44,4 @@ Activate the `data_curator_env` environment:
 
 ### Schematic Setup (backend)
 
-The next step is to install the latest release of [schematic](https://github.com/Sage-Bionetworks/schematic). Please follow the instructions on the `schematic` [documentation site](https://sage-schematic.readthedocs.io/en/develop/README.html). 
+The next step is to install the latest release of [schematic](https://github.com/Sage-Bionetworks/schematic) (currently using `allaway/463` branch). Please follow the instructions on the `schematic` [documentation site](https://sage-schematic.readthedocs.io/en/develop/README.html). 
