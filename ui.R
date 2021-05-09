@@ -32,22 +32,22 @@ ui <- dashboardPage(
       id = "tabs",
       menuItem(
         "Instructions",
-        tabName = "instructions",
+        tabName = "tab_instructions",
         icon = icon("book-open")
       ),
       menuItem(
         "Select your Dataset",
-        tabName = "data",
+        tabName = "tab_data",
         icon = icon("mouse-pointer")
       ),
       menuItem(
         "Get Metadata Template",
-        tabName = "template",
+        tabName = "tab_template",
         icon = icon("table")
       ),
       menuItem(
         "Submit & Validate Metadata",
-        tabName = "upload",
+        tabName = "tab_upload",
         icon = icon("upload")
       ),
       HTML(
@@ -71,7 +71,7 @@ ui <- dashboardPage(
     tabItems(
       # First tab content
       tabItem(
-        tabName = "instructions",
+        tabName = "tab_instructions",
         h2("Instructions for the Data Curator App:"),
         h3(
           "1. Go to",
@@ -91,7 +91,7 @@ ui <- dashboardPage(
       ),
       # second tab content
       tabItem(
-        tabName = "data",
+        tabName = "tab_data",
         h2("Set Dataset and Metadata Template for Curation"),
         fluidRow(
           box(
@@ -100,7 +100,7 @@ ui <- dashboardPage(
             width = 6,
             title = "Choose a Project and Folder: ",
             selectizeInput(
-              inputId = "var",
+              inputId = "dropdown_project",
               label = "Project:",
               choices = "Generating..."
             ),
@@ -120,7 +120,7 @@ ui <- dashboardPage(
       ),
       # Third tab item
       tabItem(
-        tabName = "template",
+        tabName = "tab_template",
         useShinyjs(),
         h2("Download Template for Selected Folder"),
         fluidRow(
@@ -129,12 +129,12 @@ ui <- dashboardPage(
             status = "primary",
             solidHeader = TRUE,
             width = 12,
-            actionButton("download", "Click to Generate Google Sheets Template"),
+            actionButton("btn_download", "Click to Generate Google Sheets Template"),
             hidden(
               div(
-                id = "text_div",
+                id = "div_download",
                 height = "100%",
-                htmlOutput("text")
+                htmlOutput("text_download")
               )
             ),
             helpText("This link will leads to an empty template or your previously submitted template with new files if applicable.")
@@ -143,7 +143,7 @@ ui <- dashboardPage(
       ),
       # Fourth tab content
       tabItem(
-        tabName = "upload",
+        tabName = "tab_upload",
         h2("Submit & Validate a Filled Metadata Template"),
         fluidRow(
           box(
@@ -158,26 +158,26 @@ ui <- dashboardPage(
             solidHeader = TRUE,
             status = "primary",
             width = 12,
-            DT::DTOutput("tbl")
+            DT::DTOutput("tbl_preview")
           ),
           box(
             title = "Validate Filled Metadata",
             status = "primary",
             solidHeader = TRUE,
             width = 12,
-            actionButton("validate", "Validate Metadata"),
+            actionButton("btn_validate", "Validate Metadata"),
             hidden(
               div(
-                id = "text_div2",
+                id = "div_validate",
                 height = "100%",
-                htmlOutput("text2")
+                htmlOutput("text_validate")
               ),
-              DT::DTOutput("tbl2"),
-              actionButton("gsheet_btn", "  Click to Generate Google Sheet Link", icon = icon("table")),
+              DT::DTOutput("tbl_validate"),
+              actionButton("btn_val_gsheet", "  Click to Generate Google Sheet Link", icon = icon("table")),
               div(
-                id = "gsheet_div",
+                id = "div_val_gsheet",
                 height = "100%",
-                htmlOutput("gsheet_link")
+                htmlOutput("text_val_gsheet")
               )
             ),
             helpText(
@@ -190,7 +190,7 @@ ui <- dashboardPage(
             status = "primary",
             solidHeader = TRUE,
             width = 12,
-            uiOutput("submit")
+            uiOutput("btn_submit")
           )
         )
       )

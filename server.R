@@ -44,12 +44,12 @@ shinyServer(function(input, output, session) {
   filename_list <- NULL
 
   ### mapping from display name to schema name
-  schema_name <- config$manifest_schemas$schema_name
+  template_name <- config$manifest_schemas$schema_name
   display_name <- config$manifest_schemas$display_name
-  schema_to_display_lookup <- data.frame(schema_name, display_name)
+  schema_to_display_lookup <- data.frame(template_name, display_name)
 
-  tabs_list <- c("instructions", "data", "template", "upload")
-  clean_tags <- c("text_div2", "tbl2", "gsheet_btn", "gsheet_div", "submitButton")
+  tabs_list <- c("tab_instructions", "tab_data", "tab_template", "tab_upload")
+  clean_tags <- c("div_validate", "tbl_validate", "btn_val_gsheet", "div_val_gsheet", "btn_submit")
 
   ######## Initiate Login Process ########
   # synapse cookies
@@ -79,7 +79,7 @@ shinyServer(function(input, output, session) {
         }
 
         # updates project dropdown
-        updateSelectizeInput(session, "var", choices = sort(names(projects_namedList)))
+        updateSelectizeInput(session, "dropdown_project", choices = sort(names(projects_namedList)))
 
         # update waiter loading screen once login successful
         waiter_update(html = tagList(
@@ -110,9 +110,9 @@ shinyServer(function(input, output, session) {
   Next_Button <- div(actionButton("Next_Tab", HTML("<div class=\"col-sm-4\"><i class=\"fa fa-angle-double-right fa-2x\"></i></div>")))
 
   output$Next_Previous <- renderUI({
-    if (input[["tabs"]] == "upload") {
+    if (input[["tabs"]] == "tab_upload") {
       # column(1,offset=1,Previous_Button)
-    } else if (input[["tabs"]] == "instructions") {
+    } else if (input[["tabs"]] == "tab_instructions") {
       column(1, offset = 10, Next_Button)
     } else {
       div(column(1, offset = 1, Previous_Button), column(1, offset = 8, Next_Button))
@@ -128,10 +128,10 @@ shinyServer(function(input, output, session) {
   })
 
   ######## Update Folder List ########
-  observeEvent(ignoreInit = TRUE, input$var, {
+  observeEvent(ignoreInit = TRUE, input$dropdown_project, {
     output$folders <- renderUI({
       # get synID of selected project
-      project_synID <- projects_namedList[[input$var]]
+      project_synID <- projects_namedList[[input$dropdown_project]]
 
       # gets folders per project
       folder_list <- synapse_driver$getStorageDatasetsInProject(
@@ -146,14 +146,14 @@ shinyServer(function(input, output, session) {
       folderNames <- names(folders_namedList)
 
       # updates foldernames
-      selectInput(inputId = "dataset", label = "Folder:", choices = folderNames)
+      selectInput(inputId = "dropdown_folder", label = "Folder:", choices = folderNames)
     })
   })
 
   # update selected folder ID
-  observeEvent(input$dataset, {
+  observeEvent(input$dropdown_folder, {
     # TODO: check how different from using rectivateValues()
-    folder_synID <<- folders_namedList[[input$dataset]]
+    folder_synID <<- folders_namedList[[input$dropdown_folder]]
   })
 
   ######## Update Template ########
@@ -161,22 +161,22 @@ shinyServer(function(input, output, session) {
     selectInput(inputId = "template_type", label = "Template:", choices = display_name)
   })
   # update selected schema template name
-  observeEvent(input$dataset, {
-    template_type_df <- schema_to_display_lookup[match(input$template_type, schema_to_display_lookup$display_name),
+  observeEvent(input$dropdown_template, {
+    template_type_df <- schema_to_display_lookup[match(input$dropdown_template, schema_to_display_lookup$display_name),
       1,
       drop = F
     ]
-    schema_name <<- as.character(template_type_df$schema_name)
+    template_name <<- as.character(template_type_df$schema_name)
   })
 
   # hide tags when users select new template
   observeEvent(
     {
-      input$dataset
-      input$template_type
+      input$dropdown_folder
+      input$dropdown_template
     },
     {
-      sapply(c("text_div", clean_tags), FUN = hide)
+      sapply(c("div_download", clean_tags), FUN = hide)
     }
   )
 
@@ -187,11 +187,11 @@ shinyServer(function(input, output, session) {
   )
 
   ######## Template Google Sheet Link ########
-  observeEvent(input$download, {
+  observeEvent(input$btn_download, {
     manifest_w$show()
 
-    if (is.null(input$template_type)) {
-      output$text <- renderUI({
+    if (is.null(input$dropdown_template)) {
+      output$text_download <- renderUI({
         tags$span(class = "error_msg", HTML("Please <b>select a template</b> from the 'Select your Dataset' tab !"))
       })
     } else {
@@ -215,8 +215,8 @@ shinyServer(function(input, output, session) {
 
         manifest_url <- metadata_model$getModelManifest(paste0(
           config$community,
-          " ", input$template_type
-        ), schema_name, filenames = as.list(filename_list))
+          " ", input$dropdown_template
+        ), template_name, filenames = as.list(filename_list))
         # make sure not scalar if length of list is 1 in R
         # add in the step to convert names later
       } else {
@@ -224,17 +224,17 @@ shinyServer(function(input, output, session) {
         manifest_entity <- syn_get(existing_manifestID)
         manifest_url <- metadata_model$populateModelManifest(paste0(
           config$community,
-          " ", input$template_type
-        ), manifest_entity$path, schema_name)
+          " ", input$temdropdown_templateplate_type
+        ), manifest_entity$path, template_name)
       }
 
-      output$text <- renderUI({
+      output$text_download <- renderUI({
         tags$a(href = manifest_url, manifest_url, target = "_blank") ### add link to data dictionary when we have it ###
       })
     }
 
     # links shows in text box
-    show("text_div") # TODO: add progress bar on (loading) screen
+    show("div_download") # TODO: add progress bar on (loading) screen
 
     manifest_w$hide()
   })
@@ -266,7 +266,7 @@ shinyServer(function(input, output, session) {
 
   # renders in DT for preview
   observeEvent(rawData(), {
-    output$tbl <- renderDT({
+    output$tbl_preview <- renderDT({
       datatable(rawData(),
         options = list(lengthChange = FALSE, scrollX = TRUE),
         rownames = FALSE
@@ -281,17 +281,17 @@ shinyServer(function(input, output, session) {
   )
 
   ######## Validation Section #######
-  observeEvent(input$validate, {
+  observeEvent(input$btn_validate, {
     validation_res <- NULL
     type_error <- NULL
     help_msg <- NULL
 
     validate_w$show()
 
-    if (!is.null(rawData()) & !is.null(input$template_type)) {
+    if (!is.null(rawData()) & !is.null(input$dropdown_template)) {
       annotation_status <- metadata_model$validateModelManifest(
         input$file1$datapath,
-        schema_name
+        template_name
       )
 
       if (length(annotation_status) != 0) {
@@ -327,12 +327,12 @@ shinyServer(function(input, output, session) {
           type_error <- paste0(
             "The submitted metadata contains << <b>",
             mismatch_c, "</b> >> in the Component column, but requested validation for << <b>",
-            input$template_type, "</b> >>."
+            input$dropdown_template, "</b> >>."
           )
           help_msg <- paste0(
             "Please check that you have selected the correct template in the <b>Select your Dataset</b> tab and
                               ensure your metadata contains <b>only</b> one template, e.g. ",
-            input$template_type, "."
+            input$dropdown_template, "."
           )
 
           # get wrong columns and values for updating preview table
@@ -369,8 +369,8 @@ shinyServer(function(input, output, session) {
           errorDT <- errorDT[order(match(errorDT$Column, colnames(rawData()))), ]
 
           # output error messages as data table
-          show("tbl2")
-          output$tbl2 <- renderDT({
+          show("tbl_validate")
+          output$tbl_validate <- renderDT({
             datatable(errorDT,
               caption = "The errors are also highlighted in the preview table above.",
               rownames = FALSE, options = list(
@@ -385,7 +385,7 @@ shinyServer(function(input, output, session) {
         validate_w$update(html = h3(waiter_msg))
 
         # highlight invalue cells in preview table
-        output$tbl <- renderDT({
+        output$tbl_preview <- renderDT({
           if (length(inx_ws) > 0) {
             # if it is wrong schema error, highlight all cells
             datatable(rawData(), options = list(lengthChange = FALSE, scrollX = TRUE)) %>%
@@ -399,24 +399,24 @@ shinyServer(function(input, output, session) {
           }
         })
 
-        show("gsheet_btn")
+        show("btn_val_gsheet")
       } else {
         validation_res <- "valid"
         # show submit button
         output$submit <- renderUI({
-          actionButton("submitButton", "Submit to Synapse")
+          actionButton("btn_submit", "Submit to Synapse")
         })
       }
     }
 
     # validation messages
-    output$text2 <- renderUI({
+    output$text_validate <- renderUI({
       text_class <- ifelse(!is.null(validation_res) && validation_res == "valid",
         "success_msg", "error_msg"
       )
 
       tagList(
-        if (is.null(input$template_type)) {
+        if (is.null(input$dropdown_template)) {
           span(class = text_class, HTML("Please <b>select a template</b> from the 'Select your Dataset' tab !<br><br>"))
         },
         if (is.null(rawData())) {
@@ -436,7 +436,7 @@ shinyServer(function(input, output, session) {
       )
     })
 
-    show("text_div2")
+    show("div_validate")
 
     Sys.sleep(2.5)
 
@@ -444,7 +444,7 @@ shinyServer(function(input, output, session) {
   })
 
   # if user click gsheet_btn, generating gsheet
-  observeEvent(input$gsheet_btn, {
+  observeEvent(input$btn_val_gsheet, {
     # loading screen for Google link generation
     gsheet_w <- Waiter$new(
       html = tagList(spin_plus(), br(), h4("Generating link...")),
@@ -455,17 +455,17 @@ shinyServer(function(input, output, session) {
 
     filled_manifest <- metadata_model$populateModelManifest(paste0(
       config$community,
-      " ", input$template_type
-    ), input$file1$datapath, schema_name)
+      " ", input$dropdown_template
+    ), input$file1$datapath, template_name)
 
-    show("gsheet_div")
+    show("div_val_gsheet")
 
-    output$gsheet_link <- renderUI({
+    output$text_val_gsheet <- renderUI({
       # tags$a(href = filled_manifest, filled_manifest, target = '_blank')
       HTML(paste0("<a target=\"_blank\" href=\"", filled_manifest, "\">Edit on the Google Sheet.</a>"))
     })
 
-    hide("gsheet_btn") # hide btn once link generated
+    hide("btn_val_gsheet") # hide btn once link generated
 
     gsheet_w$hide()
   })
@@ -477,7 +477,7 @@ shinyServer(function(input, output, session) {
   )
 
   ######## Submission Section ########
-  observeEvent(input$submitButton, {
+  observeEvent(input$btn_submit, {
     submit_w$show()
 
     # reads file csv again
@@ -494,7 +494,7 @@ shinyServer(function(input, output, session) {
 
     # and adds entityID, saves it as synapse_storage_manifest.csv, then associates
     # with synapse files
-    if (input$template_type %in% assay_schemas) {
+    if (input$dropdown_template %in% assay_schemas) {
       # make into a csv or table for assay components already has entityId
       if ("entityId" %in% colnames(infile)) {
         write.csv(infile,
@@ -544,7 +544,7 @@ shinyServer(function(input, output, session) {
           ))
         })
         # renders empty df
-        output$tbl <- renderDT(datatable(as.data.frame(matrix(0,
+        output$tbl_preview <- renderDT(datatable(as.data.frame(matrix(0,
           ncol = 0,
           nrow = 0
         ))))
@@ -589,7 +589,7 @@ shinyServer(function(input, output, session) {
           ))
         })
         # renders empty df
-        output$tbl <- renderDT(datatable(as.data.frame(matrix(0,
+        output$tbl_preview <- renderDT(datatable(as.data.frame(matrix(0,
           ncol = 0,
           nrow = 0
         ))))
