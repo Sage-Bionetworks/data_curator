@@ -155,7 +155,7 @@ ui <- dashboardPage(
             solidHeader = TRUE,
             status = "primary",
             width = 12,
-            uiOutput("fileInput_ui")
+            csvInfileUI("inputFile")
           ),
           box(
             title = "Metadata Preview",

@@ -75,5 +75,5 @@ api <- oauth_endpoint(
 scope <- "openid view download modify"
 
 # Import functions/modules
-source.files <- list.files("functions", pattern="*\\.R$", recursive = TRUE, full.names = TRUE)
+source.files <- list.files("modules", pattern="*\\.R$", recursive = TRUE, full.names = TRUE)
 sapply(source.files, FUN=source)

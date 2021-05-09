@@ -153,7 +153,7 @@ shinyServer(function(input, output, session) {
   observeEvent(input$btn_download, {
 
     # loading screen for template link generation
-		dc_waiter("show", msg="Generating link...")
+    dc_waiter("show", msg = "Generating link...")
 
     if (is.null(input$dropdown_template)) {
       output$text_download <- renderUI({
@@ -200,39 +200,19 @@ shinyServer(function(input, output, session) {
 
     dc_waiter("hide", sleep = 1)
     # display link
-    show("div_download")  # TODO: add progress bar on (loading) screen
-
+    show("div_download") # TODO: add progress bar on (loading) screen
   })
 
-  # renders fileInput ui
-  output$fileInput_ui <- renderUI({
-    fileInput("file1", "Upload CSV File", accept = c(
-      "text/csv", "text/comma-separated-values",
-      ".csv"
-    ))
-  })
 
   ######## Reads .csv File ########
-  rawData <- eventReactive(ignoreNULL = FALSE, input$file1, {
-    # if no file uploaded, return null
-    if (is.null(input$file1)) {
-      return(NULL)
-    }
-    infile <- read_csv(input$file1$datapath, na = c("", "NA"), col_types = readr::cols(.default = "c")) %>%
-      replace(., is.na(.), "") # change NA to blank to match schema output)
-    # remove empty rows/columns where readr called it 'X'[digit] for unnamed col
-    infile <- infile[, !grepl("^X", colnames(infile))]
-    infile <- infile[rowSums(is.na(infile)) != ncol(infile), ]
-  })
-
-  observeEvent(input$file1, {
-    sapply(clean_tags, FUN = hide)
-  })
+  inFile <- csvInfileServer("inputFile", colsAsCharacters = TRUE, keepBlank = TRUE)
 
   # renders in DT for preview
-  observeEvent(rawData(), {
+  observeEvent(inFile$data(), {
+    # hide the validation section when upload a new file
+    sapply(clean_tags, FUN = hide)
     output$tbl_preview <- renderDT({
-      datatable(rawData(),
+      datatable(inFile$data(),
         options = list(lengthChange = FALSE, scrollX = TRUE),
         rownames = FALSE
       )
@@ -243,14 +223,13 @@ shinyServer(function(input, output, session) {
   observeEvent(input$btn_validate, {
     # loading screen for validating metadata
     dc_waiter("show", msg = "Validating...")
-
     validation_res <- NULL
     type_error <- NULL
     help_msg <- NULL
 
-    if (!is.null(rawData()) & !is.null(input$dropdown_template)) {
+    if (!is.null(inFile$data()) & !is.null(input$dropdown_template)) {
       annotation_status <- metadata_model$validateModelManifest(
-        input$file1$datapath,
+        inFile$raw()$datapath,
         template_name
       )
 
@@ -326,7 +305,7 @@ shinyServer(function(input, output, session) {
             )
           )
           # sort rows based on input column names
-          errorDT <- errorDT[order(match(errorDT$Column, colnames(rawData()))), ]
+          errorDT <- errorDT[order(match(errorDT$Column, colnames(inFile$data()))), ]
 
           # output error messages as data table
           show("tbl_validate")
@@ -346,10 +325,10 @@ shinyServer(function(input, output, session) {
         output$tbl_preview <- renderDT({
           if (length(inx_ws) > 0) {
             # if it is wrong schema error, highlight all cells
-            datatable(rawData(), options = list(lengthChange = FALSE, scrollX = TRUE)) %>%
+            datatable(inFile$data(), options = list(lengthChange = FALSE, scrollX = TRUE)) %>%
               formatStyle(1, target = "row", backgroundColor = "yellow")
           } else {
-            datatable(rawData(), options = list(lengthChange = FALSE, scrollX = TRUE)) %>%
+            datatable(inFile$data(), options = list(lengthChange = FALSE, scrollX = TRUE)) %>%
               formatStyle(errorDT$Column, backgroundColor = styleEqual(
                 errorDT$Value,
                 rep("yellow", length(errorDT$Value))
@@ -382,7 +361,7 @@ shinyServer(function(input, output, session) {
         if (is.null(input$dropdown_template)) {
           span(class = text_class, HTML("Please <b>select a template</b> from the 'Select your Dataset' tab !<br><br>"))
         },
-        if (is.null(rawData())) {
+        if (is.null(inFile$data())) {
           span(class = text_class, HTML("Please <b>upload</b> a filled template !"))
         },
         if (!is.null(validation_res)) {
@@ -410,7 +389,7 @@ shinyServer(function(input, output, session) {
     filled_manifest <- metadata_model$populateModelManifest(paste0(
       config$community,
       " ", input$dropdown_template
-    ), input$file1$datapath, template_name)
+    ), inFile$datapath, template_name)
 
     show("div_val_gsheet")
 
@@ -431,11 +410,7 @@ shinyServer(function(input, output, session) {
     dc_waiter("show", msg = "Submitting...")
 
     # reads file csv again
-    infile <- read_csv(input$file1$datapath, na = c("", "NA"))
-
-    # remove empty rows/columns where readr called it 'X'[digit] for unnamed col
-    infile <- infile[, !grepl("^X", colnames(infile))]
-    infile <- infile[rowSums(is.na(infile)) != ncol(infile), ]
+    inFile <- csvInfileServer("inputFile")
 
     # IF an assay component selected (define assay components) note for future
     # the type to filter (eg assay) on could probably also be a config choice
@@ -483,27 +458,34 @@ shinyServer(function(input, output, session) {
         nx_report_success("Success!", paste0("Manifest submitted to: ", manifest_path))
         rm("./files/synapse_storage_manifest.csv")
 
+        # TODO:
+        # we could either hide or restart everything
+        # wait until testing on submit functions
+
         # clear inputs
         sapply(clean_tags, FUN = hide)
 
+        # TODO: consider removing this chunk,
+        # could change to reset('inFile') if reset works
         # rerenders fileinput UI
-        output$fileInput_ui <- renderUI({
-          fileInput("file1", "Upload CSV File", accept = c(
-            "text/csv", "text/comma-separated-values",
-            ".csv"
-          ))
-        })
+        # output$fileInput_ui <- renderUI({
+        #   fileInput("file1", "Upload CSV File", accept = c(
+        #     "text/csv", "text/comma-separated-values",
+        #     ".csv"
+        #   ))
+        # })
+
         # renders empty df
         output$tbl_preview <- renderDT(datatable(as.data.frame(matrix(0,
           ncol = 0,
           nrow = 0
         ))))
       } else {
-         dc_waiter("update", msg= HTML(paste0("Uh oh, looks like something went wrong!",
-            manifest_id,
-            " is not a valid Synapse ID. Try again?"
-          )
-        ), sleep = 3)
+        dc_waiter("update", msg = HTML(paste0(
+          "Uh oh, looks like something went wrong!",
+          manifest_id,
+          " is not a valid Synapse ID. Try again?"
+        )), sleep = 3)
         rm("/tmp/synapse_storage_manifest.csv")
       }
     } else {
@@ -542,8 +524,10 @@ shinyServer(function(input, output, session) {
           nrow = 0
         ))))
       } else {
-        dc_waiter("update", msg= HTML(paste0("Uh oh, looks like something went wrong!", 
-                          manifest_id, " is not a valid Synapse ID. Try again?")), sleep = 3)
+        dc_waiter("update", msg = HTML(paste0(
+          "Uh oh, looks like something went wrong!",
+          manifest_id, " is not a valid Synapse ID. Try again?"
+        )), sleep = 3)
         rm("/tmp/synapse_storage_manifest.csv")
       }
     }
