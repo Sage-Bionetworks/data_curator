@@ -8,22 +8,6 @@
 #
 # https://www.synapse.org
 
-library(shiny)
-library(shinyjs)
-library(dplyr)
-library(shinythemes)
-library(shinydashboard)
-library(stringr)
-library(DT)
-library(jsonlite)
-library(reticulate)
-library(ggplot2)
-library(purrr)
-library(plotly)
-library(shinypop)
-library(waiter)
-library(sass)  # read scss file
-
 ui <- dashboardPage(
   skin = "purple",
   dashboardHeader(

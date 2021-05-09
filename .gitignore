@@ -20,3 +20,4 @@ credentials.json
 token.pickle
 **/__pycache__
 config.yaml
+renv/activate.R

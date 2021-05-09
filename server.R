@@ -4,29 +4,10 @@
 # pages to log into Synapse as the currently logged in user from the web portal
 # using the session token.  https://www.synapse.org
 
-library(shiny)
-library(shinyjs)
-library(dplyr)
-library(shinythemes)
-library(shinydashboard)
-library(stringr)
-library(DT)
-library(jsonlite)
-library(reticulate)
-library(ggplot2)
-library(purrr)
-library(plotly)
-library(shinypop)
-library(waiter)
-library(readr)
-
 # Don't necessarily have to set `RETICULATE_PYTHON` env variable
 reticulate::use_condaenv("data_curator_env_oauth")
 
 shinyServer(function(input, output, session) {
-  ########### session global variables
-  source_python("python/synapse_func_alias.py")
-  source_python("python/metadata_model.py")
 
   params <- parseQueryString(isolate(session$clientData$url_search))
   if (!has_auth_code(params)) {
@@ -45,13 +26,15 @@ shinyServer(function(input, output, session) {
   token_response <- content(req, type = NULL)
   access_token <- token_response$access_token
 
+  ######## session global variables ########
+  source_python("python/synapse_func_alias.py")
+  source_python("python/metadata_model.py")
   # import module that contains SynapseStorage class
   synapse_driver <- import("schematic.store.synapse")$SynapseStorage
-
-  ### read config in
-  config <- jsonlite::fromJSON("www/config.json")
-
-  ### logs in and gets list of projects they have access to
+	# read config in
+	config <- fromJSON("www/config.json")
+	
+  # logs in and gets list of projects they have access to
   synStore_obj <- NULL
   projects_namedList <- NULL
 
@@ -66,27 +49,26 @@ shinyServer(function(input, output, session) {
   display_name <- config$manifest_schemas$display_name
   schema_to_display_lookup <- data.frame(schema_name, display_name)
 
+	tabs_list <- c("instructions", "data", "template", "upload")
   clean_tags <- c("text_div2", "tbl2", "gsheet_btn", "gsheet_div", "submitButton")
-  ############
 
-  ### synapse cookies
+	######## Initiate Login Process ########
+	# synapse cookies
   session$sendCustomMessage(type = "readCookie", message = list())
 
-  ### initial login front page items
+  # login page
   observeEvent(input$cookie, {
-    ## login and update session; otherwise, notify to login to Synapse first
+    # login and update session; otherwise, notify to login to Synapse first
     tryCatch(
       {
-        ### logs in
         syn_login(sessionToken = input$cookie, rememberMe = FALSE)
 
-        ### welcome message
+        # welcome message
         output$title <- renderUI({
           titlePanel(h4(sprintf("Welcome, %s", syn_getUserProfile()$userName)))
         })
 
-        ### updating global vars with values for projects synStore_obj <<-
-        ### synapse_driver(config$main_fileview, token = input$cookie)
+        # updating global vars with values for projects synStore_obj <<-
         synStore_obj <<- synapse_driver(token = input$cookie)
 
         # get_projects_list(synStore_obj)
@@ -97,10 +79,10 @@ shinyServer(function(input, output, session) {
           projects_namedList[projects_list[[i]][[2]]] <<- projects_list[[i]][[1]]
         }
 
-        ### updates project dropdown
+        # updates project dropdown
         updateSelectizeInput(session, "var", choices = sort(names(projects_namedList)))
 
-        ### update waiter loading screen once login successful
+        # update waiter loading screen once login successful
         waiter_update(html = tagList(
           img(src = "synapse_logo.png", height = "120px"),
           h3(sprintf("Welcome, %s!", syn_getUserProfile()$userName))
@@ -124,11 +106,9 @@ shinyServer(function(input, output, session) {
   })
 
 
-  ###### BUTTONS STUFF !!! remove last arrow
+  ######## Arrow Button ########
   Previous_Button <- tags$div(actionButton("Prev_Tab", HTML("<div class=\"col-sm-4\"><i class=\"fa fa-angle-double-left fa-2x\"></i></div>")))
   Next_Button <- div(actionButton("Next_Tab", HTML("<div class=\"col-sm-4\"><i class=\"fa fa-angle-double-right fa-2x\"></i></div>")))
-
-  tabs_list <- c("instructions", "data", "template", "upload")
 
   output$Next_Previous <- renderUI({
     if (input[["tabs"]] == "upload") {
@@ -140,39 +120,33 @@ shinyServer(function(input, output, session) {
     }
   })
 
-  observeEvent(input$Prev_Tab, {
-    tab_list <- list_tabs
-    current_tab <- which(tab_list == input[["tabs"]])
-    updateTabItems(session, "tabs", selected = tab_list[current_tab - 1])
-  })
+	lapply(c(-1, 1), function(i) {
+		tagID <- c("Next_Tab", "Prev_Tab")[i]
+		observeEvent(input[[tagID]], {
+		current_tab <- which(tabs_list == input[["tabs"]])
+		updateTabItems(session, "tabs", selected = tabs_list[current_tab + i])
+		})
+	})
 
-  observeEvent(input$Next_Tab, {
-    tab_list <- list_tabs
-    current_tab <- which(tab_list == input[["tabs"]])
-    updateTabItems(session, "tabs", selected = tab_list[current_tab + 1])
-  })
-
-  ####### BUTTONS END
-
-  ### lists folder datasets if exists in project
+  ######## Update Folder List ########
   observeEvent(ignoreInit = TRUE, input$var, {
     output$folders <- renderUI({
       # get synID of selected project
       project_synID <- projects_namedList[[input$var]]
 
-      ### gets folders per project
+      # gets folders per project
       folder_list <- synapse_driver$getStorageDatasetsInProject(
         synStore_obj,
         project_synID
       )
 
-      folders_namedList <<- NULL # need to clean first
+      folders_namedList <<- NULL  # need to clean first
       for (i in seq_along(folder_list)) {
         folders_namedList[folder_list[[i]][[2]]] <<- folder_list[[i]][[1]]
       }
       folderNames <- names(folders_namedList)
 
-      ### updates foldernames
+      # updates foldernames
       selectInput(inputId = "dataset", label = "Folder:", choices = folderNames)
     })
   })
@@ -183,11 +157,11 @@ shinyServer(function(input, output, session) {
     folder_synID <<- folders_namedList[[input$dataset]]
   })
 
+	######## Update Template ########
   output$manifest_display_name <- renderUI({
     selectInput(inputId = "template_type", label = "Template:", choices = display_name)
   })
-
-  # update selected schema template name
+	# update selected schema template name
   observeEvent(input$dataset, {
     template_type_df <- schema_to_display_lookup[match(input$template_type, schema_to_display_lookup$display_name),
       1,
@@ -196,6 +170,7 @@ shinyServer(function(input, output, session) {
     schema_name <<- as.character(template_type_df$schema_name)
   })
 
+	# hide tags when users select new template
   observeEvent(
     {
       input$dataset
@@ -212,8 +187,7 @@ shinyServer(function(input, output, session) {
     color = "rgba(66, 72, 116, .9)"
   )
 
-  ### shows new metadata link when get gsheets template button pressed OR updates old
-  ### metadata if is exists
+  ######## Template Google Sheet Link ########
   observeEvent(input$download, {
     manifest_w$show()
 
@@ -222,13 +196,13 @@ shinyServer(function(input, output, session) {
         tags$span(class = "error_msg", HTML("Please <b>select a template</b> from the 'Select your Dataset' tab !"))
       })
     } else {
-      ### checks if a manifest already exists
+      # checks if a manifest already exists
       existing_manifestID <- synapse_driver$getDatasetManifest(
         synStore_obj,
         folder_synID
       )
 
-      ### if there isn't an existing manifest make a new one
+      # if there isn't an existing manifest make a new one
       if (existing_manifestID == "") {
         file_list <- synapse_driver$getFilesInStorageDataset(
           synStore_obj,
@@ -244,13 +218,11 @@ shinyServer(function(input, output, session) {
           config$community,
           " ", input$template_type
         ), schema_name, filenames = as.list(filename_list))
-        ### make sure not scalar if length of list is 1 in R add in the step to convert
-        ### names later ###
+        # make sure not scalar if length of list is 1 in R 
+				# add in the step to convert names later
       } else {
-        ### if the manifest already exists
+        # if the manifest already exists
         manifest_entity <- syn_get(existing_manifestID)
-        # prepopulatedManifestURL = mm.populateModelManifest('test_update', entity.path,
-        # component)
         manifest_url <- metadata_model$populateModelManifest(paste0(
           config$community,
           " ", input$template_type
@@ -262,15 +234,13 @@ shinyServer(function(input, output, session) {
       })
     }
 
-    ## links shows in text box
-    show("text_div")
-    ### if want a progress bar need more feedback from API to know how to increment
-    ### progress bar ###
+    # links shows in text box
+    show("text_div")  # TODO: add progress bar on (loading) screen
 
     manifest_w$hide()
   })
 
-  ### renders fileInput ui
+  # renders fileInput ui
   output$fileInput_ui <- renderUI({
     fileInput("file1", "Upload CSV File", accept = c(
       "text/csv", "text/comma-separated-values",
@@ -278,14 +248,15 @@ shinyServer(function(input, output, session) {
     ))
   })
 
-  ### reads csv file and previews
+  ######## Reads .csv File ########
   rawData <- eventReactive(ignoreNULL = FALSE, input$file1, {
-    if (is.null(input$file1)) {
+    # if no file uploaded, return null
+		if (is.null(input$file1)) {
       return(NULL)
-    } # if no file uploaded, return null
-    infile <- readr::read_csv(input$file1$datapath, na = c("", "NA"), col_types = readr::cols(.default = "c")) %>%
-      replace(., is.na(.), "") # change NA to blank to match schema output)
-    ### remove empty rows/columns where readr called it 'X'[digit] for unnamed col
+    }
+    infile <- read_csv(input$file1$datapath, na = c("", "NA"), col_types = readr::cols(.default = "c")) %>%
+      replace(., is.na(.), "")  # change NA to blank to match schema output)
+    # remove empty rows/columns where readr called it 'X'[digit] for unnamed col
     infile <- infile[, !grepl("^X", colnames(infile))]
     infile <- infile[rowSums(is.na(infile)) != ncol(infile), ]
   })
@@ -294,9 +265,9 @@ shinyServer(function(input, output, session) {
     sapply(clean_tags, FUN = hide)
   })
 
-  ### renders in DT for preview
+  # renders in DT for preview
   observeEvent(rawData(), {
-    output$tbl <- DT::renderDT({
+    output$tbl <- renderDT({
       datatable(rawData(),
         options = list(lengthChange = FALSE, scrollX = TRUE),
         rownames = FALSE
@@ -304,13 +275,13 @@ shinyServer(function(input, output, session) {
     })
   })
 
-  ## loading screen for validating metadata
+  # loading screen for validating metadata
   validate_w <- Waiter$new(
     html = tagList(spin_plus(), br(), h4("Validating...")),
     color = "rgba(66, 72, 116, .9)"
   )
 
-  ### toggles validation status when validate button pressed
+  ######## Validation Section #######
   observeEvent(input$validate, {
     validation_res <- NULL
     type_error <- NULL
@@ -400,7 +371,7 @@ shinyServer(function(input, output, session) {
 
           # output error messages as data table
           show("tbl2")
-          output$tbl2 <- DT::renderDT({
+          output$tbl2 <- renderDT({
             datatable(errorDT,
               caption = "The errors are also highlighted in the preview table above.",
               rownames = FALSE, options = list(
@@ -414,9 +385,8 @@ shinyServer(function(input, output, session) {
 
         validate_w$update(html = h3(waiter_msg))
 
-        ### update DT view with incorrect values currently only one column, requires
-        ### backend support of multiple
-        output$tbl <- DT::renderDT({
+        # highlight invalue cells in preview table
+        output$tbl <- renderDT({
           if (length(inx_ws) > 0) {
             # if it is wrong schema error, highlight all cells
             datatable(rawData(), options = list(lengthChange = FALSE, scrollX = TRUE)) %>%
@@ -433,14 +403,14 @@ shinyServer(function(input, output, session) {
         show("gsheet_btn")
       } else {
         validation_res <- "valid"
-        ### show submit button
+        # show submit button
         output$submit <- renderUI({
           actionButton("submitButton", "Submit to Synapse")
         })
       }
     }
 
-    ### format output text
+    # validation messages
     output$text2 <- renderUI({
       text_class <- ifelse(!is.null(validation_res) && validation_res == "valid",
         "success_msg", "error_msg"
@@ -501,32 +471,32 @@ shinyServer(function(input, output, session) {
     gsheet_w$hide()
   })
 
-  ## loading screen for submitting data
+  # loading screen for submitting data
   submit_w <- Waiter$new(
     html = tagList(img(src = "loading.gif"), h4("Submitting...")),
     color = "#424874"
   )
 
-  ### submit button
+  ######## Submission Section ########
   observeEvent(input$submitButton, {
     submit_w$show()
 
     # reads file csv again
-    infile <- readr::read_csv(input$file1$datapath, na = c("", "NA"))
+    infile <- read_csv(input$file1$datapath, na = c("", "NA"))
 
-    ### remove empty rows/columns where readr called it 'X'[digit] for unnamed col
+    # remove empty rows/columns where readr called it 'X'[digit] for unnamed col
     infile <- infile[, !grepl("^X", colnames(infile))]
     infile <- infile[rowSums(is.na(infile)) != ncol(infile), ]
 
-    ### IF an assay component selected (define assay components) note for future - the
-    ### type to filter (eg assay) on could probably also be a config choice
+    # IF an assay component selected (define assay components) note for future 
+    # the type to filter (eg assay) on could probably also be a config choice
     assay_schemas <- config$manifest_schemas$display_name[config$manifest_schemas$type ==
       "assay"]
 
-    ### and adds entityID, saves it as synapse_storage_manifest.csv, then associates
-    ### with synapse files
+    # and adds entityID, saves it as synapse_storage_manifest.csv, then associates
+    # with synapse files
     if (input$template_type %in% assay_schemas) {
-      ### make into a csv or table for assay components already has entityId
+      # make into a csv or table for assay components already has entityId
       if ("entityId" %in% colnames(infile)) {
         write.csv(infile,
           file = "./files/synapse_storage_manifest.csv",
@@ -552,30 +522,30 @@ shinyServer(function(input, output, session) {
         )
       }
 
-      ### associates metadata with data and returns manifest id
+      # associates metadata with data and returns manifest id
       manifest_id <- synapse_driver$associateMetadataWithFiles(
         synStore_obj,
         "./files/synapse_storage_manifest.csv", folder_synID
       )
       print(manifest_id)
       manifest_path <- paste0("synapse.org/#!Synapse:", manifest_id)
-      ### if no error
+      # if no error
       if (startsWith(manifest_id, "syn") == TRUE) {
         nx_report_success("Success!", paste0("Manifest submitted to: ", manifest_path))
         rm("./files/synapse_storage_manifest.csv")
 
-        ### clear inputs
+        # clear inputs
         sapply(clean_tags, FUN = hide)
 
-        ### rerenders fileinput UI
+        # rerenders fileinput UI
         output$fileInput_ui <- renderUI({
           fileInput("file1", "Upload CSV File", accept = c(
             "text/csv", "text/comma-separated-values",
             ".csv"
           ))
         })
-        ### renders empty df
-        output$tbl <- DT::renderDT(datatable(as.data.frame(matrix(0,
+        # renders empty df
+        output$tbl <- renderDT(datatable(as.data.frame(matrix(0,
           ncol = 0,
           nrow = 0
         ))))
@@ -590,13 +560,13 @@ shinyServer(function(input, output, session) {
         rm("/tmp/synapse_storage_manifest.csv")
       }
     } else {
-      ## if not assay type tempalte
+      # if not assay type tempalte
       write.csv(infile,
         file = "./files/synapse_storage_manifest.csv", quote = TRUE,
         row.names = FALSE, na = ""
       )
 
-      ### associates metadata with data and returns manifest id
+      # associates metadata with data and returns manifest id
       manifest_id <- synapse_driver$associateMetadataWithFiles(
         synStore_obj,
         "./files/synapse_storage_manifest.csv", folder_synID
@@ -604,23 +574,23 @@ shinyServer(function(input, output, session) {
       print(manifest_id)
       manifest_path <- paste0("synapse.org/#!Synapse:", manifest_id)
 
-      ### if uploaded provided valid synID message
+      # if uploaded provided valid synID message
       if (startsWith(manifest_id, "syn") == TRUE) {
         nx_report_success("Success!", paste0("Manifest submitted to: ", manifest_path))
         rm("./files/synapse_storage_manifest.csv")
 
-        ### clear inputs
+        # clear inputs
         sapply(clean_tags, FUN = hide)
 
-        ### rerenders fileinput UI
+        # rerenders fileinput UI
         output$fileInput_ui <- renderUI({
           fileInput("file1", "Upload CSV File", accept = c(
             "text/csv", "text/comma-separated-values",
             ".csv"
           ))
         })
-        ### renders empty df
-        output$tbl <- DT::renderDT(datatable(as.data.frame(matrix(0,
+        # renders empty df
+        output$tbl <- renderDT(datatable(as.data.frame(matrix(0,
           ncol = 0,
           nrow = 0
         ))))

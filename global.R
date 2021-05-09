@@ -1,7 +1,24 @@
+suppressPackageStartupMessages({
 library(shiny)
 library(httr)
 library(rjson)
 library(yaml)
+library(shinyjs)
+library(dplyr)
+library(shinythemes)
+library(shinydashboard)
+library(stringr)
+library(DT)
+library(jsonlite)
+library(reticulate)
+library(ggplot2)
+library(purrr)
+library(plotly)
+library(shinypop)
+library(waiter)
+library(readr)
+library(sass)
+})
 
 # APP_URL <- "https://shinypro.synapse.org/users/spatil/HTAN-oauth/"
 
