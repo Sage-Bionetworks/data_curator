@@ -40,13 +40,13 @@ shinyServer(function(input, output, session) {
   folders_namedList <- NULL
   folder_synID <- NULL # selected foler synapse ID
 
-  schema_name <- NULL # selected template schema name
+  template_name <- NULL # selected template schema name
   filename_list <- NULL
 
   ### mapping from display name to schema name
-  template_name <- config$manifest_schemas$schema_name
+  schema_name <- config$manifest_schemas$schema_name
   display_name <- config$manifest_schemas$display_name
-  schema_to_display_lookup <- data.frame(template_name, display_name)
+  schema_to_display_lookup <- data.frame(schema_name, display_name)
 
   tabs_list <- c("tab_instructions", "tab_data", "tab_template", "tab_upload")
   clean_tags <- c("div_validate", "tbl_validate", "btn_val_gsheet", "div_val_gsheet", "btn_submit")
@@ -82,24 +82,10 @@ shinyServer(function(input, output, session) {
         updateSelectizeInput(session, "dropdown_project", choices = sort(names(projects_namedList)))
 
         # update waiter loading screen once login successful
-        waiter_update(html = tagList(
-          img(src = "synapse_logo.png", height = "120px"),
-          h3(sprintf("Welcome, %s!", syn_getUserProfile()$userName))
-        ))
-        Sys.sleep(2)
-        waiter_hide()
+        dc_waiter("update", isLogin = TRUE, isPass = TRUE, usrName = syn_getUserProfile()$userName)
       },
       error = function(err) {
-        Sys.sleep(2)
-        waiter_update(html = tagList(
-          img(src = "synapse_logo.png", height = "120px"),
-          h3("Looks like you're not logged in!"), span(
-            "Please ", a("login",
-              href = "https://www.synapse.org/#!LoginPlace:0", target = "_blank"
-            ),
-            " to Synapse, then refresh this page."
-          )
-        ))
+        dc_waiter("update", isLogin = TRUE, isPass = FALSE)
       }
     )
   })
@@ -107,7 +93,7 @@ shinyServer(function(input, output, session) {
 
   ######## Arrow Button ########
   lapply(1:3, function(i) {
-    switchTabServer(id = paste0("Next_Previous", i), tabId = "tabs", tab = reactive(input$tabs)(), tabList = tabs_list, parent = session)
+    switchTabServer(id = paste0("switchTab", i), tabId = "tabs", tab = reactive(input$tabs)(), tabList = tabs_list, parent = session)
   })
 
   ######## Update Folder List ########
@@ -141,7 +127,7 @@ shinyServer(function(input, output, session) {
 
   ######## Update Template ########
   output$manifest_display_name <- renderUI({
-    selectInput(inputId = "template_type", label = "Template:", choices = display_name)
+    selectInput(inputId = "dropdown_template", label = "Template:", choices = display_name)
   })
   # update selected schema template name
   observeEvent(input$dropdown_template, {
@@ -163,15 +149,11 @@ shinyServer(function(input, output, session) {
     }
   )
 
-  # loading screen for template link generation
-  manifest_w <- Waiter$new(
-    html = tagList(spin_plus(), br(), h4("Generating link...")),
-    color = "rgba(66, 72, 116, .9)"
-  )
-
   ######## Template Google Sheet Link ########
   observeEvent(input$btn_download, {
-    manifest_w$show()
+
+    # loading screen for template link generation
+		dc_waiter("show", msg="Generating link...")
 
     if (is.null(input$dropdown_template)) {
       output$text_download <- renderUI({
@@ -216,10 +198,10 @@ shinyServer(function(input, output, session) {
       })
     }
 
-    # links shows in text box
-    show("div_download") # TODO: add progress bar on (loading) screen
+    dc_waiter("hide", sleep = 1)
+    # display link
+    show("div_download")  # TODO: add progress bar on (loading) screen
 
-    manifest_w$hide()
   })
 
   # renders fileInput ui
@@ -257,19 +239,14 @@ shinyServer(function(input, output, session) {
     })
   })
 
-  # loading screen for validating metadata
-  validate_w <- Waiter$new(
-    html = tagList(spin_plus(), br(), h4("Validating...")),
-    color = "rgba(66, 72, 116, .9)"
-  )
-
   ######## Validation Section #######
   observeEvent(input$btn_validate, {
+    # loading screen for validating metadata
+    dc_waiter("show", msg = "Validating...")
+
     validation_res <- NULL
     type_error <- NULL
     help_msg <- NULL
-
-    validate_w$show()
 
     if (!is.null(rawData()) & !is.null(input$dropdown_template)) {
       annotation_status <- metadata_model$validateModelManifest(
@@ -365,8 +342,6 @@ shinyServer(function(input, output, session) {
           })
         }
 
-        validate_w$update(html = h3(waiter_msg))
-
         # highlight invalue cells in preview table
         output$tbl_preview <- renderDT({
           if (length(inx_ws) > 0) {
@@ -381,6 +356,11 @@ shinyServer(function(input, output, session) {
               ))
           }
         })
+
+        # validate_w$update(html = h3(waiter_msg))
+        # TODO: fix issue:
+        # https://github.com/Sage-Bionetworks/data_curator/issues/160#issuecomment-828911353
+        dc_waiter("update", msg = waiter_msg, sleep = 2.5)
 
         show("btn_val_gsheet")
       } else {
@@ -420,21 +400,12 @@ shinyServer(function(input, output, session) {
     })
 
     show("div_validate")
-
-    Sys.sleep(2.5)
-
-    validate_w$hide()
   })
 
   # if user click gsheet_btn, generating gsheet
   observeEvent(input$btn_val_gsheet, {
     # loading screen for Google link generation
-    gsheet_w <- Waiter$new(
-      html = tagList(spin_plus(), br(), h4("Generating link...")),
-      color = "rgba(66, 72, 116, .9)"
-    )
-
-    gsheet_w$show()
+    dc_waiter("show", msg = "Generating link...")
 
     filled_manifest <- metadata_model$populateModelManifest(paste0(
       config$community,
@@ -450,18 +421,14 @@ shinyServer(function(input, output, session) {
 
     hide("btn_val_gsheet") # hide btn once link generated
 
-    gsheet_w$hide()
+    dc_waiter("hide")
   })
 
-  # loading screen for submitting data
-  submit_w <- Waiter$new(
-    html = tagList(img(src = "loading.gif"), h4("Submitting...")),
-    color = "#424874"
-  )
 
   ######## Submission Section ########
   observeEvent(input$btn_submit, {
-    submit_w$show()
+    # loading screen for submitting data
+    dc_waiter("show", msg = "Submitting...")
 
     # reads file csv again
     infile <- read_csv(input$file1$datapath, na = c("", "NA"))
@@ -532,13 +499,11 @@ shinyServer(function(input, output, session) {
           nrow = 0
         ))))
       } else {
-        submit_w$update(html = tagList(
-          img(src = "synapse_logo.png", height = "115px"),
-          h3("Uh oh, looks like something went wrong!"), span(
+         dc_waiter("update", msg= HTML(paste0("Uh oh, looks like something went wrong!",
             manifest_id,
             " is not a valid Synapse ID. Try again?"
           )
-        ))
+        ), sleep = 3)
         rm("/tmp/synapse_storage_manifest.csv")
       }
     } else {
@@ -577,17 +542,10 @@ shinyServer(function(input, output, session) {
           nrow = 0
         ))))
       } else {
-        submit_w$update(html = tagList(
-          img(src = "synapse_logo.png", height = "115px"),
-          h3("Uh oh, looks like something went wrong!"), span(
-            manifest_id,
-            " is not a valid Synapse ID. Try again?"
-          )
-        ))
+        dc_waiter("update", msg= HTML(paste0("Uh oh, looks like something went wrong!", 
+                          manifest_id, " is not a valid Synapse ID. Try again?")), sleep = 3)
         rm("/tmp/synapse_storage_manifest.csv")
       }
     }
-    Sys.sleep(3)
-    submit_w$hide()
   })
 })

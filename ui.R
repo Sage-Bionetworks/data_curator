@@ -68,6 +68,7 @@ ui <- dashboardPage(
     ),
     uiOutput("title"),
     use_notiflix_report(),
+    use_waiter(),
     tabItems(
       # First tab content
       tabItem(
@@ -88,7 +89,7 @@ ui <- dashboardPage(
           strong("Submit and Validate Metadata"),
           "tab - upload your filled CSV and validate your metadata. If you receive errors correct them, reupload your CSV, and revalidate until you receive no more errors. When your metadata is valid, you will be able to see a 'Submit' button. Press it to submit your metadata."
         ),
-        switchTabUI("switch-instructions", direction = "right")
+        switchTabUI("switchTab1", direction = "right")
       ),
       # second tab content
       tabItem(
@@ -118,7 +119,7 @@ ui <- dashboardPage(
             uiOutput("manifest_display_name")
           )
         ),
-        switchTabUI("switch-data", direction = "both")
+        switchTabUI("switchTab2", direction = "both")
       ),
       # Third tab item
       tabItem(
@@ -142,7 +143,7 @@ ui <- dashboardPage(
             helpText("This link will leads to an empty template or your previously submitted template with new files if applicable.")
           )
         ),
-        switchTabUI("switch-tab_template", direction = "both")
+        switchTabUI("switchTab3", direction = "both")
       ),
       # Fourth tab content
       tabItem(
@@ -198,17 +199,8 @@ ui <- dashboardPage(
         )
       )
     ),
-    # uiOutput("Next_Previous"),
-    # switchPageUI("Next_Previous"),
-    ## waiter loading screen
-    use_waiter(),
-    waiter_show_on_load(
-      html = tagList(
-        img(src = "loading.gif"),
-        h4("Retrieving Synapse information...")
-      ),
-      color = "#424874"
-    )
+    # waiter loading screen
+    dc_waiter("show", isLogin = TRUE)
   )
 )
 
