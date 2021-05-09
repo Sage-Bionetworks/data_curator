@@ -8,7 +8,6 @@
 reticulate::use_condaenv("data_curator_env_oauth")
 
 shinyServer(function(input, output, session) {
-
   params <- parseQueryString(isolate(session$clientData$url_search))
   if (!has_auth_code(params)) {
     return()
@@ -31,9 +30,9 @@ shinyServer(function(input, output, session) {
   source_python("python/metadata_model.py")
   # import module that contains SynapseStorage class
   synapse_driver <- import("schematic.store.synapse")$SynapseStorage
-	# read config in
-	config <- fromJSON("www/config.json")
-	
+  # read config in
+  config <- fromJSON("www/config.json")
+
   # logs in and gets list of projects they have access to
   synStore_obj <- NULL
   projects_namedList <- NULL
@@ -49,11 +48,11 @@ shinyServer(function(input, output, session) {
   display_name <- config$manifest_schemas$display_name
   schema_to_display_lookup <- data.frame(schema_name, display_name)
 
-	tabs_list <- c("instructions", "data", "template", "upload")
+  tabs_list <- c("instructions", "data", "template", "upload")
   clean_tags <- c("text_div2", "tbl2", "gsheet_btn", "gsheet_div", "submitButton")
 
-	######## Initiate Login Process ########
-	# synapse cookies
+  ######## Initiate Login Process ########
+  # synapse cookies
   session$sendCustomMessage(type = "readCookie", message = list())
 
   # login page
@@ -120,13 +119,13 @@ shinyServer(function(input, output, session) {
     }
   })
 
-	lapply(c(-1, 1), function(i) {
-		tagID <- c("Next_Tab", "Prev_Tab")[i]
-		observeEvent(input[[tagID]], {
-		current_tab <- which(tabs_list == input[["tabs"]])
-		updateTabItems(session, "tabs", selected = tabs_list[current_tab + i])
-		})
-	})
+  lapply(c(-1, 1), function(i) {
+    tagID <- c("Next_Tab", "Prev_Tab")[i]
+    observeEvent(input[[tagID]], {
+      current_tab <- which(tabs_list == input[["tabs"]])
+      updateTabItems(session, "tabs", selected = tabs_list[current_tab + i])
+    })
+  })
 
   ######## Update Folder List ########
   observeEvent(ignoreInit = TRUE, input$var, {
@@ -140,7 +139,7 @@ shinyServer(function(input, output, session) {
         project_synID
       )
 
-      folders_namedList <<- NULL  # need to clean first
+      folders_namedList <<- NULL # need to clean first
       for (i in seq_along(folder_list)) {
         folders_namedList[folder_list[[i]][[2]]] <<- folder_list[[i]][[1]]
       }
@@ -157,11 +156,11 @@ shinyServer(function(input, output, session) {
     folder_synID <<- folders_namedList[[input$dataset]]
   })
 
-	######## Update Template ########
+  ######## Update Template ########
   output$manifest_display_name <- renderUI({
     selectInput(inputId = "template_type", label = "Template:", choices = display_name)
   })
-	# update selected schema template name
+  # update selected schema template name
   observeEvent(input$dataset, {
     template_type_df <- schema_to_display_lookup[match(input$template_type, schema_to_display_lookup$display_name),
       1,
@@ -170,7 +169,7 @@ shinyServer(function(input, output, session) {
     schema_name <<- as.character(template_type_df$schema_name)
   })
 
-	# hide tags when users select new template
+  # hide tags when users select new template
   observeEvent(
     {
       input$dataset
@@ -218,8 +217,8 @@ shinyServer(function(input, output, session) {
           config$community,
           " ", input$template_type
         ), schema_name, filenames = as.list(filename_list))
-        # make sure not scalar if length of list is 1 in R 
-				# add in the step to convert names later
+        # make sure not scalar if length of list is 1 in R
+        # add in the step to convert names later
       } else {
         # if the manifest already exists
         manifest_entity <- syn_get(existing_manifestID)
@@ -235,7 +234,7 @@ shinyServer(function(input, output, session) {
     }
 
     # links shows in text box
-    show("text_div")  # TODO: add progress bar on (loading) screen
+    show("text_div") # TODO: add progress bar on (loading) screen
 
     manifest_w$hide()
   })
@@ -251,11 +250,11 @@ shinyServer(function(input, output, session) {
   ######## Reads .csv File ########
   rawData <- eventReactive(ignoreNULL = FALSE, input$file1, {
     # if no file uploaded, return null
-		if (is.null(input$file1)) {
+    if (is.null(input$file1)) {
       return(NULL)
     }
     infile <- read_csv(input$file1$datapath, na = c("", "NA"), col_types = readr::cols(.default = "c")) %>%
-      replace(., is.na(.), "")  # change NA to blank to match schema output)
+      replace(., is.na(.), "") # change NA to blank to match schema output)
     # remove empty rows/columns where readr called it 'X'[digit] for unnamed col
     infile <- infile[, !grepl("^X", colnames(infile))]
     infile <- infile[rowSums(is.na(infile)) != ncol(infile), ]
@@ -488,7 +487,7 @@ shinyServer(function(input, output, session) {
     infile <- infile[, !grepl("^X", colnames(infile))]
     infile <- infile[rowSums(is.na(infile)) != ncol(infile), ]
 
-    # IF an assay component selected (define assay components) note for future 
+    # IF an assay component selected (define assay components) note for future
     # the type to filter (eg assay) on could probably also be a config choice
     assay_schemas <- config$manifest_schemas$display_name[config$manifest_schemas$type ==
       "assay"]
