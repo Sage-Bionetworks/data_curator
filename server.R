@@ -106,25 +106,8 @@ shinyServer(function(input, output, session) {
 
 
   ######## Arrow Button ########
-  Previous_Button <- tags$div(actionButton("Prev_Tab", HTML("<div class=\"col-sm-4\"><i class=\"fa fa-angle-double-left fa-2x\"></i></div>")))
-  Next_Button <- div(actionButton("Next_Tab", HTML("<div class=\"col-sm-4\"><i class=\"fa fa-angle-double-right fa-2x\"></i></div>")))
-
-  output$Next_Previous <- renderUI({
-    if (input[["tabs"]] == "tab_upload") {
-      # column(1,offset=1,Previous_Button)
-    } else if (input[["tabs"]] == "tab_instructions") {
-      column(1, offset = 10, Next_Button)
-    } else {
-      div(column(1, offset = 1, Previous_Button), column(1, offset = 8, Next_Button))
-    }
-  })
-
-  lapply(c(-1, 1), function(i) {
-    tagID <- c("Next_Tab", "Prev_Tab")[i]
-    observeEvent(input[[tagID]], {
-      current_tab <- which(tabs_list == input[["tabs"]])
-      updateTabItems(session, "tabs", selected = tabs_list[current_tab + i])
-    })
+  lapply(1:3, function(i) {
+    switchTabServer(id = paste0("Next_Previous", i), tabId = "tabs", tab = reactive(input$tabs)(), tabList = tabs_list, parent = session)
   })
 
   ######## Update Folder List ########

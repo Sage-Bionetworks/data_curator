@@ -73,3 +73,7 @@ api <- oauth_endpoint(
 
 # The 'openid' scope is required by the protocol for retrieving user information.
 scope <- "openid view download modify"
+
+# Import modules
+source.files <- list.files("modules", pattern="*\\.R$", recursive = TRUE, full.names = TRUE)
+sapply(ource.files, FUN=source)

@@ -87,7 +87,8 @@ ui <- dashboardPage(
           "3. Go to",
           strong("Submit and Validate Metadata"),
           "tab - upload your filled CSV and validate your metadata. If you receive errors correct them, reupload your CSV, and revalidate until you receive no more errors. When your metadata is valid, you will be able to see a 'Submit' button. Press it to submit your metadata."
-        )
+        ),
+        switchTabUI("switch-instructions", direction = "right")
       ),
       # second tab content
       tabItem(
@@ -116,7 +117,8 @@ ui <- dashboardPage(
             title = "Choose a Metadata Template Type: ",
             uiOutput("manifest_display_name")
           )
-        )
+        ),
+        switchTabUI("switch-data", direction = "both")
       ),
       # Third tab item
       tabItem(
@@ -139,7 +141,8 @@ ui <- dashboardPage(
             ),
             helpText("This link will leads to an empty template or your previously submitted template with new files if applicable.")
           )
-        )
+        ),
+        switchTabUI("switch-tab_template", direction = "both")
       ),
       # Fourth tab content
       tabItem(
@@ -195,8 +198,8 @@ ui <- dashboardPage(
         )
       )
     ),
-    uiOutput("Next_Previous"),
-
+    # uiOutput("Next_Previous"),
+    # switchPageUI("Next_Previous"),
     ## waiter loading screen
     use_waiter(),
     waiter_show_on_load(
