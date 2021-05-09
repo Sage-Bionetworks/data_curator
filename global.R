@@ -4,7 +4,7 @@ library(rjson)
 library(yaml)
 
 
-APP_URL <- "https://shinypro.synapse.org/users/spatil/HTAN-oauth/"
+# APP_URL <- "https://shinypro.synapse.org/users/spatil/HTAN-oauth/"
 
 has_auth_code <- function(params) {
   # params is a list object containing the parsed URL parameters. Return TRUE if
@@ -18,8 +18,10 @@ oauth_client = yaml.load_file("config.yaml")
 
 client_id <- toString(oauth_client$client_id)
 client_secret <- oauth_client$client_secret
+APP_URL <- oauth_client$APP_URL
 if (is.null(client_id)) stop("config.yaml is missing client_id")
 if (is.null(client_secret)) stop("config.yaml is missing client_secret")
+if (is.null(APP_URL)) stop("config.yaml is missing client_secret")
 
 app <- oauth_app("shinysynapse",
                  key = client_id,

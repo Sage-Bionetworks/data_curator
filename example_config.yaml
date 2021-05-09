@@ -3,3 +3,4 @@
 # client_id has to be a string
 client_id: 
 client_secret: 
+APP_URL: 
