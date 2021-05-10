@@ -162,7 +162,7 @@ ui <- dashboardPage(
             solidHeader = TRUE,
             status = "primary",
             width = 12,
-            DT::DTOutput("tbl_preview")
+            DTableUI("tbl_preview")
           ),
           box(
             title = "Validate Filled Metadata",
@@ -171,16 +171,14 @@ ui <- dashboardPage(
             width = 12,
             actionButton("btn_validate", "Validate Metadata"),
             hidden(
+              # TODO: 1. create module for gsheet
+              #       2. wrap up all validatio section in to one module
               div(
                 id = "div_validate",
                 height = "100%",
-                htmlOutput("text_validate")
-              ),
-              DT::DTOutput("tbl_validate"),
-              actionButton("btn_val_gsheet", "  Click to Generate Google Sheet Link", icon = icon("table")),
-              div(
-                id = "div_val_gsheet",
-                height = "100%",
+                ValidationMsgUI("text_validate"),
+                DTableUI("tbl_validate"),
+                actionButton("btn_val_gsheet", "  Click to Generate Google Sheet Link", icon = icon("table")),
                 htmlOutput("text_val_gsheet")
               )
             ),

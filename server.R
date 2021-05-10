@@ -49,7 +49,7 @@ shinyServer(function(input, output, session) {
   schema_to_display_lookup <- data.frame(schema_name, display_name)
 
   tabs_list <- c("tab_instructions", "tab_data", "tab_template", "tab_upload")
-  clean_tags <- c("div_validate", "tbl_validate", "btn_val_gsheet", "div_val_gsheet", "btn_submit")
+  clean_tags <- c("div_download", "div_validate", "btn_submit")
 
   ######## Initiate Login Process ########
   # synapse cookies
@@ -145,7 +145,7 @@ shinyServer(function(input, output, session) {
       input$dropdown_template
     },
     {
-      sapply(c("div_download", clean_tags), FUN = hide)
+      sapply(clean_tags, FUN = hide)
     }
   )
 
@@ -207,177 +207,64 @@ shinyServer(function(input, output, session) {
   ######## Reads .csv File ########
   inFile <- csvInfileServer("inputFile", colsAsCharacters = TRUE, keepBlank = TRUE)
 
-  # renders in DT for preview
+
   observeEvent(inFile$data(), {
     # hide the validation section when upload a new file
-    sapply(clean_tags, FUN = hide)
-    output$tbl_preview <- renderDT({
-      datatable(inFile$data(),
-        options = list(lengthChange = FALSE, scrollX = TRUE),
-        rownames = FALSE
-      )
-    })
+    sapply(clean_tags[-1], FUN = hide)
+    # renders in DT for preview
+    DTableServer("tbl_preview", inFile$data())
   })
 
   ######## Validation Section #######
   observeEvent(input$btn_validate, {
+    annotation_status <- metadata_model$validateModelManifest(
+      inFile$raw()$datapath,
+      template_name
+    )
+    # validation messages
+    valRes <- validationResult(annotation_status, input$dropdown_template, inFile$data())
+    ValidationMsgServer("text_validate", valRes, input$dropdown_template, inFile$data())
+
     # loading screen for validating metadata
     dc_waiter("show", msg = "Validating...")
-    validation_res <- NULL
-    type_error <- NULL
-    help_msg <- NULL
 
-    if (!is.null(inFile$data()) & !is.null(input$dropdown_template)) {
-      annotation_status <- metadata_model$validateModelManifest(
-        inFile$raw()$datapath,
-        template_name
+    # output error messages as data table
+    if (valRes$errorType == "Invalid Value") {
+      # renders in DT for preview
+      # show(NS("tbl_validate", "table"))  # NS is used in module
+      DTableServer("tbl_validate", valRes$errorDT,
+        options = list(
+          pageLength = 50, scrollX = TRUE,
+          scrollY = min(50 * length(annotation_status), 400), lengthChange = FALSE,
+          info = FALSE, searching = FALSE
+        )
       )
-
-      if (length(annotation_status) != 0) {
-        validation_res <- "invalid"
-        # mismatched template index
-        inx_mt <- which(sapply(annotation_status, function(x) {
-          grepl(
-            "Component value provided is: .*, whereas the Template Type is: .*",
-            x[[3]]
-          )
-        }))
-        # missing column index
-        inx_ws <- which(sapply(annotation_status, function(x) {
-          grepl(
-            "Wrong schema",
-            x[[2]]
-          )
-        }))
-
-        if (length(inx_mt) > 0) {
-          # mismatched error(s): selected template mismatched with validating template
-
-          waiter_msg <- "Mismatched Template Found !"
-          # get all mismatched components
-          error_values <- sapply(annotation_status[inx_mt], function(x) x[[4]][[1]]) %>%
-            unique()
-          column_names <- "Component"
-
-          # error messages for mismatch
-          mismatch_c <- error_values %>%
-            sQuote() %>%
-            paste(collapse = ", ")
-          type_error <- paste0(
-            "The submitted metadata contains << <b>",
-            mismatch_c, "</b> >> in the Component column, but requested validation for << <b>",
-            input$dropdown_template, "</b> >>."
-          )
-          help_msg <- paste0(
-            "Please check that you have selected the correct template in the <b>Select your Dataset</b> tab and
-                              ensure your metadata contains <b>only</b> one template, e.g. ",
-            input$dropdown_template, "."
-          )
-
-          # get wrong columns and values for updating preview table
-          errorDT <- data.frame(Column = sapply(
-            annotation_status[inx_mt],
-            function(i) i[[2]]
-          ), Value = sapply(
-            annotation_status[inx_mt],
-            function(i) i[[4]][[1]]
-          ))
-        } else if (length(inx_ws) > 0) {
-          # wrong schema error(s): validating metadata miss any required columns
-
-          waiter_msg <- "Wrong Schema Used !"
-          type_error <- "The submitted metadata does not contain all required column(s)."
-          help_msg <- "Please check that you used the correct template in the <b>'Get Metadata Template'</b> tab and
-                       ensure your metadata contains all required columns."
-        } else {
-          waiter_msg <- sprintf("%d errors found", length(annotation_status))
-          type_error <- paste0(
-            "The submitted metadata have ", length(annotation_status),
-            " errors."
-          )
-          help_msg <- NULL
-
-          errorDT <- data.frame(
-            Column = sapply(annotation_status, function(i) i[[2]]),
-            Value = sapply(annotation_status, function(i) i[[4]][[1]]), Error = sapply(
-              annotation_status,
-              function(i) i[[3]]
-            )
-          )
-          # sort rows based on input column names
-          errorDT <- errorDT[order(match(errorDT$Column, colnames(inFile$data()))), ]
-
-          # output error messages as data table
-          show("tbl_validate")
-          output$tbl_validate <- renderDT({
-            datatable(errorDT,
-              caption = "The errors are also highlighted in the preview table above.",
-              rownames = FALSE, options = list(
-                pageLength = 50, scrollX = TRUE,
-                scrollY = min(50 * length(annotation_status), 400), lengthChange = FALSE,
-                info = FALSE, searching = FALSE
-              )
-            )
-          })
-        }
-
-        # highlight invalue cells in preview table
-        output$tbl_preview <- renderDT({
-          if (length(inx_ws) > 0) {
-            # if it is wrong schema error, highlight all cells
-            datatable(inFile$data(), options = list(lengthChange = FALSE, scrollX = TRUE)) %>%
-              formatStyle(1, target = "row", backgroundColor = "yellow")
-          } else {
-            datatable(inFile$data(), options = list(lengthChange = FALSE, scrollX = TRUE)) %>%
-              formatStyle(errorDT$Column, backgroundColor = styleEqual(
-                errorDT$Value,
-                rep("yellow", length(errorDT$Value))
-              ))
-          }
-        })
-
-        # validate_w$update(html = h3(waiter_msg))
-        # TODO: fix issue:
-        # https://github.com/Sage-Bionetworks/data_curator/issues/160#issuecomment-828911353
-        dc_waiter("update", msg = waiter_msg, sleep = 2.5)
-
-        show("btn_val_gsheet")
-      } else {
-        validation_res <- "valid"
-        # show submit button
-        output$submit <- renderUI({
-          actionButton("btn_submit", "Submit to Synapse")
-        })
-      }
     }
 
-    # validation messages
-    output$text_validate <- renderUI({
-      text_class <- ifelse(!is.null(validation_res) && validation_res == "valid",
-        "success_msg", "error_msg"
-      )
+    # highlight invalue cells in preview table
 
-      tagList(
-        if (is.null(input$dropdown_template)) {
-          span(class = text_class, HTML("Please <b>select a template</b> from the 'Select your Dataset' tab !<br><br>"))
-        },
-        if (is.null(inFile$data())) {
-          span(class = text_class, HTML("Please <b>upload</b> a filled template !"))
-        },
-        if (!is.null(validation_res)) {
-          span(class = text_class, HTML(paste0(
-            "Your metadata is <b>", validation_res,
-            "</b> !!!"
-          )))
-        }, if (!is.null(type_error)) {
-          span(class = text_class, HTML(paste0("<br><br>", type_error)))
-        },
-        if (!is.null(help_msg)) {
-          span(class = text_class, HTML(paste0("<br><br>", help_msg)))
-        }
+    if (valRes$errorType == "Wrong Schema") {
+      DTableServer("tbl_preview", data = inFile$data(), highlight = "full")
+    } else {
+      DTableServer("tbl_preview",
+        data = inFile$data(),
+        highlight = "partial", hightlight.col = valRes$errorDT$Column, hightlight.value = valRes$errorDT$Value
       )
-    })
+    }
 
+
+    # validate_w$update(html = h3(waiter_msg))
+    # TODO: fix issue:
+    # https://github.com/Sage-Bionetworks/data_curator/issues/160#issuecomment-828911353
+    dc_waiter("update", msg = valRes$waiterMsg, sleep = 2.5)
+
+    if (valRes$validationRes == "valid") {
+      # show submit button
+      output$submit <- renderUI({
+        actionButton("btn_submit", "Submit to Synapse")
+      })
+      hide("btn_val_gsheet")
+    }
     show("div_validate")
   })
 
@@ -389,9 +276,7 @@ shinyServer(function(input, output, session) {
     filled_manifest <- metadata_model$populateModelManifest(paste0(
       config$community,
       " ", input$dropdown_template
-    ), inFile$datapath, template_name)
-
-    show("div_val_gsheet")
+    ), inFile$raw()$datapath, template_name)
 
     output$text_val_gsheet <- renderUI({
       # tags$a(href = filled_manifest, filled_manifest, target = '_blank')
@@ -457,10 +342,6 @@ shinyServer(function(input, output, session) {
       if (startsWith(manifest_id, "syn") == TRUE) {
         nx_report_success("Success!", paste0("Manifest submitted to: ", manifest_path))
         rm("./files/synapse_storage_manifest.csv")
-
-        # TODO:
-        # we could either hide or restart everything
-        # wait until testing on submit functions
 
         # clear inputs
         sapply(clean_tags, FUN = hide)
