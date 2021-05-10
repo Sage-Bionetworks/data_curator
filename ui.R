@@ -178,8 +178,7 @@ ui <- dashboardPage(
                 height = "100%",
                 ValidationMsgUI("text_validate"),
                 DTableUI("tbl_validate"),
-                actionButton("btn_val_gsheet", "  Click to Generate Google Sheet Link", icon = icon("table")),
-                htmlOutput("text_val_gsheet")
+                uiOutput("val_gsheet")
               )
             ),
             helpText(

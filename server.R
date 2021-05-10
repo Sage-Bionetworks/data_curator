@@ -263,7 +263,11 @@ shinyServer(function(input, output, session) {
       output$submit <- renderUI({
         actionButton("btn_submit", "Submit to Synapse")
       })
-      hide("btn_val_gsheet")
+    } else {
+      # render gsheet button
+      output$val_gsheet <- renderUI({
+        actionButton("btn_val_gsheet", "  Click to Generate Google Sheet Link", icon = icon("table"))
+      })
     }
     show("div_validate")
   })
@@ -278,12 +282,10 @@ shinyServer(function(input, output, session) {
       " ", input$dropdown_template
     ), inFile$raw()$datapath, template_name)
 
-    output$text_val_gsheet <- renderUI({
-      # tags$a(href = filled_manifest, filled_manifest, target = '_blank')
+    # rerender and change button to link
+    output$val_gsheet <- renderUI({
       HTML(paste0("<a target=\"_blank\" href=\"", filled_manifest, "\">Edit on the Google Sheet.</a>"))
     })
-
-    hide("btn_val_gsheet") # hide btn once link generated
 
     dc_waiter("hide")
   })
