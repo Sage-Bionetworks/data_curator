@@ -35,6 +35,7 @@ DTableServer <- function(id, data,
         ))
     }
   }
+
   moduleServer(
     id,
     function(input, output, session) {

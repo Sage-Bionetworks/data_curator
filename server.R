@@ -37,8 +37,8 @@ shinyServer(function(input, output, session) {
   folders_namedList <- NULL
   folder_synID <- NULL # selected foler synapse ID
 
-  template_name <- NULL # selected template schema name
-  filename_list <- NULL
+  template_schema_name <- NULL # selected template schema name
+  file_namedlist <- NULL
 
   ### mapping from display name to schema name
   schema_name <- config$manifest_schemas$schema_name
@@ -64,16 +64,12 @@ shinyServer(function(input, output, session) {
           titlePanel(h4(sprintf("Welcome, %s", syn_getUserProfile()$userName)))
         })
 
-        # updating global vars with values for projects synStore_obj <<-
+        # updating global vars with values for projects
         synStore_obj <<- synapse_driver(token = input$cookie)
 
         # get_projects_list(synStore_obj)
         projects_list <- synapse_driver$getStorageProjects(synStore_obj)
-
-        # projects_namedList <- NULL # may need to uncomment when we have refresh button
-        for (i in seq_along(projects_list)) {
-          projects_namedList[projects_list[[i]][[2]]] <<- projects_list[[i]][[1]]
-        }
+        projects_namedList <<- list2Vector(projects_list)
 
         # updates project dropdown
         updateSelectizeInput(session, "dropdown_project", choices = sort(names(projects_namedList)))
@@ -104,15 +100,10 @@ shinyServer(function(input, output, session) {
         synStore_obj,
         project_synID
       )
-
-      folders_namedList <<- NULL # need to clean first
-      for (i in seq_along(folder_list)) {
-        folders_namedList[folder_list[[i]][[2]]] <<- folder_list[[i]][[1]]
-      }
-      folderNames <- names(folders_namedList)
+      folders_namedList <<- list2Vector(folder_list)
 
       # updates foldernames
-      selectInput(inputId = "dropdown_folder", label = "Folder:", choices = folderNames)
+      selectInput(inputId = "dropdown_folder", label = "Folder:", choices = names(folders_namedList))
     })
   })
 
@@ -132,7 +123,7 @@ shinyServer(function(input, output, session) {
       1,
       drop = F
     ]
-    template_name <<- as.character(template_type_df$schema_name)
+    template_schema_name <<- as.character(template_type_df$schema_name)
   })
 
   # hide tags when users select new template
@@ -162,23 +153,21 @@ shinyServer(function(input, output, session) {
         synStore_obj,
         folder_synID
       )
-
       # if there isn't an existing manifest make a new one
       if (existing_manifestID == "") {
+        # get file list in selected folder
+        # don't put in the observation of folder dropdown
+        # it will crash if users switch folders too often
         file_list <- synapse_driver$getFilesInStorageDataset(
           synStore_obj,
           folder_synID
         )
-        file_namedList <- c()
-        for (i in seq_along(file_list)) {
-          file_namedList[file_list[[i]][[2]]] <- file_list[[i]][[1]]
-        }
-        filename_list <- names(file_namedList)
+        file_namedlist <<- list2Vector(file_list)
 
         manifest_url <- metadata_model$getModelManifest(paste0(
           config$community,
           " ", input$dropdown_template
-        ), template_name, filenames = as.list(filename_list))
+        ), template_schema_name, filenames = as.list(names(file_namedlist)))
         # make sure not scalar if length of list is 1 in R
         # add in the step to convert names later
       } else {
@@ -187,7 +176,7 @@ shinyServer(function(input, output, session) {
         manifest_url <- metadata_model$populateModelManifest(paste0(
           config$community,
           " ", input$dropdown_template
-        ), manifest_entity$path, template_name)
+        ), manifest_entity$path, template_schema_name)
       }
 
       output$text_download <- renderUI({
@@ -219,7 +208,7 @@ shinyServer(function(input, output, session) {
 
     annotation_status <- metadata_model$validateModelManifest(
       inFile$raw()$datapath,
-      template_name
+      template_schema_name
     )
     # validation messages
     valRes <- validationResult(annotation_status, input$dropdown_template, inFile$data())
@@ -275,7 +264,7 @@ shinyServer(function(input, output, session) {
     filled_manifest <- metadata_model$populateModelManifest(paste0(
       config$community,
       " ", input$dropdown_template
-    ), inFile$raw()$datapath, template_name)
+    ), inFile$raw()$datapath, template_schema_name)
 
     # rerender and change button to link
     output$val_gsheet <- renderUI({
@@ -309,15 +298,13 @@ shinyServer(function(input, output, session) {
           quote = TRUE, row.names = FALSE, na = ""
         )
       } else {
-        file_list <- synapse_driver$getFilesInStorageDataset(
-          synStore_obj,
-          folder_synID
-        )
-        file_namedList <- c()
-        for (i in seq_along(file_list)) {
-          file_namedList[file_list[[i]][[2]]] <- file_list[[i]][[1]]
+        if (is.null(file_namedlist)) { # if user do not generate gsheet of template before
+          file_list <- synapse_driver$getFilesInStorageDataset(
+            synStore_obj,
+            folder_synID
+          )
+          file_namedlist <<- list2Vector(file_list)
         }
-
         files_df <- stack(file_namedList)
         colnames(files_df) <- c("entityId", "Filename")
         files_entity <- inner_join(infile, files_df, by = "Filename")
@@ -333,31 +320,17 @@ shinyServer(function(input, output, session) {
         synStore_obj,
         "./files/synapse_storage_manifest.csv", folder_synID
       )
-      print(manifest_id)
       manifest_path <- paste0("synapse.org/#!Synapse:", manifest_id)
       # if no error
       if (startsWith(manifest_id, "syn") == TRUE) {
         nx_report_success("Success!", paste0("Manifest submitted to: ", manifest_path))
         rm("./files/synapse_storage_manifest.csv")
 
-        # clear inputs
+        # clean up inputfile
         sapply(clean_tags, FUN = hide)
-
-        # TODO: consider removing this chunk,
-        # could change to reset('inFile') if reset works
-        # rerenders fileinput UI
-        # output$fileInput_ui <- renderUI({
-        #   fileInput("file1", "Upload CSV File", accept = c(
-        #     "text/csv", "text/comma-separated-values",
-        #     ".csv"
-        #   ))
-        # })
-
-        # renders empty df
-        output$tbl_preview <- renderDT(datatable(as.data.frame(matrix(0,
-          ncol = 0,
-          nrow = 0
-        ))))
+        DTableServer("tbl_preview", data.frame(NULL))
+        # TODO: input file not reset yet
+        # reset(c(clean_tags, "inputFile", "tbl_preview")) if reset works
       } else {
         dc_waiter("update", msg = HTML(paste0(
           "Uh oh, looks like something went wrong!",
