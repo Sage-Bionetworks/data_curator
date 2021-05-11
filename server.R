@@ -4,9 +4,6 @@
 # pages to log into Synapse as the currently logged in user from the web portal
 # using the session token.  https://www.synapse.org
 
-# Don't necessarily have to set `RETICULATE_PYTHON` env variable
-reticulate::use_condaenv("data_curator_env_oauth")
-
 shinyServer(function(input, output, session) {
   params <- parseQueryString(isolate(session$clientData$url_search))
   if (!has_auth_code(params)) {
@@ -26,8 +23,8 @@ shinyServer(function(input, output, session) {
   access_token <- token_response$access_token
 
   ######## session global variables ########
-  source_python("python/synapse_func_alias.py")
-  source_python("python/metadata_model.py")
+  source_python("functions/synapse_func_alias.py")
+  source_python("functions/metadata_model.py")
   # import module that contains SynapseStorage class
   synapse_driver <- import("schematic.store.synapse")$SynapseStorage
   # read config in
@@ -189,7 +186,7 @@ shinyServer(function(input, output, session) {
         manifest_entity <- syn_get(existing_manifestID)
         manifest_url <- metadata_model$populateModelManifest(paste0(
           config$community,
-          " ", input$temdropdown_templateplate_type
+          " ", input$dropdown_template
         ), manifest_entity$path, template_name)
       }
 
@@ -207,7 +204,6 @@ shinyServer(function(input, output, session) {
   ######## Reads .csv File ########
   inFile <- csvInfileServer("inputFile", colsAsCharacters = TRUE, keepBlank = TRUE)
 
-
   observeEvent(inFile$data(), {
     # hide the validation section when upload a new file
     sapply(clean_tags[-1], FUN = hide)
@@ -217,6 +213,10 @@ shinyServer(function(input, output, session) {
 
   ######## Validation Section #######
   observeEvent(input$btn_validate, {
+
+    # loading screen for validating metadata
+    dc_waiter("show", msg = "Validating...")
+
     annotation_status <- metadata_model$validateModelManifest(
       inFile$raw()$datapath,
       template_name
@@ -225,24 +225,20 @@ shinyServer(function(input, output, session) {
     valRes <- validationResult(annotation_status, input$dropdown_template, inFile$data())
     ValidationMsgServer("text_validate", valRes, input$dropdown_template, inFile$data())
 
-    # loading screen for validating metadata
-    dc_waiter("show", msg = "Validating...")
+    # output error messages as data table if it is invalid value type
 
-    # output error messages as data table
-    if (valRes$errorType == "Invalid Value") {
-      # renders in DT for preview
-      # show(NS("tbl_validate", "table"))  # NS is used in module
-      DTableServer("tbl_validate", valRes$errorDT,
-        options = list(
-          pageLength = 50, scrollX = TRUE,
-          scrollY = min(50 * length(annotation_status), 400), lengthChange = FALSE,
-          info = FALSE, searching = FALSE
-        )
+    # renders in DT for preview
+    # render empty if error is not "invaid value" type - ifelse() will not work
+    show_df <- if (valRes$errorType == "Invalid Value") valRes$errorDT else data.frame(NULL)
+    DTableServer("tbl_validate", show_df,
+      options = list(
+        pageLength = 50, scrollX = TRUE,
+        scrollY = min(50 * length(annotation_status), 400), lengthChange = FALSE,
+        info = FALSE, searching = FALSE
       )
-    }
+    )
 
     # highlight invalue cells in preview table
-
     if (valRes$errorType == "Wrong Schema") {
       DTableServer("tbl_preview", data = inFile$data(), highlight = "full")
     } else {
@@ -252,11 +248,10 @@ shinyServer(function(input, output, session) {
       )
     }
 
-
     # validate_w$update(html = h3(waiter_msg))
     # TODO: fix issue:
     # https://github.com/Sage-Bionetworks/data_curator/issues/160#issuecomment-828911353
-    dc_waiter("update", msg = valRes$waiterMsg, sleep = 2.5)
+    dc_waiter("update", msg = paste0(valRes$errorType, " Found !!! "), sleep = 2.5)
 
     if (valRes$validationRes == "valid") {
       # show submit button

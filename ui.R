@@ -171,8 +171,6 @@ ui <- dashboardPage(
             width = 12,
             actionButton("btn_validate", "Validate Metadata"),
             hidden(
-              # TODO: 1. create module for gsheet
-              #       2. wrap up all validatio section in to one module
               div(
                 id = "div_validate",
                 height = "100%",

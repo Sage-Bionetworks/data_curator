@@ -74,6 +74,10 @@ api <- oauth_endpoint(
 # The 'openid' scope is required by the protocol for retrieving user information.
 scope <- "openid view download modify"
 
+# Activate conda env
+# Don't necessarily have to set `RETICULATE_PYTHON` env variable
+reticulate::use_condaenv("data_curator_env_oauth")
+
 # Import functions/modules
-source.files <- list.files("modules", pattern="*\\.R$", recursive = TRUE, full.names = TRUE)
-sapply(source.files, FUN=source)
+source_files <- list.files(c("functions", "modules"), pattern = "*\\.R$", recursive = TRUE, full.names = TRUE)
+sapply(source_files, FUN = source)

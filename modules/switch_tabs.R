@@ -33,7 +33,7 @@ switchTabServer <- function(id, tabId, tab, tabList, parent) {
         observeEvent(input[[tagName]], {
           current_tab <- which(tabList == tab)
           # need to use parent session to update tab
-          # TODO: figure out how to call parent inputs in module to minimize args 
+          # TODO: figure out how to call parent inputs in module to minimize args
           updateTabItems(parent, tabId, selected = tabList[current_tab + i])
         })
       })

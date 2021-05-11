@@ -23,6 +23,7 @@ DTableServer <- function(id, data,
     rownames = rownames,
     options = options
   )
+
   if (!is.null(highlight)) {
     if (highlight == "full") {
       df <- df %>%
