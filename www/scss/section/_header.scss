@@ -1,9 +1,63 @@
 .main-header {
-    max-height: 50px;
+    
+  .logo {
+    font-size: 1.8em;
+  }
 
-    .logo {
-        height: 70px;
-        font-size: 21px;
-        padding-top: 10px;
+  #HTAN_logo a {
+    height: 50px;
+    display: table-cell;
+    vertical-align: middle;
+    padding: 0 15px;
+  }
+
+  .dropdown-menu {
+    left: auto !important; // stick with the button left
+    box-shadow: $float_shadow;
+    animation: fadeIn 100ms;
+
+  
+    ul.menu {
+
+      padding: 0 5px !important;
+      // reset all margin
+      & * {
+        margin: 0px;
+      }
+      
+      &>div, .row {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        width: 100% !important;
+      }
+
+      .shiny-input-container{
+        width: 250px;
+        margin: 5px;
+        height: 34px; // remove extra space bottom
+      }
     }
+  }
+}
+
+.main-header .dropdown-menu #hover_text_folder div .selectize-dropdown {
+  // due to long names, increase the width of folder dropdown in header
+  width: 150% !important;
+}
+
+
+@media (max-width:1146px){
+  .shiny-input-container{
+    width: 200px !important;
+  }
+}
+
+@media (max-width:973px){
+  ul.menu {
+    &>div, .row {
+      flex-wrap: wrap;
+      justify-content: center
+    }
+  }
 }

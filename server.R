@@ -30,20 +30,22 @@ shinyServer(function(input, output, session) {
   # read config in
   config <- fromJSON("www/config.json")
 
-  # logs in and gets list of projects they have access to
-  synStore_obj <- NULL
-  projects_namedList <- NULL
-
-  folders_namedList <- NULL
-  folder_synID <- NULL # selected foler synapse ID
-
-  template_schema_name <- NULL # selected template schema name
-  file_namedlist <- NULL
-
-  ### mapping from display name to schema name
+  # mapping from display name to schema name
   schema_name <- config$manifest_schemas$schema_name
   display_name <- config$manifest_schemas$display_name
-  schema_to_display_lookup <- data.frame(schema_name, display_name)
+  template_namedList <- schema_name
+  names(template_namedList) <- display_name
+
+  synStore_obj <- NULL # gets list of projects they have access to
+  folder_synID <- NULL # selected foler synapse ID
+  template_schema_name <- NULL # selected template schema name
+
+  datatype_list <- list(
+    projects_namedList = NULL,
+    folders_namedList = NULL,
+    display_name = template_namedList
+  )
+  file_namedlist <- NULL
 
   tabs_list <- c("tab_instructions", "tab_data", "tab_template", "tab_upload")
   clean_tags <- c("div_download", "div_validate", "btn_submit")
@@ -69,15 +71,22 @@ shinyServer(function(input, output, session) {
 
         # get_projects_list(synStore_obj)
         projects_list <- synapse_driver$getStorageProjects(synStore_obj)
-        projects_namedList <<- list2Vector(projects_list)
+        datatype_list[["projects_namedList"]] <<- list2Vector(projects_list)
 
         # updates project dropdown
-        updateSelectizeInput(session, "dropdown_project", choices = sort(names(projects_namedList)))
+        lapply(c("header_dropdown_", "dropdown_"), function(x) {
+          lapply(c(1, 3), function(i) {
+            updateSelectizeInput(session, paste0(x, datatypes[i]),
+              choices = sort(names(datatype_list[[i]]))
+            )
+          })
+        })
 
         # update waiter loading screen once login successful
         dc_waiter("update", isLogin = TRUE, isPass = TRUE, usrName = syn_getUserProfile()$userName)
       },
       error = function(err) {
+        message(err) # write log error
         dc_waiter("update", isLogin = TRUE, isPass = FALSE)
       }
     )
@@ -90,40 +99,74 @@ shinyServer(function(input, output, session) {
   })
 
   ######## Update Folder List ########
-  observeEvent(ignoreInit = TRUE, input$dropdown_project, {
-    output$folders <- renderUI({
+  lapply(c("header_dropdown_", "dropdown_"), function(x) {
+    observeEvent(ignoreInit = TRUE, input[[paste0(x, "project")]], {
       # get synID of selected project
-      project_synID <- projects_namedList[[input$dropdown_project]]
+      project_synID <- datatype_list[["projects_namedList"]][[input[[paste0(x, "project")]]]]
 
       # gets folders per project
       folder_list <- synapse_driver$getStorageDatasetsInProject(
         synStore_obj,
         project_synID
       )
-      folders_namedList <<- list2Vector(folder_list)
+      datatype_list[["folders_namedList"]] <<- list2Vector(folder_list)
+      folders <- sort(names(datatype_list[["folders_namedList"]]))
 
       # updates foldernames
-      selectInput(inputId = "dropdown_folder", label = "Folder:", choices = names(folders_namedList))
+      updateSelectizeInput(session, paste0(x, "folder"),
+        choices = folders
+      )
     })
+  })
+
+  # Adjust header selection dropdown based on tabs
+  observe({
+    if (input[["tabs"]] %in% c("tab_instructions", "tab_data")) {
+      hide("header_selection_dropdown")
+    } else {
+      show("header_selection_dropdown")
+    }
+  })
+
+
+  lapply(datatypes, function(i) {
+    observeEvent(input[[paste0("dropdown_", i)]], {
+      updateSelectizeInput(session, paste0("header_dropdown_", i),
+        selected = input[[paste0("dropdown_", i)]]
+      )
+    })
+  })
+
+  observeEvent(input$btn_header_update, {
+    nx_confirm(
+      inputId = "update_confirm",
+      title = "Are you sure to update?",
+      message = "previous selections will also change",
+      button_ok = "Sure!",
+      button_cancel = "Nope!"
+    )
+  })
+
+  observeEvent(input$update_confirm, {
+    if (input$update_confirm == TRUE) {
+      lapply(datatypes, function(i) {
+        updateSelectizeInput(session, paste0("dropdown_", i),
+          selected = input[[paste0("header_dropdown_", i)]]
+        )
+      })
+    }
   })
 
   # update selected folder ID
   observeEvent(input$dropdown_folder, {
     # TODO: check how different from using rectivateValues()
-    folder_synID <<- folders_namedList[[input$dropdown_folder]]
+    folder_synID <<- datatype_list[["folders_namedList"]][[input$dropdown_folder]]
   })
 
   ######## Update Template ########
-  output$manifest_display_name <- renderUI({
-    selectInput(inputId = "dropdown_template", label = "Template:", choices = display_name)
-  })
   # update selected schema template name
   observeEvent(input$dropdown_template, {
-    template_type_df <- schema_to_display_lookup[match(input$dropdown_template, schema_to_display_lookup$display_name),
-      1,
-      drop = F
-    ]
-    template_schema_name <<- as.character(template_type_df$schema_name)
+    template_schema_name <<- template_namedList[match(input$dropdown_template, names(template_namedList))]
   })
 
   # hide tags when users select new template
@@ -167,7 +210,7 @@ shinyServer(function(input, output, session) {
         manifest_url <- metadata_model$getModelManifest(paste0(
           config$community,
           " ", input$dropdown_template
-        ), template_schema_name, filenames = as.list(names(file_namedlist)))
+        ), template_schema_name, filenames = as.list(names(datatype_list[["file_namedlist"]])))
         # make sure not scalar if length of list is 1 in R
         # add in the step to convert names later
       } else {
@@ -205,54 +248,60 @@ shinyServer(function(input, output, session) {
 
     # loading screen for validating metadata
     dc_waiter("show", msg = "Validating...")
-
-    annotation_status <- metadata_model$validateModelManifest(
-      inFile$raw()$datapath,
-      template_schema_name
+    try(
+      silent = TRUE,
+      annotation_status <- metadata_model$validateModelManifest(
+        inFile$raw()$datapath,
+        template_schema_name
+      )
     )
+
     # validation messages
     valRes <- validationResult(annotation_status, input$dropdown_template, inFile$data())
     ValidationMsgServer("text_validate", valRes, input$dropdown_template, inFile$data())
 
-    # output error messages as data table if it is invalid value type
+    # if there is a file uploaded
+    if (!is.null(valRes$validationRes)) {
 
-    # renders in DT for preview
-    # render empty if error is not "invaid value" type - ifelse() will not work
-    show_df <- if (valRes$errorType == "Invalid Value") valRes$errorDT else data.frame(NULL)
-    DTableServer("tbl_validate", show_df,
-      options = list(
-        pageLength = 50, scrollX = TRUE,
-        scrollY = min(50 * length(annotation_status), 400), lengthChange = FALSE,
-        info = FALSE, searching = FALSE
+      # output error messages as data table if it is invalid value type
+      # render empty if error is not "invaid value" type - ifelse() will not work
+      show_df <- if (valRes$errorType == "Invalid Value") valRes$errorDT else data.frame(NULL)
+      DTableServer("tbl_validate", show_df,
+        options = list(
+          pageLength = 50, scrollX = TRUE,
+          scrollY = min(50 * length(annotation_status), 400), lengthChange = FALSE,
+          info = FALSE, searching = FALSE
+        )
       )
-    )
 
-    # highlight invalue cells in preview table
-    if (valRes$errorType == "Wrong Schema") {
-      DTableServer("tbl_preview", data = inFile$data(), highlight = "full")
+      # highlight invalue cells in preview table
+      if (valRes$errorType == "Wrong Schema") {
+        DTableServer("tbl_preview", data = inFile$data(), highlight = "full")
+      } else {
+        DTableServer("tbl_preview",
+          data = inFile$data(),
+          highlight = "partial", hightlight.col = valRes$errorDT$Column, hightlight.value = valRes$errorDT$Value
+        )
+      }
+
+      if (valRes$validationRes == "valid") {
+        # show submit button
+        output$submit <- renderUI({
+          actionButton("btn_submit", "Submit to Synapse")
+        })
+        output$val_gsheet <- renderUI(NULL)
+        dc_waiter("update", msg = paste0(valRes$errorType, " Found !!! "), spin = spin_inner_circles(), sleep = 2.5)
+      } else {
+        # render gsheet button
+        output$val_gsheet <- renderUI({
+          actionButton("btn_val_gsheet", "  Click to Generate Google Sheet Link", icon = icon("table"))
+        })
+        dc_waiter("update", msg = paste0(valRes$errorType, " Found !!! "), spin = spin_pulsar(), sleep = 2.5)
+      }
     } else {
-      DTableServer("tbl_preview",
-        data = inFile$data(),
-        highlight = "partial", hightlight.col = valRes$errorDT$Column, hightlight.value = valRes$errorDT$Value
-      )
+      dc_waiter("hide")
     }
 
-    # validate_w$update(html = h3(waiter_msg))
-    # TODO: fix issue:
-    # https://github.com/Sage-Bionetworks/data_curator/issues/160#issuecomment-828911353
-    dc_waiter("update", msg = paste0(valRes$errorType, " Found !!! "), sleep = 2.5)
-
-    if (valRes$validationRes == "valid") {
-      # show submit button
-      output$submit <- renderUI({
-        actionButton("btn_submit", "Submit to Synapse")
-      })
-    } else {
-      # render gsheet button
-      output$val_gsheet <- renderUI({
-        actionButton("btn_val_gsheet", "  Click to Generate Google Sheet Link", icon = icon("table"))
-      })
-    }
     show("div_validate")
   })
 

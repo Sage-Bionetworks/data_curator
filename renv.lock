@@ -4,7 +4,11 @@
     "Repositories": [
       {
         "Name": "CRAN",
-        "URL": "https://ftp.osuosl.org/pub/cran"
+        "URL": "https://cran.rstudio.com"
+      },
+      {
+        "Name": "Sage",
+        "URL": "http://ran.synapse.org"
       }
     ]
   },
@@ -36,6 +40,34 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "08588806cba69f04797dab50627428ed"
+    },
+    "R.cache": {
+      "Package": "R.cache",
+      "Version": "0.15.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "e92a8ea8388c47c82ed8aa435ed3be50"
+    },
+    "R.methodsS3": {
+      "Package": "R.methodsS3",
+      "Version": "1.8.1",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "4bf6453323755202d5909697b6f7c109"
+    },
+    "R.oo": {
+      "Package": "R.oo",
+      "Version": "1.24.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "5709328352717e2f0a9c012be8a97554"
+    },
+    "R.utils": {
+      "Package": "R.utils",
+      "Version": "2.10.1",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "a9e316277ff12a43997266f2f6567780"
     },
     "R6": {
       "Package": "R6",
@@ -212,6 +244,13 @@
       "Repository": "CRAN",
       "Hash": "83ab58a0518afe3d17e41da01af13b60"
     },
+    "fresh": {
+      "Package": "fresh",
+      "Version": "0.2.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "fa54367040deb4537da49b7ac0ee5770"
+    },
     "fs": {
       "Package": "fs",
       "Version": "1.4.2",
@@ -253,13 +292,6 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "3d59212f2814d65dff517e6899813c58"
-    },
-    "highr": {
-      "Package": "highr",
-      "Version": "0.8",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "4dc5bb88961e347a0f4d8aad597cbfac"
     },
     "hms": {
       "Package": "hms",
@@ -315,13 +347,6 @@
       "Repository": "CRAN",
       "Hash": "2657f20b9a74c996c602e74ebe540b06"
     },
-    "knitr": {
-      "Package": "knitr",
-      "Version": "1.29",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "e5f4c41c17df8cdf7b0df12117c0d99a"
-    },
     "labeling": {
       "Package": "labeling",
       "Version": "0.3",
@@ -359,17 +384,10 @@
     },
     "magrittr": {
       "Package": "magrittr",
-      "Version": "1.5",
+      "Version": "2.0.1",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "1bb58822a20301cee84a41678e25d9b7"
-    },
-    "markdown": {
-      "Package": "markdown",
-      "Version": "1.1",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "61e4a10781dd00d7d81dd06ca9b94e95"
+      "Hash": "41287f1ac7d28a92f0a286ed507928d3"
     },
     "mgcv": {
       "Package": "mgcv",
@@ -438,8 +456,8 @@
       "Package": "plotly",
       "Version": "4.9.2.9000",
       "Source": "GitHub",
-      "Remotes": "rstudio/thematic, ramnathv/htmlwidgets",
       "RemoteType": "github",
+      "Remotes": "rstudio/thematic, ramnathv/htmlwidgets",
       "RemoteHost": "api.github.com",
       "RemoteRepo": "plotly",
       "RemoteUsername": "ropensci",
@@ -503,6 +521,13 @@
       "Repository": "CRAN",
       "Hash": "2639976851f71f330264a9c9c3d43a61"
     },
+    "rematch2": {
+      "Package": "rematch2",
+      "Version": "2.1.2",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "76c9e04c712a05848ae7a23d2f170a40"
+    },
     "renv": {
       "Package": "renv",
       "Version": "0.11.0-3",
@@ -535,13 +560,6 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "c06d2a6887f4b414f8e927afd9ee976a"
-    },
-    "rmarkdown": {
-      "Package": "rmarkdown",
-      "Version": "2.3",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "202260e1b2c410edc086d5b8f1ed946e"
     },
     "rprojroot": {
       "Package": "rprojroot",
@@ -584,6 +602,13 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "133639dc106955eee4ffb8ec73edac37"
+    },
+    "shinydashboardPlus": {
+      "Package": "shinydashboardPlus",
+      "Version": "2.0.1",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "1abe63cd90fe33d3ca211525a0b39af9"
     },
     "shinyjs": {
       "Package": "shinyjs",
@@ -632,6 +657,13 @@
       "Repository": "CRAN",
       "Hash": "0759e6b6c0957edb1311028a49a35e76"
     },
+    "styler": {
+      "Package": "styler",
+      "Version": "1.4.1",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "2ec6308547ffe73208cef3ef3766fc33"
+    },
     "sys": {
       "Package": "sys",
       "Version": "3.3",
@@ -666,13 +698,6 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "6ea435c354e8448819627cf686f66e0a"
-    },
-    "tinytex": {
-      "Package": "tinytex",
-      "Version": "0.24",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "8f24b65b86f4d6d7b1e2d8a4ce2c02fb"
     },
     "utf8": {
       "Package": "utf8",

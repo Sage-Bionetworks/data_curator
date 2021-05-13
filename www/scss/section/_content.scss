@@ -6,3 +6,12 @@
     padding: 10px 0;
 }
 
+.option {
+    &:hover, &:focus {
+        transform: scale(1.02);
+        font-size: 1.1em;
+        box-shadow: $float_shadow;
+        border-radius: 20px;
+        transition: transform 50ms;
+    }
+}
