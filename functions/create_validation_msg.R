@@ -2,6 +2,8 @@ validationResult <- function(valRes, template, inFile) {
   validation_res <- NULL
   error_msg <- NULL
   help_msg <- NULL
+  outMsg <- NULL
+  errorDT <- NULL
   errorType <- NULL
 
   if (!is.null(inFile) & !is.null(template)) {
@@ -69,14 +71,14 @@ validationResult <- function(valRes, template, inFile) {
       # errorDT <- errorDT[order(errorDT$Column),]
     } else {
       validation_res <- "valid"
+      errorType <- "No Error"
     }
 
     # combine all error messages into one, add an extra empty line to bottom
-    outMsg <- paste0(
-      "Your metadata is <b>", validation_res, "</b> !!!", "<br><br>",
-      error_msg, "<br><br>",
-      help_msg
-    )
+    outMsg <- paste0(c(
+      paste0("Your metadata is <b>", validation_res, "</b> !!!"),
+      error_msg, help_msg
+    ), collapse = "<br><br>")
   }
 
   return(list(

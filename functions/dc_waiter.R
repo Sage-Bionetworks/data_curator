@@ -3,7 +3,7 @@
 
 dc_waiter <- function(stage = c("show", "update", "hide"),
                       isLogin = FALSE, isPass = TRUE, usrName = NULL,
-                      sleep = 2, msg = NULL) {
+                      sleep = 2, msg = NULL, spin = NULL) {
   # validate arguments
   if (!is.logical(isLogin)) stop("isLogin must be a boolean")
   if (!is.logical(isPass)) stop("isPass must be a boolean")
@@ -11,6 +11,8 @@ dc_waiter <- function(stage = c("show", "update", "hide"),
   if (!stage %in% c("show", "update", "hide")) {
     stop("Please provide a value for stage: 'show', 'update' or 'hide'.")
   }
+  if (is.null(msg)) msg <- "Loading ..."
+  if (is.null(spin)) spin <- spin_plus()
 
   # if "hide", proceed hiding process immediately and exit function
   if (stage == "hide") {
@@ -52,16 +54,15 @@ dc_waiter <- function(stage = c("show", "update", "hide"),
     }
   } else {
     # other loading screens
-    if (is.null(msg)) msg <- "Loading ..."
 
     if (stage == "show") {
       waiter_show(
-        html = tagList(spin_plus(), br(), h3(msg)),
+        html = tagList(spin, br(), h3(msg)),
         color = "rgba(66, 72, 116, .9)"
       )
     } else {
       Sys.sleep(2) # has to put at least 2s before to make update work
-      waiter_update(html = tagList(spin_loaders(32), br(), h3(msg)))
+      waiter_update(html = tagList(spin, br(), h3(msg)))
       Sys.sleep(sleep)
       waiter_hide()
     }

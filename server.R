@@ -206,53 +206,60 @@ shinyServer(function(input, output, session) {
     # loading screen for validating metadata
     dc_waiter("show", msg = "Validating...")
 
-    annotation_status <- metadata_model$validateModelManifest(
-      inFile$raw()$datapath,
-      template_schema_name
+    try(
+      silent = TRUE,
+      annotation_status <- metadata_model$validateModelManifest(
+        inFile$raw()$datapath,
+        template_schema_name
+      )
     )
+
     # validation messages
     valRes <- validationResult(annotation_status, input$dropdown_template, inFile$data())
     ValidationMsgServer("text_validate", valRes, input$dropdown_template, inFile$data())
 
-    # output error messages as data table if it is invalid value type
+    # if there is a file uploaded
+    if (!is.null(valRes$validationRes)) {
 
-    # renders in DT for preview
-    # render empty if error is not "invaid value" type - ifelse() will not work
-    show_df <- if (valRes$errorType == "Invalid Value") valRes$errorDT else data.frame(NULL)
-    DTableServer("tbl_validate", show_df,
-      options = list(
-        pageLength = 50, scrollX = TRUE,
-        scrollY = min(50 * length(annotation_status), 400), lengthChange = FALSE,
-        info = FALSE, searching = FALSE
+      # output error messages as data table if it is invalid value type
+      # render empty if error is not "invaid value" type - ifelse() will not work
+      show_df <- if (valRes$errorType == "Invalid Value") valRes$errorDT else data.frame(NULL)
+      DTableServer("tbl_validate", show_df,
+        options = list(
+          pageLength = 50, scrollX = TRUE,
+          scrollY = min(50 * length(annotation_status), 400), lengthChange = FALSE,
+          info = FALSE, searching = FALSE
+        )
       )
-    )
 
-    # highlight invalue cells in preview table
-    if (valRes$errorType == "Wrong Schema") {
-      DTableServer("tbl_preview", data = inFile$data(), highlight = "full")
+      # highlight invalue cells in preview table
+      if (valRes$errorType == "Wrong Schema") {
+        DTableServer("tbl_preview", data = inFile$data(), highlight = "full")
+      } else {
+        DTableServer("tbl_preview",
+          data = inFile$data(),
+          highlight = "partial", hightlight.col = valRes$errorDT$Column, hightlight.value = valRes$errorDT$Value
+        )
+      }
+
+      if (valRes$validationRes == "valid") {
+        # show submit button
+        output$submit <- renderUI({
+          actionButton("btn_submit", "Submit to Synapse")
+        })
+        output$val_gsheet <- renderUI(NULL)
+        dc_waiter("update", msg = paste0(valRes$errorType, " Found !!! "), spin = spin_inner_circles(), sleep = 2.5)
+      } else {
+        # render gsheet button
+        output$val_gsheet <- renderUI({
+          actionButton("btn_val_gsheet", "  Click to Generate Google Sheet Link", icon = icon("table"))
+        })
+        dc_waiter("update", msg = paste0(valRes$errorType, " Found !!! "), spin = spin_pulsar(), sleep = 2.5)
+      }
     } else {
-      DTableServer("tbl_preview",
-        data = inFile$data(),
-        highlight = "partial", hightlight.col = valRes$errorDT$Column, hightlight.value = valRes$errorDT$Value
-      )
+      dc_waiter("hide")
     }
 
-    # validate_w$update(html = h3(waiter_msg))
-    # TODO: fix issue:
-    # https://github.com/Sage-Bionetworks/data_curator/issues/160#issuecomment-828911353
-    dc_waiter("update", msg = paste0(valRes$errorType, " Found !!! "), sleep = 2.5)
-
-    if (valRes$validationRes == "valid") {
-      # show submit button
-      output$submit <- renderUI({
-        actionButton("btn_submit", "Submit to Synapse")
-      })
-    } else {
-      # render gsheet button
-      output$val_gsheet <- renderUI({
-        actionButton("btn_val_gsheet", "  Click to Generate Google Sheet Link", icon = icon("table"))
-      })
-    }
     show("div_validate")
   })
 
