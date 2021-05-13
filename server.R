@@ -119,6 +119,7 @@ shinyServer(function(input, output, session) {
     })
   })
 
+
   # Adjust header selection dropdown based on tabs
   observe({
     if (input[["tabs"]] %in% c("tab_instructions", "tab_data")) {
@@ -157,12 +158,6 @@ shinyServer(function(input, output, session) {
     }
   })
 
-  # update selected folder ID
-  observeEvent(input$dropdown_folder, {
-    # TODO: check how different from using rectivateValues()
-    folder_synID <<- datatype_list[["folders_namedList"]][[input$dropdown_folder]]
-  })
-
   ######## Update Template ########
   # update selected schema template name
   observeEvent(input$dropdown_template, {
@@ -185,6 +180,9 @@ shinyServer(function(input, output, session) {
 
     # loading screen for template link generation
     dc_waiter("show", msg = "Generating link...")
+
+    # update selected folder ID
+    folder_synID <<- datatype_list[["folders_namedList"]][[input$dropdown_folder]]
 
     if (is.null(input$dropdown_template)) {
       output$text_download <- renderUI({
@@ -337,6 +335,8 @@ shinyServer(function(input, output, session) {
     # the type to filter (eg assay) on could probably also be a config choice
     assay_schemas <- config$manifest_schemas$display_name[config$manifest_schemas$type ==
       "assay"]
+    # folder_ID has not been updated yet
+    if (is.null(folder_synID)) folder_synID <<- datatype_list[["folders_namedList"]][[input$dropdown_folder]]
 
     # and adds entityID, saves it as synapse_storage_manifest.csv, then associates
     # with synapse files
