@@ -13,6 +13,7 @@ dc_waiter <- function(stage = c("show", "update", "hide"),
   }
   if (is.null(msg)) msg <- "Loading ..."
   if (is.null(spin)) spin <- spin_plus()
+
   # if "hide", proceed hiding process immediately and exit function
   if (stage == "hide") {
     Sys.sleep(sleep)

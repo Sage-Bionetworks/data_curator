@@ -248,6 +248,7 @@ shinyServer(function(input, output, session) {
 
     # loading screen for validating metadata
     dc_waiter("show", msg = "Validating...")
+
     try(
       silent = TRUE,
       annotation_status <- metadata_model$validateModelManifest(
