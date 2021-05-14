@@ -26,7 +26,7 @@ ui <- shinydashboardPlus::dashboardPage(
           lapply(datatypes, function(x) {
             div(
               id = paste0("hover_text_", x),
-              selectizeInput(
+              selectInput(
                 inputId = paste0("header_dropdown_", x),
                 label = NULL,
                 choices = character(0)
@@ -123,12 +123,12 @@ ui <- shinydashboardPlus::dashboardPage(
             solidHeader = TRUE,
             width = 6,
             title = "Choose a Project and Folder: ",
-            selectizeInput(
+            selectInput(
               inputId = "dropdown_project",
               label = "Project:",
               choices = "Generating..."
             ),
-            selectizeInput(
+            selectInput(
               inputId = "dropdown_folder",
               label = "Folder:",
               choices = "Generating..."
@@ -142,7 +142,7 @@ ui <- shinydashboardPlus::dashboardPage(
             solidHeader = TRUE,
             width = 6,
             title = "Choose a Metadata Template Type: ",
-            selectizeInput(
+            selectInput(
               inputId = "dropdown_template",
               label = "Template:",
               choices = "Generating..."

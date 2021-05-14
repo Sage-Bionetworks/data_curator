@@ -76,7 +76,7 @@ shinyServer(function(input, output, session) {
         # updates project dropdown
         lapply(c("header_dropdown_", "dropdown_"), function(x) {
           lapply(c(1, 3), function(i) {
-            updateSelectizeInput(session, paste0(x, datatypes[i]),
+            updateSelectInput(session, paste0(x, datatypes[i]),
               choices = sort(names(datatype_list[[i]]))
             )
           })
@@ -113,7 +113,7 @@ shinyServer(function(input, output, session) {
       folders <- sort(names(datatype_list[["folders_namedList"]]))
 
       # updates foldernames
-      updateSelectizeInput(session, paste0(x, "folder"),
+      updateSelectInput(session, paste0(x, "folder"),
         choices = folders
       )
     })
@@ -132,7 +132,7 @@ shinyServer(function(input, output, session) {
 
   lapply(datatypes, function(i) {
     observeEvent(input[[paste0("dropdown_", i)]], {
-      updateSelectizeInput(session, paste0("header_dropdown_", i),
+      updateSelectInput(session, paste0("header_dropdown_", i),
         selected = input[[paste0("dropdown_", i)]]
       )
     })
@@ -151,7 +151,7 @@ shinyServer(function(input, output, session) {
   observeEvent(input$update_confirm, {
     if (input$update_confirm == TRUE) {
       lapply(datatypes, function(i) {
-        updateSelectizeInput(session, paste0("dropdown_", i),
+        updateSelectInput(session, paste0("dropdown_", i),
           selected = input[[paste0("header_dropdown_", i)]]
         )
       })
