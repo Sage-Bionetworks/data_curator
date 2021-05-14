@@ -107,7 +107,7 @@ ui <- dashboardPage(
             solidHeader = TRUE,
             width = 6,
             title = "Choose a Project and Folder: ",
-            selectizeInput(
+            selectInput(
               inputId = "var",
               label = "Project:",
               choices = "Generating..."
@@ -266,7 +266,7 @@ server <- function(input, output, session) {
         }
 
         ### updates project dropdown
-        updateSelectizeInput(session, "var", choices = sort(names(projects_namedList)))
+        updateSelectInput(session, "var", choices = sort(names(projects_namedList)))
 
         ### update waiter loading screen once login successful
         waiter_update(html = tagList(
