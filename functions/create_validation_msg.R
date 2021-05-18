@@ -6,7 +6,7 @@ validationResult <- function(valRes, template, inFile) {
   errorDT <- NULL
   errorType <- NULL
 
-  if (!is.null(inFile) & !is.null(template)) {
+  if (!is.null(inFile) && !is.null(template) && length(inFile) != 0) {
     if (length(valRes) != 0) {
       validation_res <- "invalid"
       # mismatched template index
