@@ -101,7 +101,7 @@ ui <- dashboardPage(
             solidHeader = TRUE,
             width = 6,
             title = "Choose a Project and Folder: ",
-            selectizeInput(
+            selectInput(
               inputId = "dropdown_project",
               label = "Project:",
               choices = "Generating..."

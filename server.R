@@ -72,7 +72,7 @@ shinyServer(function(input, output, session) {
         projects_namedList <<- list2Vector(projects_list)
 
         # updates project dropdown
-        updateSelectizeInput(session, "dropdown_project", choices = sort(names(projects_namedList)))
+        updateSelectInput(session, "dropdown_project", choices = sort(names(projects_namedList)))
 
         # update waiter loading screen once login successful
         dc_waiter("update", isLogin = TRUE, isPass = TRUE, usrName = syn_getUserProfile()$userName)
