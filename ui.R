@@ -8,22 +8,6 @@
 #
 # https://www.synapse.org
 
-library(shiny)
-library(shinyjs)
-library(dplyr)
-library(shinythemes)
-library(shinydashboard)
-library(stringr)
-library(DT)
-library(jsonlite)
-library(reticulate)
-library(ggplot2)
-library(purrr)
-library(plotly)
-library(shinypop)
-library(waiter)
-library(sass)  # read scss file
-
 ui <- dashboardPage(
   skin = "purple",
   dashboardHeader(
@@ -48,22 +32,22 @@ ui <- dashboardPage(
       id = "tabs",
       menuItem(
         "Instructions",
-        tabName = "instructions",
+        tabName = "tab_instructions",
         icon = icon("book-open")
       ),
       menuItem(
         "Select your Dataset",
-        tabName = "data",
+        tabName = "tab_data",
         icon = icon("mouse-pointer")
       ),
       menuItem(
         "Get Metadata Template",
-        tabName = "template",
+        tabName = "tab_template",
         icon = icon("table")
       ),
       menuItem(
         "Submit & Validate Metadata",
-        tabName = "upload",
+        tabName = "tab_upload",
         icon = icon("upload")
       ),
       HTML(
@@ -84,10 +68,11 @@ ui <- dashboardPage(
     ),
     uiOutput("title"),
     use_notiflix_report(),
+    use_waiter(),
     tabItems(
       # First tab content
       tabItem(
-        tabName = "instructions",
+        tabName = "tab_instructions",
         h2("Instructions for the Data Curator App:"),
         h3(
           "1. Go to",
@@ -103,11 +88,12 @@ ui <- dashboardPage(
           "3. Go to",
           strong("Submit and Validate Metadata"),
           "tab - upload your filled CSV and validate your metadata. If you receive errors correct them, reupload your CSV, and revalidate until you receive no more errors. When your metadata is valid, you will be able to see a 'Submit' button. Press it to submit your metadata."
-        )
+        ),
+        switchTabUI("switchTab1", direction = "right")
       ),
       # second tab content
       tabItem(
-        tabName = "data",
+        tabName = "tab_data",
         h2("Set Dataset and Metadata Template for Curation"),
         fluidRow(
           box(
@@ -116,7 +102,7 @@ ui <- dashboardPage(
             width = 6,
             title = "Choose a Project and Folder: ",
             selectInput(
-              inputId = "var",
+              inputId = "dropdown_project",
               label = "Project:",
               choices = "Generating..."
             ),
@@ -132,11 +118,12 @@ ui <- dashboardPage(
             title = "Choose a Metadata Template Type: ",
             uiOutput("manifest_display_name")
           )
-        )
+        ),
+        switchTabUI("switchTab2", direction = "both")
       ),
       # Third tab item
       tabItem(
-        tabName = "template",
+        tabName = "tab_template",
         useShinyjs(),
         h2("Download Template for Selected Folder"),
         fluidRow(
@@ -145,21 +132,22 @@ ui <- dashboardPage(
             status = "primary",
             solidHeader = TRUE,
             width = 12,
-            actionButton("download", "Click to Generate Google Sheets Template"),
+            actionButton("btn_download", "Click to Generate Google Sheets Template"),
             hidden(
               div(
-                id = "text_div",
+                id = "div_download",
                 height = "100%",
-                htmlOutput("text")
+                htmlOutput("text_download")
               )
             ),
             helpText("This link will leads to an empty template or your previously submitted template with new files if applicable.")
           )
-        )
+        ),
+        switchTabUI("switchTab3", direction = "both")
       ),
       # Fourth tab content
       tabItem(
-        tabName = "upload",
+        tabName = "tab_upload",
         h2("Submit & Validate a Filled Metadata Template"),
         fluidRow(
           box(
@@ -167,33 +155,28 @@ ui <- dashboardPage(
             solidHeader = TRUE,
             status = "primary",
             width = 12,
-            uiOutput("fileInput_ui")
+            csvInfileUI("inputFile")
           ),
           box(
             title = "Metadata Preview",
             solidHeader = TRUE,
             status = "primary",
             width = 12,
-            DT::DTOutput("tbl")
+            DTableUI("tbl_preview")
           ),
           box(
             title = "Validate Filled Metadata",
             status = "primary",
             solidHeader = TRUE,
             width = 12,
-            actionButton("validate", "Validate Metadata"),
+            actionButton("btn_validate", "Validate Metadata"),
             hidden(
               div(
-                id = "text_div2",
+                id = "div_validate",
                 height = "100%",
-                htmlOutput("text2")
-              ),
-              DT::DTOutput("tbl2"),
-              actionButton("gsheet_btn", "  Click to Generate Google Sheet Link", icon = icon("table")),
-              div(
-                id = "gsheet_div",
-                height = "100%",
-                htmlOutput("gsheet_link")
+                ValidationMsgUI("text_validate"),
+                DTableUI("tbl_validate"),
+                uiOutput("val_gsheet")
               )
             ),
             helpText(
@@ -206,22 +189,13 @@ ui <- dashboardPage(
             status = "primary",
             solidHeader = TRUE,
             width = 12,
-            uiOutput("submit")
+            uiOutput("btn_submit")
           )
         )
       )
     ),
-    uiOutput("Next_Previous"),
-
-    ## waiter loading screen
-    use_waiter(),
-    waiter_show_on_load(
-      html = tagList(
-        img(src = "loading.gif"),
-        h4("Retrieving Synapse information...")
-      ),
-      color = "#424874"
-    )
+    # waiter loading screen
+    dc_waiter("show", isLogin = TRUE)
   )
 )
 

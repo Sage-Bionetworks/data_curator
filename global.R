@@ -1,10 +1,26 @@
-library(shiny)
-library(httr)
-library(rjson)
-library(yaml)
+suppressPackageStartupMessages({
+  library(shiny)
+  library(httr)
+  library(rjson)
+  library(yaml)
+  library(shinyjs)
+  library(dplyr)
+  library(shinythemes)
+  library(shinydashboard)
+  library(stringr)
+  library(DT)
+  library(jsonlite)
+  library(reticulate)
+  library(ggplot2)
+  library(purrr)
+  library(plotly)
+  library(shinypop)
+  library(waiter)
+  library(readr)
+  library(sass)
+})
 
-
-APP_URL <- "https://shinypro.synapse.org/users/spatil/HTAN-oauth/"
+# APP_URL <- "https://shinypro.synapse.org/users/spatil/HTAN-oauth/"
 
 has_auth_code <- function(params) {
   # params is a list object containing the parsed URL parameters. Return TRUE if
@@ -14,43 +30,54 @@ has_auth_code <- function(params) {
   return(!is.null(params$code))
 }
 
-oauth_client = yaml.load_file("config.yaml")
+oauth_client <- yaml.load_file("config.yaml")
 
 client_id <- toString(oauth_client$client_id)
 client_secret <- oauth_client$client_secret
+APP_URL <- oauth_client$APP_URL
 if (is.null(client_id)) stop("config.yaml is missing client_id")
 if (is.null(client_secret)) stop("config.yaml is missing client_secret")
+if (is.null(APP_URL)) stop("config.yaml is missing client_secret")
 
 app <- oauth_app("shinysynapse",
-                 key = client_id,
-                 secret = client_secret, 
-                 redirect_uri = APP_URL)
-
-# These are the user info details ('claims') requested from Synapse:
-claims=list(
-  family_name=NULL, 
-  given_name=NULL,
-  email=NULL,
-  email_verified=NULL,
-  userid=NULL,
-  orcid=NULL,
-  is_certified=NULL,
-  is_validated=NULL,
-  validated_given_name=NULL,
-  validated_family_name=NULL,
-  validated_location=NULL,
-  validated_email=NULL,
-  validated_company=NULL,
-  validated_at=NULL,
-  validated_orcid=NULL,
-  company=NULL
+  key = client_id,
+  secret = client_secret,
+  redirect_uri = APP_URL
 )
 
-claimsParam<-toJSON(list(id_token = claims, userinfo = claims))
+# These are the user info details ('claims') requested from Synapse:
+claims <- list(
+  family_name = NULL,
+  given_name = NULL,
+  email = NULL,
+  email_verified = NULL,
+  userid = NULL,
+  orcid = NULL,
+  is_certified = NULL,
+  is_validated = NULL,
+  validated_given_name = NULL,
+  validated_family_name = NULL,
+  validated_location = NULL,
+  validated_email = NULL,
+  validated_company = NULL,
+  validated_at = NULL,
+  validated_orcid = NULL,
+  company = NULL
+)
+
+claimsParam <- toJSON(list(id_token = claims, userinfo = claims))
 api <- oauth_endpoint(
-  authorize=paste0("https://signin.synapse.org?claims=", claimsParam),
-  access="https://repo-prod.prod.sagebase.org/auth/v1/oauth2/token"
+  authorize = paste0("https://signin.synapse.org?claims=", claimsParam),
+  access = "https://repo-prod.prod.sagebase.org/auth/v1/oauth2/token"
 )
 
 # The 'openid' scope is required by the protocol for retrieving user information.
 scope <- "openid view download modify"
+
+# Activate conda env
+# Don't necessarily have to set `RETICULATE_PYTHON` env variable
+reticulate::use_condaenv("data_curator_env_oauth")
+
+# Import functions/modules
+source_files <- list.files(c("functions", "modules"), pattern = "*\\.R$", recursive = TRUE, full.names = TRUE)
+sapply(source_files, FUN = source)
