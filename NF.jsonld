@@ -2814,6 +2814,23 @@
             "sms:validationRules": []
         },
         {
+            "@id": "bts:Phase-ContrastMicroscopy",
+            "@type": "rdfs:Class",
+            "rdfs:comment": "A simple non-quantitative form of interference microscopy of great utility in visualising live cells. Small differences in optical path length due to differences in refractive index and thickness of structures are visualised as differences in light intensity.",
+            "rdfs:label": "Phase-ContrastMicroscopy",
+            "rdfs:subClassOf": [
+                {
+                    "@id": "bts:Assay"
+                }
+            ],
+            "schema:isPartOf": {
+                "@id": "http://schema.biothings.io"
+            },
+            "sms:displayName": "Phase-Contrast Microscopy",
+            "sms:required": "sms:false",
+            "sms:validationRules": []
+        },
+        {
             "@id": "bts:NextGenerationTargetedSequencing",
             "@type": "rdfs:Class",
             "rdfs:comment": "A type of next generation sequencing in which specific genes or portions of genes are targeted for sequencing using amplicon-based workflow.",
@@ -3460,6 +3477,9 @@
                 },
                 {
                     "@id": "bts:AcuteMyeloidLeukemia"
+                },
+                {
+                    "@id": "bts:Teratoma"
                 }
             ],
             "sms:displayName": "tumorType",
@@ -5728,7 +5748,7 @@
         {
             "@id": "bts:Platform",
             "@type": "rdfs:Class",
-            "rdfs:comment": "HiSeq3000, HiSeq2500, HiSeq4000, NextSeq500, HiSeq2000, MiSeq, Zeiss LSM 980, Affy5.0, Affy6.0, PacBioRSII, GAIIx, Illumina_HumanOmni1-Quadv1.0, Illumina_1M, Illumina_h650, Illumina_Omni2pt5M, Illumina_Omni5M, Illumina MouseWG-6 v2.0 expression beadchip, Perlegen300Karray, Agilent44Karray, IlluminaWholeGenomeDASL, IlluminaHumanHap300, NanostringnCounter, LTQOrbitrapXL, IlluminaHumanMethylation450, Illumina Infinium MethylationEPIC BeadChip, AffymetrixU133AB, Affymetrix Human Gene 1.0 ST Array, AffymetrixU133Plus2, HiSeqX, Bionano Irys, Infinium HumanOmniExpressExome, NextSeq 550, NextSeq 1000, NextSeq 2000, PacBio Sequel IIe System, PacBio Sequel II System, NanostringGeoMx, LI-COR Odyssey CLx, Spectramax M Series",
+            "rdfs:comment": "A sequencing platform, microscope, spectroscope/plate reader, or other platform for collecting data. ",
             "rdfs:label": "Platform",
             "rdfs:subClassOf": [
                 {
@@ -5824,9 +5844,6 @@
                     "@id": "bts:AffymetrixU133Plus2"
                 },
                 {
-                    "@id": "bts:ConfocalImaging"
-                },
-                {
                     "@id": "bts:HiSeqX"
                 },
                 {
@@ -5858,6 +5875,12 @@
                 },
                 {
                     "@id": "bts:SpectramaxMSeries"
+                },
+                {
+                    "@id": "bts:OlympusDP80"
+                },
+                {
+                    "@id": "bts:OrbitrapFusionLumosTribrid"
                 }
             ],
             "sms:displayName": "platform",
@@ -8363,6 +8386,74 @@
             "sms:validationRules": []
         },
         {
+            "@id": "bts:HiPSC-SCP",
+            "@type": "rdfs:Class",
+            "rdfs:comment": "Schwann cell precursor iPSCs",
+            "rdfs:label": "HiPSC-SCP",
+            "rdfs:subClassOf": [
+                {
+                    "@id": "bts:ModelSystemName"
+                }
+            ],
+            "schema:isPartOf": {
+                "@id": "http://schema.biothings.io"
+            },
+            "sms:displayName": "hiPSC-SCP",
+            "sms:required": "sms:false",
+            "sms:validationRules": []
+        },
+        {
+            "@id": "bts:HiPSC",
+            "@type": "rdfs:Class",
+            "rdfs:comment": "human iPSCs",
+            "rdfs:label": "HiPSC",
+            "rdfs:subClassOf": [
+                {
+                    "@id": "bts:ModelSystemName"
+                }
+            ],
+            "schema:isPartOf": {
+                "@id": "http://schema.biothings.io"
+            },
+            "sms:displayName": "hiPSC",
+            "sms:required": "sms:false",
+            "sms:validationRules": []
+        },
+        {
+            "@id": "bts:HiPSC-SCP",
+            "@type": "rdfs:Class",
+            "rdfs:comment": "Schwann cell precursor iPSCs",
+            "rdfs:label": "HiPSC-SCP",
+            "rdfs:subClassOf": [
+                {
+                    "@id": "bts:ModelSystemStrainNomenclature"
+                }
+            ],
+            "schema:isPartOf": {
+                "@id": "http://schema.biothings.io"
+            },
+            "sms:displayName": "hiPSC-SCP",
+            "sms:required": "sms:false",
+            "sms:validationRules": []
+        },
+        {
+            "@id": "bts:HiPSC",
+            "@type": "rdfs:Class",
+            "rdfs:comment": "human iPSCs",
+            "rdfs:label": "HiPSC",
+            "rdfs:subClassOf": [
+                {
+                    "@id": "bts:ModelSystemStrainNomenclature"
+                }
+            ],
+            "schema:isPartOf": {
+                "@id": "http://schema.biothings.io"
+            },
+            "sms:displayName": "hiPSC",
+            "sms:required": "sms:false",
+            "sms:validationRules": []
+        },
+        {
             "@id": "bts:Prss56Cre;R26mT",
             "@type": "rdfs:Class",
             "rdfs:comment": "Prss56Cre;R26mT is a transgenic non-human animal model for Neurofibromatosis type 1, wherein the Nf1 gene is specifically inactivated in BC cells and derivatives thereof. Invented by invented by Piotr Topilko, Patrick Charnay, Fanny Coulpier, Aurélie Gresset, and Katarzyna Radomska.\n",
@@ -8401,6 +8492,12 @@
                 },
                 {
                     "@id": "bts:IpNF95.11bC"
+                },
+                {
+                    "@id": "bts:HiPSC-SCP"
+                },
+                {
+                    "@id": "bts:HiPSC"
                 }
             ],
             "sms:displayName": "modelSystemName",
@@ -10058,6 +10155,23 @@
             "sms:validationRules": []
         },
         {
+            "@id": "bts:OlympusDP80",
+            "@type": "rdfs:Class",
+            "rdfs:comment": "Dual-Sensor Monochrome and Color Camera",
+            "rdfs:label": "OlympusDP80",
+            "rdfs:subClassOf": [
+                {
+                    "@id": "bts:Platform"
+                }
+            ],
+            "schema:isPartOf": {
+                "@id": "http://schema.biothings.io"
+            },
+            "sms:displayName": "Olympus DP80",
+            "sms:required": "sms:false",
+            "sms:validationRules": []
+        },
+        {
             "@id": "bts:OrbitrapFusionLumosTribrid",
             "@type": "rdfs:Class",
             "rdfs:comment": "Thermo Scientific Orbitrap Fusion Lumos Tribrid Mass Spectrometer",
@@ -10563,7 +10677,7 @@
             "schema:isPartOf": {
                 "@id": "http://schema.biothings.io"
             },
-            "sms:displayName": "LTQOrbitrapXL",
+            "sms:displayName": "LTQ Orbitrap XL",
             "sms:required": "sms:false",
             "sms:validationRules": []
         },
@@ -11524,6 +11638,23 @@
             "sms:validationRules": []
         },
         {
+            "@id": "bts:Unknown",
+            "@type": "rdfs:Class",
+            "rdfs:comment": "TBD",
+            "rdfs:label": "Unknown",
+            "rdfs:subClassOf": [
+                {
+                    "@id": "bts:Sex"
+                }
+            ],
+            "schema:isPartOf": {
+                "@id": "http://schema.biothings.io"
+            },
+            "sms:displayName": "unknown",
+            "sms:required": "sms:false",
+            "sms:validationRules": []
+        },
+        {
             "@id": "bts:Homosapiens",
             "@type": "rdfs:Class",
             "rdfs:comment": "Homo sapiens with taxonomy ID: 9606 and Genbank common name: human",
@@ -12277,6 +12408,23 @@
                 "@id": "http://schema.biothings.io"
             },
             "sms:displayName": "isograft",
+            "sms:required": "sms:false",
+            "sms:validationRules": []
+        },
+        {
+            "@id": "bts:Teratoma",
+            "@type": "rdfs:Class",
+            "rdfs:comment": "A non-seminomatous germ cell tumor characterized by the presence of various tissues which correspond to the different germinal layers (endoderm, mesoderm, and ectoderm). It occurs in the testis, ovary, and extragonadal sites including central nervous system, mediastinum, lung, and stomach",
+            "rdfs:label": "Teratoma",
+            "rdfs:subClassOf": [
+                {
+                    "@id": "bts:TumorType"
+                }
+            ],
+            "schema:isPartOf": {
+                "@id": "http://schema.biothings.io"
+            },
+            "sms:displayName": "teratoma",
             "sms:required": "sms:false",
             "sms:validationRules": []
         },
@@ -13162,23 +13310,6 @@
                 "@id": "http://schema.biothings.io"
             },
             "sms:displayName": "normal",
-            "sms:required": "sms:false",
-            "sms:validationRules": []
-        },
-        {
-            "@id": "bts:ConfocalImaging",
-            "@type": "rdfs:Class",
-            "rdfs:comment": "TBD",
-            "rdfs:label": "ConfocalImaging",
-            "rdfs:subClassOf": [
-                {
-                    "@id": "bts:Platform"
-                }
-            ],
-            "schema:isPartOf": {
-                "@id": "http://schema.biothings.io"
-            },
-            "sms:displayName": "confocalImaging",
             "sms:required": "sms:false",
             "sms:validationRules": []
         },
