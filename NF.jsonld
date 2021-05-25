@@ -4146,6 +4146,23 @@
             "sms:validationRules": []
         },
         {
+            "@id": "bts:Teratoma",
+            "@type": "rdfs:Class",
+            "rdfs:comment": "A non-seminomatous germ cell tumor characterized by the presence of various tissues which correspond to the different germinal layers (endoderm, mesoderm, and ectoderm). It occurs in the testis, ovary, and extragonadal sites including central nervous system, mediastinum, lung, and stomach",
+            "rdfs:label": "Teratoma",
+            "rdfs:subClassOf": [
+                {
+                    "@id": "bts:CellType"
+                }
+            ],
+            "schema:isPartOf": {
+                "@id": "http://schema.biothings.io"
+            },
+            "sms:displayName": "teratoma",
+            "sms:required": "sms:false",
+            "sms:validationRules": []
+        },
+        {
             "@id": "bts:Cy5",
             "@type": "rdfs:Class",
             "rdfs:comment": "Fluorescent dye used for the red channel on an array",
@@ -6049,6 +6066,9 @@
                 },
                 {
                     "@id": "bts:CNON"
+                },
+                {
+                    "@id": "bts:Teratoma"
                 }
             ],
             "sms:displayName": "cellType",
@@ -8252,7 +8272,7 @@
         {
             "@id": "bts:Assay",
             "@type": "rdfs:Class",
-            "rdfs:comment": "Metadata describing properites of an assay conducted in the study.",
+            "rdfs:comment": "Metadata describing properties of an assay conducted in the study.",
             "rdfs:label": "Assay",
             "rdfs:subClassOf": [
                 {
@@ -8530,6 +8550,9 @@
             "sms:requiresDependency": [
                 {
                     "@id": "bts:ModelSystemName"
+                },
+                {
+                    "@id": "bts:ModelSystemStrainNomenclature"
                 }
             ],
             "sms:validationRules": []
@@ -8559,6 +8582,12 @@
                 },
                 {
                     "@id": "bts:Prss56Cre;R26mT"
+                },
+                {
+                    "@id": "bts:HiPSC-SCP"
+                },
+                {
+                    "@id": "bts:HiPSC"
                 }
             ],
             "sms:displayName": "modelSystemStrainNomenclature",
