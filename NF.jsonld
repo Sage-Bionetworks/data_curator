@@ -9375,6 +9375,52 @@
             "sms:validationRules": []
         },
         {
+            "@id": "bts:PatientTimepoints",
+            "@type": "rdfs:Class",
+            "rdfs:comment": "Patient level metadata. Not for annotation.",
+            "rdfs:label": "PatientTimepoints",
+            "rdfs:subClassOf": [
+                {
+                    "@id": "bts:Template"
+                }
+            ],
+            "schema:isPartOf": {
+                "@id": "http://schema.biothings.io"
+            },
+            "sms:displayName": "patientTimepoints",
+            "sms:required": "sms:true",
+            "sms:requiresDependency": [
+                {
+                    "@id": "bts:IndividualID"
+                },
+                {
+                    "@id": "bts:Sex"
+                },
+                {
+                    "@id": "bts:Species"
+                },
+                {
+                    "@id": "bts:Diagnosis"
+                },
+                {
+                    "@id": "bts:Nf1Genotype"
+                },
+                {
+                    "@id": "bts:Nf2Genotype"
+                },
+                {
+                    "@id": "bts:ExperimentalCondition"
+                },
+                {
+                    "@id": "bts:ExperimentalTimepoint"
+                },
+                {
+                    "@id": "bts:TimePointUnit"
+                }
+            ],
+            "sms:validationRules": []
+        },
+        {
             "@id": "bts:-/-",
             "@type": "rdfs:Class",
             "rdfs:comment": "Homozygous deletion or mutation of NF1.",
