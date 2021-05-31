@@ -1,17 +1,13 @@
 // specify div
+
+.content {
+    padding-top: 50px;
+}
+
+
 #div_download, #div_validate, #div_val_gsheet {
     font-size: 18px; 
     background-color: white; 
     margin: 10px 0; 
     padding: 10px 0;
-}
-
-.option {
-    &:hover, &:focus {
-        transform: scale(1.02);
-        font-size: 1.1em;
-        box-shadow: $float_shadow;
-        border-radius: 20px;
-        transition: transform 50ms;
-    }
 }

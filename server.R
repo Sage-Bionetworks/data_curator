@@ -111,7 +111,6 @@ shinyServer(function(input, output, session) {
       )
       datatype_list[["folders_namedList"]] <<- list2Vector(folder_list)
       folders <- sort(names(datatype_list[["folders_namedList"]]))
-
       # updates foldernames
       updateSelectInput(session, paste0(x, "folder"),
         choices = folders
@@ -119,21 +118,31 @@ shinyServer(function(input, output, session) {
     })
   })
 
-
+  ######## Header Dropdown Button ########
   # Adjust header selection dropdown based on tabs
   observe({
     if (input[["tabs"]] %in% c("tab_instructions", "tab_data")) {
       hide("header_selection_dropdown")
     } else {
       show("header_selection_dropdown")
+      addClass(id = "header_selection_dropdown", class = "open")
     }
   })
 
+  lapply(datatypes, function(x) {
+    selector <- paste0("header_dropdown_", x)
+    observeEvent(input[[selector]], {
+      if (nchar(input[[selector]]) > 20) {
+        short <- paste0(substr(input[[selector]], 1, 20), " ...")
+        runjs(paste0("$('#header_content_", x, " .item').text('", short, "');"))
+      }
+    })
+  })
 
-  lapply(datatypes, function(i) {
-    observeEvent(input[[paste0("dropdown_", i)]], {
-      updateSelectInput(session, paste0("header_dropdown_", i),
-        selected = input[[paste0("dropdown_", i)]]
+  lapply(datatypes, function(x) {
+    observeEvent(input[[paste0("dropdown_", x)]], {
+      updateSelectInput(session, paste0("header_dropdown_", x),
+        selected = input[[paste0("dropdown_", x)]]
       )
     })
   })
@@ -150,9 +159,9 @@ shinyServer(function(input, output, session) {
 
   observeEvent(input$update_confirm, {
     if (input$update_confirm == TRUE) {
-      lapply(datatypes, function(i) {
-        updateSelectInput(session, paste0("dropdown_", i),
-          selected = input[[paste0("header_dropdown_", i)]]
+      lapply(datatypes, function(x) {
+        updateSelectInput(session, paste0("dropdown_", x),
+          selected = input[[paste0("header_dropdown_", x)]]
         )
       })
     }

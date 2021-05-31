@@ -11,9 +11,10 @@ ValidationMsgServer <- function(id, valRes, template, inFile) {
     id,
     function(input, output, session) {
       output$results <- renderUI({
-        text_class <- ifelse(!is.null(valRes$validationRes) && valRes$validationRes == "valid",
-          "success_msg", "error_msg"
-        )
+        text_class <-
+          ifelse(!is.null(valRes$validationRes) && valRes$validationRes == "valid" && length(valRes$validationRes) != 0,
+            "success_msg", "error_msg"
+          )
 
         tagList(
           # TODO: remove first two checking once we set dropdown value as 1st selection by default
@@ -22,6 +23,9 @@ ValidationMsgServer <- function(id, valRes, template, inFile) {
           },
           if (is.null(inFile)) {
             span(class = text_class, HTML("Please <b>upload</b> a filled template !"))
+          },
+          if (length(inFile) == 0) {
+            span(class = text_class, HTML("File is empty. Please <b>upload</b> a filled template !"))
           },
           span(class = text_class, HTML(valRes$outMsg))
         )

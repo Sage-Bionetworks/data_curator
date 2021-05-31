@@ -1,7 +1,5 @@
 // styles of button are collected in here 
 
-
-
 // https://paigen11.medium.com/
 #btn_header_update
 {
@@ -56,6 +54,17 @@
   }
 }
 
+
+// dropdown hover effect
+.option {
+  &:hover, &:focus {
+      transform: scale(1.01);
+      font-size: 1.02em;
+      box-shadow: $float_shadow;
+      border-radius: 20px;
+      transition: transform 50ms;
+  }
+}
 
 
 

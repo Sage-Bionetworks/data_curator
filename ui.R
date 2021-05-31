@@ -25,7 +25,7 @@ ui <- shinydashboardPlus::dashboardPage(
         fluidRow(
           lapply(datatypes, function(x) {
             div(
-              id = paste0("hover_text_", x),
+              id = paste0("header_content_", x),
               selectInput(
                 inputId = paste0("header_dropdown_", x),
                 label = NULL,

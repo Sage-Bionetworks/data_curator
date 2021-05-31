@@ -85,3 +85,4 @@ sapply(source_files, FUN = source)
 
 # Global variables
 datatypes <- c("project", "folder", "template")
+options(sass.cache = FALSE)
