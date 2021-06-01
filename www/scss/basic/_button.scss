@@ -60,7 +60,7 @@
   &:hover, &:focus {
       transform: scale(1.01);
       font-size: 1.02em;
-      box-shadow: $float_shadow;
+      box-shadow: $primary_shadow;
       border-radius: 20px;
       transition: transform 50ms;
   }

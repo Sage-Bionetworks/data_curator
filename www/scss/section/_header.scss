@@ -1,5 +1,10 @@
+.logo, .navbar {
+  background-color: transparent !important;
+}
+
 .main-header {
-    
+  @include header_bg;
+
   .logo {
     font-size: 1.8em;
   }
@@ -11,9 +16,24 @@
     padding: 0 15px;
   }
 
+  // adjust custom dropdown color effect
+  .navbar .nav {
+
+    a:hover {
+      background: $primary_col !important;
+    }
+    .open>a {
+      background-color: $primary_col !important;
+
+      &:focus, &:hover {
+        background-color: $primary_col !important;
+      }
+    }
+  }
+
   .dropdown-menu {
     left: auto !important; // stick with the button left
-    box-shadow: $float_shadow;
+    box-shadow: $primary_shadow;
     animation: fadeIn 100ms;
 
   

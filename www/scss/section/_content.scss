@@ -1,9 +1,59 @@
 // specify div
 
-.content {
-    padding-top: 50px;
+.content-wrapper {
+  // overflow-y: visible !important;
+  background-color: $bg_primary_col;
+  // padding: 10px;
 }
 
+.content {
+  padding-top: 50px;
+}
+
+.tab-content {
+  .title h2 {
+    border-bottom: 1px solid rgba(0, 0, 0,  0.12); // line below title
+    padding-bottom: 16px;
+  }
+}
+
+// TODO: Make it function or use existing function
+.box-solid.box-primary {
+  border-radius: 10px !important;
+  background-color: $bg_primary_col ; 
+  border: 0px !important; 
+  top: 15px; // move down to lower than header
+  box-shadow: $primary_shadow;
+  transition: 200ms;
+  -webkit-transition-property: box-shadow, transform;
+  transition-property: box-shadow, transform;
+
+  &:hover {
+      box-shadow: $float_shadow;
+      -webkit-transform: scale(1.01);
+      transform: scale(1.01);
+  }
+  /*#show_template_box {
+      background-color: $dark;
+      margin: 50px 0px 5px;
+  } 
+  */
+  .box-header {
+      border-radius: 10px;
+      // background: $grad_primary_col !important;
+      // box-shadow: 0px 0.0625em 0.0625em rgba(0, 0, 0, 0.25),
+      //             0px 0.125em 0.5em rgba(0, 0, 0, 0.25),
+      //             0px 0px 0px 1px inset rgba(255, 255, 255, 0.1);
+      margin: 0 5px 5px 5px;
+      top: -7px;
+  }
+
+  // help msg
+  .help-block {
+      margin: 8px 5px 2.5px 5px ;
+  }
+
+}
 
 #div_download, #div_validate, #div_val_gsheet {
     font-size: 18px; 
