@@ -1,15 +1,24 @@
-// global variables are collected here
+/*** Global Variables ***/
 
 // colors
+$primary_col: #605ca8;
+
+$htan_col: rgb(95,0,140);
+$light: #f8f9fa;
+$dark: #343a40;
 $error_col: #E53935;
 $success_col: #28a745;
 $notif_process_col: #F7DC6F; 
 $notif_success_col: #82E0AA;
-$footer_col: #465362;
-$footer_bg_col: #D0D6DC;
+
+$sidebar_col: #191919;
+$sidebar_pink: #A63FAA;
+$footer_col: #878787;
+$footer_bg_col: #202020;
 
 // box shadow
-$simple_shadow: 0 10px 10px -5px;
+$simple_shadow:rgba(50, 50, 105, 0.15) 0px 2px 5px 0px, 
+               rgba(0, 0, 0, 0.05) 0px 1px 1px 0px;
 $float_shadow: 0px 0.0625em 0.0625em rgba(0, 0, 0, 0.25),
                0px 0.125em 0.5em rgba(0, 0, 0, 0.25),
                0px 0px 0px 1px inset rgba(255, 255, 255, 0.1);

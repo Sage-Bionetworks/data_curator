@@ -44,7 +44,7 @@ ui <- shinydashboardPlus::dashboardPage(
         target = "_blank",
         tags$img(
           height = "40px", alt = "HTAN LOGO",
-          src = "HTAN_text_logo.png"
+          src = "img/HTAN_text_logo.png"
         )
       )
     )
@@ -73,12 +73,13 @@ ui <- shinydashboardPlus::dashboardPage(
         tabName = "tab_upload",
         icon = icon("upload")
       ),
-      HTML(
-        "<footer>
-            Supported by the Human Tumor Atlas Network <br/>
-            (U24-CA233243-01)<br/>
-            Powered by Sage Bionetworks
-        </footer>"
+      # add sidebar footer here
+      tags$a(
+        id = "sidebar_footer", `data-toggle` = "tab",
+        tags$div(icon("heart")),
+        tags$footer(HTML('Supported by the Human Tumor Atlas Network <br/>
+                  (U24-CA233243-01)<br/>
+                  Powered by <i class="far fa-heart"></i> and Sage Bionetworks'))
       )
     )
   ),

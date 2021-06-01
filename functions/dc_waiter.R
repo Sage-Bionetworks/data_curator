@@ -26,14 +26,14 @@ dc_waiter <- function(stage = c("show", "update", "hide"),
     if (stage == "show") {
       waiter_show_on_load(
         html = tagList(
-          img(src = "loading.gif"),
+          img(src = "img/loading.gif"),
           h4("Retrieving Synapse information...")
         ),
         color = "#424874"
       )
     } else if (isPass) {
       waiter_update(html = tagList(
-        img(src = "synapse_logo.png", height = "120px"),
+        img(src = "img/synapse_logo.png", height = "120px"),
         h3(sprintf("Welcome, %s!", usrName))
       ))
       Sys.sleep(sleep)
@@ -41,7 +41,7 @@ dc_waiter <- function(stage = c("show", "update", "hide"),
     } else {
       # ensure the synapse logo image is stored in www/
       waiter_update(html = tagList(
-        img(src = "synapse_logo.png", height = "120px"),
+        img(src = "img/synapse_logo.png", height = "120px"),
         h3("Looks like you're not logged in!"), span(
           "Please ", a("login",
             href = "https://www.synapse.org/#!LoginPlace:0", target = "_blank"
