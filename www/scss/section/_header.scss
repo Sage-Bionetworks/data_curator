@@ -7,6 +7,7 @@
 
   .logo {
     font-size: 1.8em;
+    font-weight: 600;
   }
 
   #HTAN_logo a {
@@ -17,16 +18,16 @@
   }
 
   // adjust custom dropdown color effect
-  .navbar .nav {
-
+  .navbar {
     a:hover {
-      background: $primary_col !important;
+      background-color: $glass_grey !important;
     }
-    .open>a {
-      background-color: $primary_col !important;
+    // custom dropdown - leftUI
+    .open>a { // when the box open
+      background-color: $glass_grey !important;
 
       &:focus, &:hover {
-        background-color: $primary_col !important;
+        background-color: $glass_grey !important;
       }
     }
   }
@@ -77,7 +78,7 @@
   ul.menu {
     &>div, .row {
       flex-wrap: wrap;
-      justify-content: center
+      // justify-content: center
     }
   }
 }

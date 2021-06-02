@@ -46,7 +46,7 @@
 			transition: 100ms;
 
 			&:hover {
-				background: rgba(104, 103, 103, 0.3) !important;
+				background: $glass_grey !important;
 				filter: grayscale(0%) opacity(1);
 			}
 			
