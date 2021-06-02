@@ -19,7 +19,7 @@
 // TODO: Make it function or use existing function
 .box-primary {
   border-radius: 10px !important;
-  background-color: $bg_primary_col ; 
+  background-color: #FFF ; 
   border-color: rgba($primary_col, 0.8) !important; 
   top: 15px; // move down to lower than header
   box-shadow: $primary_shadow;
@@ -28,15 +28,19 @@
   transition-property: box-shadow, transform;
 
   &:hover {
-      box-shadow: $float_shadow;
-      -webkit-transform: scale(1.01);
-      transform: scale(1.01);
-      z-index: 100;
+    box-shadow: $float_shadow;
+    -webkit-transform: scale(1.001);
+    transform: scale(1.001);
+    z-index: 100;
   }
 
+  .box-title {
+    font-size: 1.6em;
+  }
+  
   // help msg
   .help-block {
-      margin: 8px 5px 2.5px 5px ;
+    margin: 8px 5px 2.5px 5px ;
   }
 }
 
@@ -47,9 +51,6 @@
  .box-header {
     border-radius: 10px;
     background: rgba($primary_col, 0.8) !important;
-    // box-shadow: 0px 0.0625em 0.0625em rgba(0, 0, 0, 0.25),
-    //             0px 0.125em 0.5em rgba(0, 0, 0, 0.25),
-    //             0px 0px 0px 1px inset rgba(255, 255, 255, 0.1);
     margin: 0 5px 5px 5px;
     top: -7px;
 

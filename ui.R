@@ -120,7 +120,6 @@ ui <- shinydashboardPlus::dashboardPage(
         fluidRow(
           box(
             status = "primary",
-            solidHeader = TRUE,
             width = 6,
             title = "Choose a Project and Folder: ",
             selectInput(
@@ -139,7 +138,6 @@ ui <- shinydashboardPlus::dashboardPage(
           ),
           box(
             status = "primary",
-            solidHeader = TRUE,
             width = 6,
             title = "Choose a Metadata Template Type: ",
             selectInput(
@@ -160,7 +158,6 @@ ui <- shinydashboardPlus::dashboardPage(
           box(
             title = "Get Link, Annotate, and Download Template as CSV",
             status = "primary",
-            solidHeader = TRUE,
             width = 12,
             actionButton("btn_download", "Click to Generate Google Sheets Template"),
             hidden(
@@ -182,14 +179,12 @@ ui <- shinydashboardPlus::dashboardPage(
         fluidRow(
           box(
             title = "Upload Filled Metadata as a CSV",
-            solidHeader = TRUE,
             status = "primary",
             width = 12,
             csvInfileUI("inputFile")
           ),
           box(
             title = "Metadata Preview",
-            solidHeader = TRUE,
             collapsible = TRUE,
             status = "primary",
             width = 12,
@@ -198,7 +193,6 @@ ui <- shinydashboardPlus::dashboardPage(
           box(
             title = "Validate Filled Metadata",
             status = "primary",
-            solidHeader = TRUE,
             collapsible = TRUE,
             width = 12,
             actionButton("btn_validate", "Validate Metadata"),
@@ -219,7 +213,6 @@ ui <- shinydashboardPlus::dashboardPage(
           box(
             title = "Submit Validated Metadata to Synapse",
             status = "primary",
-            solidHeader = TRUE,
             width = 12,
             uiOutput("btn_submit")
           )
