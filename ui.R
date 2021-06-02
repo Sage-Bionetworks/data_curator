@@ -53,6 +53,7 @@ ui <- shinydashboardPlus::dashboardPage(
     width = 250,
     sidebarMenu(
       id = "tabs",
+      # uiOutput("title"),
       menuItem(
         "Instructions",
         tabName = "tab_instructions",
@@ -86,8 +87,7 @@ ui <- shinydashboardPlus::dashboardPage(
   dashboardBody(
     tags$head(
       tags$style(sass(sass_file("www/scss/main.scss"))),
-      singleton(includeScript("www/js/readCookie.js")),
-      singleton(includeScript("www/js/onclick.js"))
+      singleton(includeScript("www/js/readCookie.js"))
     ),
     use_notiflix_report(),
     use_waiter(),
@@ -95,7 +95,6 @@ ui <- shinydashboardPlus::dashboardPage(
       # First tab content
       tabItem(
         tabName = "tab_instructions",
-        uiOutput("title"),
         h2("Instructions for the Data Curator App:"),
         h3(
           "1. Go to",
@@ -191,6 +190,7 @@ ui <- shinydashboardPlus::dashboardPage(
           box(
             title = "Metadata Preview",
             solidHeader = TRUE,
+            collapsible = TRUE,
             status = "primary",
             width = 12,
             DTableUI("tbl_preview")
@@ -199,6 +199,7 @@ ui <- shinydashboardPlus::dashboardPage(
             title = "Validate Filled Metadata",
             status = "primary",
             solidHeader = TRUE,
+            collapsible = TRUE,
             width = 12,
             actionButton("btn_validate", "Validate Metadata"),
             hidden(

@@ -62,9 +62,9 @@ shinyServer(function(input, output, session) {
         syn_login(sessionToken = input$cookie, rememberMe = FALSE)
 
         # welcome message
-        output$title <- renderUI({
-          titlePanel(h4(sprintf("Welcome, %s", syn_getUserProfile()$userName)))
-        })
+        # output$title <- renderUI({
+        #   titlePanel(h4(sprintf("Welcome, %s", syn_getUserProfile()$userName)))
+        # })
 
         # updating global vars with values for projects
         synStore_obj <<- synapse_driver(token = input$cookie)
@@ -443,3 +443,4 @@ shinyServer(function(input, output, session) {
     }
   })
 })
+
