@@ -1,18 +1,70 @@
+/*** Animation ***/
+
 @keyframes fadeIn {
-  0% {transform:scale(0); opacity: 0}
-  30% {transform: scale(0.3)}
-  70% {transform: scale(0.7)}
-  100% {transform: scale(1); opacity: 1}
+
+  0% {
+    transform:scale(0); opacity: 0
+  }
+
+  30% {
+    transform: scale(0.3)
+  }
+
+  70% {
+    transform: scale(0.7)
+  }
+  100% {
+    transform: scale(1); opacity: 1
+  }
 }
 
+// update button animation
 @keyframes TransitioningBackground {
+
   0% {
     background-position: 1% 0%;
   }
+
   50% {
     background-position: 99% 100%;
   }
+
   100% {
     background-position: 1% 0%;
+  }
+}
+
+// switch tab animation
+@keyframes move-left {
+
+  0% {
+    opacity: 0;
+    transform:  translateX(10px);
+  }
+
+  50% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+}
+
+@keyframes move-right {
+
+  0% {
+    opacity: 0;
+    transform:  translateX(-10px);
+  }
+
+  50% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateX(10px);
   }
 }

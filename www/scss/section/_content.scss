@@ -1,4 +1,4 @@
-// specify div
+/*** Content ***/
 
 .content-wrapper {
   // overflow-y: visible !important;
@@ -19,9 +19,9 @@
 // TODO: Make it function or use existing function
 .box-primary {
   border-radius: 10px !important;
-  background-color: #FFF ; 
+  background-color: #FFF; 
   border-color: rgba($primary_col, 0.8) !important; 
-  top: 15px; // move down to lower than header
+  top: 15px;
   box-shadow: $primary_shadow;
   transition: 200ms;
   -webkit-transition-property: box-shadow, transform;
@@ -46,14 +46,17 @@
 
 // if use solidHeader box
 .box-solid {
+
   @extend .box-primary;
   border: 0px !important;
+
  .box-header {
     border-radius: 10px;
     background: rgba($primary_col, 0.8) !important;
     margin: 0 5px 5px 5px;
     top: -7px;
 
+    // collapse button
     .box-tools .btn{
       background: rgba($primary_col, 0.8);
     }

@@ -1,8 +1,11 @@
+/*** Header ***/
+
 .logo, .navbar {
   background-color: transparent !important;
 }
 
 .main-header {
+
   @include header_bg;
 
   .logo {
@@ -19,11 +22,14 @@
 
   // adjust custom dropdown color effect
   .navbar {
+
     a:hover {
       background-color: $glass_grey !important;
     }
+
     // custom dropdown - leftUI
-    .open>a { // when the box open
+    // when the box open
+    .open>a { 
       background-color: $glass_grey !important;
 
       &:focus, &:hover {
@@ -36,11 +42,11 @@
     left: auto !important; // stick with the button left
     box-shadow: $primary_shadow;
     animation: fadeIn 100ms;
-
   
     ul.menu {
 
       padding: 0 5px !important;
+
       // reset all margin
       & * {
         margin: 0px;
@@ -67,18 +73,20 @@
   }
 }
 
-
+// responsive - cycle back for proper breakpoints if needed
 @media (max-width:1146px){
+
   .shiny-input-container{
     width: 200px !important;
   }
 }
 
 @media (max-width:973px){
+
   ul.menu {
+
     &>div, .row {
       flex-wrap: wrap;
-      // justify-content: center
     }
   }
 }

@@ -295,14 +295,16 @@ shinyServer(function(input, output, session) {
       if (valRes$validationRes == "valid") {
         # show submit button
         output$submit <- renderUI({
-          actionButton("btn_submit", "Submit to Synapse")
+          actionButton("btn_submit", "Submit to Synapse", class = "btn-primary-color")
         })
         output$val_gsheet <- renderUI(NULL)
         dc_waiter("update", msg = paste0(valRes$errorType, " Found !!! "), spin = spin_inner_circles(), sleep = 2.5)
       } else {
         # render gsheet button
         output$val_gsheet <- renderUI({
-          actionButton("btn_val_gsheet", "  Click to Generate Google Sheet Link", icon = icon("table"))
+          actionButton("btn_val_gsheet", "  Click to Generate Google Sheet Link",
+            class = "btn-primary-color", icon = icon("table")
+          )
         })
         dc_waiter("update", msg = paste0(valRes$errorType, " Found !!! "), spin = spin_pulsar(), sleep = 2.5)
       }
@@ -443,4 +445,3 @@ shinyServer(function(input, output, session) {
     }
   })
 })
-

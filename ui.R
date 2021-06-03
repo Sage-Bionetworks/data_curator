@@ -33,7 +33,10 @@ ui <- shinydashboardPlus::dashboardPage(
               )
             )
           }),
-          actionButton(inputId = "btn_header_update", label = NULL, icon = icon("sync-alt"))
+          actionButton(
+            inputId = "btn_header_update", class = "btn-shiny-effect",
+            label = NULL, icon = icon("sync-alt")
+          )
         )
       )
     ),
@@ -159,7 +162,9 @@ ui <- shinydashboardPlus::dashboardPage(
             title = "Get Link, Annotate, and Download Template as CSV",
             status = "primary",
             width = 12,
-            actionButton("btn_download", "Click to Generate Google Sheets Template"),
+            actionButton("btn_download", "Click to Generate Google Sheets Template",
+              class = "btn-primary-color"
+            ),
             hidden(
               div(
                 id = "div_download",
@@ -195,7 +200,9 @@ ui <- shinydashboardPlus::dashboardPage(
             status = "primary",
             collapsible = TRUE,
             width = 12,
-            actionButton("btn_validate", "Validate Metadata"),
+            actionButton("btn_validate", "Validate Metadata",
+              class = "btn-primary-color"
+            ),
             hidden(
               div(
                 id = "div_validate",
