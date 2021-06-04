@@ -49,6 +49,9 @@ shinyServer(function(input, output, session) {
 
   tabs_list <- c("tab_instructions", "tab_data", "tab_template", "tab_upload")
   clean_tags <- c("div_download", "div_validate", "btn_submit")
+  
+  # add box effects
+  boxEffect(zoom = TRUE, float = TRUE)
 
   ######## Initiate Login Process ########
   # synapse cookies
@@ -83,11 +86,11 @@ shinyServer(function(input, output, session) {
         })
 
         # update waiter loading screen once login successful
-        dc_waiter("update", isLogin = TRUE, isPass = TRUE, usrName = syn_getUserProfile()$userName)
+        dcWaiter("update", isLogin = TRUE, isPass = TRUE, usrName = syn_getUserProfile()$userName)
       },
       error = function(err) {
         message(err) # write log error
-        dc_waiter("update", isLogin = TRUE, isPass = FALSE)
+        dcWaiter("update", isLogin = TRUE, isPass = FALSE)
       }
     )
   })
@@ -188,7 +191,7 @@ shinyServer(function(input, output, session) {
   observeEvent(input$btn_download, {
 
     # loading screen for template link generation
-    dc_waiter("show", msg = "Generating link...")
+    dcWaiter("show", msg = "Generating link...")
 
     # update selected folder ID
     folder_synID <<- datatype_list[["folders_namedList"]][[input$dropdown_folder]]
@@ -234,7 +237,7 @@ shinyServer(function(input, output, session) {
       })
     }
 
-    dc_waiter("hide", sleep = 1)
+    dcWaiter("hide", sleep = 1)
     # display link
     show("div_download") # TODO: add progress bar on (loading) screen
   })
@@ -254,7 +257,7 @@ shinyServer(function(input, output, session) {
   observeEvent(input$btn_validate, {
 
     # loading screen for validating metadata
-    dc_waiter("show", msg = "Validating...")
+    dcWaiter("show", msg = "Validating...")
 
     try(
       silent = TRUE,
@@ -298,7 +301,7 @@ shinyServer(function(input, output, session) {
           actionButton("btn_submit", "Submit to Synapse", class = "btn-primary-color")
         })
         output$val_gsheet <- renderUI(NULL)
-        dc_waiter("update", msg = paste0(valRes$errorType, " Found !!! "), spin = spin_inner_circles(), sleep = 2.5)
+        dcWaiter("update", msg = paste0(valRes$errorType, " Found !!! "), spin = spin_inner_circles(), sleep = 2.5)
       } else {
         # render gsheet button
         output$val_gsheet <- renderUI({
@@ -306,10 +309,10 @@ shinyServer(function(input, output, session) {
             class = "btn-primary-color", icon = icon("table")
           )
         })
-        dc_waiter("update", msg = paste0(valRes$errorType, " Found !!! "), spin = spin_pulsar(), sleep = 2.5)
+        dcWaiter("update", msg = paste0(valRes$errorType, " Found !!! "), spin = spin_pulsar(), sleep = 2.5)
       }
     } else {
-      dc_waiter("hide")
+      dcWaiter("hide")
     }
 
     show("div_validate")
@@ -318,7 +321,7 @@ shinyServer(function(input, output, session) {
   # if user click gsheet_btn, generating gsheet
   observeEvent(input$btn_val_gsheet, {
     # loading screen for Google link generation
-    dc_waiter("show", msg = "Generating link...")
+    dcWaiter("show", msg = "Generating link...")
 
     filled_manifest <- metadata_model$populateModelManifest(paste0(
       config$community,
@@ -330,14 +333,14 @@ shinyServer(function(input, output, session) {
       HTML(paste0("<a target=\"_blank\" href=\"", filled_manifest, "\">Edit on the Google Sheet.</a>"))
     })
 
-    dc_waiter("hide")
+    dcWaiter("hide")
   })
 
 
   ######## Submission Section ########
   observeEvent(input$btn_submit, {
     # loading screen for submitting data
-    dc_waiter("show", msg = "Submitting...")
+    dcWaiter("show", msg = "Submitting...")
 
     # reads file csv again
     inFile <- csvInfileServer("inputFile")
@@ -393,7 +396,7 @@ shinyServer(function(input, output, session) {
         # TODO: input file not reset yet
         # reset(c(clean_tags, "inputFile", "tbl_preview")) if reset works
       } else {
-        dc_waiter("update", msg = HTML(paste0(
+        dcWaiter("update", msg = HTML(paste0(
           "Uh oh, looks like something went wrong!",
           manifest_id,
           " is not a valid Synapse ID. Try again?"
@@ -436,7 +439,7 @@ shinyServer(function(input, output, session) {
           nrow = 0
         ))))
       } else {
-        dc_waiter("update", msg = HTML(paste0(
+        dcWaiter("update", msg = HTML(paste0(
           "Uh oh, looks like something went wrong!",
           manifest_id, " is not a valid Synapse ID. Try again?"
         )), sleep = 3)

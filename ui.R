@@ -227,7 +227,7 @@ ui <- shinydashboardPlus::dashboardPage(
       )
     ),
     # waiter loading screen
-    dc_waiter("show", isLogin = TRUE)
+    dcWaiter("show", isLogin = TRUE)
   )
 )
 

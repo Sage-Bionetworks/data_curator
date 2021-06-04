@@ -22,17 +22,6 @@
   background-color: #FFF; 
   border-color: rgba($primary_col, 0.8) !important; 
   top: 15px;
-  box-shadow: $primary_shadow;
-  transition: 200ms;
-  -webkit-transition-property: box-shadow, transform;
-  transition-property: box-shadow, transform;
-
-  &:hover {
-    box-shadow: $float_shadow;
-    -webkit-transform: scale(1.001);
-    transform: scale(1.001);
-    z-index: 100;
-  }
 
   .box-title {
     font-size: 1.6em;

@@ -17,7 +17,7 @@
   background-size: 400% 400%;
   animation: TransitioningBackground 10s ease infinite;
 
-  &:hover {
+  &:hover, &:focus {
     color: #fff;
     background-image: linear-gradient(to left, #2d8fe5, #d155b8);
     transform: scale(1.05);
@@ -82,8 +82,9 @@
   border-radius: 10px;
   box-shadow: $simple_shadow;
   
-  &:hover {
+  &:hover, &:focus {
     background: #fff;
+    outline: none !important;
   }
   
   .fa {
@@ -129,7 +130,7 @@
     border-radius: 40px;
     cursor: pointer;
 
-  &:hover {
+  &:hover, &:focus {
     background: $primary_col;
     color: #fff;
     box-shadow: $float_shadow2;

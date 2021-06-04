@@ -1,7 +1,7 @@
 # This is script to wrap up the waiter screen for data curator app
 # TODO: maybe we could split into UI and server if we need
 
-dc_waiter <- function(stage = c("show", "update", "hide"),
+dcWaiter <- function(stage = c("show", "update", "hide"),
                       isLogin = FALSE, isPass = TRUE, usrName = NULL,
                       sleep = 2, msg = NULL, spin = NULL) {
   # validate arguments
