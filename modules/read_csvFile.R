@@ -24,7 +24,7 @@ csvInfileServer <- function(id, na = c("", "NA"), colsAsCharacters = FALSE, keep
         if (colsAsCharacters) {
           infile <- read_csv(input$file$datapath, na = na, col_types = cols(.default = "c"))
         } else {
-          infile <- read_csv(input$file$datapath, na = na)
+          infile <- read_csv(input$file$datapath, na = na, col_types = cols())
         }
 
         if (keepBlank) {

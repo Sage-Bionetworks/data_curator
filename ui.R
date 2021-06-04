@@ -189,7 +189,7 @@ ui <- dashboardPage(
             status = "primary",
             solidHeader = TRUE,
             width = 12,
-            uiOutput("btn_submit")
+            uiOutput("submit")
           )
         )
       )

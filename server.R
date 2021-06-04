@@ -38,7 +38,7 @@ shinyServer(function(input, output, session) {
   folder_synID <- NULL # selected foler synapse ID
 
   template_schema_name <- NULL # selected template schema name
-  file_namedlist <- NULL
+  file_namedList <- NULL
 
   ### mapping from display name to schema name
   schema_name <- config$manifest_schemas$schema_name
@@ -162,12 +162,12 @@ shinyServer(function(input, output, session) {
           synStore_obj,
           folder_synID
         )
-        file_namedlist <<- list2Vector(file_list)
+        file_namedList <<- list2Vector(file_list)
 
         manifest_url <- metadata_model$getModelManifest(paste0(
           config$community,
           " ", input$dropdown_template
-        ), template_schema_name, filenames = as.list(names(file_namedlist)))
+        ), template_schema_name, filenames = as.list(names(file_namedList)))
         # make sure not scalar if length of list is 1 in R
         # add in the step to convert names later
       } else {
@@ -288,7 +288,7 @@ shinyServer(function(input, output, session) {
     dc_waiter("show", msg = "Submitting...")
 
     # reads file csv again
-    inFile <- csvInfileServer("inputFile")
+    submit_data <- csvInfileServer("inputFile")$data()
 
     # IF an assay component selected (define assay components) note for future
     # the type to filter (eg assay) on could probably also be a config choice
@@ -299,22 +299,22 @@ shinyServer(function(input, output, session) {
     # with synapse files
     if (input$dropdown_template %in% assay_schemas) {
       # make into a csv or table for assay components already has entityId
-      if ("entityId" %in% colnames(infile)) {
-        write.csv(infile,
+      if ("entityId" %in% colnames(submit_data)) {
+        write.csv(submit_data,
           file = "./files/synapse_storage_manifest.csv",
           quote = TRUE, row.names = FALSE, na = ""
         )
       } else {
-        if (is.null(file_namedlist)) { # if user do not generate gsheet of template before
-          file_list <- synapse_driver$getFilesInStorageDataset(
-            synStore_obj,
-            folder_synID
-          )
-          file_namedlist <<- list2Vector(file_list)
-        }
-        files_df <- stack(file_namedList)
+        file_list <- synapse_driver$getFilesInStorageDataset(
+          synStore_obj,
+          folder_synID
+        )
+        file_namedList <<- list2Vector(file_list)
+
+        # better filename checking is needed
+        files_df <- stack(file_namedList) # crash if no file existing
         colnames(files_df) <- c("entityId", "Filename")
-        files_entity <- inner_join(infile, files_df, by = "Filename")
+        files_entity <- inner_join(submit_data, files_df, by = "Filename")
 
         write.csv(files_entity,
           file = "./files/synapse_storage_manifest.csv",
@@ -330,8 +330,9 @@ shinyServer(function(input, output, session) {
       manifest_path <- paste0("synapse.org/#!Synapse:", manifest_id)
       # if no error
       if (startsWith(manifest_id, "syn") == TRUE) {
-        nx_report_success("Success!", paste0("Manifest submitted to: ", manifest_path))
         rm("./files/synapse_storage_manifest.csv")
+        dc_waiter("hide")
+        nx_report_success("Success!", paste0("Manifest submitted to: ", manifest_path))
 
         # clean up inputfile
         sapply(clean_tags, FUN = hide)
@@ -348,7 +349,7 @@ shinyServer(function(input, output, session) {
       }
     } else {
       # if not assay type tempalte
-      write.csv(infile,
+      write.csv(submit_data,
         file = "./files/synapse_storage_manifest.csv", quote = TRUE,
         row.names = FALSE, na = ""
       )
