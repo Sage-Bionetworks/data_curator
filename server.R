@@ -46,7 +46,7 @@ shinyServer(function(input, output, session) {
   schema_to_display_lookup <- data.frame(schema_name, display_name)
 
   tabs_list <- c("tab_instructions", "tab_data", "tab_template", "tab_upload")
-  clean_tags <- c("div_download", "div_validate", "btn_submit")
+  clean_tags <- c("div_download", "div_validate", NS("tbl_validate", "table"), "btn_val_gsheet", "btn_submit")
 
   ######## Initiate Login Process ########
   # synapse cookies
@@ -223,14 +223,16 @@ shinyServer(function(input, output, session) {
 
       # output error messages as data table if it is invalid value type
       # render empty if error is not "invaid value" type - ifelse() will not work
-      show_df <- if (valRes$errorType == "Invalid Value") valRes$errorDT else data.frame(NULL)
-      DTableServer("tbl_validate", show_df,
-        options = list(
-          pageLength = 50, scrollX = TRUE,
-          scrollY = min(50 * length(annotation_status), 400), lengthChange = FALSE,
-          info = FALSE, searching = FALSE
+      if (valRes$errorType == "Invalid Value") {
+        DTableServer("tbl_validate", valRes$errorDT,
+          options = list(
+            pageLength = 50, scrollX = TRUE,
+            scrollY = min(50 * length(annotation_status), 400), lengthChange = FALSE,
+            info = FALSE, searching = FALSE
+          )
         )
-      )
+        show(NS("tbl_validate", "table"))
+      }
 
       # highlight invalue cells in preview table
       if (valRes$errorType == "Wrong Schema") {
@@ -247,13 +249,9 @@ shinyServer(function(input, output, session) {
         output$submit <- renderUI({
           actionButton("btn_submit", "Submit to Synapse")
         })
-        output$val_gsheet <- renderUI(NULL)
         dc_waiter("update", msg = paste0(valRes$errorType, " Found !!! "), spin = spin_inner_circles(), sleep = 2.5)
       } else {
-        # render gsheet button
-        output$val_gsheet <- renderUI({
-          actionButton("btn_val_gsheet", "  Click to Generate Google Sheet Link", icon = icon("table"))
-        })
+        show("btn_val_gsheet")
         dc_waiter("update", msg = paste0(valRes$errorType, " Found !!! "), spin = spin_pulsar(), sleep = 2.5)
       }
     } else {
