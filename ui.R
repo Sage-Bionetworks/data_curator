@@ -204,10 +204,10 @@ ui <- shinydashboardPlus::dashboardPage(
               div(
                 id = "div_validate",
                 height = "100%",
-                ValidationMsgUI("text_validate"),
-                DTableUI("tbl_validate"),
-                uiOutput("val_gsheet")
-              )
+                ValidationMsgUI("text_validate")
+              ),
+              DTableUI("tbl_validate"),
+              actionButton("btn_val_gsheet", "  Click to Generate Google Sheet Link", icon = icon("table"))
             ),
             helpText(
               HTML("If you have an error, please try editing locally or on google sheet.<br/>
@@ -219,7 +219,7 @@ ui <- shinydashboardPlus::dashboardPage(
             status = "primary",
             solidHeader = TRUE,
             width = 12,
-            uiOutput("btn_submit")
+            uiOutput("submit")
           )
         )
       )
