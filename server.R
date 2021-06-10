@@ -213,12 +213,13 @@ shinyServer(function(input, output, session) {
           folder_synID
         )
         file_namedList <<- list2Vector(file_list)
-
-        manifest_url <- metadata_model$getModelManifest(paste0(
-          config$community,
-          " ", input$dropdown_template
-        ), template_schema_name, filenames = as.list(names(datatype_list[["file_namedlist"]])))
-
+        
+        manifest_url <- 
+          metadata_model$getModelManifest(paste0(config$community, " ", input$dropdown_template),
+                                          template_schema_name, 
+                                          filenames = as.list(names(file_namedList)),
+                                          datasetId = folder_synID
+                                         )
         # make sure not scalar if length of list is 1 in R
         # add in the step to convert names later
       } else {
