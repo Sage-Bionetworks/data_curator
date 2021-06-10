@@ -18,6 +18,7 @@ suppressPackageStartupMessages({
   library(waiter)
   library(readr)
   library(sass)
+  library(shinydashboardPlus)
 })
 
 # APP_URL <- "https://shinypro.synapse.org/users/spatil/HTAN-oauth/"
@@ -81,3 +82,7 @@ reticulate::use_condaenv("data_curator_env_oauth")
 # Import functions/modules
 source_files <- list.files(c("functions", "modules"), pattern = "*\\.R$", recursive = TRUE, full.names = TRUE)
 sapply(source_files, FUN = source)
+
+# Global variables
+datatypes <- c("project", "folder", "template")
+options(sass.cache = FALSE)

@@ -30,20 +30,22 @@ shinyServer(function(input, output, session) {
   # read config in
   config <- fromJSON("www/config.json")
 
-  # logs in and gets list of projects they have access to
-  synStore_obj <- NULL
-  projects_namedList <- NULL
-
-  folders_namedList <- NULL
-  folder_synID <- NULL # selected foler synapse ID
-
-  template_schema_name <- NULL # selected template schema name
-  file_namedList <- NULL
-
-  ### mapping from display name to schema name
+  # mapping from display name to schema name
   schema_name <- config$manifest_schemas$schema_name
   display_name <- config$manifest_schemas$display_name
-  schema_to_display_lookup <- data.frame(schema_name, display_name)
+  template_namedList <- schema_name
+  names(template_namedList) <- display_name
+
+  synStore_obj <- NULL # gets list of projects they have access to
+  folder_synID <- NULL # selected foler synapse ID
+  template_schema_name <- NULL # selected template schema name
+
+  datatype_list <- list(
+    projects_namedList = NULL,
+    folders_namedList = NULL,
+    display_name = template_namedList
+  )
+  file_namedlist <- NULL
 
   tabs_list <- c("tab_instructions", "tab_data", "tab_template", "tab_upload")
   clean_tags <- c("div_download", "div_validate", NS("tbl_validate", "table"), "btn_val_gsheet", "btn_submit")
@@ -69,15 +71,22 @@ shinyServer(function(input, output, session) {
 
         # get_projects_list(synStore_obj)
         projects_list <- synapse_driver$getStorageProjects(synStore_obj)
-        projects_namedList <<- list2Vector(projects_list)
+        datatype_list[["projects_namedList"]] <<- list2Vector(projects_list)
 
         # updates project dropdown
-        updateSelectInput(session, "dropdown_project", choices = sort(names(projects_namedList)))
+        lapply(c("header_dropdown_", "dropdown_"), function(x) {
+          lapply(c(1, 3), function(i) {
+            updateSelectInput(session, paste0(x, datatypes[i]),
+              choices = sort(names(datatype_list[[i]]))
+            )
+          })
+        })
 
         # update waiter loading screen once login successful
         dc_waiter("update", isLogin = TRUE, isPass = TRUE, usrName = syn_getUserProfile()$userName)
       },
       error = function(err) {
+        message(err) # write log error
         dc_waiter("update", isLogin = TRUE, isPass = FALSE)
       }
     )
@@ -90,40 +99,78 @@ shinyServer(function(input, output, session) {
   })
 
   ######## Update Folder List ########
-  observeEvent(ignoreInit = TRUE, input$dropdown_project, {
-    output$folders <- renderUI({
+  lapply(c("header_dropdown_", "dropdown_"), function(x) {
+    observeEvent(ignoreInit = TRUE, input[[paste0(x, "project")]], {
       # get synID of selected project
-      project_synID <- projects_namedList[[input$dropdown_project]]
+      project_synID <- datatype_list[["projects_namedList"]][[input[[paste0(x, "project")]]]]
 
       # gets folders per project
       folder_list <- synapse_driver$getStorageDatasetsInProject(
         synStore_obj,
         project_synID
       )
-      folders_namedList <<- list2Vector(folder_list)
-
+      datatype_list[["folders_namedList"]] <<- list2Vector(folder_list)
+      folders <- sort(names(datatype_list[["folders_namedList"]]))
       # updates foldernames
-      selectInput(inputId = "dropdown_folder", label = "Folder:", choices = names(folders_namedList))
+      updateSelectInput(session, paste0(x, "folder"),
+        choices = folders
+      )
     })
   })
 
-  # update selected folder ID
-  observeEvent(input$dropdown_folder, {
-    # TODO: check how different from using rectivateValues()
-    folder_synID <<- folders_namedList[[input$dropdown_folder]]
+  ######## Header Dropdown Button ########
+  # Adjust header selection dropdown based on tabs
+  observe({
+    if (input[["tabs"]] %in% c("tab_instructions", "tab_data")) {
+      hide("header_selection_dropdown")
+    } else {
+      show("header_selection_dropdown")
+      addClass(id = "header_selection_dropdown", class = "open")
+    }
+  })
+
+  lapply(datatypes, function(x) {
+    selector <- paste0("header_dropdown_", x)
+    observeEvent(input[[selector]], {
+      if (nchar(input[[selector]]) > 20) {
+        short <- paste0(substr(input[[selector]], 1, 20), " ...")
+        runjs(paste0("$('#header_content_", x, " .item').text('", short, "');"))
+      }
+    })
+  })
+
+  lapply(datatypes, function(x) {
+    observeEvent(input[[paste0("dropdown_", x)]], {
+      updateSelectInput(session, paste0("header_dropdown_", x),
+        selected = input[[paste0("dropdown_", x)]]
+      )
+    })
+  })
+
+  observeEvent(input$btn_header_update, {
+    nx_confirm(
+      inputId = "update_confirm",
+      title = "Are you sure to update?",
+      message = "previous selections will also change",
+      button_ok = "Sure!",
+      button_cancel = "Nope!"
+    )
+  })
+
+  observeEvent(input$update_confirm, {
+    if (input$update_confirm == TRUE) {
+      lapply(datatypes, function(x) {
+        updateSelectInput(session, paste0("dropdown_", x),
+          selected = input[[paste0("header_dropdown_", x)]]
+        )
+      })
+    }
   })
 
   ######## Update Template ########
-  output$manifest_display_name <- renderUI({
-    selectInput(inputId = "dropdown_template", label = "Template:", choices = display_name)
-  })
   # update selected schema template name
   observeEvent(input$dropdown_template, {
-    template_type_df <- schema_to_display_lookup[match(input$dropdown_template, schema_to_display_lookup$display_name),
-      1,
-      drop = F
-    ]
-    template_schema_name <<- as.character(template_type_df$schema_name)
+    template_schema_name <<- template_namedList[match(input$dropdown_template, names(template_namedList))]
   })
 
   # hide tags when users select new template
@@ -142,6 +189,9 @@ shinyServer(function(input, output, session) {
 
     # loading screen for template link generation
     dc_waiter("show", msg = "Generating link...")
+
+    # update selected folder ID
+    folder_synID <<- datatype_list[["folders_namedList"]][[input$dropdown_folder]]
 
     if (is.null(input$dropdown_template)) {
       output$text_download <- renderUI({
@@ -163,12 +213,13 @@ shinyServer(function(input, output, session) {
           folder_synID
         )
         file_namedList <<- list2Vector(file_list)
-
- metadata_model$getModelManifest(paste0(config$community, " ", input$dropdown_template),  
-  template_schema_name, 
-  filenames = as.list(names(file_namedList)),
-  datasetId = folder_synID
-)
+        
+        manifest_url <- 
+          metadata_model$getModelManifest(paste0(config$community, " ", input$dropdown_template),
+                                          template_schema_name, 
+                                          filenames = as.list(names(file_namedList)),
+                                          datasetId = folder_synID
+                                         )
         # make sure not scalar if length of list is 1 in R
         # add in the step to convert names later
       } else {
@@ -293,6 +344,8 @@ shinyServer(function(input, output, session) {
     # the type to filter (eg assay) on could probably also be a config choice
     assay_schemas <- config$manifest_schemas$display_name[config$manifest_schemas$type ==
       "assay"]
+    # folder_ID has not been updated yet
+    if (is.null(folder_synID)) folder_synID <<- datatype_list[["folders_namedList"]][[input$dropdown_folder]]
 
     # and adds entityID, saves it as synapse_storage_manifest.csv, then associates
     # with synapse files

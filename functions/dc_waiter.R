@@ -23,8 +23,6 @@ dc_waiter <- function(stage = c("show", "update", "hide"),
   # log in screen
   if (isLogin) {
     # The message on initial loading page are not customizable
-    if (!is.null(msg)) message("message for log in screen can be changed in dc_waiter.R")
-
     if (stage == "show") {
       waiter_show_on_load(
         html = tagList(

@@ -1,8 +1,13 @@
 // specify div
+
+.content {
+    padding-top: 50px;
+}
+
+
 #div_download, #div_validate, #div_val_gsheet {
     font-size: 18px; 
     background-color: white; 
     margin: 10px 0; 
     padding: 10px 0;
 }
-

@@ -1,0 +1,18 @@
+@keyframes fadeIn {
+  0% {transform:scale(0); opacity: 0}
+  30% {transform: scale(0.3)}
+  70% {transform: scale(0.7)}
+  100% {transform: scale(1); opacity: 1}
+}
+
+@keyframes TransitioningBackground {
+  0% {
+    background-position: 1% 0%;
+  }
+  50% {
+    background-position: 99% 100%;
+  }
+  100% {
+    background-position: 1% 0%;
+  }
+}

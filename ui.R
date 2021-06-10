@@ -8,17 +8,40 @@
 #
 # https://www.synapse.org
 
-ui <- dashboardPage(
+ui <- shinydashboardPlus::dashboardPage(
   skin = "purple",
   dashboardHeader(
     titleWidth = 250,
-    title = "Data Curator",
+    title = tagList(
+      span(class = "logo-lg", "Data Curator"),
+      span(class = "logo-mini", "DCA")
+    ),
+    leftUi = tagList(
+      dropdownBlock(
+        id = "header_selection_dropdown",
+        title = "Selection",
+        icon = icon("sliders"),
+        badgeStatus = "info",
+        fluidRow(
+          lapply(datatypes, function(x) {
+            div(
+              id = paste0("header_content_", x),
+              selectInput(
+                inputId = paste0("header_dropdown_", x),
+                label = NULL,
+                choices = character(0)
+              )
+            )
+          }),
+          actionButton(inputId = "btn_header_update", label = NULL, icon = icon("sync-alt"))
+        )
+      )
+    ),
     tags$li(
-      class = "dropdown",
+      class = "dropdown", id = "HTAN_logo",
       tags$a(
         href = "https://humantumoratlas.org/",
         target = "_blank",
-        ## insert links and logos of your choice, this is just an example
         tags$img(
           height = "40px", alt = "HTAN LOGO",
           src = "HTAN_text_logo.png"
@@ -62,17 +85,16 @@ ui <- dashboardPage(
   dashboardBody(
     tags$head(
       tags$style(sass(sass_file("www/scss/main.scss"))),
-      singleton(
-        includeScript("www/readCookie.js")
-      )
+      singleton(includeScript("www/js/readCookie.js")),
+      singleton(includeScript("www/js/onclick.js"))
     ),
-    uiOutput("title"),
     use_notiflix_report(),
     use_waiter(),
     tabItems(
       # First tab content
       tabItem(
         tabName = "tab_instructions",
+        uiOutput("title"),
         h2("Instructions for the Data Curator App:"),
         h3(
           "1. Go to",
@@ -106,7 +128,11 @@ ui <- dashboardPage(
               label = "Project:",
               choices = "Generating..."
             ),
-            uiOutput("folders"),
+            selectInput(
+              inputId = "dropdown_folder",
+              label = "Folder:",
+              choices = "Generating..."
+            ),
             helpText(
               "If your recently updated folder does not appear, please wait for Synapse to sync and refresh"
             )
@@ -116,7 +142,11 @@ ui <- dashboardPage(
             solidHeader = TRUE,
             width = 6,
             title = "Choose a Metadata Template Type: ",
-            uiOutput("manifest_display_name")
+            selectInput(
+              inputId = "dropdown_template",
+              label = "Template:",
+              choices = "Generating..."
+            )
           )
         ),
         switchTabUI("switchTab2", direction = "both")

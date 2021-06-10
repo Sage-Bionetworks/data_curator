@@ -1,1 +1,71 @@
 // styles of button are collected in here 
+
+// https://paigen11.medium.com/
+#btn_header_update
+{
+  position: relative;
+  background: #27022d;
+  color: #fff;
+  text-decoration: none;
+  letter-spacing: 1px;
+  border-radius: 5px;
+  box-shadow: $simple_shadow;
+  transition: 500ms;
+  overflow: hidden;
+  // for background color shift
+  background-image: (linear-gradient(270deg, #8e9ac2, #42579a));
+  background-size: 400% 400%;
+  animation: TransitioningBackground 10s ease infinite;
+
+  &:hover {
+    background-image: (linear-gradient(to left, #2d8fe5, #d155b8));
+    transform: scale(1.05);
+    cursor: pointer;
+  }
+  // shine animation left side
+  &::before {
+    content: '';
+    display: block;
+    position: absolute;
+    background: rgba(255, 255, 255, 0.5);
+    width: 60px;
+    height: 100%;
+    top: 0;
+    filter: blur(30px);
+    transform: translateX(-100px) skewX(-15deg);
+  }
+  // shine animation right side
+  &::after {
+    content: '';
+    display: block;
+    position: absolute;
+    background: rgba(255, 255, 255, 0.2);
+    width: 30px;
+    height: 100%;
+    top: 0;
+    filter: blur(5px);
+    transform: translateX(-100px) skewX(-15deg);
+  }
+
+  &::before,
+  &::after {
+    transform: translateX(300px) skewX(-15deg);
+    transition: 0.7s;
+  }
+}
+
+
+// dropdown hover effect
+.option {
+  &:hover, &:focus {
+      transform: scale(1.01);
+      font-size: 1.02em;
+      box-shadow: $float_shadow;
+      border-radius: 20px;
+      transition: transform 50ms;
+  }
+}
+
+
+
+
