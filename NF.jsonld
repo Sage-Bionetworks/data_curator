@@ -2219,10 +2219,10 @@
             "sms:validationRules": []
         },
         {
-            "@id": "bts:VernierCaliper",
+            "@id": "bts:Invivotumorgrowth",
             "@type": "rdfs:Class",
-            "rdfs:comment": "A medical device that is a combination of ruler and caliper that can measure the distance between two points. The configuration of this device permits the measurement of internal dimensions.",
-            "rdfs:label": "VernierCaliper",
+            "rdfs:comment": "The growth of a tumor measured using calipers, ruler, or another similar measurement device. See also \"in vivo bioluminescence\".",
+            "rdfs:label": "Invivotumorgrowth",
             "rdfs:subClassOf": [
                 {
                     "@id": "bts:Assay"
@@ -2231,7 +2231,7 @@
             "schema:isPartOf": {
                 "@id": "http://schema.biothings.io"
             },
-            "sms:displayName": "Vernier Caliper",
+            "sms:displayName": "in vivo tumor growth",
             "sms:required": "sms:false",
             "sms:validationRules": []
         },
@@ -5228,7 +5228,7 @@
                     "@id": "bts:RealTimePCR"
                 },
                 {
-                    "@id": "bts:VernierCaliper"
+                    "@id": "bts:Invivotumorgrowth"
                 },
                 {
                     "@id": "bts:Scale"
