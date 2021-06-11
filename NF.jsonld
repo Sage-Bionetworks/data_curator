@@ -8494,6 +8494,108 @@
             "sms:validationRules": []
         },
         {
+            "@id": "bts:JHU2-103-CL",
+            "@type": "rdfs:Class",
+            "rdfs:comment": "An MPNST cell line derived from JHU NF1 Biobank tumor specimen JHU 2-103. ",
+            "rdfs:label": "JHU2-103-CL",
+            "rdfs:subClassOf": [
+                {
+                    "@id": "bts:ModelSystemName"
+                }
+            ],
+            "schema:isPartOf": {
+                "@id": "http://schema.biothings.io"
+            },
+            "sms:displayName": "JHU 2-103-CL",
+            "sms:required": "sms:false",
+            "sms:validationRules": []
+        },
+        {
+            "@id": "bts:JHU2-002-CL",
+            "@type": "rdfs:Class",
+            "rdfs:comment": "An MPNST cell line derived from JHU NF1 Biobank tumor specimen JHU 2-002. ",
+            "rdfs:label": "JHU2-002-CL",
+            "rdfs:subClassOf": [
+                {
+                    "@id": "bts:ModelSystemName"
+                }
+            ],
+            "schema:isPartOf": {
+                "@id": "http://schema.biothings.io"
+            },
+            "sms:displayName": "JHU 2-002-CL",
+            "sms:required": "sms:false",
+            "sms:validationRules": []
+        },
+        {
+            "@id": "bts:JHU2-079-CL",
+            "@type": "rdfs:Class",
+            "rdfs:comment": "An MPNST cell line derived from JHU NF1 Biobank tumor specimen JHU 2-079. ",
+            "rdfs:label": "JHU2-079-CL",
+            "rdfs:subClassOf": [
+                {
+                    "@id": "bts:ModelSystemName"
+                }
+            ],
+            "schema:isPartOf": {
+                "@id": "http://schema.biothings.io"
+            },
+            "sms:displayName": "JHU 2-079-CL",
+            "sms:required": "sms:false",
+            "sms:validationRules": []
+        },
+        {
+            "@id": "bts:JHU2-103-PDX",
+            "@type": "rdfs:Class",
+            "rdfs:comment": "A PDX model derived from JHU NF1 Biobank tumor specimen JHU 2-103. ",
+            "rdfs:label": "JHU2-103-PDX",
+            "rdfs:subClassOf": [
+                {
+                    "@id": "bts:ModelSystemName"
+                }
+            ],
+            "schema:isPartOf": {
+                "@id": "http://schema.biothings.io"
+            },
+            "sms:displayName": "JHU 2-103-PDX",
+            "sms:required": "sms:false",
+            "sms:validationRules": []
+        },
+        {
+            "@id": "bts:JHU2-002-PDX",
+            "@type": "rdfs:Class",
+            "rdfs:comment": "A PDX model derived from JHU NF1 Biobank tumor specimen JHU 2-002. ",
+            "rdfs:label": "JHU2-002-PDX",
+            "rdfs:subClassOf": [
+                {
+                    "@id": "bts:ModelSystemName"
+                }
+            ],
+            "schema:isPartOf": {
+                "@id": "http://schema.biothings.io"
+            },
+            "sms:displayName": "JHU 2-002-PDX",
+            "sms:required": "sms:false",
+            "sms:validationRules": []
+        },
+        {
+            "@id": "bts:JHU2-079-PDX",
+            "@type": "rdfs:Class",
+            "rdfs:comment": "A PDX model derived from JHU NF1 Biobank tumor specimen JHU 2-079. ",
+            "rdfs:label": "JHU2-079-PDX",
+            "rdfs:subClassOf": [
+                {
+                    "@id": "bts:ModelSystemName"
+                }
+            ],
+            "schema:isPartOf": {
+                "@id": "http://schema.biothings.io"
+            },
+            "sms:displayName": "JHU 2-079-PDX",
+            "sms:required": "sms:false",
+            "sms:validationRules": []
+        },
+        {
             "@id": "bts:ModelSystemName",
             "@type": "rdfs:Class",
             "rdfs:comment": "A group of presumed common ancestry with clear-cut physiological but usually not morphological distinctions such as an animal model or cell line. EXAMPLE(S):  HEK293T (cell line), Minnesota5 (swine strain), DXL (poultry strain), RB51 (vaccine strain of Brucella abortus)",
@@ -8521,43 +8623,28 @@
                 },
                 {
                     "@id": "bts:HiPSC"
+                },
+                {
+                    "@id": "bts:JHU2-103-CL"
+                },
+                {
+                    "@id": "bts:JHU2-002-CL"
+                },
+                {
+                    "@id": "bts:JHU2-079-CL"
+                },
+                {
+                    "@id": "bts:JHU2-103-PDX"
+                },
+                {
+                    "@id": "bts:JHU2-002-PDX"
+                },
+                {
+                    "@id": "bts:JHU2-079-PDX"
                 }
             ],
             "sms:displayName": "modelSystemName",
             "sms:required": "sms:false",
-            "sms:validationRules": []
-        },
-        {
-            "@id": "bts:IsModelSystem",
-            "@type": "rdfs:Class",
-            "rdfs:comment": "A boolean indicating whether the data are derived from a model system. ",
-            "rdfs:label": "IsModelSystem",
-            "rdfs:subClassOf": [
-                {
-                    "@id": "bts:Neuro"
-                }
-            ],
-            "schema:isPartOf": {
-                "@id": "http://schema.biothings.io"
-            },
-            "schema:rangeIncludes": [
-                {
-                    "@id": "bts:TRUE"
-                },
-                {
-                    "@id": "bts:FALSE"
-                }
-            ],
-            "sms:displayName": "isModelSystem",
-            "sms:required": "sms:true",
-            "sms:requiresDependency": [
-                {
-                    "@id": "bts:ModelSystemName"
-                },
-                {
-                    "@id": "bts:ModelSystemStrainNomenclature"
-                }
-            ],
             "sms:validationRules": []
         },
         {
@@ -13124,6 +13211,18 @@
                 },
                 {
                     "@id": "bts:6"
+                },
+                {
+                    "@id": "bts:7"
+                },
+                {
+                    "@id": "bts:8"
+                },
+                {
+                    "@id": "bts:9"
+                },
+                {
+                    "@id": "bts:10"
                 }
             ],
             "sms:displayName": "reportMilestone",
@@ -13660,6 +13759,74 @@
                 "@id": "http://schema.biothings.io"
             },
             "sms:displayName": "6",
+            "sms:required": "sms:false",
+            "sms:validationRules": []
+        },
+        {
+            "@id": "bts:7",
+            "@type": "rdfs:Class",
+            "rdfs:comment": "TBD",
+            "rdfs:label": "7",
+            "rdfs:subClassOf": [
+                {
+                    "@id": "bts:ReportMilestone"
+                }
+            ],
+            "schema:isPartOf": {
+                "@id": "http://schema.biothings.io"
+            },
+            "sms:displayName": "7",
+            "sms:required": "sms:false",
+            "sms:validationRules": []
+        },
+        {
+            "@id": "bts:8",
+            "@type": "rdfs:Class",
+            "rdfs:comment": "TBD",
+            "rdfs:label": "8",
+            "rdfs:subClassOf": [
+                {
+                    "@id": "bts:ReportMilestone"
+                }
+            ],
+            "schema:isPartOf": {
+                "@id": "http://schema.biothings.io"
+            },
+            "sms:displayName": "8",
+            "sms:required": "sms:false",
+            "sms:validationRules": []
+        },
+        {
+            "@id": "bts:9",
+            "@type": "rdfs:Class",
+            "rdfs:comment": "TBD",
+            "rdfs:label": "9",
+            "rdfs:subClassOf": [
+                {
+                    "@id": "bts:ReportMilestone"
+                }
+            ],
+            "schema:isPartOf": {
+                "@id": "http://schema.biothings.io"
+            },
+            "sms:displayName": "9",
+            "sms:required": "sms:false",
+            "sms:validationRules": []
+        },
+        {
+            "@id": "bts:10",
+            "@type": "rdfs:Class",
+            "rdfs:comment": "TBD",
+            "rdfs:label": "10",
+            "rdfs:subClassOf": [
+                {
+                    "@id": "bts:ReportMilestone"
+                }
+            ],
+            "schema:isPartOf": {
+                "@id": "http://schema.biothings.io"
+            },
+            "sms:displayName": "10",
             "sms:required": "sms:false",
             "sms:validationRules": []
         },
