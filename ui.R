@@ -9,6 +9,7 @@
 # https://www.synapse.org
 
 ui <- shinydashboardPlus::dashboardPage(
+  title = "Data Curator",
   skin = "purple",
   dashboardHeader(
     titleWidth = 250,
