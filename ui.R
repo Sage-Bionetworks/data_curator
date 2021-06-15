@@ -98,7 +98,7 @@ ui <- shinydashboardPlus::dashboardPage(
       # First tab content
       tabItem(
         tabName = "tab_instructions",
-        h2("Instructions for the Data Curator App:"),
+        h2("Instructions for the Data Curator App (DCA):"),
         h3(
           "1. Go to",
           strong("Select your Dataset"),
@@ -200,21 +200,17 @@ ui <- shinydashboardPlus::dashboardPage(
             status = "primary",
             collapsible = TRUE,
             width = 12,
-            actionButton("btn_validate", "Validate Metadata",
-              class = "btn-primary-color"
+            actionButton("btn_validate", "Validate Metadata", class = "btn-primary-color"),
+            div(
+              id = "div_validate",
+              height = "100%",
+              ValidationMsgUI("text_validate")
             ),
-            hidden(
-              div(
-                id = "div_validate",
-                height = "100%",
-                ValidationMsgUI("text_validate")
-              ),
-              DTableUI("tbl_validate"),
-              actionButton("btn_val_gsheet", "  Click to Generate Google Sheet Link", icon = icon("table"))
-            ),
+            DTableUI("tbl_validate"),
+            uiOutput("val_gsheet"),
             helpText(
-              HTML("If you have an error, please try editing locally or on google sheet.<br/>
-                   Reupload your CSV and press the validate button as needed.")
+              HTML("If you have an error, please try editing locally or on google sheet.
+                  Reupload your CSV and press the validate button as needed.")
             )
           ),
           box(

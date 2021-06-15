@@ -2,8 +2,8 @@
 # TODO: maybe we could split into UI and server if we need
 
 dcWaiter <- function(stage = c("show", "update", "hide"),
-                      isLogin = FALSE, isPass = TRUE, usrName = NULL,
-                      sleep = 2, msg = NULL, spin = NULL) {
+                     isLogin = FALSE, isPass = TRUE, usrName = NULL,
+                     sleep = 2, msg = NULL, spin = NULL) {
   # validate arguments
   if (!is.logical(isLogin)) stop("isLogin must be a boolean")
   if (!is.logical(isPass)) stop("isPass must be a boolean")

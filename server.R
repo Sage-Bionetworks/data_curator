@@ -31,25 +31,19 @@ shinyServer(function(input, output, session) {
   config <- fromJSON("www/config.json")
 
   # mapping from display name to schema name
-  schema_name <- config$manifest_schemas$schema_name
-  display_name <- config$manifest_schemas$display_name
-  template_namedList <- schema_name
-  names(template_namedList) <- display_name
+  template_namedList <- config$manifest_schemas$schema_name
+  names(template_namedList) <- config$manifest_schemas$display_name
 
   synStore_obj <- NULL # gets list of projects they have access to
+  project_synID <- NULL # selected project synapse ID
   folder_synID <- NULL # selected foler synapse ID
   template_schema_name <- NULL # selected template schema name
 
-  datatype_list <- list(
-    projects_namedList = NULL,
-    folders_namedList = NULL,
-    display_name = template_namedList
-  )
-  file_namedlist <- NULL
+  datatype_list <- list(projects = NULL, folders = NULL, manifests = template_namedList, files = NULL)
 
   tabs_list <- c("tab_instructions", "tab_data", "tab_template", "tab_upload")
   clean_tags <- c("div_download", "div_validate", NS("tbl_validate", "table"), "btn_val_gsheet", "btn_submit")
-  
+
   # add box effects
   boxEffect(zoom = TRUE, float = TRUE)
 
@@ -74,7 +68,7 @@ shinyServer(function(input, output, session) {
 
         # get_projects_list(synStore_obj)
         projects_list <- synapse_driver$getStorageProjects(synStore_obj)
-        datatype_list[["projects_namedList"]] <<- list2Vector(projects_list)
+        datatype_list$projects <<- list2Vector(projects_list)
 
         # updates project dropdown
         lapply(c("header_dropdown_", "dropdown_"), function(x) {
@@ -105,19 +99,18 @@ shinyServer(function(input, output, session) {
   lapply(c("header_dropdown_", "dropdown_"), function(x) {
     observeEvent(ignoreInit = TRUE, input[[paste0(x, "project")]], {
       # get synID of selected project
-      project_synID <- datatype_list[["projects_namedList"]][[input[[paste0(x, "project")]]]]
+      projectID <- datatype_list$projects[[input[[paste0(x, "project")]]]]
 
       # gets folders per project
-      folder_list <- synapse_driver$getStorageDatasetsInProject(
-        synStore_obj,
-        project_synID
-      )
-      datatype_list[["folders_namedList"]] <<- list2Vector(folder_list)
-      folders <- sort(names(datatype_list[["folders_namedList"]]))
+      folder_list <- synapse_driver$getStorageDatasetsInProject(synStore_obj, projectID) %>% list2Vector()
+
+      if (x == "dropdown_") {
+        project_synID <<- projectID
+        datatype_list$folders <<- folder_list
+      }
+
       # updates foldernames
-      updateSelectInput(session, paste0(x, "folder"),
-        choices = folders
-      )
+      updateSelectInput(session, paste0(x, "folder"), choices = sort(names(folder_list)))
     })
   })
 
@@ -194,7 +187,7 @@ shinyServer(function(input, output, session) {
     dcWaiter("show", msg = "Generating link...")
 
     # update selected folder ID
-    folder_synID <<- datatype_list[["folders_namedList"]][[input$dropdown_folder]]
+    folder_synID <<- datatype_list$folders[[input$dropdown_folder]]
 
     if (is.null(input$dropdown_template)) {
       output$text_download <- renderUI({
@@ -215,14 +208,14 @@ shinyServer(function(input, output, session) {
           synStore_obj,
           folder_synID
         )
-        file_namedList <<- list2Vector(file_list)
- 
-        manifest_url <- 
+        datatype_list$files <<- list2Vector(file_list)
+
+        manifest_url <-
           metadata_model$getModelManifest(paste0(config$community, " ", input$dropdown_template),
-                                          template_schema_name, 
-                                          filenames = as.list(names(file_namedList)),
-                                          datasetId = folder_synID
-                                         )
+            template_schema_name,
+            filenames = as.list(names(datatype_list$files)),
+            datasetId = folder_synID
+          )
 
         # make sure not scalar if length of list is 1 in R
         # add in the step to convert names later
@@ -302,15 +295,13 @@ shinyServer(function(input, output, session) {
 
       if (valRes$validationRes == "valid") {
         # show submit button
-        output$submit <- renderUI({
-          actionButton("btn_submit", "Submit to Synapse", class = "btn-primary-color")
-        })
-        
-        dc_waiter("update", msg = paste0(valRes$errorType, " Found !!! "), spin = spin_inner_circles(), sleep = 2.5)
-
+        output$submit <- renderUI(actionButton("btn_submit", "Submit to Synapse", class = "btn-primary-color"))
+        dcWaiter("update", msg = paste0(valRes$errorType, " Found !!! "), spin = spin_inner_circles(), sleep = 2.5)
       } else {
-        show("btn_val_gsheet")
-        dc_waiter("update", msg = paste0(valRes$errorType, " Found !!! "), spin = spin_pulsar(), sleep = 2.5)
+        output$val_gsheet <- renderUI(
+          actionButton("btn_val_gsheet", "  Generate Google Sheet Link", icon = icon("table"), class = "btn-primary-color")
+        )
+        dcWaiter("update", msg = paste0(valRes$errorType, " Found !!! "), spin = spin_pulsar(), sleep = 2.5)
       }
     } else {
       dcWaiter("hide")
@@ -345,14 +336,11 @@ shinyServer(function(input, output, session) {
 
     # reads file csv again
     submit_data <- csvInfileServer("inputFile")$data()
-
     # IF an assay component selected (define assay components) note for future
     # the type to filter (eg assay) on could probably also be a config choice
-    assay_schemas <- config$manifest_schemas$display_name[config$manifest_schemas$type ==
-      "assay"]
-    # folder_ID has not been updated yet
-    if (is.null(folder_synID)) folder_synID <<- datatype_list[["folders_namedList"]][[input$dropdown_folder]]
-
+    assay_schemas <- config$manifest_schemas$display_name[config$manifest_schemas$type == "assay"]
+    # iffolder_ID has not been updated yet
+    if (is.null(folder_synID)) folder_synID <<- datatype_list$folders[[input$dropdown_folder]]
     # and adds entityID, saves it as synapse_storage_manifest.csv, then associates
     # with synapse files
     if (input$dropdown_template %in% assay_schemas) {
@@ -363,14 +351,11 @@ shinyServer(function(input, output, session) {
           quote = TRUE, row.names = FALSE, na = ""
         )
       } else {
-        file_list <- synapse_driver$getFilesInStorageDataset(
-          synStore_obj,
-          folder_synID
-        )
-        file_namedList <<- list2Vector(file_list)
+        file_list <- synapse_driver$getFilesInStorageDataset(synStore_obj, folder_synID)
+        datatype_list$files <<- list2Vector(file_list)
 
         # better filename checking is needed
-        files_df <- stack(file_namedList) # crash if no file existing
+        files_df <- stack(datatype_list$files) # crash if no file existing
         colnames(files_df) <- c("entityId", "Filename")
         files_entity <- inner_join(submit_data, files_df, by = "Filename")
 
@@ -381,15 +366,17 @@ shinyServer(function(input, output, session) {
       }
 
       # associates metadata with data and returns manifest id
+      logjs("haha6")
       manifest_id <- synapse_driver$associateMetadataWithFiles(
         synStore_obj,
         "./files/synapse_storage_manifest.csv", folder_synID
       )
+      logjs("haha7")
       manifest_path <- paste0("synapse.org/#!Synapse:", manifest_id)
       # if no error
       if (startsWith(manifest_id, "syn") == TRUE) {
         rm("./files/synapse_storage_manifest.csv")
-        dc_waiter("hide")
+        dcWaiter("hide")
         nx_report_success("Success!", paste0("Manifest submitted to: ", manifest_path))
 
         # clean up inputfile
