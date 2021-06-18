@@ -8443,57 +8443,6 @@
             "sms:validationRules": []
         },
         {
-            "@id": "bts:HiPSC-SCP",
-            "@type": "rdfs:Class",
-            "rdfs:comment": "Schwann cell precursor iPSCs",
-            "rdfs:label": "HiPSC-SCP",
-            "rdfs:subClassOf": [
-                {
-                    "@id": "bts:ModelSystemStrainNomenclature"
-                }
-            ],
-            "schema:isPartOf": {
-                "@id": "http://schema.biothings.io"
-            },
-            "sms:displayName": "hiPSC-SCP",
-            "sms:required": "sms:false",
-            "sms:validationRules": []
-        },
-        {
-            "@id": "bts:HiPSC",
-            "@type": "rdfs:Class",
-            "rdfs:comment": "human iPSCs",
-            "rdfs:label": "HiPSC",
-            "rdfs:subClassOf": [
-                {
-                    "@id": "bts:ModelSystemStrainNomenclature"
-                }
-            ],
-            "schema:isPartOf": {
-                "@id": "http://schema.biothings.io"
-            },
-            "sms:displayName": "hiPSC",
-            "sms:required": "sms:false",
-            "sms:validationRules": []
-        },
-        {
-            "@id": "bts:Prss56Cre;R26mT",
-            "@type": "rdfs:Class",
-            "rdfs:comment": "Prss56Cre;R26mT is a transgenic non-human animal model for Neurofibromatosis type 1, wherein the Nf1 gene is specifically inactivated in BC cells and derivatives thereof. Invented by invented by Piotr Topilko, Patrick Charnay, Fanny Coulpier, Aurélie Gresset, and Katarzyna Radomska.\n",
-            "rdfs:label": "Prss56Cre;R26mT",
-            "rdfs:subClassOf": [
-                {
-                    "@id": "bts:ModelSystemStrainNomenclature"
-                }
-            ],
-            "schema:isPartOf": {
-                "@id": "http://schema.biothings.io"
-            },
-            "sms:displayName": "Prss56Cre;R26mT",
-            "sms:required": "sms:false",
-            "sms:validationRules": []
-        },
-        {
             "@id": "bts:JHU2-103-CL",
             "@type": "rdfs:Class",
             "rdfs:comment": "An MPNST cell line derived from JHU NF1 Biobank tumor specimen JHU 2-103. ",
@@ -8749,10 +8698,13 @@
                     "@id": "bts:C57BL/6J"
                 },
                 {
-                    "@id": "bts:Ipn02.32λ"
+                    "@id": "bts:NODscidgamma"
                 },
                 {
-                    "@id": "bts:IpNF95.11bC"
+                    "@id": "bts:HTERTNF1ipn02.32λ"
+                },
+                {
+                    "@id": "bts:HTERTNF1ipNF95.11bC"
                 },
                 {
                     "@id": "bts:HiPSC-SCP"
@@ -8777,9 +8729,84 @@
                 },
                 {
                     "@id": "bts:JHU2-079-PDX"
+                },
+                {
+                    "@id": "bts:Humanforeskinfibroblasts"
+                },
+                {
+                    "@id": "bts:HTERTNF1ipNF05.5"
+                },
+                {
+                    "@id": "bts:HTERTNF1ipNF05.5(Mixedclones)"
+                },
+                {
+                    "@id": "bts:HTERTNF1ipn06.2A"
+                },
+                {
+                    "@id": "bts:HTERTNF1ipNF95.11bC/T"
+                },
+                {
+                    "@id": "bts:HTERTNF1ipNF95.6"
+                },
+                {
+                    "@id": "bts:HTERTNF1ipn02.8"
+                },
+                {
+                    "@id": "bts:HTERTNF1ipnNF95.11c"
                 }
             ],
             "sms:displayName": "modelSystemName",
+            "sms:required": "sms:false",
+            "sms:validationRules": []
+        },
+        {
+            "@id": "bts:HiPSC-SCP",
+            "@type": "rdfs:Class",
+            "rdfs:comment": "Schwann cell precursor iPSCs",
+            "rdfs:label": "HiPSC-SCP",
+            "rdfs:subClassOf": [
+                {
+                    "@id": "bts:ModelSystemStrainNomenclature"
+                }
+            ],
+            "schema:isPartOf": {
+                "@id": "http://schema.biothings.io"
+            },
+            "sms:displayName": "hiPSC-SCP",
+            "sms:required": "sms:false",
+            "sms:validationRules": []
+        },
+        {
+            "@id": "bts:HiPSC",
+            "@type": "rdfs:Class",
+            "rdfs:comment": "human iPSCs",
+            "rdfs:label": "HiPSC",
+            "rdfs:subClassOf": [
+                {
+                    "@id": "bts:ModelSystemStrainNomenclature"
+                }
+            ],
+            "schema:isPartOf": {
+                "@id": "http://schema.biothings.io"
+            },
+            "sms:displayName": "hiPSC",
+            "sms:required": "sms:false",
+            "sms:validationRules": []
+        },
+        {
+            "@id": "bts:Prss56Cre;R26mT",
+            "@type": "rdfs:Class",
+            "rdfs:comment": "Prss56Cre;R26mT is a transgenic non-human animal model for Neurofibromatosis type 1, wherein the Nf1 gene is specifically inactivated in BC cells and derivatives thereof. Invented by invented by Piotr Topilko, Patrick Charnay, Fanny Coulpier, Aurélie Gresset, and Katarzyna Radomska.\n",
+            "rdfs:label": "Prss56Cre;R26mT",
+            "rdfs:subClassOf": [
+                {
+                    "@id": "bts:ModelSystemStrainNomenclature"
+                }
+            ],
+            "schema:isPartOf": {
+                "@id": "http://schema.biothings.io"
+            },
+            "sms:displayName": "Prss56Cre;R26mT",
             "sms:required": "sms:false",
             "sms:validationRules": []
         },
@@ -13708,40 +13735,6 @@
                 "@id": "http://schema.biothings.io"
             },
             "sms:displayName": "ATAC-seq",
-            "sms:required": "sms:false",
-            "sms:validationRules": []
-        },
-        {
-            "@id": "bts:Ipn02.32λ",
-            "@type": "rdfs:Class",
-            "rdfs:comment": "TBD",
-            "rdfs:label": "Ipn02.32λ",
-            "rdfs:subClassOf": [
-                {
-                    "@id": "bts:ModelSystemName"
-                }
-            ],
-            "schema:isPartOf": {
-                "@id": "http://schema.biothings.io"
-            },
-            "sms:displayName": "ipn02.3 2λ",
-            "sms:required": "sms:false",
-            "sms:validationRules": []
-        },
-        {
-            "@id": "bts:IpNF95.11bC",
-            "@type": "rdfs:Class",
-            "rdfs:comment": "TBD",
-            "rdfs:label": "IpNF95.11bC",
-            "rdfs:subClassOf": [
-                {
-                    "@id": "bts:ModelSystemName"
-                }
-            ],
-            "schema:isPartOf": {
-                "@id": "http://schema.biothings.io"
-            },
-            "sms:displayName": "ipNF95.11b C",
             "sms:required": "sms:false",
             "sms:validationRules": []
         },
