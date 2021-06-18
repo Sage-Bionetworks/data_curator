@@ -8375,10 +8375,10 @@
             "sms:validationRules": []
         },
         {
-            "@id": "bts:Ipn02.32λ",
+            "@id": "bts:HTERTNF1ipn02.32λ",
             "@type": "rdfs:Class",
-            "rdfs:comment": "TBD",
-            "rdfs:label": "Ipn02.32λ",
+            "rdfs:comment": "plexiform neurofibroma cell line",
+            "rdfs:label": "HTERTNF1ipn02.32λ",
             "rdfs:subClassOf": [
                 {
                     "@id": "bts:ModelSystemName"
@@ -8387,15 +8387,15 @@
             "schema:isPartOf": {
                 "@id": "http://schema.biothings.io"
             },
-            "sms:displayName": "ipn02.3 2λ",
+            "sms:displayName": "hTERT NF1 ipn02.3 2λ",
             "sms:required": "sms:false",
             "sms:validationRules": []
         },
         {
-            "@id": "bts:IpNF95.11bC",
+            "@id": "bts:HTERTNF1ipNF95.11bC",
             "@type": "rdfs:Class",
-            "rdfs:comment": "TBD",
-            "rdfs:label": "IpNF95.11bC",
+            "rdfs:comment": "plexiform neurofibroma cell line",
+            "rdfs:label": "HTERTNF1ipNF95.11bC",
             "rdfs:subClassOf": [
                 {
                     "@id": "bts:ModelSystemName"
@@ -8404,7 +8404,7 @@
             "schema:isPartOf": {
                 "@id": "http://schema.biothings.io"
             },
-            "sms:displayName": "ipNF95.11b C",
+            "sms:displayName": "hTERT NF1 ipNF95.11b C",
             "sms:required": "sms:false",
             "sms:validationRules": []
         },
@@ -8592,6 +8592,142 @@
                 "@id": "http://schema.biothings.io"
             },
             "sms:displayName": "JHU 2-079-PDX",
+            "sms:required": "sms:false",
+            "sms:validationRules": []
+        },
+        {
+            "@id": "bts:Humanforeskinfibroblasts",
+            "@type": "rdfs:Class",
+            "rdfs:comment": "generic human foreskin fibroblasts, often used as a control cell in toxicology experiments",
+            "rdfs:label": "Humanforeskinfibroblasts",
+            "rdfs:subClassOf": [
+                {
+                    "@id": "bts:ModelSystemName"
+                }
+            ],
+            "schema:isPartOf": {
+                "@id": "http://schema.biothings.io"
+            },
+            "sms:displayName": "human foreskin fibroblasts",
+            "sms:required": "sms:false",
+            "sms:validationRules": []
+        },
+        {
+            "@id": "bts:HTERTNF1ipNF05.5",
+            "@type": "rdfs:Class",
+            "rdfs:comment": "plexiform neurofibroma cell line",
+            "rdfs:label": "HTERTNF1ipNF05.5",
+            "rdfs:subClassOf": [
+                {
+                    "@id": "bts:ModelSystemName"
+                }
+            ],
+            "schema:isPartOf": {
+                "@id": "http://schema.biothings.io"
+            },
+            "sms:displayName": "hTERT NF1 ipNF05.5",
+            "sms:required": "sms:false",
+            "sms:validationRules": []
+        },
+        {
+            "@id": "bts:HTERTNF1ipNF05.5(Mixedclones)",
+            "@type": "rdfs:Class",
+            "rdfs:comment": "plexiform neurofibroma cell line",
+            "rdfs:label": "HTERTNF1ipNF05.5(Mixedclones)",
+            "rdfs:subClassOf": [
+                {
+                    "@id": "bts:ModelSystemName"
+                }
+            ],
+            "schema:isPartOf": {
+                "@id": "http://schema.biothings.io"
+            },
+            "sms:displayName": "hTERT NF1 ipNF05.5 (Mixed clones)",
+            "sms:required": "sms:false",
+            "sms:validationRules": []
+        },
+        {
+            "@id": "bts:HTERTNF1ipn06.2A",
+            "@type": "rdfs:Class",
+            "rdfs:comment": "plexiform neurofibroma cell line",
+            "rdfs:label": "HTERTNF1ipn06.2A",
+            "rdfs:subClassOf": [
+                {
+                    "@id": "bts:ModelSystemName"
+                }
+            ],
+            "schema:isPartOf": {
+                "@id": "http://schema.biothings.io"
+            },
+            "sms:displayName": "hTERT NF1 ipn06.2 A",
+            "sms:required": "sms:false",
+            "sms:validationRules": []
+        },
+        {
+            "@id": "bts:HTERTNF1ipNF95.11bC/T",
+            "@type": "rdfs:Class",
+            "rdfs:comment": "plexiform neurofibroma cell line",
+            "rdfs:label": "HTERTNF1ipNF95.11bC/T",
+            "rdfs:subClassOf": [
+                {
+                    "@id": "bts:ModelSystemName"
+                }
+            ],
+            "schema:isPartOf": {
+                "@id": "http://schema.biothings.io"
+            },
+            "sms:displayName": "hTERT NF1 ipNF95.11b C/T",
+            "sms:required": "sms:false",
+            "sms:validationRules": []
+        },
+        {
+            "@id": "bts:HTERTNF1ipNF95.6",
+            "@type": "rdfs:Class",
+            "rdfs:comment": "plexiform neurofibroma cell line",
+            "rdfs:label": "HTERTNF1ipNF95.6",
+            "rdfs:subClassOf": [
+                {
+                    "@id": "bts:ModelSystemName"
+                }
+            ],
+            "schema:isPartOf": {
+                "@id": "http://schema.biothings.io"
+            },
+            "sms:displayName": "hTERT NF1 ipNF95.6",
+            "sms:required": "sms:false",
+            "sms:validationRules": []
+        },
+        {
+            "@id": "bts:HTERTNF1ipn02.8",
+            "@type": "rdfs:Class",
+            "rdfs:comment": "plexiform neurofibroma cell line",
+            "rdfs:label": "HTERTNF1ipn02.8",
+            "rdfs:subClassOf": [
+                {
+                    "@id": "bts:ModelSystemName"
+                }
+            ],
+            "schema:isPartOf": {
+                "@id": "http://schema.biothings.io"
+            },
+            "sms:displayName": "hTERT NF1 ipn02.8",
+            "sms:required": "sms:false",
+            "sms:validationRules": []
+        },
+        {
+            "@id": "bts:HTERTNF1ipnNF95.11c",
+            "@type": "rdfs:Class",
+            "rdfs:comment": "plexiform neurofibroma cell line",
+            "rdfs:label": "HTERTNF1ipnNF95.11c",
+            "rdfs:subClassOf": [
+                {
+                    "@id": "bts:ModelSystemName"
+                }
+            ],
+            "schema:isPartOf": {
+                "@id": "http://schema.biothings.io"
+            },
+            "sms:displayName": "hTERT NF1 ipnNF95.11c",
             "sms:required": "sms:false",
             "sms:validationRules": []
         },
@@ -13183,7 +13319,7 @@
         {
             "@id": "bts:ReportMilestone",
             "@type": "rdfs:Class",
-            "rdfs:comment": "Indicates which milestone report you're annotating data files for. Currently only required for projects funded by NTAP, GFF, and NFRI. An example: if submitting a 6-month milestone report for NTAP, reportMilestone=1.  ",
+            "rdfs:comment": "Indicates which milestone you're annotating data files for. Currently only required for projects funded by NTAP, GFF, and NFRI. An example: if submitting data for your 6-month milestone report for NTAP, reportMilestone=1.  Also if you are submitting data associated with your first milestone, reportMilestone =1",
             "rdfs:label": "ReportMilestone",
             "rdfs:subClassOf": [
                 {
@@ -13572,6 +13708,40 @@
                 "@id": "http://schema.biothings.io"
             },
             "sms:displayName": "ATAC-seq",
+            "sms:required": "sms:false",
+            "sms:validationRules": []
+        },
+        {
+            "@id": "bts:Ipn02.32λ",
+            "@type": "rdfs:Class",
+            "rdfs:comment": "TBD",
+            "rdfs:label": "Ipn02.32λ",
+            "rdfs:subClassOf": [
+                {
+                    "@id": "bts:ModelSystemName"
+                }
+            ],
+            "schema:isPartOf": {
+                "@id": "http://schema.biothings.io"
+            },
+            "sms:displayName": "ipn02.3 2λ",
+            "sms:required": "sms:false",
+            "sms:validationRules": []
+        },
+        {
+            "@id": "bts:IpNF95.11bC",
+            "@type": "rdfs:Class",
+            "rdfs:comment": "TBD",
+            "rdfs:label": "IpNF95.11bC",
+            "rdfs:subClassOf": [
+                {
+                    "@id": "bts:ModelSystemName"
+                }
+            ],
+            "schema:isPartOf": {
+                "@id": "http://schema.biothings.io"
+            },
+            "sms:displayName": "ipNF95.11b C",
             "sms:required": "sms:false",
             "sms:validationRules": []
         },
