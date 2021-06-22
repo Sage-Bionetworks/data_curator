@@ -9,6 +9,7 @@
 # https://www.synapse.org
 
 ui <- shinydashboardPlus::dashboardPage(
+  title = "Data Curator",
   skin = "purple",
   dashboardHeader(
     titleWidth = 250,
@@ -33,7 +34,10 @@ ui <- shinydashboardPlus::dashboardPage(
               )
             )
           }),
-          actionButton(inputId = "btn_header_update", label = NULL, icon = icon("sync-alt"))
+          actionButton(
+            inputId = "btn_header_update", class = "btn-shiny-effect",
+            label = NULL, icon = icon("sync-alt")
+          )
         )
       )
     ),
@@ -53,6 +57,7 @@ ui <- shinydashboardPlus::dashboardPage(
     width = 250,
     sidebarMenu(
       id = "tabs",
+      # uiOutput("title"),
       menuItem(
         "Instructions",
         tabName = "tab_instructions",
@@ -86,8 +91,7 @@ ui <- shinydashboardPlus::dashboardPage(
   dashboardBody(
     tags$head(
       tags$style(sass(sass_file("www/scss/main.scss"))),
-      singleton(includeScript("www/js/readCookie.js")),
-      singleton(includeScript("www/js/onclick.js"))
+      singleton(includeScript("www/js/readCookie.js"))
     ),
     use_notiflix_report(),
     use_waiter(),
@@ -95,8 +99,7 @@ ui <- shinydashboardPlus::dashboardPage(
       # First tab content
       tabItem(
         tabName = "tab_instructions",
-        uiOutput("title"),
-        h2("Instructions for the Data Curator App:"),
+        h2("Instructions for the Data Curator App (DCA):"),
         h3(
           "1. Go to",
           strong("Select your Dataset"),
@@ -121,7 +124,6 @@ ui <- shinydashboardPlus::dashboardPage(
         fluidRow(
           box(
             status = "primary",
-            solidHeader = TRUE,
             width = 6,
             title = "Choose a Project and Folder: ",
             selectInput(
@@ -140,7 +142,6 @@ ui <- shinydashboardPlus::dashboardPage(
           ),
           box(
             status = "primary",
-            solidHeader = TRUE,
             width = 6,
             title = "Choose a Metadata Template Type: ",
             selectInput(
@@ -161,9 +162,10 @@ ui <- shinydashboardPlus::dashboardPage(
           box(
             title = "Get Link, Annotate, and Download Template as CSV",
             status = "primary",
-            solidHeader = TRUE,
             width = 12,
-            actionButton("btn_download", "Click to Generate Google Sheets Template"),
+            actionButton("btn_download", "Click to Generate Google Sheets Template",
+              class = "btn-primary-color"
+            ),
             hidden(
               div(
                 id = "div_download",
@@ -183,14 +185,13 @@ ui <- shinydashboardPlus::dashboardPage(
         fluidRow(
           box(
             title = "Upload Filled Metadata as a CSV",
-            solidHeader = TRUE,
             status = "primary",
             width = 12,
             csvInfileUI("inputFile")
           ),
           box(
             title = "Metadata Preview",
-            solidHeader = TRUE,
+            collapsible = TRUE,
             status = "primary",
             width = 12,
             DTableUI("tbl_preview")
@@ -198,27 +199,24 @@ ui <- shinydashboardPlus::dashboardPage(
           box(
             title = "Validate Filled Metadata",
             status = "primary",
-            solidHeader = TRUE,
+            collapsible = TRUE,
             width = 12,
-            actionButton("btn_validate", "Validate Metadata"),
-            hidden(
-              div(
-                id = "div_validate",
-                height = "100%",
-                ValidationMsgUI("text_validate")
-              ),
-              DTableUI("tbl_validate"),
-              actionButton("btn_val_gsheet", "  Click to Generate Google Sheet Link", icon = icon("table"))
+            actionButton("btn_validate", "Validate Metadata", class = "btn-primary-color"),
+            div(
+              id = "div_validate",
+              height = "100%",
+              ValidationMsgUI("text_validate")
             ),
+            DTableUI("tbl_validate"),
+            uiOutput("val_gsheet"),
             helpText(
-              HTML("If you have an error, please try editing locally or on google sheet.<br/>
-                   Reupload your CSV and press the validate button as needed.")
+              HTML("If you have an error, please try editing locally or on google sheet.
+                  Reupload your CSV and press the validate button as needed.")
             )
           ),
           box(
             title = "Submit Validated Metadata to Synapse",
             status = "primary",
-            solidHeader = TRUE,
             width = 12,
             uiOutput("submit")
           )
@@ -226,7 +224,7 @@ ui <- shinydashboardPlus::dashboardPage(
       )
     ),
     # waiter loading screen
-    dc_waiter("show", isLogin = TRUE)
+    dcWaiter("show", isLogin = TRUE)
   )
 )
 

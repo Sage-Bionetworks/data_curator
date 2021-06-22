@@ -7,11 +7,12 @@ switchTabUI <- function(id, direction = c("left", "right", "both")) {
 
   # namespace
   ns <- NS(id)
+  tags$head()
   # if we put buttons in server, buttons will change after observing tabs' change  delay
   # which cause some add-remove tranisition in delay
   # now, put buttons in UI
-  btn_prev <- actionButton(ns(tagID[2]), HTML("<div class=\"col-sm-4\"><i class=\"fa fa-angle-double-left fa-2x\"></i></div>"), style = "margin-top: 20px;")
-  btn_next <- actionButton(ns(tagID[1]), HTML("<div class=\"col-sm-4\"><i class=\"fa fa-angle-double-right fa-2x\"></i></div>"), style = "margin-top: 20px;")
+  btn_prev <- actionButton(ns(tagID[2]), class = "switch-tab-prev", lapply(1:3, function(i) tags$i(class = "fa fa-angle-left")))
+  btn_next <- actionButton(ns(tagID[1]), class = "switch-tab-next", lapply(1:3, function(i) tags$i(class = "fa fa-angle-right")))
   fluidRow(
     if (direction == "right") {
       column(1, offset = 10, btn_next)

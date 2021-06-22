@@ -1,7 +1,6 @@
 /*** Sidebar ***/
 
 .left-side, .main-sidebar {
-	
   padding-top: 80px; 
   font-weight: bold; 
   font-size: 1.1em 
@@ -9,7 +8,6 @@
 
 // when sidebar is open
 .main-sidebar {
-
 	background-color: $sidebar_col !important;
 
 	.sidebar {
@@ -46,7 +44,7 @@
 			transition: 100ms;
 
 			&:hover {
-				background: rgba(104, 103, 103, 0.3) !important;
+				background: $glass_grey !important;
 				filter: grayscale(0%) opacity(1);
 			}
 			

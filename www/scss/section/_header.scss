@@ -1,7 +1,16 @@
+/*** Header ***/
+
+.logo, .navbar {
+  background-color: transparent !important;
+}
+
 .main-header {
-    
+
+  @include header_bg;
+
   .logo {
     font-size: 1.8em;
+    font-weight: 600;
   }
 
   #HTAN_logo a {
@@ -11,15 +20,33 @@
     padding: 0 15px;
   }
 
+  // adjust custom dropdown color effect
+  .navbar {
+
+    a:hover {
+      background-color: $glass_grey !important;
+    }
+
+    // custom dropdown - leftUI
+    // when the box open
+    .open>a { 
+      background-color: $glass_grey !important;
+
+      &:focus, &:hover {
+        background-color: $glass_grey !important;
+      }
+    }
+  }
+
   .dropdown-menu {
     left: auto !important; // stick with the button left
-    box-shadow: $float_shadow;
+    box-shadow: $primary_shadow;
     animation: fadeIn 100ms;
-
   
     ul.menu {
 
       padding: 0 5px !important;
+
       // reset all margin
       & * {
         margin: 0px;
@@ -46,18 +73,20 @@
   }
 }
 
-
+// responsive - cycle back for proper breakpoints if needed
 @media (max-width:1146px){
+
   .shiny-input-container{
     width: 200px !important;
   }
 }
 
 @media (max-width:973px){
+
   ul.menu {
+
     &>div, .row {
       flex-wrap: wrap;
-      justify-content: center
     }
   }
 }

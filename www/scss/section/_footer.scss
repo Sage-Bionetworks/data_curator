@@ -32,15 +32,17 @@
 
 // sidebar footer when sidebar collapsed
 .sidebar-collapse #sidebar_footer {
+
 	div>.fa{
 		color: transparent;
 		padding: 2px;
 		transform: scale(2.2);
 		background: linear-gradient(45deg, purple, #7590d6);
-		-webkit-background-clip: text;
+		-webkit-background-clip: text; // clip to heart shape
 		visibility: visible !important;
 		transition: 100ms ease-in-out;
 	}
+	
 	footer {
 		visibility: hidden;
 	} 

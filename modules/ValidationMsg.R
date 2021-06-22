@@ -24,7 +24,7 @@ ValidationMsgServer <- function(id, valRes, template, inFile) {
           if (is.null(inFile)) {
             span(class = text_class, HTML("Please <b>upload</b> a filled template !"))
           },
-          if (length(inFile) == 0) {
+          if (!is.null(inFile) & length(inFile) == 0) {
             span(class = text_class, HTML("File is empty. Please <b>upload</b> a filled template !"))
           },
           span(class = text_class, HTML(valRes$outMsg))
