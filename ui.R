@@ -149,6 +149,29 @@ ui <- shinydashboardPlus::dashboardPage(
               label = "Template:",
               choices = "Generating..."
             )
+          ),
+          column(12, actionButton("dashboard_control", div(span(), p("Show Metadata Compliance")), class = "scroll-down")),
+          box(
+            status = "primary",
+            id = "dashboard",
+            width = 12,
+            closable = TRUE,
+            title = "Track Process of your Dataset",
+            fluidRow(
+              column(9,
+                tabsetPanel(
+                  id = "dashboard_tabs",
+                  tabPanel(
+                    "Selected Template",
+                    p(class = "tab-title", "Complete your Selected Template"),
+                    fluidRow(
+                      column(6, progressChecklistUI("checklist_template")), 
+                      column(6, selectDataReqNetUI("template_network", height = "400px"))
+                    )
+                  )
+                )
+              )
+            )
           )
         ),
         switchTabUI("switchTab2", direction = "both")

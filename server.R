@@ -39,13 +39,16 @@ shinyServer(function(input, output, session) {
   folder_synID <- NULL # selected foler synapse ID
   template_schema_name <- NULL # selected template schema name
 
-  datatype_list <- list(projects = NULL, folders = NULL, manifests = template_namedList, files = NULL)
+  # datatype's checklist for synID to name 
+  datatype_list <- reactiveValues(projects = NULL, folders = NULL, files = NULL) 
 
   tabs_list <- c("tab_instructions", "tab_data", "tab_template", "tab_upload")
   clean_tags <- c("div_download", "div_validate", NS("tbl_validate", "table"), "btn_val_gsheet", "btn_submit")
 
   # add box effects
   boxEffect(zoom = TRUE, float = TRUE)
+  # remove dashboard box initially
+  shinydashboardPlus::updateBox("dashboard", action = "remove")
 
   ######## Initiate Login Process ########
   # synapse cookies
@@ -73,9 +76,8 @@ shinyServer(function(input, output, session) {
         # updates project dropdown
         lapply(c("header_dropdown_", "dropdown_"), function(x) {
           lapply(c(1, 3), function(i) {
-            updateSelectInput(session, paste0(x, datatypes[i]),
-              choices = sort(names(datatype_list[[i]]))
-            )
+           updateSelectInput(session, paste0(x, "project"), choices = sort(names(datatype_list$projects)))
+           updateSelectInput(session, paste0(x, "template"), choices = sort(names(template_namedList)))
           })
         })
 
@@ -167,6 +169,20 @@ shinyServer(function(input, output, session) {
   # update selected schema template name
   observeEvent(input$dropdown_template, {
     template_schema_name <<- template_namedList[match(input$dropdown_template, names(template_namedList))]
+  })
+
+  ######## Update Dashboard Stats ########
+  # all functions should not be executed until dashboard visable
+  observeEvent(input$dashboard$visible, {
+    if (!input$dashboard$visible) {
+      Sys.sleep(0.3)  # 0.3 is optimal
+      show("dashboard_control")
+    }
+  })
+
+  observeEvent(input$dashboard_control, {
+    hide("dashboard_control")
+    shinydashboardPlus::updateBox("dashboard", action = "restore")
   })
 
   # hide tags when users select new template
