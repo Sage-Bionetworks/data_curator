@@ -4,7 +4,10 @@ selectDataReqNetUI <- function(id, height = 500) {
 
   # namespace
   ns <- NS(id)
-  forceNetworkOutput(ns("network"), height = height)
+  tagList(
+    forceNetworkOutput(ns("network"), height = height),
+    uiOutput(ns("pbOut"))
+  )
 }
 
 selectDataReqNetServer <- function(id, upload_data, req_data, selected_manifest) {
@@ -12,12 +15,11 @@ selectDataReqNetServer <- function(id, upload_data, req_data, selected_manifest)
     id,
     function(input, output, session) {
       
-      output$network <- renderForceNetwork({
+      reqData <- isolate(req_data)
+      upData <- isolate(upload_data)
+      selected <- isolate(selected_manifest)
 
-        # wait input schema name finish updating !important
-        reqData <- isolate(req_data)
-        upData <- isolate(upload_data)
-        selected <- isolate(selected_manifest)
+      output$network <- renderForceNetwork({
 
         # reorder to make selected manifest always on the left in plot
         inx <- which(reqData == selected)
@@ -46,6 +48,15 @@ selectDataReqNetServer <- function(id, upload_data, req_data, selected_manifest)
                     zoom = FALSE, bounded=TRUE, arrows = TRUE, 
                     opacity = 0.9, fontSize=16, charge = -500)
       })
+
+      all_req <- union(reqData, names(reqData))
+      pb_pct <- round(length(intersect(all_req, upData$schema)) / length(all_req), 2) * 100
+      output$pbOut <- renderUI(
+        shinyWidgets::progressBar(
+          id = NS(id, "pb"), status = "danger", title = "Submission Progress of Required Metadata",
+          striped = TRUE, display_pct = TRUE, value = pb_pct
+        )
+      )
     }
   )
 }

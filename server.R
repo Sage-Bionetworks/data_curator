@@ -37,7 +37,7 @@ shinyServer(function(input, output, session) {
   synStore_obj <- NULL # gets list of projects they have access to
   project_synID <- NULL # selected project synapse ID
   folder_synID <- NULL # selected foler synapse ID
-  template_schema_name <- NULL # selected template schema name
+  template_schema_name <- reactiveVal() # selected template schema name
 
   # datatype's checklist for synID to name 
   datatype_list <- reactiveValues(projects = NULL, folders = NULL, files = NULL) 
@@ -168,11 +168,18 @@ shinyServer(function(input, output, session) {
   ######## Update Template ########
   # update selected schema template name
   observeEvent(input$dropdown_template, {
-    template_schema_name <<- template_namedList[match(input$dropdown_template, names(template_namedList))]
+    template_schema_name(template_namedList[match(input$dropdown_template, names(template_namedList))])
+    # hide selectors when users change selection
+    sapply(clean_tags, FUN = hide)
   })
 
   ######## Update Dashboard Stats ########
   # all functions should not be executed until dashboard visable
+  load_dashbord <- Waiter$new(id = "dashboard", 
+                              html = tagList(spin_google(), h4("Loading", style = "color: #000")), 
+                              color = transparent(0.2)
+                              )
+
   observeEvent(input$dashboard$visible, {
     if (!input$dashboard$visible) {
       Sys.sleep(0.3)  # 0.3 is optimal
@@ -185,16 +192,49 @@ shinyServer(function(input, output, session) {
     shinydashboardPlus::updateBox("dashboard", action = "restore")
   })
 
-  # hide tags when users select new template
-  observeEvent(
-    {
-      input$dropdown_folder
-      input$dropdown_template
-    },
-    {
-      sapply(clean_tags, FUN = hide)
-    }
-  )
+  # split functions for getting uploaded and required into different reactives 
+  # only process getting uploaded manifest in project wehn folder change & box shown - !use reactive not input$dropdown
+  upload_manifest <- eventReactive(c(datatype_list$folders, input$dashboard$visible), {
+    
+    req(input$dashboard_control != 0 & input$dashboard$visible)
+    # shiny::validate(need(length(datatype_list$folders_namedList) > 0, "No File Detected !"))
+
+    load_dashbord$show()  # initiate partial loading screen for generating plot
+
+    lapply(c("box_pick_project", "box_pick_manifest"), FUN = disable)  # disable selection to prevent change before finish below fun
+
+    all_manifest <- lapply(datatype_list$folders, function(i) {
+      synapse_driver$getDatasetManifest(synStore_obj, i, downloadFile = TRUE) %>%
+      collectManifestInfo()
+    }) %>% extractManifests()
+  
+    lapply(c("box_pick_project", "box_pick_manifest"), FUN = enable)  # enable selection btns
+    load_dashbord$hide()  # hide the partial loading screen
+
+    return(all_manifest)
+  })
+  
+  # only process getting requirements of selected manifest when manifest change & box shown - !use reactive not input$dropdown
+  template_req <- eventReactive(c(template_schema_name(), input$dashboard$visible), {
+    
+    req(input$dashboard_control != 0 & input$dashboard$visible)
+
+    # get requirements, otherwise output unamed vector of schema name
+    req_data <- tryCatch(metadata_model$get_component_requirements(template_schema_name(), as_graph = TRUE), error = function() NULL)
+    if (length(req_data) == 0) req_data <- as.character(template_schema_name()) else req_data <- list2Vector(req_data)
+    return(req_data)
+  })
+
+  # render dashboard plots when input data updated & box shown
+  observeEvent(c(upload_manifest(), template_req(), input$dashboard$visible), {
+    
+    req(input$dashboard_control != 0 & input$dashboard$visible)
+
+    # check list of requirments of selected template 
+    checkListServer("checklist_template", upload_manifest(), template_req())
+    # networks plot for requirements of selected template 
+    selectDataReqNetServer("template_network", upload_manifest(), template_req(), template_schema_name())
+  })
 
   ######## Template Google Sheet Link ########
   observeEvent(input$btn_download, {
