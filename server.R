@@ -199,11 +199,13 @@ shinyServer(function(input, output, session) {
     load_upload$show()  # initiate partial loading screen for generating plot
 
     lapply(c("box_pick_project", "box_pick_manifest"), FUN = disable)  # disable selection to prevent change before finish below fun
-
+    t <- runTime(
     all_manifest <- sapply(datatype_list$folders, function(i) {
       synapse_driver$getDatasetManifest(synStore_obj, i, downloadFile = TRUE) %>% collectManifestInfo()
     }) %>% extractManifests()
-
+    )
+    logjs(t)
+    
     lapply(c("box_pick_project", "box_pick_manifest"), FUN = enable)  # enable selection btns
     load_upload$hide()  # hide the partial loading screen
 
@@ -290,7 +292,7 @@ shinyServer(function(input, output, session) {
 
         manifest_url <-
           metadata_model$getModelManifest(paste0(config$community, " ", input$dropdown_template),
-            template_schema_name,
+            template_schema_name(),
             filenames = as.list(names(datatype_list$files)),
             datasetId = folder_synID
           )
@@ -303,7 +305,7 @@ shinyServer(function(input, output, session) {
         manifest_url <- metadata_model$populateModelManifest(paste0(
           config$community,
           " ", input$dropdown_template
-        ), manifest_entity$path, template_schema_name)
+        ), manifest_entity$path, template_schema_name())
       }
 
       output$text_download <- renderUI({
@@ -337,7 +339,7 @@ shinyServer(function(input, output, session) {
       silent = TRUE,
       annotation_status <- metadata_model$validateModelManifest(
         inFile$raw()$datapath,
-        template_schema_name
+        template_schema_name()
       )
     )
 
@@ -396,7 +398,7 @@ shinyServer(function(input, output, session) {
     filled_manifest <- metadata_model$populateModelManifest(paste0(
       config$community,
       " ", input$dropdown_template
-    ), inFile$raw()$datapath, template_schema_name)
+    ), inFile$raw()$datapath, template_schema_name())
 
     # rerender and change button to link
     output$val_gsheet <- renderUI({
