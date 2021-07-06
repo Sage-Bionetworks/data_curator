@@ -192,22 +192,18 @@ shinyServer(function(input, output, session) {
     shinydashboardPlus::updateBox("dashboard", action = "restore")
   })
 
-  # split functions for getting uploaded and required into different reactives 
-  # only process getting uploaded manifest in project wehn folder change & box shown - !use reactive not input$dropdown
+  # get all uploaded files in project
   upload_manifest <- eventReactive(c(datatype_list$folders, input$dashboard$visible), {
     
     req(input$dashboard_control != 0 & input$dashboard$visible)
-    # shiny::validate(need(length(datatype_list$folders_namedList) > 0, "No File Detected !"))
-
     load_dashbord$show()  # initiate partial loading screen for generating plot
 
     lapply(c("box_pick_project", "box_pick_manifest"), FUN = disable)  # disable selection to prevent change before finish below fun
 
-    all_manifest <- lapply(datatype_list$folders, function(i) {
-      synapse_driver$getDatasetManifest(synStore_obj, i, downloadFile = TRUE) %>%
-      collectManifestInfo()
+    all_manifest <- sapply(datatype_list$folders, function(i) {
+      synapse_driver$getDatasetManifest(synStore_obj, i, downloadFile = TRUE) %>% collectManifestInfo()
     }) %>% extractManifests()
-  
+
     lapply(c("box_pick_project", "box_pick_manifest"), FUN = enable)  # enable selection btns
     load_dashbord$hide()  # hide the partial loading screen
 
@@ -229,7 +225,6 @@ shinyServer(function(input, output, session) {
   observeEvent(c(upload_manifest(), template_req(), input$dashboard$visible), {
     
     req(input$dashboard_control != 0 & input$dashboard$visible)
-
     # check list of requirments of selected template 
     checkListServer("checklist_template", upload_manifest(), template_req())
     # networks plot for requirements of selected template 
