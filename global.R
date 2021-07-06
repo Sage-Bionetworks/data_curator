@@ -19,6 +19,8 @@ suppressPackageStartupMessages({
   library(networkD3)
   # TODO: remove `shinyWidgets` after create own progress bar widgets
   library(shinyWidgets)
+  library(data.tree)
+  library(r2d3)
 })
 
 # APP_URL <- "https://shinypro.synapse.org/users/spatil/HTAN-oauth/"

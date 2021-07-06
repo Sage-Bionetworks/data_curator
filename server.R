@@ -175,10 +175,10 @@ shinyServer(function(input, output, session) {
 
   ######## Update Dashboard Stats ########
   # all functions should not be executed until dashboard visable
-  load_dashbord <- Waiter$new(id = "dashboard", 
-                              html = tagList(spin_google(), h4("Loading", style = "color: #000")), 
-                              color = transparent(0.2)
-                              )
+  load_upload <- Waiter$new(id = "dashboard", 
+                            html = tagList(spin_google(), h4("Loading", style = "color: #000")), 
+                            color = transparent(0.2)
+                            )
 
   observeEvent(input$dashboard$visible, {
     if (!input$dashboard$visible) {
@@ -196,7 +196,7 @@ shinyServer(function(input, output, session) {
   upload_manifest <- eventReactive(c(datatype_list$folders, input$dashboard$visible), {
     
     req(input$dashboard_control != 0 & input$dashboard$visible)
-    load_dashbord$show()  # initiate partial loading screen for generating plot
+    load_upload$show()  # initiate partial loading screen for generating plot
 
     lapply(c("box_pick_project", "box_pick_manifest"), FUN = disable)  # disable selection to prevent change before finish below fun
 
@@ -205,7 +205,7 @@ shinyServer(function(input, output, session) {
     }) %>% extractManifests()
 
     lapply(c("box_pick_project", "box_pick_manifest"), FUN = enable)  # enable selection btns
-    load_dashbord$hide()  # hide the partial loading screen
+    load_upload$hide()  # hide the partial loading screen
 
     return(all_manifest)
   })
@@ -221,6 +221,27 @@ shinyServer(function(input, output, session) {
     return(req_data)
   })
 
+  all_require_manifest <- eventReactive(upload_manifest(), {
+
+    req(input$dashboard_control != 0 & input$dashboard$visible)
+    
+    all_req <- lapply(1:nrow(upload_manifest()), function(i) {
+      out <- tryCatch(metadata_model$get_component_requirements(upload_manifest()$schema[i], as_graph = TRUE), error = function(err) NULL)
+
+      if (length(out) != 0) {
+        out <- list2Vector(out)
+        # change upload schema to folder names
+        out[which(out == upload_manifest()$schema[i])] <- upload_manifest()$folder[i]
+        df <- data.frame(from = as.character(out), to = names(out))
+      } else {
+        df <- data.frame()
+      }
+      return(df)
+    }) %>% bind_rows()
+    # res <- quickValidateManifest(upload_manifest())
+    return(all_req)
+  })
+
   # render dashboard plots when input data updated & box shown
   observeEvent(c(upload_manifest(), template_req(), input$dashboard$visible), {
     
@@ -231,6 +252,12 @@ shinyServer(function(input, output, session) {
     selectDataReqNetServer("template_network", upload_manifest(), template_req(), template_schema_name())
   })
 
+  observeEvent(c(all_require_manifest(), input$dashboard$visible), {
+    req(input$dashboard_control != 0 & input$dashboard$visible)
+    # tree plot for requirements of all uploaded data
+    uploadDataReqTreeServer("upload_tree", upload_manifest(), all_require_manifest(), input$dropdown_project)
+  })
+  
   ######## Template Google Sheet Link ########
   observeEvent(input$btn_download, {
 
