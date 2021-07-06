@@ -34,7 +34,7 @@ checkListServer <- function(id, upload_data, req_data) {
                 if(length(not_up) > 0) {
                   lapply(not_up, function(name) {
                     div(class = "checklist-icon",
-                      name, tags$i(class = "error_msg", icon("circle-o"))
+                      name, tags$span(class = "error_msg", icon("circle-o"))
                     )
                   })
                 }
@@ -51,8 +51,7 @@ checkListServer <- function(id, upload_data, req_data) {
                     div(class = "checklist-icon",
                       name, lapply(synID, function(id) 
                       tags$a("", icon("link"), target = '_blank', href = paste0("https://www.synapse.org/#!Synapse:", id))),
-                      notif_icon,
-                      tags$i(class = "success_msg", icon("check-circle"))
+                      tags$span(notif_icon, tags$span(class = "success_msg", icon("check-circle")))
                     )
                   })
                 }

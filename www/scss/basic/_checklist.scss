@@ -2,13 +2,9 @@
   min-height: 400px;
   text-align: center;
   box-shadow: 0 2px 30px rgba(#000, 0.2);
-
-  .help-block {
-    position: relative;
-    top: -2em;
-  }
   
   .fa-lightbulb {
+    margin-right: 5px;
     color: $notif_process_col;
   }
   
@@ -82,14 +78,19 @@
             margin-left: 5px;
             order: 2;
           }
-
-          i {
+          
+          span {
             margin-left: auto;
-            order: 4;
+            order: 3;
           }
         }
       }
     }
+  }
+
+  .help-block {
+    position: relative;
+    top: -2em;
   }
 }
 

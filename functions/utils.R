@@ -48,7 +48,7 @@ extractManifests <- function(list) {
       modify = sapply(list, `[[`, c(1, 4)) %>% as.Date()
     ) %>% 
       filter(schema != "" & schema != "NaN") %>% 
-      distinct(schema, .keep_all = TRUE) %>% 
+      # distinct(schema, .keep_all = TRUE) %>% 
       tibble::rownames_to_column("folder")
   }
 
