@@ -173,6 +173,16 @@ ui <- shinydashboardPlus::dashboardPage(
                 "Uploaded Data",
                 p(class = "tab-title", "Progress of Uploaded Data in Synapse"),
                 uploadDataReqTreeUI("upload_tree")
+              ),
+              tabPanel(
+                "Validation Preview",
+                p(class = "tab-title", "Manifest is out of schema"),
+                tagList(
+                  p(actionButton("btn_dashboard_validate", "Validate", class = "btn-primary-color"),  
+                    "Check if any uploaded files are out of date"),
+                  DTableUI("tbl_dashboard_validate"),
+                  helpText("If there are any invalid files, please download the invalid files from synapse and validate the files in the DCA again.")
+                )
               )
             )
           )

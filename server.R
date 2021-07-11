@@ -248,6 +248,27 @@ shinyServer(function(input, output, session) {
     # res <- quickValidateManifest(upload_manifest())
     return(all_req)
   })
+  
+  quick_val <- eventReactive(upload_manifest(), {
+    all_manifest <- upload_manifest()
+    valDF <- lapply(1:nrow(all_manifest), function(i) {
+      path <- all_manifest$path[i]
+      component <- all_manifest$schema[i]
+      manifest_df <- data.table::fread(path)
+      # if no error, output is list()
+      # TODO: check with backend - ValueError: c("LungCancerTier3", "BreastCancerTier3", "ScRNA-seqAssay", "MolecularTest", "NaN", "") ...
+      valRes <- tryCatch(metadata_model$validateModelManifest(path, component), error = function(err) "Invalid Component")
+      if (is.list(valRes)) {
+        res <- validationResult(valRes, component, manifest_df)
+      } else {
+        res <- list(validationRes = "invalid", errorType = valRes)
+      }
+      # manifest[[2]] <- list(res$validationRes, res$errorType)
+      out <- data.frame(is_valid = res$validationRes, error_type = res$errorType)
+    }) %>% bind_rows()
+
+    return(valDF)
+  })
 
   # render dashboard plots when input data updated & box shown
   observeEvent(c(upload_manifest(), template_req(), input$dashboard$visible), {
@@ -265,6 +286,26 @@ shinyServer(function(input, output, session) {
     uploadDataReqTreeServer("upload_tree", upload_manifest(), all_require_manifest(), input$dropdown_project)
   })
   
+  observeEvent(input$btn_dashboard_validate, {
+    
+    valRes <- isolate(quick_val())
+    df <- data.frame(
+      Upload_Data = upload_manifest()$schema, 
+      Status = valRes$is_valid, 
+      Error_Type = valRes$error_type,
+      SynapseId = paste0('<a href="https://www.synapse.org/#!Synapse:', 
+        upload_manifest()$synID, '" target="_blank">', upload_manifest()$synID, '</a>'), 
+      Create_On = upload_manifest()$create,
+      Last_Modified = upload_manifest()$modify,
+      Schema_Lastest_Update_on = c("2021-06-01"))
+
+    DTableServer("tbl_dashboard_validate", df, highlight = "row", escape = FALSE,
+      caption = paste0(sum(df$is_valid == "invalid"), " uploaded manifests are invalid according to the lastest schema"),
+      ht.color = c("#fff", "yellow"), ht.value = c("valid", "invalid"), ht.column = "Status",
+      options = list(dom = 't')
+      # show("tbl_dashboard_validate")
+  })
+
   ######## Template Google Sheet Link ########
   observeEvent(input$btn_download, {
 
@@ -370,11 +411,11 @@ shinyServer(function(input, output, session) {
 
       # highlight invalue cells in preview table
       if (valRes$errorType == "Wrong Schema") {
-        DTableServer("tbl_preview", data = inFile$data(), highlight = "full")
+        DTableServer("tbl_preview", data = inFile$data(), highlight = "row", ht.column = 1, ht.value = inFile$data()[,1])
       } else {
         DTableServer("tbl_preview",
           data = inFile$data(),
-          highlight = "partial", hightlight.col = valRes$errorDT$Column, hightlight.value = valRes$errorDT$Value
+          highlight = "column", ht.column = valRes$errorDT$Column, ht.value = valRes$errorDT$Value
         )
       }
 
