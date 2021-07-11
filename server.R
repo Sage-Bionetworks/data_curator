@@ -289,6 +289,7 @@ shinyServer(function(input, output, session) {
   observeEvent(input$btn_dashboard_validate, {
     
     valRes <- isolate(quick_val())
+    load_upload$show()
     df <- data.frame(
       Upload_Data = upload_manifest()$schema, 
       Status = valRes$is_valid, 
@@ -298,12 +299,13 @@ shinyServer(function(input, output, session) {
       Create_On = upload_manifest()$create,
       Last_Modified = upload_manifest()$modify,
       Schema_Lastest_Update_on = c("2021-06-01"))
-
+    
     DTableServer("tbl_dashboard_validate", df, highlight = "row", escape = FALSE,
-      caption = paste0(sum(df$is_valid == "invalid"), " uploaded manifests are invalid according to the lastest schema"),
+      caption = paste0("Invalid Result according to the lastest schema: ", sum(df$Status == "invalid")),
       ht.color = c("#fff", "yellow"), ht.value = c("valid", "invalid"), ht.column = "Status",
       options = list(dom = 't')
-      # show("tbl_dashboard_validate")
+    )
+    load_upload$hide()
   })
 
   ######## Template Google Sheet Link ########
