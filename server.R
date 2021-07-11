@@ -218,7 +218,7 @@ shinyServer(function(input, output, session) {
     req(input$dashboard_control != 0 & input$dashboard$visible)
 
     # get requirements, otherwise output unamed vector of schema name
-    req_data <- tryCatch(metadata_model$get_component_requirements(template_schema_name(), as_graph = TRUE), error = function() NULL)
+    req_data <- tryCatch(metadata_model$get_component_requirements(template_schema_name(), as_graph = TRUE), error = function() list())
     if (length(req_data) == 0) req_data <- as.character(template_schema_name()) else req_data <- list2Vector(req_data)
     return(req_data)
   })
@@ -226,20 +226,25 @@ shinyServer(function(input, output, session) {
   all_require_manifest <- eventReactive(upload_manifest(), {
 
     req(input$dashboard_control != 0 & input$dashboard$visible)
-    
-    all_req <- lapply(1:nrow(upload_manifest()), function(i) {
-      out <- tryCatch(metadata_model$get_component_requirements(upload_manifest()$schema[i], as_graph = TRUE), error = function(err) NULL)
+    all_manifest <- upload_manifest()
+    all_req <- lapply(1:nrow(all_manifest), function(i) {
+      out <- tryCatch(metadata_model$get_component_requirements(all_manifest$schema[i], as_graph = TRUE), error = function(err) list())
 
-      if (length(out) != 0) {
-        out <- list2Vector(out)
-        # change upload schema to folder names
-        out[which(out == upload_manifest()$schema[i])] <- upload_manifest()$folder[i]
-        df <- data.frame(from = as.character(out), to = names(out))
+      if (length(out) == 0) {
+        return(data.frame())
       } else {
-        df <- data.frame()
-      }
-      return(df)
+        out <- list2Vector(out)
+        # check if the uploaded file contains any missed requirement
+        has_miss <- ifelse(any(!union(names(out), out) %in% all_manifest$schema), TRUE, FALSE)
+        folder_name <- all_manifest$folder[i]
+        # names(has_miss) <- folder_name
+        # change upload schema to folder names
+        out[which(out == all_manifest$schema[i])] <- folder_name
+        df <- data.frame(from = as.character(out), to = names(out), folder = rep(folder_name, length(out)), has_miss = rep(has_miss, length(out)))
+        return(df)
+      }  
     }) %>% bind_rows()
+    # all_req <- all_req[lengths(all_req) != 0]
     # res <- quickValidateManifest(upload_manifest())
     return(all_req)
   })
