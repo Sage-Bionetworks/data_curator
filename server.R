@@ -207,7 +207,6 @@ shinyServer(function(input, output, session) {
     logjs(paste0("Get all uploaded manifest: ", t))
     
     lapply(c("box_pick_project", "box_pick_manifest"), FUN = enable)  # enable selection btns
-    load_upload$hide()  # hide the partial loading screen
 
     return(all_manifest)
   })
@@ -279,8 +278,6 @@ shinyServer(function(input, output, session) {
     )
     logjs(paste0("Get validation for all uploaded manifests: ", t))
 
-    load_upload$hide()
-
     return(valDF)
   })
 
@@ -289,24 +286,29 @@ shinyServer(function(input, output, session) {
     
     req(input$dashboard_control != 0 & input$dashboard$visible)
     # check list of requirments of selected template 
-    logjs("plot checklist")
+    logjs("start plot checklist")
     checkListServer("checklist_template", upload_manifest(), template_req())
+    logjs("end plot checklist")
+
     # networks plot for requirements of selected template 
-    logjs("plot network")
+    logjs("start plot network")
     selectDataReqNetServer("template_network", upload_manifest(), template_req(), template_schema_name())
+    logjs("end plot network")
+    load_upload$hide()  # hide the partial loading screen
   })
 
   observeEvent(c(all_require_manifest(), input$dashboard$visible), {
     req(input$dashboard_control != 0 & input$dashboard$visible)
     # tree plot for requirements of all uploaded data
-    logjs("plot tree")
+    logjs("start plot tree")
     uploadDataReqTreeServer("upload_tree", upload_manifest(), all_require_manifest(), input$dropdown_project)
+    logjs("end plot tree")
   })
   
   observeEvent(input$btn_dashboard_validate, {
     
     valRes <- isolate(quick_val())
-    logjs("plot validation table")
+    logjs("start plot validation table")
     df <- data.frame(
       Component = upload_manifest()$schema, 
       Folder_name = upload_manifest()$folder,
@@ -325,6 +327,9 @@ shinyServer(function(input, output, session) {
       ht.color = c("#82E0AA", "#F7DC6F"), ht.value = c("valid", "invalid"), ht.column = "Status",
       options = list(dom = 't', columnDefs = list(className = 'dt-center', targets = "_all"))
     )
+    logjs("end plot validation table")
+
+    load_upload$hide()
     show(NS("tbl_dashboard_validate", "table"))
   })
 
