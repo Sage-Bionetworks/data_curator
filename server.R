@@ -197,14 +197,14 @@ shinyServer(function(input, output, session) {
     
     req(input$dashboard_control != 0 & input$dashboard$visible)
     load_upload$show()  # initiate partial loading screen for generating plot
-
+    hide(NS("tbl_dashboard_validate", "table"))
     lapply(c("box_pick_project", "box_pick_manifest"), FUN = disable)  # disable selection to prevent change before finish below fun
     t <- runTime(
     all_manifest <- sapply(datatype_list$folders, function(i) {
       synapse_driver$getDatasetManifest(synStore_obj, i, downloadFile = TRUE) %>% collectManifestInfo()
     }) %>% extractManifests()
     )
-    logjs(t)
+    logjs(paste0("Get all uploaded manifest: ", t))
     
     lapply(c("box_pick_project", "box_pick_manifest"), FUN = enable)  # enable selection btns
     load_upload$hide()  # hide the partial loading screen
@@ -220,6 +220,9 @@ shinyServer(function(input, output, session) {
     # get requirements, otherwise output unamed vector of schema name
     req_data <- tryCatch(metadata_model$get_component_requirements(template_schema_name(), as_graph = TRUE), error = function() list())
     if (length(req_data) == 0) req_data <- as.character(template_schema_name()) else req_data <- list2Vector(req_data)
+    
+    logjs("Get requirments for selected template")
+
     return(req_data)
   })
 
@@ -227,6 +230,8 @@ shinyServer(function(input, output, session) {
 
     req(input$dashboard_control != 0 & input$dashboard$visible)
     all_manifest <- upload_manifest()
+
+    t <- runTime(
     all_req <- lapply(1:nrow(all_manifest), function(i) {
       out <- tryCatch(metadata_model$get_component_requirements(all_manifest$schema[i], as_graph = TRUE), error = function(err) list())
 
@@ -244,13 +249,18 @@ shinyServer(function(input, output, session) {
         return(df)
       }  
     }) %>% bind_rows()
-    # all_req <- all_req[lengths(all_req) != 0]
-    # res <- quickValidateManifest(upload_manifest())
+    )
+    logjs(paste0("Get requirments for all uploaded manifests: ", t))
     return(all_req)
   })
   
   quick_val <- eventReactive(upload_manifest(), {
+
+    load_upload$show()
+
     all_manifest <- upload_manifest()
+
+    t <- runTime(
     valDF <- lapply(1:nrow(all_manifest), function(i) {
       path <- all_manifest$path[i]
       component <- all_manifest$schema[i]
@@ -266,6 +276,10 @@ shinyServer(function(input, output, session) {
       # manifest[[2]] <- list(res$validationRes, res$errorType)
       out <- data.frame(is_valid = res$validationRes, error_type = res$errorType)
     }) %>% bind_rows()
+    )
+    logjs(paste0("Get validation for all uploaded manifests: ", t))
+
+    load_upload$hide()
 
     return(valDF)
   })
@@ -275,37 +289,43 @@ shinyServer(function(input, output, session) {
     
     req(input$dashboard_control != 0 & input$dashboard$visible)
     # check list of requirments of selected template 
+    logjs("plot checklist")
     checkListServer("checklist_template", upload_manifest(), template_req())
     # networks plot for requirements of selected template 
+    logjs("plot network")
     selectDataReqNetServer("template_network", upload_manifest(), template_req(), template_schema_name())
   })
 
   observeEvent(c(all_require_manifest(), input$dashboard$visible), {
     req(input$dashboard_control != 0 & input$dashboard$visible)
     # tree plot for requirements of all uploaded data
+    logjs("plot tree")
     uploadDataReqTreeServer("upload_tree", upload_manifest(), all_require_manifest(), input$dropdown_project)
   })
   
   observeEvent(input$btn_dashboard_validate, {
     
     valRes <- isolate(quick_val())
-    load_upload$show()
+    logjs("plot validation table")
     df <- data.frame(
-      Upload_Data = upload_manifest()$schema, 
+      Component = upload_manifest()$schema, 
+      Folder_name = upload_manifest()$folder,
       Status = valRes$is_valid, 
       Error_Type = valRes$error_type,
       SynapseId = paste0('<a href="https://www.synapse.org/#!Synapse:', 
         upload_manifest()$synID, '" target="_blank">', upload_manifest()$synID, '</a>'), 
       Create_On = upload_manifest()$create,
       Last_Modified = upload_manifest()$modify,
-      Schema_Lastest_Update_on = c("2021-06-01"))
-    
-    DTableServer("tbl_dashboard_validate", df, highlight = "row", escape = FALSE,
-      caption = paste0("Invalid Result according to the lastest schema: ", sum(df$Status == "invalid")),
-      ht.color = c("#fff", "yellow"), ht.value = c("valid", "invalid"), ht.column = "Status",
-      options = list(dom = 't')
+      Lastest_Schema = c("2021-06-01/v1"),
+      Internal_links = c("Pass/Fail")
     )
-    load_upload$hide()
+    
+    DTableServer("tbl_dashboard_validate", df, highlight = "column", escape = FALSE,
+      caption = paste0("Invalid Results: ", sum(df$Status == "invalid")),
+      ht.color = c("#82E0AA", "#F7DC6F"), ht.value = c("valid", "invalid"), ht.column = "Status",
+      options = list(dom = 't', columnDefs = list(className = 'dt-center', targets = "_all"))
+    )
+    show(NS("tbl_dashboard_validate", "table"))
   })
 
   ######## Template Google Sheet Link ########

@@ -180,7 +180,7 @@ ui <- shinydashboardPlus::dashboardPage(
                 tagList(
                   p(actionButton("btn_dashboard_validate", "Validate", class = "btn-primary-color"),  
                     "Check if any uploaded files are out of date"),
-                  DTableUI("tbl_dashboard_validate"),
+                  hidden(DTableUI("tbl_dashboard_validate")),
                   helpText("If there are any invalid files, please download the invalid files from synapse and validate the files in the DCA again.")
                 )
               )
