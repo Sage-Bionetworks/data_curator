@@ -197,7 +197,7 @@ shinyServer(function(input, output, session) {
     
     req(input$dashboard_control != 0 & input$dashboard$visible)
     load_upload$show()  # initiate partial loading screen for generating plot
-    hide(NS("tbl_dashboard_validate", "table"))
+    DTableServer("tbl_dashboard_validate", data.frame(NULL))   
     lapply(c("box_pick_project", "box_pick_manifest"), FUN = disable)  # disable selection to prevent change before finish below fun
     t <- runTime(
     all_manifest <- sapply(datatype_list$folders, function(i) {
@@ -229,7 +229,7 @@ shinyServer(function(input, output, session) {
 
     req(input$dashboard_control != 0 & input$dashboard$visible)
     all_manifest <- upload_manifest()
-
+    
     t <- runTime(
     all_req <- lapply(1:nrow(all_manifest), function(i) {
       out <- tryCatch(metadata_model$get_component_requirements(all_manifest$schema[i], as_graph = TRUE), error = function(err) list())
@@ -259,26 +259,30 @@ shinyServer(function(input, output, session) {
 
     all_manifest <- upload_manifest()
 
-    t <- runTime(
-    valDF <- lapply(1:nrow(all_manifest), function(i) {
-      path <- all_manifest$path[i]
-      component <- all_manifest$schema[i]
-      manifest_df <- data.table::fread(path)
-      # if no error, output is list()
-      # TODO: check with backend - ValueError: c("LungCancerTier3", "BreastCancerTier3", "ScRNA-seqAssay", "MolecularTest", "NaN", "") ...
-      valRes <- tryCatch(metadata_model$validateModelManifest(path, component), error = function(err) "Invalid Component")
-      if (is.list(valRes)) {
-        res <- validationResult(valRes, component, manifest_df)
-      } else {
-        res <- list(validationRes = "invalid", errorType = valRes)
-      }
-      # manifest[[2]] <- list(res$validationRes, res$errorType)
-      out <- data.frame(is_valid = res$validationRes, error_type = res$errorType)
-    }) %>% bind_rows()
-    )
-    logjs(paste0("Get validation for all uploaded manifests: ", t))
-
-    return(valDF)
+    if (nrow(all_manifest) == 0) {
+      return(data.frame())
+    } else {
+      t <- runTime(
+      valDF <- lapply(1:nrow(all_manifest), function(i) {
+        path <- all_manifest$path[i]
+        component <- all_manifest$schema[i]
+        manifest_df <- data.table::fread(path)
+        # if no error, output is list()
+        # TODO: check with backend - ValueError: c("LungCancerTier3", "BreastCancerTier3", "ScRNA-seqAssay", "MolecularTest", "NaN", "") ...
+        valRes <- tryCatch(metadata_model$validateModelManifest(path, component), error = function(err) "Invalid Component")
+        if (is.list(valRes)) {
+          res <- validationResult(valRes, component, manifest_df)
+        } else {
+          res <- list(validationRes = "invalid", errorType = valRes)
+        }
+        # manifest[[2]] <- list(res$validationRes, res$errorType)
+        out <- data.frame(is_valid = res$validationRes, error_type = res$errorType)
+      }) %>% bind_rows()
+      )
+      logjs(paste0("Get validation for all uploaded manifests: ", t))
+  
+      return(valDF)
+    }
   })
 
   # render dashboard plots when input data updated & box shown
@@ -308,29 +312,31 @@ shinyServer(function(input, output, session) {
   observeEvent(input$btn_dashboard_validate, {
     
     valRes <- isolate(quick_val())
-    logjs("start plot validation table")
-    df <- data.frame(
-      Component = upload_manifest()$schema, 
-      Folder_name = upload_manifest()$folder,
-      Status = valRes$is_valid, 
-      Error_Type = valRes$error_type,
-      SynapseId = paste0('<a href="https://www.synapse.org/#!Synapse:', 
-        upload_manifest()$synID, '" target="_blank">', upload_manifest()$synID, '</a>'), 
-      Create_On = upload_manifest()$create,
-      Last_Modified = upload_manifest()$modify,
-      Lastest_Schema = c("2021-06-01/v1"),
-      Internal_links = c("Pass/Fail")
-    )
-    
-    DTableServer("tbl_dashboard_validate", df, highlight = "column", escape = FALSE,
-      caption = paste0("Invalid Results: ", sum(df$Status == "invalid")),
-      ht.color = c("#82E0AA", "#F7DC6F"), ht.value = c("valid", "invalid"), ht.column = "Status",
-      options = list(dom = 't', columnDefs = list(className = 'dt-center', targets = "_all"))
-    )
-    logjs("end plot validation table")
-
+    if (nrow(valRes) > 0) {
+      logjs("start plot validation table")
+      df <- data.frame(
+        Component = upload_manifest()$schema, 
+        Folder_name = upload_manifest()$folder,
+        Status = valRes$is_valid, 
+        Error_Type = valRes$error_type,
+        SynapseId = paste0('<a href="https://www.synapse.org/#!Synapse:', 
+          upload_manifest()$synID, '" target="_blank">', upload_manifest()$synID, '</a>'), 
+        Create_On = upload_manifest()$create,
+        Last_Modified = upload_manifest()$modify,
+        Internal_links = c("Pass/Fail")
+      )
+      
+      DTableServer("tbl_dashboard_validate", df, highlight = "column", escape = FALSE,
+        caption = htmltools::tags$caption(HTML(
+          paste0("Schema Version: <code>v1.0.0</code> ",
+                tags$a(icon("github"), style="color:#000;", href="https://github.com/Sage-Bionetworks/schematic", target = "_blank"),
+                "<br>Invalid Results: <b>", sum(df$Status == "invalid"), "</b>"))),
+        ht.color = c("#82E0AA", "#F7DC6F"), ht.value = c("valid", "invalid"), ht.column = "Status",
+        options = list(dom = 't', columnDefs = list(list(className = 'dt-center', targets = "_all")))
+      )
+      logjs("end plot validation table")
+    }
     load_upload$hide()
-    show(NS("tbl_dashboard_validate", "table"))
   })
 
   ######## Template Google Sheet Link ########
