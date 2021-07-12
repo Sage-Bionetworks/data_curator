@@ -176,11 +176,10 @@ ui <- shinydashboardPlus::dashboardPage(
               ),
               tabPanel(
                 "Validation Preview",
-                p(class = "tab-title", "Manifest is out of schema"),
+                p(class = "tab-title", "Quick Validation of your Uploaded Files"),
                 tagList(
-                  p(actionButton("btn_dashboard_validate", "Validate", class = "btn-primary-color"),  
-                    "Check if any uploaded files are out of date"),
-                  hidden(DTableUI("tbl_dashboard_validate")),
+                  p(actionButton("btn_dashboard_validate", "Validate", class = "btn-primary-color")),
+                  DTableUI("tbl_dashboard_validate"),
                   helpText("If there are any invalid files, please download the invalid files from synapse and validate the files in the DCA again.")
                 )
               )

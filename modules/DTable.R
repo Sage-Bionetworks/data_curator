@@ -5,16 +5,18 @@ DTableUI <- function(id) {
   DT::DTOutput(ns("table"))
 }
 
-DTableServer <- function(id, data, highlight = NULL,
+DTableServer <- function(id, data, highlight = NULL, 
+                         selection = "none", cell_border = FALSE,
                          rownames = FALSE, caption = NULL, escape = TRUE,
-                         options = list(lengthChange = FALSE, scrollX = TRUE),
+                         options = list(lengthChange = FALSE, scrollX = TRUE, autoWidth = TRUE),
                          ht.color = NULL, ht.column = NULL, ht.value = NULL) {
   
   df <- datatable(data,
     caption = caption,
     escape = escape,
     rownames = rownames,
-    options = options
+    options = options,
+    selection = selection
   )
 
   if (!is.null(highlight)) {
@@ -32,6 +34,10 @@ DTableServer <- function(id, data, highlight = NULL,
     } else {
       df <- df %>%
         formatStyle(ht.column, backgroundColor = styleEqual(ht.value, ht.color))
+    }
+
+    if (cell_border) {
+      df <- df %>% formatStyle(1:ncol(df), border = '1px solid #ddd')
     }
   }
 
