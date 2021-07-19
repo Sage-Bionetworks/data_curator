@@ -316,7 +316,7 @@ shinyServer(function(input, output, session) {
       logjs("start plot validation table")
       df <- data.frame(
         Component = upload_manifest()$schema, 
-        Folder_name = upload_manifest()$folder,
+        Folder_Name = upload_manifest()$folder,
         Status = valRes$is_valid, 
         Error_Type = valRes$error_type,
         SynapseId = paste0('<a href="https://www.synapse.org/#!Synapse:', 
@@ -328,7 +328,7 @@ shinyServer(function(input, output, session) {
       
       DTableServer("tbl_dashboard_validate", df, highlight = "column", escape = FALSE,
         caption = htmltools::tags$caption(HTML(
-          paste0("Schema Version: <code>v1.0.0</code> ",
+          paste0("Schematic Version: <code>v1.0.0</code> ",
                 tags$a(icon("github"), style="color:#000;", href="https://github.com/Sage-Bionetworks/schematic", target = "_blank"),
                 "<br>Invalid Results: <b>", sum(df$Status == "invalid"), "</b>"))),
         ht.color = c("#82E0AA", "#F7DC6F"), ht.value = c("valid", "invalid"), ht.column = "Status",

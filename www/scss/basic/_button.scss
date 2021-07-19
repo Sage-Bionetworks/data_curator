@@ -16,6 +16,7 @@
   background-image: linear-gradient(270deg, #8e9ac2, #42579a);
   background-size: 400% 400%;
   animation: TransitioningBackground 10s ease infinite;
+  outline: none !important;
 
   &:hover, &:focus {
     color: #fff;
@@ -81,7 +82,8 @@
   padding: 5px;
   border-radius: 10px;
   box-shadow: $simple_shadow;
-  
+  outline: none !important;
+
   &:hover, &:focus {
     background: #fff;
     outline: none !important;
@@ -189,6 +191,7 @@
     border-color: transparent;
     border-radius: 40px;
     cursor: pointer;
+    outline: none !important;
 
   &:hover, &:focus {
     background: $primary_col;
