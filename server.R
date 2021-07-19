@@ -366,12 +366,10 @@ shinyServer(function(input, output, session) {
       }
 
       # associates metadata with data and returns manifest id
-      logjs("haha6")
       manifest_id <- synapse_driver$associateMetadataWithFiles(
         synStore_obj,
         "./files/synapse_storage_manifest.csv", folder_synID
       )
-      logjs("haha7")
       manifest_path <- paste0("synapse.org/#!Synapse:", manifest_id)
       # if no error
       if (startsWith(manifest_id, "syn") == TRUE) {
