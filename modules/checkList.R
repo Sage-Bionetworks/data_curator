@@ -58,7 +58,7 @@ checkListServer <- function(id, upload_data, req_data) {
               )
             )
           ),
-          if (anyDuplicated(upData$schema) != 0) helpText(icon("lightbulb"), "multiple manifest with same component are detected")
+          if (anyDuplicated(upData$schema) != 0) helpText(icon("lightbulb"), "multiple manifests with the same component are detected")
         )
       })
     }

@@ -152,7 +152,7 @@ ui <- shinydashboardPlus::dashboardPage(
               choices = "Generating..."
             )
           ),
-          column(12, actionButton("dashboard_control", div(span(), p("Show Metadata Completion")), class = "scroll-down")),
+          column(12, actionButton("dashboard_control", div(span(), p("Show Data Tracker")), class = "scroll-down")),
           box(
             status = "primary",
             id = "dashboard",
