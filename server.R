@@ -175,7 +175,7 @@ shinyServer(function(input, output, session) {
 
   ######## Update Dashboard Stats ########
   # all functions should not be executed until dashboard visable
-  load_dashbord <- Waiter$new(id = "dashboard", 
+  load_upload <- Waiter$new(id = "dashboard", 
                               html = tagList(spin_google(), h4("Loading", style = "color: #000")), 
                               color = transparent(0.2)
                               )
@@ -192,24 +192,21 @@ shinyServer(function(input, output, session) {
     shinydashboardPlus::updateBox("dashboard", action = "restore")
   })
 
-  # split functions for getting uploaded and required into different reactives 
-  # only process getting uploaded manifest in project wehn folder change & box shown - !use reactive not input$dropdown
+  # get all uploaded files in project
   upload_manifest <- eventReactive(c(datatype_list$folders, input$dashboard$visible), {
     
     req(input$dashboard_control != 0 & input$dashboard$visible)
-    # shiny::validate(need(length(datatype_list$folders_namedList) > 0, "No File Detected !"))
-
-    load_dashbord$show()  # initiate partial loading screen for generating plot
-
+    load_upload$show()  # initiate partial loading screen for generating plot
+    DTableServer("tbl_dashboard_validate", data.frame(NULL))   
     lapply(c("box_pick_project", "box_pick_manifest"), FUN = disable)  # disable selection to prevent change before finish below fun
-
-    all_manifest <- lapply(datatype_list$folders, function(i) {
-      synapse_driver$getDatasetManifest(synStore_obj, i, downloadFile = TRUE) %>%
-      collectManifestInfo()
+    t <- runTime(
+    all_manifest <- sapply(datatype_list$folders, function(i) {
+      synapse_driver$getDatasetManifest(synStore_obj, i, downloadFile = TRUE) %>% collectManifestInfo()
     }) %>% extractManifests()
-  
+    )
+    logjs(paste0("Get all uploaded manifest: ", t))
+    
     lapply(c("box_pick_project", "box_pick_manifest"), FUN = enable)  # enable selection btns
-    load_dashbord$hide()  # hide the partial loading screen
 
     return(all_manifest)
   })
@@ -220,8 +217,11 @@ shinyServer(function(input, output, session) {
     req(input$dashboard_control != 0 & input$dashboard$visible)
 
     # get requirements, otherwise output unamed vector of schema name
-    req_data <- tryCatch(metadata_model$get_component_requirements(template_schema_name(), as_graph = TRUE), error = function() NULL)
+    req_data <- tryCatch(metadata_model$get_component_requirements(template_schema_name(), as_graph = TRUE), error = function() list())
     if (length(req_data) == 0) req_data <- as.character(template_schema_name()) else req_data <- list2Vector(req_data)
+    
+    logjs("Get requirments for selected template")
+
     return(req_data)
   })
 
@@ -234,6 +234,7 @@ shinyServer(function(input, output, session) {
     checkListServer("checklist_template", upload_manifest(), template_req())
     # networks plot for requirements of selected template 
     selectDataReqNetServer("template_network", upload_manifest(), template_req(), template_schema_name())
+    load_upload$hide()  # hide the partial loading screen
   })
 
   ######## Template Google Sheet Link ########
