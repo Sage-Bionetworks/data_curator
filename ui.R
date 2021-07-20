@@ -165,7 +165,7 @@ ui <- shinydashboardPlus::dashboardPage(
                 "Selected Template",
                 p(class = "tab-title", "Complete your Selected Template"),
                 fluidRow(
-                  column(6, checkListUI("checklist_template")), 
+                  column(6, checkListUI("checklist_template")),
                   column(6, selectDataReqNetUI("template_network", height = "400px"))
                 )
               ),

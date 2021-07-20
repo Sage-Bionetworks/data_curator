@@ -10,7 +10,6 @@ DTableServer <- function(id, data, highlight = NULL,
                          rownames = FALSE, caption = NULL, escape = TRUE,
                          options = list(lengthChange = FALSE, scrollX = TRUE),
                          ht.color = NULL, ht.column = NULL, ht.value = NULL) {
-  
   df <- datatable(data,
     caption = caption,
     escape = escape,
@@ -20,7 +19,6 @@ DTableServer <- function(id, data, highlight = NULL,
   )
 
   if (!is.null(highlight)) {
-
     match.arg(highlight, c("row", "column"))
 
     if (is.null(ht.color)) {
@@ -30,14 +28,13 @@ DTableServer <- function(id, data, highlight = NULL,
     if (highlight == "row") {
       df <- df %>%
         formatStyle(ht.column, target = "row", backgroundColor = styleEqual(ht.value, ht.color))
-
     } else {
       df <- df %>%
         formatStyle(ht.column, backgroundColor = styleEqual(ht.value, ht.color))
     }
 
     if (cell_border) {
-      df <- df %>% formatStyle(1:ncol(data), border = '1px solid #ddd')
+      df <- df %>% formatStyle(1:ncol(data), border = "1px solid #ddd")
     }
   }
 
