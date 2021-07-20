@@ -3,7 +3,7 @@ svg.selectAll("g").remove()
 
 var treeData = data;
 
-var margin = {top: 20, right: 90, bottom: 30, left: 50},
+var margin = { top: 20, right: 90, bottom: 30, left: 50 },
   width = width - margin.left - margin.right,
   height = height - margin.top - margin.bottom;
 
@@ -35,7 +35,7 @@ if (!data) {
   var treemap = d3.tree().size([height, width]);
 
   // Assigns parent, children, height, depth
-  root = d3.hierarchy(treeData, function (d) {return d.children;});
+  root = d3.hierarchy(treeData, function (d) { return d.children; });
   root.x0 = height / 2;
   root.y0 = 0;
 
@@ -64,13 +64,13 @@ if (!data) {
       links = treeData.descendants().slice(1);
 
     // Normalize for fixed-depth.
-    nodes.forEach(function (d) {d.y = d.depth * 180});
+    nodes.forEach(function (d) { d.y = d.depth * 180 });
 
     // ****************** Nodes section ***************************
 
     // Update the nodes...
     var node = svg.selectAll('g.node')
-      .data(nodes, function (d) {return d.id || (d.id = ++i);});
+      .data(nodes, function (d) { return d.id || (d.id = ++i); });
 
     // Enter any new modes at the parent's previous position.
     var nodeEnter = node.enter().append('g')
@@ -107,7 +107,7 @@ if (!data) {
       .attr("dy", ".35em")
       .attr("x", 13)
       .attr("text-anchor", "start")
-      .text(function (d) {return d.data.name;})
+      .text(function (d) { return d.data.name; })
       .style("opacity", 0);
 
     // UPDATE
@@ -149,13 +149,13 @@ if (!data) {
 
     // Update the links...
     var link = svg.selectAll('path.link')
-      .data(links, function (d) {return d.id;});
+      .data(links, function (d) { return d.id; });
 
     // Enter any new links at the parent's previous position.
     var linkEnter = link.enter().insert('path', "g")
       .attr("class", "link")
       .attr('d', function (d) {
-        var o = {x: source.x0, y: source.y0}
+        var o = { x: source.x0, y: source.y0 }
         return diagonal(o, o)
       });
 
@@ -165,13 +165,13 @@ if (!data) {
     // Transition back to the parent element position
     linkUpdate.transition()
       .duration(duration)
-      .attr('d', function (d) {return diagonal(d, d.parent)});
+      .attr('d', function (d) { return diagonal(d, d.parent) });
 
     // Remove any exiting links
     var linkExit = link.exit().transition()
       .duration(duration)
       .attr('d', function (d) {
-        var o = {x: source.x, y: source.y}
+        var o = { x: source.x, y: source.y }
         return diagonal(o, o)
       })
       .remove();

@@ -39,8 +39,8 @@ shinyServer(function(input, output, session) {
   folder_synID <- NULL # selected foler synapse ID
   template_schema_name <- reactiveVal() # selected template schema name
 
-  # datatype's checklist for synID to name 
-  datatype_list <- reactiveValues(projects = NULL, folders = NULL, files = NULL) 
+  # datatype's checklist for synID to name
+  datatype_list <- reactiveValues(projects = NULL, folders = NULL, files = NULL)
 
   tabs_list <- c("tab_instructions", "tab_data", "tab_template", "tab_upload")
   clean_tags <- c("div_download", "div_validate", NS("tbl_validate", "table"), "btn_val_gsheet", "btn_submit")
@@ -76,8 +76,8 @@ shinyServer(function(input, output, session) {
         # updates project dropdown
         lapply(c("header_dropdown_", "dropdown_"), function(x) {
           lapply(c(1, 3), function(i) {
-           updateSelectInput(session, paste0(x, "project"), choices = sort(names(datatype_list$projects)))
-           updateSelectInput(session, paste0(x, "template"), choices = sort(names(template_namedList)))
+            updateSelectInput(session, paste0(x, "project"), choices = sort(names(datatype_list$projects)))
+            updateSelectInput(session, paste0(x, "template"), choices = sort(names(template_namedList)))
           })
         })
 
@@ -175,14 +175,15 @@ shinyServer(function(input, output, session) {
 
   ######## Update Dashboard Stats ########
   # all functions should not be executed until dashboard visable
-  load_upload <- Waiter$new(id = "dashboard", 
-                            html = tagList(spin_google(), h4("Loading", style = "color: #000")), 
-                            color = transparent(0.2)
-                            )
+  load_upload <- Waiter$new(
+    id = "dashboard",
+    html = tagList(spin_google(), h4("Loading", style = "color: #000")),
+    color = transparent(0.2)
+  )
 
   observeEvent(input$dashboard$visible, {
     if (!input$dashboard$visible) {
-      Sys.sleep(0.3)  # 0.3 is optimal
+      Sys.sleep(0.3) # 0.3 is optimal
       show("dashboard_control")
     }
   })
@@ -194,39 +195,35 @@ shinyServer(function(input, output, session) {
 
   # get all uploaded files in project
   upload_manifest <- eventReactive(c(datatype_list$folders, input$dashboard$visible), {
-    
     req(input$dashboard_control != 0 & input$dashboard$visible)
-    load_upload$show()  # initiate partial loading screen for generating plot
+    load_upload$show() # initiate partial loading screen for generating plot
+    DTableServer("tbl_dashboard_validate", data.frame(NULL))
+    lapply(c("box_pick_project", "box_pick_manifest"), FUN = disable) # disable selection to prevent change before finish below fun
 
-    lapply(c("box_pick_project", "box_pick_manifest"), FUN = disable)  # disable selection to prevent change before finish below fun
-    t <- runTime(
     all_manifest <- sapply(datatype_list$folders, function(i) {
       synapse_driver$getDatasetManifest(synStore_obj, i, downloadFile = TRUE) %>% collectManifestInfo()
     }) %>% extractManifests()
-    )
-    logjs(t)
-    
-    lapply(c("box_pick_project", "box_pick_manifest"), FUN = enable)  # enable selection btns
-    load_upload$hide()  # hide the partial loading screen
+
+    lapply(c("box_pick_project", "box_pick_manifest"), FUN = enable) # enable selection btns
 
     return(all_manifest)
   })
-  
+
   # only process getting requirements of selected manifest when manifest change & box shown - !use reactive not input$dropdown
   template_req <- eventReactive(c(template_schema_name(), input$dashboard$visible), {
-    
     req(input$dashboard_control != 0 & input$dashboard$visible)
 
     # get requirements, otherwise output unamed vector of schema name
     req_data <- tryCatch(metadata_model$get_component_requirements(template_schema_name(), as_graph = TRUE), error = function() list())
     if (length(req_data) == 0) req_data <- as.character(template_schema_name()) else req_data <- list2Vector(req_data)
+
     return(req_data)
   })
 
   all_require_manifest <- eventReactive(upload_manifest(), {
-
     req(input$dashboard_control != 0 & input$dashboard$visible)
     all_manifest <- upload_manifest()
+
     all_req <- lapply(1:nrow(all_manifest), function(i) {
       out <- tryCatch(metadata_model$get_component_requirements(all_manifest$schema[i], as_graph = TRUE), error = function(err) list())
 
@@ -242,21 +239,20 @@ shinyServer(function(input, output, session) {
         out[which(out == all_manifest$schema[i])] <- folder_name
         df <- data.frame(from = as.character(out), to = names(out), folder = rep(folder_name, length(out)), has_miss = rep(has_miss, length(out)))
         return(df)
-      }  
+      }
     }) %>% bind_rows()
-    # all_req <- all_req[lengths(all_req) != 0]
-    # res <- quickValidateManifest(upload_manifest())
+
     return(all_req)
   })
 
   # render dashboard plots when input data updated & box shown
   observeEvent(c(upload_manifest(), template_req(), input$dashboard$visible), {
-    
     req(input$dashboard_control != 0 & input$dashboard$visible)
-    # check list of requirments of selected template 
+    # check list of requirments of selected template
     checkListServer("checklist_template", upload_manifest(), template_req())
-    # networks plot for requirements of selected template 
+    # networks plot for requirements of selected template
     selectDataReqNetServer("template_network", upload_manifest(), template_req(), template_schema_name())
+    load_upload$hide() # hide the partial loading screen
   })
 
   observeEvent(c(all_require_manifest(), input$dashboard$visible), {
@@ -264,7 +260,13 @@ shinyServer(function(input, output, session) {
     # tree plot for requirements of all uploaded data
     uploadDataReqTreeServer("upload_tree", upload_manifest(), all_require_manifest(), input$dropdown_project)
   })
-  
+
+  observeEvent(c(all_require_manifest(), input$dashboard$visible), {
+    req(input$dashboard_control != 0 & input$dashboard$visible)
+    # tree plot for requirements of all uploaded data
+    uploadDataReqTreeServer("upload_tree", upload_manifest(), all_require_manifest(), input$dropdown_project)
+  })
+
   ######## Template Google Sheet Link ########
   observeEvent(input$btn_download, {
 
