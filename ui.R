@@ -151,6 +151,7 @@ ui <- shinydashboardPlus::dashboardPage(
             )
           )
         ),
+        # dashboard section
         switchTabUI("switchTab2", direction = "both")
       ),
       # Third tab item
