@@ -201,7 +201,10 @@ shinyServer(function(input, output, session) {
     lapply(c("box_pick_project", "box_pick_manifest"), FUN = disable)  # disable selection to prevent change before finish below fun
     t <- runTime(
     all_manifest <- sapply(datatype_list$folders, function(i) {
-      synapse_driver$getDatasetManifest(synStore_obj, i, downloadFile = TRUE) %>% collectManifestInfo()
+      synapse_driver$getDatasetManifest(synStore_obj, i, 
+                                        downloadFile = TRUE, 
+                                        downloadPath = file.path("manifests", i)) %>% 
+      collectManifestInfo()
     }) %>% extractManifests()
     )
     logjs(paste0("Get all uploaded manifest: ", t))
