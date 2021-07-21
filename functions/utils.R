@@ -46,8 +46,9 @@ extractManifests <- function(list) {
       modify = sapply(list, `[[`, c(1, 4)) %>% as.Date(),
       path = sapply(list, `[[`, c(1, 5))
     ) %>% 
-      filter(schema != "" & schema != "NaN") %>% 
-      # distinct(schema, .keep_all = TRUE) %>% 
+      filter(schema != "" & schema != "NaN") %>%
+      # uncomment this to get unique component, otherwise use multiple manifest with the same component name
+      # distinct(schema, .keep_all = TRUE) %>%
       tibble::rownames_to_column("folder")
   }
 
