@@ -11,14 +11,14 @@ suppressPackageStartupMessages({
   library(DT)
   library(jsonlite)
   library(reticulate)
-  library(ggplot2)
-  library(purrr)
-  library(plotly)
   library(shinypop)
   library(waiter)
   library(readr)
   library(sass)
   library(shinydashboardPlus)
+  library(networkD3)
+  # TODO: remove `shinyWidgets` after create own progress bar widgets
+  library(shinyWidgets)
 })
 
 # APP_URL <- "https://shinypro.synapse.org/users/spatil/HTAN-oauth/"
@@ -77,7 +77,7 @@ scope <- "openid view download modify"
 
 # Activate conda env
 # Don't necessarily have to set `RETICULATE_PYTHON` env variable
-reticulate::use_condaenv("data_curator_env_oauth")
+reticulate::use_condaenv("schematic_dev")
 
 # Import functions/modules
 source_files <- list.files(c("functions", "modules"), pattern = "*\\.R$", recursive = TRUE, full.names = TRUE)

@@ -2,7 +2,7 @@
 
 ## Introduction
 
-The _Data Curator App_ is an R Shiny app that serves as the _frontend_ to the schematic Python package. It allows data contributors to easily annotate, validate and submit their metadata.
+This branch is to test the data curator app using the latest updates from `schematic-dev` branch and not use `pip install` to install `schematicpy`.
 
 
 ## Setup
@@ -12,7 +12,7 @@ Follow the steps below to make sure the _Data Curator App_ is fully setup to wor
 
 Navigate to the location where you want to setup the application (i.e., the _Shiny Server_). Clone the code on this github branch (_shiny-server-main_):
 
-    git clone --single-branch --branch shiny-server-main https://github.com/Sage-Bionetworks/data_curator.git
+    git clone --single-branch --branch use-schematic-dev https://github.com/Sage-Bionetworks/data_curator.git
 
 Create a conda environment in the cloned directory from the `environment.yml` file which has all the required package dependencies:
 
@@ -22,15 +22,19 @@ Here, our conda environment name `data_curator_env` is set from the `environment
 
 Activate the `data_curator_env` environment:
 
-    conda activate data_curator_env
+    conda activate schematic_dev
 
 
 ### Schematic Setup
 
-The next step is to install the latest release of the [schematic](https://github.com/Sage-Bionetworks/schematic/tree/main) (backend) as a folder `schematic` inside the `data_curator` folder and tie it together with this frontend. 
+1. Clone the [schematic](https://github.com/Sage-Bionetworks/schematic/tree/develop) (backend) as a folder `schematic` inside the `data_curator` folder and tie it together with this frontend. 
+```
+git clone --single-branch --branch develop https://github.com/Sage-Bionetworks/schematic.git
+```
 
-To do so, follow the instructions on the `schematic` repository [README](https://github.com/Sage-Bionetworks/schematic/tree/develop#12-installation-requirements-and-pre-requisites).
+2. Install `schematicpy`, check [here](https://github.com/Sage-Bionetworks/schematic/blob/develop/CONTRIBUTION.md#setup-project-for-development-and-testing)
 
+3. Set up configuration for `schematic`
 
 ### App Configuration File
 

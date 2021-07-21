@@ -37,15 +37,18 @@ shinyServer(function(input, output, session) {
   synStore_obj <- NULL # gets list of projects they have access to
   project_synID <- NULL # selected project synapse ID
   folder_synID <- NULL # selected foler synapse ID
-  template_schema_name <- NULL # selected template schema name
+  template_schema_name <- reactiveVal() # selected template schema name
 
-  datatype_list <- list(projects = NULL, folders = NULL, manifests = template_namedList, files = NULL)
+  # datatype's checklist for synID to name
+  datatype_list <- reactiveValues(projects = NULL, folders = NULL, files = NULL)
 
   tabs_list <- c("tab_instructions", "tab_data", "tab_template", "tab_upload")
   clean_tags <- c("div_download", "div_validate", NS("tbl_validate", "table"), "btn_val_gsheet", "btn_submit")
 
   # add box effects
   boxEffect(zoom = TRUE, float = TRUE)
+  # remove dashboard box initially
+  shinydashboardPlus::updateBox("dashboard", action = "remove")
 
   ######## Initiate Login Process ########
   # synapse cookies
@@ -73,9 +76,8 @@ shinyServer(function(input, output, session) {
         # updates project dropdown
         lapply(c("header_dropdown_", "dropdown_"), function(x) {
           lapply(c(1, 3), function(i) {
-            updateSelectInput(session, paste0(x, datatypes[i]),
-              choices = sort(names(datatype_list[[i]]))
-            )
+            updateSelectInput(session, paste0(x, "project"), choices = sort(names(datatype_list$projects)))
+            updateSelectInput(session, paste0(x, "template"), choices = sort(names(template_namedList)))
           })
         })
 
@@ -166,19 +168,73 @@ shinyServer(function(input, output, session) {
   ######## Update Template ########
   # update selected schema template name
   observeEvent(input$dropdown_template, {
-    template_schema_name <<- template_namedList[match(input$dropdown_template, names(template_namedList))]
+    template_schema_name(template_namedList[match(input$dropdown_template, names(template_namedList))])
+    # hide selectors when users change selection
+    sapply(clean_tags, FUN = hide)
   })
 
-  # hide tags when users select new template
-  observeEvent(
-    {
-      input$dropdown_folder
-      input$dropdown_template
-    },
-    {
-      sapply(clean_tags, FUN = hide)
-    }
+  ######## Update Dashboard Stats ########
+  # all functions should not be executed until dashboard visable
+  load_upload <- Waiter$new(
+    id = "dashboard",
+    html = tagList(spin_google(), h4("Loading", style = "color: #000")),
+    color = transparent(0.2)
   )
+
+  observeEvent(input$dashboard$visible, {
+    if (!input$dashboard$visible) {
+      Sys.sleep(0.3) # 0.3 is optimal
+      show("dashboard_control")
+    }
+  })
+
+  observeEvent(input$dashboard_control, {
+    hide("dashboard_control")
+    shinydashboardPlus::updateBox("dashboard", action = "restore")
+  })
+
+  # get all uploaded files in project
+  upload_manifest <- eventReactive(c(datatype_list$folders, input$dashboard$visible), {
+    req(input$dashboard_control != 0 & input$dashboard$visible)
+    load_upload$show() # initiate partial loading screen for generating plot
+    DTableServer("tbl_dashboard_validate", data.frame(NULL))
+    lapply(c("box_pick_project", "box_pick_manifest"), FUN = disable) # disable selection to prevent change before finish below fun
+
+    all_manifest <- sapply(datatype_list$folders, function(i) {
+      synapse_driver$getDatasetManifest(synStore_obj, i, 
+                                        downloadFile = TRUE, 
+                                        downloadPath = file.path("manifests", i)) %>% 
+      collectManifestInfo()
+    }) %>% extractManifests()
+
+    lapply(c("box_pick_project", "box_pick_manifest"), FUN = enable) # enable selection btns
+
+    return(all_manifest)
+  })
+
+  # only process getting requirements of selected manifest when manifest change & box shown - !use reactive not input$dropdown
+  template_req <- eventReactive(c(template_schema_name(), input$dashboard$visible), {
+    req(input$dashboard_control != 0 & input$dashboard$visible)
+
+    # get requirements, otherwise output unamed vector of schema name
+    req_data <- tryCatch(metadata_model$get_component_requirements(template_schema_name(), as_graph = TRUE), error = function() list())
+    if (length(req_data) == 0) req_data <- as.character(template_schema_name()) else req_data <- list2Vector(req_data)
+
+    logjs("Get requirments for selected template")
+
+    return(req_data)
+  })
+
+  # render dashboard plots when input data updated & box shown
+  observeEvent(c(upload_manifest(), template_req(), input$dashboard$visible), {
+    req(input$dashboard_control != 0 & input$dashboard$visible)
+
+    # check list of requirments of selected template
+    checkListServer("checklist_template", upload_manifest(), template_req())
+    # networks plot for requirements of selected template
+    selectDataReqNetServer("template_network", upload_manifest(), template_req(), template_schema_name())
+    load_upload$hide() # hide the partial loading screen
+  })
 
   ######## Template Google Sheet Link ########
   observeEvent(input$btn_download, {
@@ -402,7 +458,6 @@ shinyServer(function(input, output, session) {
         synStore_obj,
         "./files/synapse_storage_manifest.csv", folder_synID
       )
-      print(manifest_id)
       manifest_path <- paste0("synapse.org/#!Synapse:", manifest_id)
 
       # if uploaded provided valid synID message
