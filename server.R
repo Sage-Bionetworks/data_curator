@@ -199,12 +199,13 @@ shinyServer(function(input, output, session) {
     load_upload$show() # initiate partial loading screen for generating plot
     DTableServer("tbl_dashboard_validate", data.frame(NULL))
     lapply(c("box_pick_project", "box_pick_manifest"), FUN = disable) # disable selection to prevent change before finish below fun
-    t <- runTime(
-      all_manifest <- sapply(datatype_list$folders, function(i) {
-        synapse_driver$getDatasetManifest(synStore_obj, i, downloadFile = TRUE) %>% collectManifestInfo()
-      }) %>% extractManifests()
-    )
-    logjs(paste0("Get all uploaded manifest: ", t))
+
+    all_manifest <- sapply(datatype_list$folders, function(i) {
+      synapse_driver$getDatasetManifest(synStore_obj, i, 
+                                        downloadFile = TRUE, 
+                                        downloadPath = file.path("manifests", i)) %>% 
+      collectManifestInfo()
+    }) %>% extractManifests()
 
     lapply(c("box_pick_project", "box_pick_manifest"), FUN = enable) # enable selection btns
 
