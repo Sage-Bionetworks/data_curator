@@ -200,7 +200,10 @@ shinyServer(function(input, output, session) {
     DTableServer("tbl_dashboard_validate", data.frame(NULL))
     lapply(c("box_pick_project", "box_pick_manifest"), FUN = disable) # disable selection to prevent change before finish below fun
     all_manifest <- sapply(datatype_list$folders, function(i) {
-      synapse_driver$getDatasetManifest(synStore_obj, i, downloadFile = TRUE) %>% collectManifestInfo()
+      synapse_driver$getDatasetManifest(synStore_obj, i, 
+                                        downloadFile = TRUE, 
+                                        downloadPath = file.path("manifests", i)) %>% 
+      collectManifestInfo()
     }) %>% extractManifests()
 
     lapply(c("box_pick_project", "box_pick_manifest"), FUN = enable) # enable selection btns
