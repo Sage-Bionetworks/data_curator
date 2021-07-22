@@ -56,3 +56,33 @@ runTime <- function(expr) {
   t2 <- Sys.time() - t1
   return(t2)
 }
+
+# get information of manifest from output list of collectManifestInfo()
+extractManifests <- function(list) {
+
+  list <- list[lengths(list) != 0]
+  df <- data.frame()
+
+  if (length(list) != 0) {
+    df <- data.frame(
+      synID = sapply(list, `[[`, c(1, 1)),
+      schema = sapply(list, `[[`, c(1, 2)),
+      create = sapply(list, `[[`, c(1, 3)) %>% as.Date(),
+      modify = sapply(list, `[[`, c(1, 4)) %>% as.Date(),
+      path = sapply(list, `[[`, c(1, 5))
+    ) %>% 
+      filter(schema != "" & schema != "NaN") %>%
+      # uncomment this to get unique component, otherwise use multiple manifest with the same component name
+      # distinct(schema, .keep_all = TRUE) %>%
+      tibble::rownames_to_column("folder")
+  }
+
+  return(df)
+}
+
+runTime <- function(expr) {
+  t1 <- Sys.time()
+  expr
+  t2 <- Sys.time() - t1
+  return(t2)
+}
