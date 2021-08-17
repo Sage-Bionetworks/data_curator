@@ -10,12 +10,12 @@ list2Vector <- function(list) {
 
 # get manifest info from getDatasetManifest()
 collectManifestInfo <- function(manifest_info) {
-
   manifest <- NULL
 
   if (manifest_info != "") {
+    manifest_id <- manifest_info["properties"]["id"]
+    manifest_name <- manifest_info["properties"]["name"]
     manifest_path <- manifest_info["path"]
-    manifest_id <- manifest_info["id"]
     create_date <- manifest_info["createdOn"]
     modified_date <- manifest_info["modifiedOn"]
 

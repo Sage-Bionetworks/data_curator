@@ -33,6 +33,10 @@ uploadDataReqTreeServer <- function(id, upload_data, upload_require_data, projec
           # remove project name in children to trim long names
           pattern <- paste0(str_replace(project_name, " ", "_"), "_")
           n_file <- length(upData$folder)
+<<<<<<< HEAD
+=======
+          # has_miss: dataset contains any missing requirement children
+>>>>>>> c9b9270aa4a21943a17a2dc706b6c61cf868c508
           file_has_miss <- reqData[, c("folder", "has_miss")] %>%
             distinct() %>%
             filter(has_miss)
