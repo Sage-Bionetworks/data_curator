@@ -220,20 +220,54 @@ shinyServer(function(input, output, session) {
     req_data <- tryCatch(metadata_model$get_component_requirements(template_schema_name(), as_graph = TRUE), error = function() list())
     if (length(req_data) == 0) req_data <- as.character(template_schema_name()) else req_data <- list2Vector(req_data)
 
-    logjs("Get requirments for selected template")
-
     return(req_data)
+  })
+
+  all_require_manifest <- eventReactive(upload_manifest(), {
+    req(input$dashboard_control != 0 & input$dashboard$visible)
+    all_manifest <- upload_manifest()
+
+    all_req <- lapply(1:nrow(all_manifest), function(i) {
+      out <- tryCatch(metadata_model$get_component_requirements(all_manifest$schema[i], as_graph = TRUE), error = function(err) list())
+
+      if (length(out) == 0) {
+        return(data.frame())
+      } else {
+        out <- list2Vector(out)
+        # check if the uploaded file contains any missed requirement
+        has_miss <- ifelse(any(!union(names(out), out) %in% all_manifest$schema), TRUE, FALSE)
+        folder_name <- all_manifest$folder[i]
+        # names(has_miss) <- folder_name
+        # change upload schema to folder names
+        out[which(out == all_manifest$schema[i])] <- folder_name
+        df <- data.frame(from = as.character(out), to = names(out), folder = rep(folder_name, length(out)), has_miss = rep(has_miss, length(out)))
+        return(df)
+      }
+    }) %>% bind_rows()
+
+    return(all_req)
   })
 
   # render dashboard plots when input data updated & box shown
   observeEvent(c(upload_manifest(), template_req(), input$dashboard$visible), {
     req(input$dashboard_control != 0 & input$dashboard$visible)
-
     # check list of requirments of selected template
     checkListServer("checklist_template", upload_manifest(), template_req())
     # networks plot for requirements of selected template
     selectDataReqNetServer("template_network", upload_manifest(), template_req(), template_schema_name())
     load_upload$hide() # hide the partial loading screen
+  })
+
+  observeEvent(c(all_require_manifest(), input$dashboard$visible), {
+    req(input$dashboard_control != 0 & input$dashboard$visible)
+    # tree plot for requirements of all uploaded data
+    uploadDataReqTreeServer("upload_tree", upload_manifest(), all_require_manifest(), input$dropdown_project)
+  })
+
+  observeEvent(c(all_require_manifest(), input$dashboard$visible), {
+    req(input$dashboard_control != 0 & input$dashboard$visible)
+    # tree plot for requirements of all uploaded data
+    uploadDataReqTreeServer("upload_tree", upload_manifest(), all_require_manifest(), input$dropdown_project)
   })
 
   ######## Template Google Sheet Link ########
@@ -268,7 +302,7 @@ shinyServer(function(input, output, session) {
 
         manifest_url <-
           metadata_model$getModelManifest(paste0(config$community, " ", input$dropdown_template),
-            template_schema_name,
+            template_schema_name(),
             filenames = as.list(names(datatype_list$files)),
             datasetId = folder_synID
           )
@@ -281,7 +315,7 @@ shinyServer(function(input, output, session) {
         manifest_url <- metadata_model$populateModelManifest(paste0(
           config$community,
           " ", input$dropdown_template
-        ), manifest_entity$path, template_schema_name)
+        ), manifest_entity$path, template_schema_name())
       }
 
       output$text_download <- renderUI({
@@ -315,7 +349,7 @@ shinyServer(function(input, output, session) {
       silent = TRUE,
       annotation_status <- metadata_model$validateModelManifest(
         inFile$raw()$datapath,
-        template_schema_name
+        template_schema_name()
       )
     )
 
@@ -374,7 +408,7 @@ shinyServer(function(input, output, session) {
     filled_manifest <- metadata_model$populateModelManifest(paste0(
       config$community,
       " ", input$dropdown_template
-    ), inFile$raw()$datapath, template_schema_name)
+    ), inFile$raw()$datapath, template_schema_name())
 
     # rerender and change button to link
     output$val_gsheet <- renderUI({

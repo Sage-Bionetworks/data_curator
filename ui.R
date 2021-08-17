@@ -166,11 +166,13 @@ ui <- shinydashboardPlus::dashboardPage(
                 p(class = "tab-title", "Complete your Selected Template"),
                 fluidRow(
                   column(6, checkListUI("checklist_template")),
-                  column(
-                    6,
-                    selectDataReqNetUI("template_network", height = "400px")
-                  )
+                  column(6, selectDataReqNetUI("template_network", height = "400px"))
                 )
+              ),
+              tabPanel(
+                "Uploaded Data",
+                p(class = "tab-title", "Progress of Uploaded Data in Synapse"),
+                uploadDataReqTreeUI("upload_tree")
               )
             )
           )
