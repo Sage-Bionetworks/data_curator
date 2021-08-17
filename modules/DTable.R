@@ -5,34 +5,36 @@ DTableUI <- function(id) {
   DT::DTOutput(ns("table"))
 }
 
-DTableServer <- function(id, data,
-                         rownames = FALSE, caption = NULL,
+DTableServer <- function(id, data, highlight = NULL,
+                         selection = "none", cell_border = FALSE,
+                         rownames = FALSE, caption = NULL, escape = TRUE,
                          options = list(lengthChange = FALSE, scrollX = TRUE),
-                         highlight = NULL, hightlight.col = NULL, hightlight.value = NULL) {
-  if (!is.null(highlight)) {
-    if (!highlight %in% c("full", "partial")) {
-      Stop("Please choose a value for highlight: 'full', 'partial'.")
-    }
-
-    column <- hightlight.col
-    value <- hightlight.value
-  }
-
+                         ht.color = NULL, ht.column = NULL, ht.value = NULL) {
   df <- datatable(data,
     caption = caption,
+    escape = escape,
     rownames = rownames,
-    options = options
+    options = options,
+    selection = selection
   )
 
   if (!is.null(highlight)) {
-    if (highlight == "full") {
+    match.arg(highlight, c("row", "column"))
+
+    if (is.null(ht.color)) {
+      ht.color <- rep("yellow", length(ht.value))
+    }
+
+    if (highlight == "row") {
       df <- df %>%
-        formatStyle(1, target = "row", backgroundColor = "yellow")
-    } else if (highlight == "partial") {
+        formatStyle(ht.column, target = "row", backgroundColor = styleEqual(ht.value, ht.color))
+    } else {
       df <- df %>%
-        formatStyle(column, backgroundColor = styleEqual(
-          value, rep("yellow", length(value))
-        ))
+        formatStyle(ht.column, backgroundColor = styleEqual(ht.value, ht.color))
+    }
+
+    if (cell_border) {
+      df <- df %>% formatStyle(1:ncol(data), border = "1px solid #ddd")
     }
   }
 

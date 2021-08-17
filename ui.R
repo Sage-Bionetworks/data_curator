@@ -152,7 +152,7 @@ ui <- shinydashboardPlus::dashboardPage(
               choices = "Generating..."
             )
           ),
-          column(12, actionButton("dashboard_control", div(span(), p("Show Metadata Completion")), class = "scroll-down")),
+          column(12, actionButton("dashboard_control", div(span(), p("Show Data Tracker")), class = "scroll-down")),
           box(
             status = "primary",
             id = "dashboard",
@@ -167,6 +167,20 @@ ui <- shinydashboardPlus::dashboardPage(
                 fluidRow(
                   column(6, checkListUI("checklist_template")),
                   column(6, selectDataReqNetUI("template_network", height = "400px"))
+                )
+              ),
+              tabPanel(
+                "Uploaded Data",
+                p(class = "tab-title", "Progress of Uploaded Data in Synapse"),
+                uploadDataReqTreeUI("upload_tree")
+              ),
+              tabPanel(
+                "Validation Preview",
+                p(class = "tab-title", "Quick Validation of your Uploaded Files"),
+                tagList(
+                  p(actionButton("btn_dashboard_validate", "Validate", class = "btn-primary-color")),
+                  DTableUI("tbl_dashboard_validate"),
+                  helpText("If there are any invalid files, please download the invalid files from synapse and validate the files in the DCA again.")
                 )
               ),
               tabPanel(
