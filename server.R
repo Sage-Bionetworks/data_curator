@@ -312,8 +312,14 @@ shinyServer(function(input, output, session) {
     logjs("end plot tree")
   })
   
-  observeEvent(input$btn_dashboard_validate, {
+  observeEvent(input$btn_validate_preview, {
     
+    updateBoxSidebar("validate_preview")  # toggle sidebar
+  })
+  
+  observeEvent(input$validate_preview, {
+    
+    req(input$validate_preview)  # if sidebar box is open
     valRes <- isolate(quick_val())
     if (nrow(valRes) > 0) {
       logjs("start plot validation table")
@@ -321,12 +327,13 @@ shinyServer(function(input, output, session) {
         Component = upload_manifest()$schema, 
         Folder_Name = upload_manifest()$folder,
         Status = valRes$is_valid, 
+        Internal_links = c("Pass/Fail"),  # placeholders for internal checking
         Error_Type = valRes$error_type,
         SynapseId = paste0('<a href="https://www.synapse.org/#!Synapse:', 
           upload_manifest()$synID, '" target="_blank">', upload_manifest()$synID, '</a>'), 
         Create_On = upload_manifest()$create,
         Last_Modified = upload_manifest()$modify,
-        Internal_links = c("Pass/Fail")
+        Person = c("somebody")
       )
       
       DTableServer("tbl_dashboard_validate", df, highlight = "column", escape = FALSE,
@@ -335,10 +342,11 @@ shinyServer(function(input, output, session) {
                 tags$a(icon("github"), style="color:#000;", href="https://github.com/Sage-Bionetworks/schematic", target = "_blank"),
                 "<br>Invalid Results: <b>", sum(df$Status == "invalid"), "</b>"))),
         ht.color = c("#82E0AA", "#F7DC6F"), ht.value = c("valid", "invalid"), ht.column = "Status",
-        options = list(dom = 't', columnDefs = list(list(className = 'dt-center', targets = "_all")))
+        options = list(dom = 't', columnDefs = list(list(className = 'dt-center', targets = "_all")), pageLength = 7)
       )
       logjs("end plot validation table")
     }
+    
     load_upload$hide()
   })
 

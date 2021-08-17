@@ -52,11 +52,27 @@
   }
 }
 
+// simple move right based on opacity without any transform
+@keyframes simple-move-right {
+
+  0% {
+    opacity: 0;
+  }
+
+  50% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
 @keyframes move-right {
 
   0% {
     opacity: 0;
-    transform:  translateX(-10px);
+    transform: translateX(-10px);
   }
 
   50% {

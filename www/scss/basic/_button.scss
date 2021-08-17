@@ -1,5 +1,14 @@
 /*** Buttons ***/
 
+@mixin btn_transpant {
+  background: inherit !important;
+  color: inherit !important;
+  border: none;
+  box-shadow: none !important;
+  outline: none !important;
+  cursor: pointer;
+}
+
 // update button
 // refer to https://paigen11.medium.com/
 .btn-shiny-effect {
@@ -179,6 +188,42 @@
         box-sizing: border-box;
         animation: move-down 1.8s infinite;
       }
+    }
+  }
+}
+
+// scroll right content
+.scroll-right {
+  @include btn_transpant;
+  position: absolute;
+  top: 50%;
+  right: 10px;
+
+  span {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    top: -17px; // 12 * sqrt(2)
+    margin-bottom: 5px;
+    transform-origin: left;
+    transform: rotate(-45deg);
+    border-right: 2px solid #000;
+    border-bottom: 2px solid #000;
+    box-sizing: border-box;
+    animation: simple-move-right 2s infinite;
+
+    &:nth-of-type(1) {
+      left: 50%;
+    }
+
+    &:nth-of-type(2) {
+      left: calc(50% - 8.5px);
+      animation-delay: 0.15s;
+    }
+
+    &:nth-of-type(3) {
+      left: calc(50% - 17px);
+      animation-delay: 0.3s;
     }
   }
 }

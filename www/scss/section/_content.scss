@@ -81,6 +81,18 @@
   }
 }
 
+.direct-chat-contacts {
+  position: relative;
+  background: $light !important;
+  box-shadow: $float_shadow2;  
+
+  .help-block {
+    position: absolute;
+    top: 100%;
+    left: 0;
+  }
+}
+
 #div_download, #div_validate, #div_val_gsheet {
     font-size: 18px; 
     background-color: white; 
