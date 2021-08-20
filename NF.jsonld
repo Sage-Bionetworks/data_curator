@@ -3404,7 +3404,7 @@
         {
             "@id": "bts:TumorType",
             "@type": "rdfs:Class",
-            "rdfs:comment": "The type of cells that carcinoma arises from.",
+            "rdfs:comment": "The type of tumor that the biospecimen used to generate the data were collected from. ",
             "rdfs:label": "TumorType",
             "rdfs:subClassOf": [
                 {
@@ -4997,6 +4997,60 @@
             "sms:validationRules": []
         },
         {
+            "@id": "bts:SporadicSchwannoma",
+            "@type": "rdfs:Class",
+            "rdfs:comment": "A",
+            "rdfs:label": "SporadicSchwannoma",
+            "rdfs:subClassOf": [
+                {
+                    "@id": "schema:Thing"
+                }
+            ],
+            "schema:isPartOf": {
+                "@id": "http://schema.biothings.io"
+            },
+            "sms:displayName": "Sporadic Schwannoma",
+            "sms:required": "sms:false",
+            "sms:validationRules": []
+        },
+        {
+            "@id": "bts:Diagnosis",
+            "@type": "rdfs:Class",
+            "rdfs:comment": "A diagnosis is the result of a medical investigation to identify a disorder from its signs and symptoms.",
+            "rdfs:label": "Diagnosis",
+            "rdfs:subClassOf": [
+                {
+                    "@id": "bts:ExperimentalData"
+                }
+            ],
+            "schema:isPartOf": {
+                "@id": "http://schema.biothings.io"
+            },
+            "schema:rangeIncludes": [
+                {
+                    "@id": "bts:Neurofibromatosistype1"
+                },
+                {
+                    "@id": "bts:Neurofibromatosistype2"
+                },
+                {
+                    "@id": "bts:Schwannomatosis"
+                },
+                {
+                    "@id": "bts:Unknown"
+                },
+                {
+                    "@id": "bts:NotApplicable"
+                },
+                {
+                    "@id": "bts:SporadicSchwannoma"
+                }
+            ],
+            "sms:displayName": "diagnosis",
+            "sms:required": "sms:false",
+            "sms:validationRules": []
+        },
+        {
             "@id": "bts:10xV2",
             "@type": "rdfs:Class",
             "rdfs:comment": "TBD",
@@ -6096,37 +6150,6 @@
             "sms:validationRules": []
         },
         {
-            "@id": "bts:Diagnosis",
-            "@type": "rdfs:Class",
-            "rdfs:comment": "A diagnosis is the result of a medical investigation to identify a disorder from its signs and symptoms.",
-            "rdfs:label": "Diagnosis",
-            "rdfs:subClassOf": [
-                {
-                    "@id": "bts:ExperimentalData"
-                }
-            ],
-            "schema:isPartOf": {
-                "@id": "http://schema.biothings.io"
-            },
-            "schema:rangeIncludes": [
-                {
-                    "@id": "bts:Neurofibromatosistype1"
-                },
-                {
-                    "@id": "bts:Neurofibromatosistype2"
-                },
-                {
-                    "@id": "bts:Schwannomatosis"
-                },
-                {
-                    "@id": "bts:NotApplicable"
-                }
-            ],
-            "sms:displayName": "diagnosis",
-            "sms:required": "sms:false",
-            "sms:validationRules": []
-        },
-        {
             "@id": "bts:IsMultiIndividual",
             "@type": "rdfs:Class",
             "rdfs:comment": "Boolean flag indicating whether or not a file has data for multiple individuals  (Note: TRUE = Yes; FALSE = No)",
@@ -6201,6 +6224,57 @@
                 }
             ],
             "sms:displayName": "sex",
+            "sms:required": "sms:false",
+            "sms:validationRules": []
+        },
+        {
+            "@id": "bts:Male",
+            "@type": "rdfs:Class",
+            "rdfs:comment": "A person who belongs to the sex that normally produces sperm. The term is used to indicate biological sex distinctions, cultural gender role distinctions, or both.",
+            "rdfs:label": "Male",
+            "rdfs:subClassOf": [
+                {
+                    "@id": "bts:Sex"
+                }
+            ],
+            "schema:isPartOf": {
+                "@id": "http://schema.biothings.io"
+            },
+            "sms:displayName": "Male",
+            "sms:required": "sms:false",
+            "sms:validationRules": []
+        },
+        {
+            "@id": "bts:Female",
+            "@type": "rdfs:Class",
+            "rdfs:comment": "A person who belongs to the sex that normally produces ova. The term is used to indicate biological sex distinctions, or cultural gender role distinctions, or both.",
+            "rdfs:label": "Female",
+            "rdfs:subClassOf": [
+                {
+                    "@id": "bts:Sex"
+                }
+            ],
+            "schema:isPartOf": {
+                "@id": "http://schema.biothings.io"
+            },
+            "sms:displayName": "Female",
+            "sms:required": "sms:false",
+            "sms:validationRules": []
+        },
+        {
+            "@id": "bts:Unknown",
+            "@type": "rdfs:Class",
+            "rdfs:comment": "Not known, observed, recorded; or reported as unknown by the data contributor.",
+            "rdfs:label": "Unknown",
+            "rdfs:subClassOf": [
+                {
+                    "@id": "bts:Sex"
+                }
+            ],
+            "schema:isPartOf": {
+                "@id": "http://schema.biothings.io"
+            },
+            "sms:displayName": "Unknown",
             "sms:required": "sms:false",
             "sms:validationRules": []
         },
@@ -8533,7 +8607,7 @@
         {
             "@id": "bts:JHU2-103-CL",
             "@type": "rdfs:Class",
-            "rdfs:comment": "An MPNST cell line derived from JHU NF1 Biobank tumor specimen JHU 2-103.",
+            "rdfs:comment": "An MPNST cell line derived from JHU NF1 Biobank tumor specimen JHU 2-103. ",
             "rdfs:label": "JHU2-103-CL",
             "rdfs:subClassOf": [
                 {
@@ -8550,7 +8624,7 @@
         {
             "@id": "bts:JHU2-002-CL",
             "@type": "rdfs:Class",
-            "rdfs:comment": "An MPNST cell line derived from JHU NF1 Biobank tumor specimen JHU 2-002.",
+            "rdfs:comment": "An MPNST cell line derived from JHU NF1 Biobank tumor specimen JHU 2-002. ",
             "rdfs:label": "JHU2-002-CL",
             "rdfs:subClassOf": [
                 {
@@ -8567,7 +8641,7 @@
         {
             "@id": "bts:JHU2-079-CL",
             "@type": "rdfs:Class",
-            "rdfs:comment": "An MPNST cell line derived from JHU NF1 Biobank tumor specimen JHU 2-079.",
+            "rdfs:comment": "An MPNST cell line derived from JHU NF1 Biobank tumor specimen JHU 2-079. ",
             "rdfs:label": "JHU2-079-CL",
             "rdfs:subClassOf": [
                 {
@@ -8584,7 +8658,7 @@
         {
             "@id": "bts:JHU2-103-PDX",
             "@type": "rdfs:Class",
-            "rdfs:comment": "A PDX model derived from JHU NF1 Biobank tumor specimen JHU 2-103.",
+            "rdfs:comment": "A PDX model derived from JHU NF1 Biobank tumor specimen JHU 2-103. ",
             "rdfs:label": "JHU2-103-PDX",
             "rdfs:subClassOf": [
                 {
@@ -8601,7 +8675,7 @@
         {
             "@id": "bts:JHU2-002-PDX",
             "@type": "rdfs:Class",
-            "rdfs:comment": "A PDX model derived from JHU NF1 Biobank tumor specimen JHU 2-002.",
+            "rdfs:comment": "A PDX model derived from JHU NF1 Biobank tumor specimen JHU 2-002. ",
             "rdfs:label": "JHU2-002-PDX",
             "rdfs:subClassOf": [
                 {
@@ -8618,7 +8692,7 @@
         {
             "@id": "bts:JHU2-079-PDX",
             "@type": "rdfs:Class",
-            "rdfs:comment": "A PDX model derived from JHU NF1 Biobank tumor specimen JHU 2-079.",
+            "rdfs:comment": "A PDX model derived from JHU NF1 Biobank tumor specimen JHU 2-079. ",
             "rdfs:label": "JHU2-079-PDX",
             "rdfs:subClassOf": [
                 {
@@ -9707,7 +9781,7 @@
         {
             "@id": "bts:Nf2Genotype",
             "@type": "rdfs:Class",
-            "rdfs:comment": "Genotype of NF2 gene, if known",
+            "rdfs:comment": "Genotype of NF2 gene in the biospecimen from which the data were derived, if known",
             "rdfs:label": "Nf2Genotype",
             "rdfs:subClassOf": [
                 {
@@ -9728,6 +9802,12 @@
                     "@id": "bts:+/+"
                 },
                 {
+                    "@id": "bts:+/?"
+                },
+                {
+                    "@id": "bts:-/?"
+                },
+                {
                     "@id": "bts:Unknown"
                 }
             ],
@@ -9738,7 +9818,7 @@
         {
             "@id": "bts:Nf1Genotype",
             "@type": "rdfs:Class",
-            "rdfs:comment": "Genotype of NF1 gene, if known",
+            "rdfs:comment": "Genotype of NF1 gene in the biospecimen from which the data were derived, if known",
             "rdfs:label": "Nf1Genotype",
             "rdfs:subClassOf": [
                 {
@@ -9757,6 +9837,12 @@
                 },
                 {
                     "@id": "bts:+/+"
+                },
+                {
+                    "@id": "bts:+/?"
+                },
+                {
+                    "@id": "bts:-/?"
                 },
                 {
                     "@id": "bts:Unknown"
@@ -9909,6 +9995,9 @@
                 },
                 {
                     "@id": "bts:ReadDepth"
+                },
+                {
+                    "@id": "bts:Comments"
                 }
             ],
             "sms:validationRules": []
@@ -10015,6 +10104,9 @@
                 },
                 {
                     "@id": "bts:Platform"
+                },
+                {
+                    "@id": "bts:Comments"
                 }
             ],
             "sms:validationRules": []
@@ -10144,6 +10236,9 @@
                 },
                 {
                     "@id": "bts:NucleicAcidSource"
+                },
+                {
+                    "@id": "bts:Comments"
                 }
             ],
             "sms:validationRules": []
@@ -10247,6 +10342,9 @@
                 },
                 {
                     "@id": "bts:TimePointUnit"
+                },
+                {
+                    "@id": "bts:Comments"
                 }
             ],
             "sms:validationRules": []
@@ -10353,6 +10451,9 @@
                 },
                 {
                     "@id": "bts:Platform"
+                },
+                {
+                    "@id": "bts:Comments"
                 }
             ],
             "sms:validationRules": []
@@ -10462,6 +10563,9 @@
                 },
                 {
                     "@id": "bts:TimePointUnit"
+                },
+                {
+                    "@id": "bts:Comments"
                 }
             ],
             "sms:validationRules": []
@@ -10508,6 +10612,9 @@
                 },
                 {
                     "@id": "bts:TimePointUnit"
+                },
+                {
+                    "@id": "bts:Comments"
                 }
             ],
             "sms:validationRules": []
@@ -12417,7 +12524,7 @@
         {
             "@id": "bts:ExperimentalCondition",
             "@type": "rdfs:Class",
-            "rdfs:comment": "A free-text description of the experimental condition (e.g. 5 mM doxorubicin).",
+            "rdfs:comment": "A free-text description of the experimental condition (e.g. 5 mM doxorubicin). ",
             "rdfs:label": "ExperimentalCondition",
             "rdfs:subClassOf": [
                 {
@@ -13005,7 +13112,7 @@
         {
             "@id": "bts:Oryctolaguscuniculus",
             "@type": "rdfs:Class",
-            "rdfs:comment": "Oryctolagus cuniculus with taxonomy ID: 9986 and Genbank common name: rabbit",
+            "rdfs:comment": "\nOryctolagus cuniculus with taxonomy ID: 9986 and Genbank common name: rabbit",
             "rdfs:label": "Oryctolaguscuniculus",
             "rdfs:subClassOf": [
                 {
@@ -14348,6 +14455,9 @@
                 },
                 {
                     "@id": "bts:ReadDepth"
+                },
+                {
+                    "@id": "bts:Comments"
                 }
             ],
             "sms:validationRules": []
@@ -14472,6 +14582,23 @@
             "sms:validationRules": []
         },
         {
+            "@id": "bts:Comments",
+            "@type": "rdfs:Class",
+            "rdfs:comment": "Brief free-text comments that may also be important to understanding the data. ",
+            "rdfs:label": "Comments",
+            "rdfs:subClassOf": [
+                {
+                    "@id": "bts:ExperimentalData"
+                }
+            ],
+            "schema:isPartOf": {
+                "@id": "http://schema.biothings.io"
+            },
+            "sms:displayName": "comments",
+            "sms:required": "sms:false",
+            "sms:validationRules": []
+        },
+        {
             "@id": "bts:TRUE",
             "@type": "rdfs:Class",
             "rdfs:comment": "TBD",
@@ -14553,6 +14680,40 @@
                 "@id": "http://schema.biothings.io"
             },
             "sms:displayName": "ATAC-seq",
+            "sms:required": "sms:false",
+            "sms:validationRules": []
+        },
+        {
+            "@id": "bts:+/?",
+            "@type": "rdfs:Class",
+            "rdfs:comment": "TBD",
+            "rdfs:label": "+/?",
+            "rdfs:subClassOf": [
+                {
+                    "@id": "bts:Nf2Genotype"
+                }
+            ],
+            "schema:isPartOf": {
+                "@id": "http://schema.biothings.io"
+            },
+            "sms:displayName": "+/?",
+            "sms:required": "sms:false",
+            "sms:validationRules": []
+        },
+        {
+            "@id": "bts:-/?",
+            "@type": "rdfs:Class",
+            "rdfs:comment": "TBD",
+            "rdfs:label": "-/?",
+            "rdfs:subClassOf": [
+                {
+                    "@id": "bts:Nf2Genotype"
+                }
+            ],
+            "schema:isPartOf": {
+                "@id": "http://schema.biothings.io"
+            },
+            "sms:displayName": "-/?",
             "sms:required": "sms:false",
             "sms:validationRules": []
         },
