@@ -3480,6 +3480,9 @@
                 },
                 {
                     "@id": "bts:Teratoma"
+                },
+                {
+                    "@id": "bts:NotApplicable"
                 }
             ],
             "sms:displayName": "tumorType",
@@ -10683,7 +10686,7 @@
             "schema:isPartOf": {
                 "@id": "http://schema.biothings.io"
             },
-            "sms:displayName": "unknown",
+            "sms:displayName": "Unknown",
             "sms:required": "sms:false",
             "sms:validationRules": []
         },
@@ -10751,7 +10754,7 @@
             "schema:isPartOf": {
                 "@id": "http://schema.biothings.io"
             },
-            "sms:displayName": "unknown",
+            "sms:displayName": "Unknown",
             "sms:required": "sms:false",
             "sms:validationRules": []
         },
@@ -14021,6 +14024,23 @@
                 "@id": "http://schema.biothings.io"
             },
             "sms:displayName": "Acute Myeloid Leukemia",
+            "sms:required": "sms:false",
+            "sms:validationRules": []
+        },
+        {
+            "@id": "bts:NotApplicable",
+            "@type": "rdfs:Class",
+            "rdfs:comment": "TBD",
+            "rdfs:label": "NotApplicable",
+            "rdfs:subClassOf": [
+                {
+                    "@id": "bts:TumorType"
+                }
+            ],
+            "schema:isPartOf": {
+                "@id": "http://schema.biothings.io"
+            },
+            "sms:displayName": "Not Applicable",
             "sms:required": "sms:false",
             "sms:validationRules": []
         },
