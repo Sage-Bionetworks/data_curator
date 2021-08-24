@@ -12624,13 +12624,13 @@
             },
             "schema:rangeIncludes": [
                 {
-                    "@id": "bts:Ai"
-                },
-                {
                     "@id": "bts:Bashscript"
                 },
                 {
                     "@id": "bts:Bedgraph"
+                },
+                {
+                    "@id": "bts:Ai"
                 },
                 {
                     "@id": "bts:Idx"
@@ -12870,10 +12870,19 @@
                     "@id": "bts:SDAT"
                 },
                 {
+                    "@id": "bts:Nii"
+                },
+                {
                     "@id": "bts:PAR"
                 },
                 {
                     "@id": "bts:REC"
+                },
+                {
+                    "@id": "bts:Hdr"
+                },
+                {
+                    "@id": "bts:Img"
                 },
                 {
                     "@id": "bts:Sf"
