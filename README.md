@@ -10,27 +10,48 @@ The _Data Curator App_ is an R Shiny app that serves as the _frontend_ to the sc
 ### Data Curator App Setup
 Follow the steps below to make sure the _Data Curator App_ is fully setup to work with the [schematic](https://github.com/Sage-Bionetworks/schematic/tree/main):
 
-Navigate to the location where you want to setup the application (i.e., the _Shiny Server_). Clone the code on this github branch (_shiny-server-main_):
+1. Clone this repo with one single branch (i.e., *shiny-server-main*):
 
-    git clone --single-branch --branch shiny-server-main https://github.com/Sage-Bionetworks/data_curator.git
+        git clone --single-branch --branch shiny-server-main https://github.com/Sage-Bionetworks/data_curator.git
 
-Create a conda environment in the cloned directory from the `environment.yml` file which has all the required package dependencies:
+2. Create and edit the configuration file. Please make sure `OAuth Credential` ([how to obtain OAuth](###-Authentication)), `App_URL` and `CONDA_ENV_NAME` are correct in `config.yaml`:
+   
+        cp example_config.yaml config.yaml
+   
+        chmod 400 config.yaml
 
-    conda env create -f environment.yml
 
-Here, our conda environment name `data_curator_env` is set from the `environment.yml` file .
+3. Create a conda environment in the cloned directory from the `environment.yml` file which has all the required package dependencies:
 
-Activate the `data_curator_env` environment:
+        grep 'CONDA_ENV_NAME:' config.yaml | cut -f2 -d':' | xargs conda env create -f environment.yml -n
 
-    conda activate data_curator_env
+4. Activate the `data_curator_env` environment. Here, our conda environment name `data_curator_env` is set by default in the `example_config.yaml`.
 
+        conda activate data_curator_env
+
+5. Install R packages:
+
+        R -e "renv::consent(provided=TRUE)"
+        R -e "renv::restore(lockfile='renv.lock')"
 
 ### Schematic Setup
 
-The next step is to install the latest release of the [schematic](https://github.com/Sage-Bionetworks/schematic/tree/main) (backend) as a folder `schematic` inside the `data_curator` folder and tie it together with this frontend. 
+1. Clone the [schematic](https://github.com/Sage-Bionetworks/schematic/tree/develop) (backend) as a folder `schematic` inside the `data_curator` folder:
 
-To do so, follow the instructions on the `schematic` repository [README](https://github.com/Sage-Bionetworks/schematic/tree/develop#12-installation-requirements-and-pre-requisites).
+        git clone --single-branch --branch develop https://github.com/Sage-Bionetworks/schematic.git
 
+2. Install the latest release of the `schematic`:
+
+        python -m pip install schematicpy
+    
+    
+    - For [development](https://github.com/Sage-Bionetworks/schematic/blob/develop/CONTRIBUTION.md#development-environment-setup), install the package via `poetry`:
+
+                cd schematic
+                poetry build
+                pip install dist/schematicpy-*-py3-none-any.whl
+
+2. Set up the schematic configuration. To do so, follow the instructions on the `schematic` repository [README](https://github.com/Sage-Bionetworks/schematic/tree/develop#12-installation-requirements-and-pre-requisites)
 
 ### App Configuration File
 
@@ -45,12 +66,6 @@ Use the app configuration file `www/config.json` to adapt this app to your DCC.
 * `community` : the abbreviated name of the community or project. (e.g. _HTAN_)
 
 
-### Authentication (OAuth)
+### Authentication
 
-This utilizes a Synapse OAuth client (code motivated by [ShinyOAuthExample](https://github.com/brucehoff/ShinyOAuthExample) and [app.R](https://gist.github.com/jcheng5/44bd750764713b5a1df7d9daf5538aea). Each application is required to have its own OAuth client as these clients cannot be shared between one another. View instructions [here](https://docs.synapse.org/articles/using_synapse_as_an_oauth_server.html) to learn how to request a client. Once you obtain the `client_id` and `client_secret` make sure to add it to the configuration file.
-
-```
-cp example_config.yaml config.yaml
-# Edit config.yaml
-chmod 400 config.yaml
-```
+This utilizes a Synapse Authentication (OAuth) client (code motivated by [ShinyOAuthExample](https://github.com/brucehoff/ShinyOAuthExample) and [app.R](https://gist.github.com/jcheng5/44bd750764713b5a1df7d9daf5538aea). Each application is required to have its own OAuth client as these clients cannot be shared between one another. View instructions [here](https://docs.synapse.org/articles/using_synapse_as_an_oauth_server.html) to learn how to request a client. Once you obtain the `client_id` and `client_secret` make sure to add it to the configuration yaml file.

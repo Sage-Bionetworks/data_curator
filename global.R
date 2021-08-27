@@ -33,9 +33,10 @@ has_auth_code <- function(params) {
 
 oauth_client <- yaml.load_file("config.yaml")
 
-client_id <- toString(oauth_client$client_id)
-client_secret <- oauth_client$client_secret
-APP_URL <- oauth_client$APP_URL
+client_id <- toString(oauth_client$CLIENT_ID)
+client_secret <- toString(oauth_client$CLIENT_SECRET)
+APP_URL <- toString(oauth_client$APP_URL)
+
 if (is.null(client_id)) stop("config.yaml is missing client_id")
 if (is.null(client_secret)) stop("config.yaml is missing client_secret")
 if (is.null(APP_URL)) stop("config.yaml is missing client_secret")
@@ -77,7 +78,7 @@ scope <- "openid view download modify"
 
 # Activate conda env
 # Don't necessarily have to set `RETICULATE_PYTHON` env variable
-reticulate::use_condaenv("data_curator_env_oauth")
+reticulate::use_condaenv("data_curator_dev_env")
 
 # Import functions/modules
 source_files <- list.files(c("functions", "modules"), pattern = "*\\.R$", recursive = TRUE, full.names = TRUE)
