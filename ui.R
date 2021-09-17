@@ -9,8 +9,13 @@
 # https://www.synapse.org
 
 ui <- shinydashboardPlus::dashboardPage(
+<<<<<<< HEAD
   title = "NF Data Curator",
   skin = "blue",
+=======
+  title = "Data Curator",
+  skin = "purple",
+>>>>>>> 4eb5ba33273c7f9c5a940018ba01c057272943cd
   dashboardHeader(
     titleWidth = 250,
     title = tagList(
@@ -44,11 +49,19 @@ ui <- shinydashboardPlus::dashboardPage(
     tags$li(
       class = "dropdown", id = "HTAN_logo",
       tags$a(
+<<<<<<< HEAD
         href = "https://help.nf.synapse.org/",
         target = "_blank",
         tags$img(
           height = "40px", alt = "NF LOGO",
           src = "img/nfosi_logo_crop.png"
+=======
+        href = "https://humantumoratlas.org/",
+        target = "_blank",
+        tags$img(
+          height = "40px", alt = "HTAN LOGO",
+          src = "img/HTAN_text_logo.png"
+>>>>>>> 4eb5ba33273c7f9c5a940018ba01c057272943cd
         )
       )
     )
@@ -82,12 +95,18 @@ ui <- shinydashboardPlus::dashboardPage(
       tags$a(
         id = "sidebar_footer", `data-toggle` = "tab",
         tags$div(icon("heart")),
+<<<<<<< HEAD
         tags$footer(HTML("Managed by the</br>
             Neurofibromatosis Open Science Initiative</br>
             Created by the Human Tumor Atlas Network</br>
             (U24-CA233243-01)</br>
             Powered by Sage Bionetworks"
         ))
+=======
+        tags$footer(HTML('Supported by the Human Tumor Atlas Network <br/>
+                  (U24-CA233243-01)<br/>
+                  Powered by <i class="far fa-heart"></i> and Sage Bionetworks'))
+>>>>>>> 4eb5ba33273c7f9c5a940018ba01c057272943cd
       )
     )
   ),
