@@ -102,13 +102,9 @@ shinyServer(function(input, output, session) {
       projectID <- datatype_list$projects[[input[[paste0(x, "project")]]]]
 
       # gets folders per project
-<<<<<<< HEAD
       folder_df <- syn_tableQuery(sprintf("select name, id from %s where type = 'folder' and projectId = '%s'", config$main_fileview, project_synID))$asDataFrame()
       
       folders_list <- setNames(folder_df$id, folder_df$name)
-=======
-      folder_list <- synapse_driver$getStorageDatasetsInProject(synStore_obj, projectID) %>% list2Vector()
->>>>>>> 4eb5ba33273c7f9c5a940018ba01c057272943cd
 
       if (x == "dropdown_") {
         project_synID <<- projectID
@@ -205,10 +201,6 @@ shinyServer(function(input, output, session) {
         synStore_obj,
         folder_synID
       )
-<<<<<<< HEAD
-=======
-      # if there isn't an existing manifest make a new one
->>>>>>> 4eb5ba33273c7f9c5a940018ba01c057272943cd
       if (existing_manifestID == "") {
         # get file list in selected folder
         # don't put in the observation of folder dropdown
