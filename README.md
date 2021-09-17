@@ -1,5 +1,4 @@
 
-<<<<<<< HEAD
 \**Please note, "releases" only pertain to changes in the JSON-LD schema file.**
 
 # NF Data Curator App
@@ -9,17 +8,6 @@
 The _Data Curator App_ is an R Shiny app that serves as the _frontend_ to the schematic Python package. It allows data contributors to easily annotate, validate and submit their metadata.
 
 ## Shiny app configuration
-=======
-## Introduction
-
-The _Data Curator App_ is an R Shiny app that serves as the _frontend_ to the schematic Python package. It allows data contributors to easily annotate, validate and submit their metadata.
-
-
-## Setup
-
-### Data Curator App Setup
-Follow the steps below to make sure the _Data Curator App_ is fully setup to work with the [schematic](https://github.com/Sage-Bionetworks/schematic/tree/main):
->>>>>>> 4eb5ba33273c7f9c5a940018ba01c057272943cd
 
 There are two editions of the front end: 
 
@@ -43,13 +31,7 @@ Here, our conda environment name `data_curator_env` is set from the `environment
 Activate the `data_curator_env` environment:
 
     conda activate data_curator_env
-<<<<<<< HEAD
 
-=======
-
-
-### Schematic Setup
->>>>>>> 4eb5ba33273c7f9c5a940018ba01c057272943cd
 
 ### Schematic Setup
 The next step is to install the latest release of the [schematic](https://github.com/Sage-Bionetworks/schematic/tree/main) (backend) as a folder `schematic` inside the `data_curator` folder and tie it together with this frontend. 
