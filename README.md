@@ -54,3 +54,13 @@ cp example_config.yaml config.yaml
 # Edit config.yaml
 chmod 400 config.yaml
 ```
+
+### Install Dependencies (R)
+
+To install dependencies, `cd` to your repository directory, open R (e.g. run `R`) and run the `hydrate` command: 
+
+```
+renv::hydrate()
+* Discovering package dependencies ... Done!
+* Copying packages into the cache ... [93/93] Done!
+```
