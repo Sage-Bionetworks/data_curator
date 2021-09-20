@@ -1,0 +1,49 @@
+/*** Footer ***/
+
+// footer in sidebar
+#sidebar_footer {
+	position: absolute; 
+	padding: 5px 15px 0px 15px; 
+	left: 0; 
+	bottom: 0; 
+	width: 100%; 
+	background-color: $footer_bg_col; 
+	color: $footer_col; 
+	font-size: 0.7em;
+	text-align: center;
+	z-index: 1000;
+	opacity: 0.8;
+	// white-space: nowrap;
+	overflow: hidden;
+	display: flex;
+	align-items: center;
+
+	// heart color
+	div>.fa{
+		visibility: hidden !important;
+	}
+	
+	footer {
+		padding: 10px 0;
+		margin-left: -20px;
+		line-height: 2;
+	}
+}
+
+// sidebar footer when sidebar collapsed
+.sidebar-collapse #sidebar_footer {
+
+	div>.fa{
+		color: transparent;
+		padding: 2px;
+		transform: scale(2.2);
+		background: linear-gradient(45deg, purple, #7590d6);
+		-webkit-background-clip: text; // clip to heart shape
+		visibility: visible !important;
+		transition: 100ms ease-in-out;
+	}
+	
+	footer {
+		visibility: hidden;
+	} 
+}

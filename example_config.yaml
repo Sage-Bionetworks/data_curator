@@ -1,0 +1,6 @@
+# This file contains the oauth client id and secret required for
+# the application.  This file needs to have chmod 400 permissions
+# client_id and APP_URL has to be a string
+client_id: 
+client_secret: 
+APP_URL: 
