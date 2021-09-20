@@ -1,4 +1,4 @@
-name: data_curator_env_oauth
+name: data_curator_env
 channels:
   - defaults
 dependencies:
