@@ -1,3 +1,6 @@
+# Activate conda env
+reticulate::use_condaenv("data_curator_env_oauth")
+
 suppressPackageStartupMessages({
   library(shiny)
   library(httr)
@@ -20,8 +23,6 @@ suppressPackageStartupMessages({
   library(sass)
   library(shinydashboardPlus)
 })
-
-# APP_URL <- "https://shinypro.synapse.org/users/spatil/HTAN-oauth/"
 
 has_auth_code <- function(params) {
   # params is a list object containing the parsed URL parameters. Return TRUE if
@@ -74,10 +75,6 @@ api <- oauth_endpoint(
 
 # The 'openid' scope is required by the protocol for retrieving user information.
 scope <- "openid view download modify"
-
-# Activate conda env
-# Don't necessarily have to set `RETICULATE_PYTHON` env variable
-reticulate::use_condaenv("data_curator_env_oauth")
 
 # Import functions/modules
 source_files <- list.files(c("functions", "modules"), pattern = "*\\.R$", recursive = TRUE, full.names = TRUE)
