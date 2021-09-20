@@ -102,9 +102,9 @@ shinyServer(function(input, output, session) {
       projectID <- datatype_list$projects[[input[[paste0(x, "project")]]]]
 
       # gets folders per project
-      folder_df <- syn_tableQuery(sprintf("select name, id from %s where type = 'folder' and projectId = '%s'", config$main_fileview, project_synID))$asDataFrame()
+      folder_df <- syn_tableQuery(sprintf("select name, id from %s where type = 'folder' and projectId = '%s'", config$main_fileview, projectID))$asDataFrame()
       
-      folders_list <- setNames(folder_df$id, folder_df$name)
+      folder_list <- setNames(as.list(folder_df$id), folder_df$name)
 
       if (x == "dropdown_") {
         project_synID <<- projectID
