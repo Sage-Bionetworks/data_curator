@@ -120,7 +120,7 @@ ui <- shinydashboardPlus::dashboardPage(
       # second tab content
       tabItem(
         tabName = "tab_data",
-        h2("Set Dataset and Metadata Template for Curation"),
+        h2("Set Dataset and Datatype for Curation"),
         fluidRow(
           box(
             id = "box_pick_project",
@@ -133,54 +133,59 @@ ui <- shinydashboardPlus::dashboardPage(
               choices = "Generating..."
             ),
             selectInput(
-              inputId = "dropdown_folder",
-              label = "Folder:",
+              inputId = "dropdown_dataset",
+              label = "Dataset:",
               choices = "Generating..."
             ),
             helpText(
-              "If your recently updated folder does not appear, please wait for Synapse to sync and refresh"
+              "If your recently updated folder does not appear, please wait for a few minutes and refresh"
             )
           ),
           box(
             id = "box_pick_manifest",
             status = "primary",
             width = 6,
-            title = "Choose a Metadata Template Type: ",
+            title = "Choose a datatype template: ",
             selectInput(
               inputId = "dropdown_template",
               label = "Template:",
               choices = "Generating..."
             )
           ),
-          column(12, actionButton("dashboard_control", div(span(), p("Show Data Tracker")), class = "scroll-down")),
+          column(12, 
+            div(id = "dashboard_switch_container",
+              actionButton("dashboard_control", div(span(), p("Show Data Dashboard")), class = "scroll-down"),
+              helpText("check your data ingress status and metadata compliance")
+            )
+          ),
           box(
             status = "primary",
             id = "dashboard",
             width = 12,
             closable = TRUE,
-            title = "Track Process of Data Ingress",
+            title = "Track your Data Status",
             tabsetPanel(
               id = "dashboard_tabs",
               tabPanel(
-                "Selected Template",
-                p(class = "tab-title", "Complete your Selected Template"),
+                "Selected Datatype",
+                p(class = "tab-title", "Complete your Selected Datatype"),
                 fluidRow(
                   column(6, checkListUI("checklist_template")),
                   column(6, selectDataReqNetUI("template_network", height = "400px"))
                 )
               ),
               tabPanel(
-                "Uploaded Data",
+                "All datasets",
                 p(class = "tab-title", "Progress of Uploaded Data in Synapse"),
                 uploadDataReqTreeUI("upload_tree")
               ),
               tabPanel(
-                "Validation Preview",
-                p(class = "tab-title", "Quick Validation of your Uploaded Files"),
+                "Metadata Components",
+                p(class = "tab-title", "Uploaded metadata"),
                 tagList(
                   p(actionButton("btn_dashboard_validate", "Validate", class = "btn-primary-color")),
                   DTableUI("tbl_dashboard_validate"),
-                  helpText("If there are any invalid files, please download the invalid files from synapse and validate the files in the DCA again.")
+                  helpText("If there is any validation error, please resubmit the corresponding metadata. Click on the datatype name to download your existing metadata.")
                 )
               )
             )

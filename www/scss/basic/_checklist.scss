@@ -47,6 +47,10 @@
         font-size: 1.2em;
         font-weight: bold;
         text-shadow: 0 1px 0 rgba(#000, 0.1);
+
+        &.upload {
+          background: #28a745;
+        }
       }
       
       .checklist-data {

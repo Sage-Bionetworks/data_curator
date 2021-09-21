@@ -34,7 +34,7 @@ selectDataReqNetServer <- function(id, upload_data, req_data, selected_manifest)
           )
           nodes <- data.frame(
             name = c(selected, links$target),
-            group = c("Selected Template", ifelse(links$target %in% upData$schema, "Uploaded", "Not Uploaded")),
+            group = c("Selected Datatype", ifelse(links$target %in% upData$schema, "Uploaded Metadata", "Missing")),
             size = c(20)
           )
         }
@@ -58,7 +58,7 @@ selectDataReqNetServer <- function(id, upload_data, req_data, selected_manifest)
       pb_pct <- round(length(intersect(all_req, upData$schema)) / length(all_req), 2) * 100
       output$pbOut <- renderUI(
         shinyWidgets::progressBar(
-          id = NS(id, "pb"), status = "danger", title = "Submission Progress of Required Metadata",
+          id = NS(id, "pb"), status = "danger", title = "uploading progress of required metadata",
           striped = TRUE, display_pct = TRUE, value = pb_pct
         )
       )

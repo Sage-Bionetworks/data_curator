@@ -184,12 +184,12 @@ shinyServer(function(input, output, session) {
   observeEvent(input$dashboard$visible, {
     if (!input$dashboard$visible) {
       Sys.sleep(0.3) # 0.3 is optimal
-      show("dashboard_control")
+      show("dashboard_switch_container")
     }
   })
 
   observeEvent(input$dashboard_control, {
-    hide("dashboard_control")
+    hide("dashboard_switch_container")
     shinydashboardPlus::updateBox("dashboard", action = "restore")
   })
 
@@ -297,26 +297,27 @@ shinyServer(function(input, output, session) {
     valRes <- isolate(quick_val())
     if (nrow(valRes) > 0) {
       df <- data.frame(
-        Component = upload_manifest()$schema,
-        Folder_Name = upload_manifest()$folder,
-        Status = valRes$is_valid,
-        Error_Type = valRes$error_type,
-        SynapseId = paste0(
+        Datatype = paste0(
           '<a href="https://www.synapse.org/#!Synapse:',
-          upload_manifest()$synID, '" target="_blank">', upload_manifest()$synID, "</a>"
+          upload_manifest()$synID, '" target="_blank">', upload_manifest()$schema, "</a>"
         ),
-        Create_On = upload_manifest()$create,
-        Last_Modified = upload_manifest()$modify,
-        Internal_links = c("Pass/Fail")
+        Dataset = upload_manifest()$folder,
+        Status = valRes$is_valid,
+        Error = valRes$error_type,
+        createOn = upload_manifest()$create,
+        lastModified = upload_manifest()$modify,
+        nameModified = c("HTAN user"),
+        internalLinks = c("Pass/Fail"),
       )
 
       DTableServer("tbl_dashboard_validate", df,
         highlight = "column", escape = FALSE,
         caption = htmltools::tags$caption(HTML(
           paste0(
+            "Invalid Results: <b>", sum(df$Status == "invalid"), "</b>",
             "Schematic Version: <code>v1.0.0</code> ",
             tags$a(icon("github"), style = "color:#000;", href = "https://github.com/Sage-Bionetworks/schematic", target = "_blank"),
-            "<br>Invalid Results: <b>", sum(df$Status == "invalid"), "</b>"
+            "</b>"
           )
         )),
         ht.color = c("#82E0AA", "#F7DC6F"), ht.value = c("valid", "invalid"), ht.column = "Status",
