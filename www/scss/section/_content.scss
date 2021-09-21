@@ -52,6 +52,35 @@
   }
 }
 
+#dashboard {
+  margin-top: 20px;
+
+  .tab-title {
+    text-align: center;
+    font-weight: bold;
+    font-size: 1.6em;
+    margin: 15px 0;
+  }
+
+  .valueBox-title {
+    @extend .tab-title;
+    padding-top: 42px;
+  }
+
+  .nav-tabs {
+
+    &>li.active>a {
+      color: #fff !important;
+      background-color: rgba($primary_col, 0.8) !important;
+    }
+  
+    &>li>a {
+      color: #000;
+      background-color: transparent;
+    }
+  }
+}
+
 #div_download, #div_validate, #div_val_gsheet {
     font-size: 18px; 
     background-color: white; 

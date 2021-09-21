@@ -123,6 +123,7 @@ ui <- shinydashboardPlus::dashboardPage(
         h2("Set Dataset and Metadata Template for Curation"),
         fluidRow(
           box(
+            id = "box_pick_project",
             status = "primary",
             width = 6,
             title = "Choose a Project and Folder: ",
@@ -141,6 +142,7 @@ ui <- shinydashboardPlus::dashboardPage(
             )
           ),
           box(
+            id = "box_pick_manifest",
             status = "primary",
             width = 6,
             title = "Choose a Metadata Template Type: ",
@@ -148,6 +150,44 @@ ui <- shinydashboardPlus::dashboardPage(
               inputId = "dropdown_template",
               label = "Template:",
               choices = "Generating..."
+            )
+          ),
+          column(12, actionButton("dashboard_control", div(span(), p("Show Data Tracker")), class = "scroll-down")),
+          box(
+            status = "primary",
+            id = "dashboard",
+            width = 12,
+            closable = TRUE,
+            title = "Track Process of Data Ingress",
+            tabsetPanel(
+              id = "dashboard_tabs",
+              tabPanel(
+                "Selected Template",
+                p(class = "tab-title", "Complete your Selected Template"),
+                fluidRow(
+                  column(6, checkListUI("checklist_template")),
+                  column(6, selectDataReqNetUI("template_network", height = "400px"))
+                )
+              ),
+              tabPanel(
+                "Uploaded Data",
+                p(class = "tab-title", "Progress of Uploaded Data in Synapse"),
+                uploadDataReqTreeUI("upload_tree")
+              ),
+              tabPanel(
+                "Validation Preview",
+                p(class = "tab-title", "Quick Validation of your Uploaded Files"),
+                tagList(
+                  p(actionButton("btn_dashboard_validate", "Validate", class = "btn-primary-color")),
+                  DTableUI("tbl_dashboard_validate"),
+                  helpText("If there are any invalid files, please download the invalid files from synapse and validate the files in the DCA again.")
+                )
+              ),
+              tabPanel(
+                "Uploaded Data",
+                p(class = "tab-title", "Progress of Uploaded Data in Synapse"),
+                uploadDataReqTreeUI("upload_tree")
+              )
             )
           )
         ),
