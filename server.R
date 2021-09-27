@@ -337,8 +337,6 @@ shinyServer(function(input, output, session) {
 
     # reads file csv again
     submit_data <- csvInfileServer("inputFile")$data()
-    # replace special characters with '_'
-    colnames(submit_data) <- gsub("[[:punct:]]", "_", colnames(submit_data))
 
     # If an assay component selected (define assay components) note for future
     # the type to filter (eg assay) on could probably also be a config choice
