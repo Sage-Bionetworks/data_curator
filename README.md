@@ -16,7 +16,7 @@ Follow the steps below to make sure the _Data Curator App_ is fully setup to wor
 
         git clone --single-branch --branch shiny-server-main https://github.com/Sage-Bionetworks/data_curator.git
 
-2. Create the configuration file and modify `OAuth Credential` ([how to obtain OAuth](##-Authentication)), `App_URL` and `CONDA_ENV_NAME` in the `config.yaml` as needed:
+2. Create the configuration file and modify `OAuth Credential` ([how to obtain OAuth](https://github.com/Sage-Bionetworks/data_curator#authentication-oauth)), `App_URL` and `CONDA_ENV_NAME` in the `config.yaml` as needed:
 
         cp example_config.yaml config.yaml
         chmod 400 config.yaml
