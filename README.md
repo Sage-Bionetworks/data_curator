@@ -17,6 +17,7 @@ Follow the steps below to make sure the _Data Curator App_ is fully setup to wor
 
 2. Create the configuration file and modify `OAuth Credential` ([how to obtain OAuth](###-Authentication)), `App_URL` and `CONDA_ENV_NAME` in the `config.yaml` as needed:
 
+
         cp example_config.yaml config.yaml
         chmod 400 config.yaml
 
@@ -50,6 +51,8 @@ renv::hydrate()
         cd schematic
         poetry build
         pip install dist/schematicpy-*-py3-none-any.whl
+
+3. Set up the `schematic` configuration. To do so, follow the instructions on the `schematic` repository [README](https://github.com/Sage-Bionetworks/schematic/tree/develop#12-installation-requirements-and-pre-requisites)
 
 ### Data Model Configuration
 

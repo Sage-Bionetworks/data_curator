@@ -79,7 +79,6 @@ scope <- "openid view download modify"
 # Activate conda env
 # Don't necessarily have to set `RETICULATE_PYTHON` env variable
 reticulate::use_condaenv(conda_name)
-
 # Import functions/modules
 source_files <- list.files(c("functions", "modules"), pattern = "*\\.R$", recursive = TRUE, full.names = TRUE)
 sapply(source_files, FUN = source)
