@@ -21,7 +21,7 @@ Follow the steps below to make sure the _Data Curator App_ is fully setup to wor
         cp example_config.yaml config.yaml
         chmod 400 config.yaml
 
-3. Create and activate the conda environment (our conda environment name `data_curator_env` is set by default in the `example_config.yaml`.)
+3. Create and activate the conda environment (our conda environment name `data_curator_env` is set by default in the `example_config.yaml`):
 
         grep 'CONDA_ENV_NAME:' config.yaml | cut -f2 -d':' | xargs conda env create -f environment.yml -n
         conda activate data_curator_env    
