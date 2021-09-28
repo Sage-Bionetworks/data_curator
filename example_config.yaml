@@ -1,6 +1,7 @@
 # This file contains the oauth client id and secret required for
 # the application.  This file needs to have chmod 400 permissions
 # client_id and APP_URL has to be a string
-client_id: 
-client_secret: 
-APP_URL: 
+CLIENT_ID: 
+CLIENT_SECRET: 
+APP_URL: "https://shinypro.synapse.org/users/rchai/dc/"
+CONDA_ENV_NAME: "data_curator_env"
