@@ -5,6 +5,7 @@
 The _Data Curator App_ is an R Shiny app that serves as the _frontend_ to the schematic Python package. It allows data contributors to easily annotate, validate and submit their metadata.
 
 ---
+
 ## Get Started and Installation
 
 Follow the steps below to make sure the _Data Curator App_ is fully setup to work with the [schematic]:
@@ -15,12 +16,10 @@ Follow the steps below to make sure the _Data Curator App_ is fully setup to wor
 
         git clone --single-branch --branch shiny-server-main https://github.com/Sage-Bionetworks/data_curator.git
 
-2. Create the configuration file and modify `OAuth Credential` ([how to obtain OAuth](###-Authentication)), `App_URL` and `CONDA_ENV_NAME` in the `config.yaml` as needed:
-
+2. Create the configuration file and modify `OAuth Credential` ([how to obtain OAuth](##-Authentication)), `App_URL` and `CONDA_ENV_NAME` in the `config.yaml` as needed:
 
         cp example_config.yaml config.yaml
         chmod 400 config.yaml
-
 
 3. Create and activate the conda environment (our conda environment name `data_curator_env` is set by default in the `example_config.yaml`.)
 
@@ -41,8 +40,7 @@ Follow the steps below to make sure the _Data Curator App_ is fully setup to wor
 2. Install the latest release of the `schematic` via `pip`:
 
         python -m pip install schematicpy
-    
-    
+
     For development and test with the latest update from `schematic`, install the `schematic` via `poetry`:
 
         cd schematic
@@ -74,12 +72,12 @@ This utilizes a Synapse Authentication (OAuth) client (code motivated by [ShinyO
 
 Main contributors and developers:
 
+- [Rongrong Chai](https://github.com/rrchai)
 - [Xengie Doan](https://github.com/xdoan)
 - [Milen Nikolov](https://github.com/milen-sage)
-- [Rongrong Chai](https://github.com/rrchai)
 - [Sujay Patil](https://github.com/sujaypatil96)
 - [Robert Allaway](https://github.com/allaway)
-
+- [Bruno Grande](https://github.com/BrunoGrandePhD)
 
 <!-- Links -->
 
