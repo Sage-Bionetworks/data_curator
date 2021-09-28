@@ -5,7 +5,7 @@
 The _Data Curator App_ is an R Shiny app that serves as the _frontend_ to the schematic Python package. It allows data contributors to easily annotate, validate and submit their metadata.
 
 ---
-## Setup
+## Get Started and Installation
 
 Follow the steps below to make sure the _Data Curator App_ is fully setup to work with the [schematic]:
 
@@ -59,7 +59,6 @@ Use the app configuration file `www/config.json` to adapt this app to your DCC.
     * `display_name` : The display name for the dropdown. (e.g. _scRNA-seq Level 1_)
     * `schema_name`: The name of the manifest in the JSON-LD schema (e.g. _ScRNA-seqLevel1_)  
     * `type`: The type of manifest. As currently configured in `app.R`, will only display manifests of type _assay_.
-
 * `main_fileview` : The Synapse ID of a fileview that is scoped to all files, folders, & projects in your community.  (e.g. _syn20446927_)
 * `community` : the abbreviated name of the community or project. (e.g. _HTAN_)
 
