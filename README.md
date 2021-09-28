@@ -72,3 +72,13 @@ This utilizes a Synapse Authentication (OAuth) client (code motivated by [ShinyO
 <!-- Links -->
 
 [schematic]: https://github.com/Sage-Bionetworks/schematic/tree/develop
+
+## Contributors
+
+Main contributors and developers:
+
+- [Xengie Doan](https://github.com/xdoan)
+- [Milen Nikolov](https://github.com/milen-sage)
+- [Rongrong Chai](https://github.com/rrchai)
+- [Sujay Patil](https://github.com/sujaypatil96)
+- [Robert Allaway](https://github.com/allaway)
