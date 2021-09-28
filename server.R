@@ -10,7 +10,7 @@ shinyServer(function(input, output, session) {
     return()
   }
   redirect_url <- paste0(
-    api$access, "?", "redirect_uri=", APP_URL, "&grant_type=",
+    api$access, "?", "redirect_uri=", app_url, "&grant_type=",
     "authorization_code", "&code=", params$code
   )
   # get the access_token and userinfo token
