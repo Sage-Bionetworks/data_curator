@@ -65,13 +65,11 @@ Use the app configuration file `www/config.json` to adapt this app to your DCC.
 
 ---
 
-### Authentication
+## Authentication
 
 This utilizes a Synapse Authentication (OAuth) client (code motivated by [ShinyOAuthExample](https://github.com/brucehoff/ShinyOAuthExample) and [app.R](https://gist.github.com/jcheng5/44bd750764713b5a1df7d9daf5538aea). Each application is required to have its own OAuth client as these clients cannot be shared between one another. View instructions [here](https://docs.synapse.org/articles/using_synapse_as_an_oauth_server.html) to learn how to request a client. Once you obtain the `client_id` and `client_secret` make sure to add it to the configuration yaml file.
 
-<!-- Links -->
-
-[schematic]: https://github.com/Sage-Bionetworks/schematic/tree/develop
+---
 
 ## Contributors
 
@@ -82,3 +80,8 @@ Main contributors and developers:
 - [Rongrong Chai](https://github.com/rrchai)
 - [Sujay Patil](https://github.com/sujaypatil96)
 - [Robert Allaway](https://github.com/allaway)
+
+
+<!-- Links -->
+
+[schematic]: https://github.com/Sage-Bionetworks/schematic/tree/develop
