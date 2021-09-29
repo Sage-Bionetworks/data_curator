@@ -199,37 +199,26 @@ shinyServer(function(input, output, session) {
         synStore_obj,
         folder_synID
       )
-      # if there isn't an existing manifest make a new one
-      if (existing_manifestID == "") {
-        # get file list in selected folder
-        # don't put in the observation of folder dropdown
-        # it will crash if users switch folders too often
-        file_list <- synapse_driver$getFilesInStorageDataset(
-          synStore_obj,
-          folder_synID
+      
+      # get file list in selected folder
+      # don't put in the observation of folder dropdown
+      # it will crash if users switch folders too often
+      file_list <- synapse_driver$getFilesInStorageDataset(
+        synStore_obj,
+        folder_synID
+      )
+      datatype_list$files <<- list2Vector(file_list)
+
+      manifest_url <-
+        metadata_model$getModelManifest(paste0(config$community, " ", input$dropdown_template),
+          template_schema_name,
+          filenames = as.list(names(datatype_list$files)),
+          datasetId = folder_synID
         )
-        datatype_list$files <<- list2Vector(file_list)
 
-        manifest_url <-
-          metadata_model$getModelManifest(paste0(config$community, " ", input$dropdown_template),
-            template_schema_name,
-            filenames = as.list(names(datatype_list$files)),
-            datasetId = folder_synID
-          )
-
-        # make sure not scalar if length of list is 1 in R
-        # add in the step to convert names later
-      } else {
-        # if the manifest already exists
-        manifest_entity <- syn_get(existing_manifestID)
-        manifest_url <- metadata_model$populateModelManifest(paste0(
-          config$community,
-          " ", input$dropdown_template
-        ), manifest_entity$path, template_schema_name)
-      }
-
+      # generate link
       output$text_download <- renderUI({
-        tags$a(href = manifest_url, manifest_url, target = "_blank") ### add link to data dictionary when we have it ###
+        tags$a(href = manifest_url, manifest_url, target = "_blank") 
       })
     }
 
