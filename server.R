@@ -333,7 +333,7 @@ shinyServer(function(input, output, session) {
   observeEvent(input$btn_submit, {
     # loading screen for submitting data
     dcWaiter("show", msg = "Submitting...")
-  
+
     dir.create("./tmp", showWarnings = FALSE)
 
     # reads file csv again
