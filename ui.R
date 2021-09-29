@@ -92,7 +92,7 @@ ui <- shinydashboardPlus::dashboardPage(
     tags$head(
       tags$style(sass(sass_file("www/scss/main.scss"))),
       singleton(includeScript("www/js/readCookie.js")),
-      tags$script(htmlwidgets::JS("setTimeout(function(){history.pushState({}, 'Page Title', window.location.pathname);},2000);"))
+      tags$script(htmlwidgets::JS("setTimeout(function(){history.pushState({}, 'Data Curator', window.location.pathname);},2000);"))
     ),
     use_notiflix_report(),
     use_waiter(),
