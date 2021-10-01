@@ -2,7 +2,7 @@ from schematic.models.metadata import MetadataModel
 from schematic import CONFIG
 
 
-config = CONFIG.load_config("config.yml")
+config = CONFIG.load_config("schematic/config.yml")
 
 inputMModelLocation = CONFIG["model"]["input"]["location"]
 inputMModelLocationType = CONFIG["model"]["input"]["file_type"]
