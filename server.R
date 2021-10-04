@@ -262,7 +262,7 @@ shinyServer(function(input, output, session) {
       # output error messages as data table if it is invalid value type
       # render empty if error is not "invaid value" type - ifelse() will not work
       if (valRes$errorType == "Invalid Value") {
-        DTableServer("tbl_validate", valRes$errorDT,
+        DTableServer("tbl_validate", valRes$errorDT, rownames = FALSE,
           options = list(
             pageLength = 50, scrollX = TRUE,
             scrollY = min(50 * length(annotation_status), 400), lengthChange = FALSE,
