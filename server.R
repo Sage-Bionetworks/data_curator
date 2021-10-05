@@ -215,7 +215,8 @@ shinyServer(function(input, output, session) {
           metadata_model$getModelManifest(paste0(config$community, " ", input$dropdown_template),
             template_schema_name,
             filenames = as.list(names(datatype_list$files)),
-            datasetId = folder_synID
+            datasetId = folder_synID,
+            useAnnotations = T
           )
 
         # make sure not scalar if length of list is 1 in R
