@@ -29,10 +29,10 @@ Follow the steps below to make sure the _Data Curator App_ is fully setup to wor
 
 ### Install Dependencies (R)
 
-To install dependencies, `cd` to your repository directory, open R (e.g. run `R`) and run the `hydrate` command: 
+To install dependencies, `cd` to your repository directory, open R (e.g. run `R`) and run the `restore` command: 
 
 ```
-renv::hydrate()
+renv::restore()
 ```
 
 ### Schematic Setup
