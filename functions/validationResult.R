@@ -67,18 +67,19 @@ validationResult <- function(valRes, template, inFile) {
       )
 
       # collapse similiar errors with one row
-      errorDT <- errorDT %>% 
-        mutate(Options = gsub("^'.*?'(.*)", "\\1", Error)) %>% 
+      errorDT <- errorDT %>%
+        mutate(Options = gsub("^'.*?'(.*)", "\\1", Error)) %>%
         group_by(Column, Options) %>%
         summarise(
           n = n_distinct(Value),
-          Row=str_c(unique(Row), collapse=", "),
-          Value=str_c(unique(Value), collapse=", "),
-          .groups = 'drop') %>%
+          Row = str_c(unique(Row), collapse = ", "),
+          Value = str_c(unique(Value), collapse = ", "),
+          .groups = "drop"
+        ) %>%
         mutate(
-          Options=ifelse(n > 1, str_replace(Options, "^ is", " are"), Options),
-          Error=str_c(sQuote(Value), Options)
-          ) %>%
+          Options = ifelse(n > 1, str_replace(Options, "^ is", " are"), Options),
+          Error = str_c(sQuote(Value), Options)
+        ) %>%
         ungroup() %>%
         dplyr::select(Row, Column, Value, Error)
 
@@ -86,7 +87,6 @@ validationResult <- function(valRes, template, inFile) {
       errorDT <- errorDT[order(match(errorDT$Column, colnames(inFile))), ]
       # TODO: to reduce parameter, sort just based on alphabetic
       # errorDT <- errorDT[order(errorDT$Column),]
-
     } else {
       validation_res <- "valid"
       errorType <- "No Error"

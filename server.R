@@ -199,7 +199,7 @@ shinyServer(function(input, output, session) {
         synStore_obj,
         folder_synID
       )
-      
+
       # get file list in selected folder
       # don't put in the observation of folder dropdown
       # it will crash if users switch folders too often
@@ -218,7 +218,7 @@ shinyServer(function(input, output, session) {
 
       # generate link
       output$text_download <- renderUI({
-        tags$a(href = manifest_url, manifest_url, target = "_blank") 
+        tags$a(href = manifest_url, manifest_url, target = "_blank")
       })
     }
 
@@ -262,10 +262,11 @@ shinyServer(function(input, output, session) {
       # output error messages as data table if it is invalid value type
       # render empty if error is not "invaid value" type - ifelse() will not work
       if (valRes$errorType == "Invalid Value") {
-        DTableServer("tbl_validate", valRes$errorDT, rownames = FALSE, filter = "none",
+        DTableServer("tbl_validate", valRes$errorDT,
+          rownames = FALSE, filter = "none",
           options = list(
             pageLength = 50, scrollX = TRUE,
-            scrollY = min(50 * length(annotation_status), 400), lengthChange = FALSE,
+            scrollY = min(50 * nrow(valRes$errorDT), 400), lengthChange = FALSE,
             info = FALSE, searching = FALSE
           )
         )
