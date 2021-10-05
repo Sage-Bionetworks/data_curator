@@ -370,7 +370,8 @@ shinyServer(function(input, output, session) {
       logjs("haha6")
       manifest_id <- synapse_driver$associateMetadataWithFiles(
         synStore_obj,
-        "./files/synapse_storage_manifest.csv", folder_synID
+        "./files/synapse_storage_manifest.csv", folder_synID,
+        useSchemaLabel = FALSE
       )
       logjs("haha7")
       manifest_path <- paste0("synapse.org/#!Synapse:", manifest_id)
@@ -403,7 +404,8 @@ shinyServer(function(input, output, session) {
       # associates metadata with data and returns manifest id
       manifest_id <- synapse_driver$associateMetadataWithFiles(
         synStore_obj,
-        "./files/synapse_storage_manifest.csv", folder_synID
+        "./files/synapse_storage_manifest.csv", folder_synID,
+        useSchemaLabel = FALSE
       )
       print(manifest_id)
       manifest_path <- paste0("synapse.org/#!Synapse:", manifest_id)
