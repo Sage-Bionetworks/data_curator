@@ -23,8 +23,6 @@ suppressPackageStartupMessages({
   library(r2d3)
 })
 
-# APP_URL <- "https://shinypro.synapse.org/users/spatil/HTAN-oauth/"
-
 has_auth_code <- function(params) {
   # params is a list object containing the parsed URL parameters. Return TRUE if
   # based on these parameters, it looks like auth code is present that we can
@@ -35,17 +33,20 @@ has_auth_code <- function(params) {
 
 oauth_client <- yaml.load_file("config.yaml")
 
-client_id <- toString(oauth_client$client_id)
-client_secret <- oauth_client$client_secret
-APP_URL <- oauth_client$APP_URL
-if (is.null(client_id)) stop("config.yaml is missing client_id")
-if (is.null(client_secret)) stop("config.yaml is missing client_secret")
-if (is.null(APP_URL)) stop("config.yaml is missing client_secret")
+client_id <- toString(oauth_client$CLIENT_ID)
+client_secret <- toString(oauth_client$CLIENT_SECRET)
+app_url <- toString(oauth_client$APP_URL)
+conda_name <- toString(oauth_client$CONDA_ENV_NAME)
+
+if (is.null(client_id)) stop("config.yaml is missing CLIENT_ID")
+if (is.null(client_secret)) stop("config.yaml is missing CLIENT_SECRET")
+if (is.null(app_url)) stop("config.yaml is missing APP_URL")
+if (is.null(conda_name)) stop("config.yaml is missing CONDA_ENV_NAME")
 
 app <- oauth_app("shinysynapse",
   key = client_id,
   secret = client_secret,
-  redirect_uri = APP_URL
+  redirect_uri = app_url
 )
 
 # These are the user info details ('claims') requested from Synapse:
@@ -79,7 +80,7 @@ scope <- "openid view download modify"
 
 # Activate conda env
 # Don't necessarily have to set `RETICULATE_PYTHON` env variable
-reticulate::use_condaenv("schematic_dev")
+reticulate::use_condaenv(conda_name)
 
 # Import functions/modules
 source_files <- list.files(c("functions", "modules"), pattern = "*\\.R$", recursive = TRUE, full.names = TRUE)
