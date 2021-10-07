@@ -183,11 +183,6 @@ ui <- shinydashboardPlus::dashboardPage(
                   DTableUI("tbl_dashboard_validate"),
                   helpText("If there are any invalid files, please download the invalid files from synapse and validate the files in the DCA again.")
                 )
-              ),
-              tabPanel(
-                "Uploaded Data",
-                p(class = "tab-title", "Progress of Uploaded Data in Synapse"),
-                uploadDataReqTreeUI("upload_tree")
               )
             )
           )
