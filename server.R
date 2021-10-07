@@ -10,7 +10,7 @@ shinyServer(function(input, output, session) {
     return()
   }
   redirect_url <- paste0(
-    api$access, "?", "redirect_uri=", APP_URL, "&grant_type=",
+    api$access, "?", "redirect_uri=", app_url, "&grant_type=",
     "authorization_code", "&code=", params$code
   )
   # get the access_token and userinfo token
@@ -345,37 +345,26 @@ shinyServer(function(input, output, session) {
         synStore_obj,
         folder_synID
       )
-      # if there isn't an existing manifest make a new one
-      if (existing_manifestID == "") {
-        # get file list in selected folder
-        # don't put in the observation of folder dropdown
-        # it will crash if users switch folders too often
-        file_list <- synapse_driver$getFilesInStorageDataset(
-          synStore_obj,
-          folder_synID
+
+      # get file list in selected folder
+      # don't put in the observation of folder dropdown
+      # it will crash if users switch folders too often
+      file_list <- synapse_driver$getFilesInStorageDataset(
+        synStore_obj,
+        folder_synID
+      )
+      datatype_list$files <<- list2Vector(file_list)
+
+      manifest_url <-
+        metadata_model$getModelManifest(paste0(config$community, " ", input$dropdown_template),
+          template_schema_name,
+          filenames = as.list(names(datatype_list$files)),
+          datasetId = folder_synID
         )
-        datatype_list$files <<- list2Vector(file_list)
 
-        manifest_url <-
-          metadata_model$getModelManifest(paste0(config$community, " ", input$dropdown_template),
-            template_schema_name(),
-            filenames = as.list(names(datatype_list$files)),
-            datasetId = folder_synID
-          )
-
-        # make sure not scalar if length of list is 1 in R
-        # add in the step to convert names later
-      } else {
-        # if the manifest already exists
-        manifest_entity <- syn_get(existing_manifestID)
-        manifest_url <- metadata_model$populateModelManifest(paste0(
-          config$community,
-          " ", input$dropdown_template
-        ), manifest_entity$path, template_schema_name())
-      }
-
+      # generate link
       output$text_download <- renderUI({
-        tags$a(href = manifest_url, manifest_url, target = "_blank") ### add link to data dictionary when we have it ###
+        tags$a(href = manifest_url, manifest_url, target = "_blank") 
       })
     }
 
@@ -480,20 +469,22 @@ shinyServer(function(input, output, session) {
     # loading screen for submitting data
     dcWaiter("show", msg = "Submitting...")
 
+    dir.create("./tmp", showWarnings = FALSE)
+
     # reads file csv again
     submit_data <- csvInfileServer("inputFile")$data()
-    # IF an assay component selected (define assay components) note for future
+
+    # If an assay component selected (define assay components) note for future
     # the type to filter (eg assay) on could probably also be a config choice
     assay_schemas <- config$manifest_schemas$display_name[config$manifest_schemas$type == "assay"]
-    # iffolder_ID has not been updated yet
+    # if folder_ID has not been updated yet
     if (is.null(folder_synID)) folder_synID <<- datatype_list$folders[[input$dropdown_folder]]
-    # and adds entityID, saves it as synapse_storage_manifest.csv, then associates
-    # with synapse files
+
     if (input$dropdown_template %in% assay_schemas) {
       # make into a csv or table for assay components already has entityId
       if ("entityId" %in% colnames(submit_data)) {
         write.csv(submit_data,
-          file = "./files/synapse_storage_manifest.csv",
+          file = "./tmp/synapse_storage_manifest.csv",
           quote = TRUE, row.names = FALSE, na = ""
         )
       } else {
@@ -501,12 +492,14 @@ shinyServer(function(input, output, session) {
         datatype_list$files <<- list2Vector(file_list)
 
         # better filename checking is needed
-        files_df <- stack(datatype_list$files) # crash if no file existing
+        # TODO: crash if no file existing
+        files_df <- stack(datatype_list$files)
+        # adds entityID, saves it as synapse_storage_manifest.csv, then associates with synapse files
         colnames(files_df) <- c("entityId", "Filename")
         files_entity <- inner_join(submit_data, files_df, by = "Filename")
 
         write.csv(files_entity,
-          file = "./files/synapse_storage_manifest.csv",
+          file = "./tmp/synapse_storage_manifest.csv",
           quote = TRUE, row.names = FALSE, na = ""
         )
       }
@@ -514,12 +507,11 @@ shinyServer(function(input, output, session) {
       # associates metadata with data and returns manifest id
       manifest_id <- synapse_driver$associateMetadataWithFiles(
         synStore_obj,
-        "./files/synapse_storage_manifest.csv", folder_synID
+        "./tmp/synapse_storage_manifest.csv", folder_synID
       )
       manifest_path <- paste0("synapse.org/#!Synapse:", manifest_id)
       # if no error
       if (startsWith(manifest_id, "syn") == TRUE) {
-        rm("./files/synapse_storage_manifest.csv")
         dcWaiter("hide")
         nx_report_success("Success!", paste0("Manifest submitted to: ", manifest_path))
 
@@ -534,26 +526,25 @@ shinyServer(function(input, output, session) {
           manifest_id,
           " is not a valid Synapse ID. Try again?"
         )), sleep = 3)
-        rm("/tmp/synapse_storage_manifest.csv")
       }
     } else {
       # if not assay type tempalte
       write.csv(submit_data,
-        file = "./files/synapse_storage_manifest.csv", quote = TRUE,
+        file = "./tmp/synapse_storage_manifest.csv", quote = TRUE,
         row.names = FALSE, na = ""
       )
 
       # associates metadata with data and returns manifest id
       manifest_id <- synapse_driver$associateMetadataWithFiles(
         synStore_obj,
-        "./files/synapse_storage_manifest.csv", folder_synID
+        "./tmp/synapse_storage_manifest.csv", folder_synID
       )
       manifest_path <- paste0("synapse.org/#!Synapse:", manifest_id)
 
       # if uploaded provided valid synID message
       if (startsWith(manifest_id, "syn") == TRUE) {
+        dcWaiter("hide")
         nx_report_success("Success!", paste0("Manifest submitted to: ", manifest_path))
-        rm("./files/synapse_storage_manifest.csv")
 
         # clear inputs
         sapply(clean_tags, FUN = hide)
@@ -575,8 +566,9 @@ shinyServer(function(input, output, session) {
           "Uh oh, looks like something went wrong!",
           manifest_id, " is not a valid Synapse ID. Try again?"
         )), sleep = 3)
-        rm("/tmp/synapse_storage_manifest.csv")
       }
     }
+    # delete tmp manifest
+    unlink("./tmp/synapse_storage_manifest.csv")
   })
 })
