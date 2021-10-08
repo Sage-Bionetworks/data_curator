@@ -95,25 +95,6 @@ shinyServer(function(input, output, session) {
     switchTabServer(id = paste0("switchTab", i), tabId = "tabs", tab = reactive(input$tabs)(), tabList = tabs_list, parent = session)
   })
 
-  ######## Update Folder List ########
-  lapply(c("header_dropdown_", "dropdown_"), function(x) {
-    observeEvent(ignoreInit = TRUE, input[[paste0(x, "project")]], {
-      # get synID of selected project
-      projectID <- datatype_list$projects[[input[[paste0(x, "project")]]]]
-
-      # gets folders per project
-      folder_list <- synapse_driver$getStorageDatasetsInProject(synStore_obj, projectID) %>% list2Vector()
-
-      if (x == "dropdown_") {
-        project_synID <<- projectID
-        datatype_list$folders <<- folder_list
-      }
-
-      # updates foldernames
-      updateSelectInput(session, paste0(x, "folder"), choices = sort(names(folder_list)))
-    })
-  })
-
   ######## Header Dropdown Button ########
   # Adjust header selection dropdown based on tabs
   observe({
@@ -155,12 +136,34 @@ shinyServer(function(input, output, session) {
 
   observeEvent(input$update_confirm, {
     if (input$update_confirm == TRUE) {
-      lapply(datatypes, function(x) {
+      lapply(c("project", "template"), function(x) {
         updateSelectInput(session, paste0("dropdown_", x),
           selected = input[[paste0("header_dropdown_", x)]]
         )
       })
     }
+  })
+
+  ######## Update Folder List ########
+  lapply(c("header_dropdown_", "dropdown_"), function(x) {
+    observeEvent(ignoreInit = TRUE, input[[paste0(x, "project")]], {
+      # get synID of selected project
+      projectID <- datatype_list$projects[[input[[paste0(x, "project")]]]]
+
+      # gets folders per project
+      folder_list <- synapse_driver$getStorageDatasetsInProject(synStore_obj, projectID) %>% list2Vector()
+
+      # updates foldernames
+      updateSelectInput(session, paste0(x, "folder"), choices = sort(names(folder_list)))
+
+      if (x == "dropdown_") {
+        project_synID <<- projectID
+        datatype_list$folders <<- folder_list
+      }
+
+      req(input$update_confirm)
+      updateSelectInput(session, "dropdown_folder", selected = input[["header_dropdown_folder"]])
+    })
   })
 
   ######## Update Template ########
