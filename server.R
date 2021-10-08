@@ -39,6 +39,7 @@ shinyServer(function(input, output, session) {
   folder_synID <- NULL # selected foler synapse ID
   template_schema_name <- NULL # selected template schema name
 
+  isUpdateFolder <- reactiveVal(FALSE)  
   datatype_list <- list(projects = NULL, folders = NULL, manifests = template_namedList, files = NULL)
 
   tabs_list <- c("tab_instructions", "tab_data", "tab_template", "tab_upload")
@@ -95,25 +96,6 @@ shinyServer(function(input, output, session) {
     switchTabServer(id = paste0("switchTab", i), tabId = "tabs", tab = reactive(input$tabs)(), tabList = tabs_list, parent = session)
   })
 
-  ######## Update Folder List ########
-  lapply(c("header_dropdown_", "dropdown_"), function(x) {
-    observeEvent(ignoreInit = TRUE, input[[paste0(x, "project")]], {
-      # get synID of selected project
-      projectID <- datatype_list$projects[[input[[paste0(x, "project")]]]]
-
-      # gets folders per project
-      folder_list <- synapse_driver$getStorageDatasetsInProject(synStore_obj, projectID) %>% list2Vector()
-
-      if (x == "dropdown_") {
-        project_synID <<- projectID
-        datatype_list$folders <<- folder_list
-      }
-
-      # updates foldernames
-      updateSelectInput(session, paste0(x, "folder"), choices = sort(names(folder_list)))
-    })
-  })
-
   ######## Header Dropdown Button ########
   # Adjust header selection dropdown based on tabs
   observe({
@@ -123,16 +105,6 @@ shinyServer(function(input, output, session) {
       show("header_selection_dropdown")
       addClass(id = "header_selection_dropdown", class = "open")
     }
-  })
-
-  lapply(datatypes, function(x) {
-    selector <- paste0("header_dropdown_", x)
-    observeEvent(input[[selector]], {
-      if (nchar(input[[selector]]) > 20) {
-        short <- paste0(substr(input[[selector]], 1, 20), " ...")
-        runjs(paste0("$('#header_content_", x, " .item').text('", short, "');"))
-      }
-    })
   })
 
   lapply(datatypes, function(x) {
@@ -154,13 +126,38 @@ shinyServer(function(input, output, session) {
   })
 
   observeEvent(input$update_confirm, {
-    if (input$update_confirm == TRUE) {
-      lapply(datatypes, function(x) {
-        updateSelectInput(session, paste0("dropdown_", x),
-          selected = input[[paste0("header_dropdown_", x)]]
-        )
-      })
-    }
+
+    req(input$update_confirm == TRUE)
+    isUpdateFolder(TRUE)
+    lapply(datatypes, function(x) {
+      updateSelectInput(session, paste0("dropdown_", x),
+        selected = input[[paste0("header_dropdown_", x)]]
+      )
+    })
+  })
+
+  ######## Update Folder List ########
+  lapply(c("header_dropdown_", "dropdown_"), function(x) {
+    observeEvent(ignoreInit = TRUE, input[[paste0(x, "project")]], {
+      # get synID of selected project
+      projectID <- datatype_list$projects[[input[[paste0(x, "project")]]]]
+
+      # gets folders per project
+      folder_list <- synapse_driver$getStorageDatasetsInProject(synStore_obj, projectID) %>% list2Vector()
+
+      # updates foldernames
+      updateSelectInput(session, paste0(x, "folder"), choices = sort(names(folder_list)))
+
+      if (x == "dropdown_") {
+        project_synID <<- projectID
+        datatype_list$folders <<- folder_list
+      }
+
+      req(isUpdateFolder() == TRUE)
+      # sync with header dropdown
+      updateSelectInput(session, "dropdown_folder", selected = input[["header_dropdown_folder"]])
+      isUpdateFolder(FALSE)
+    })
   })
 
   ######## Update Template ########
