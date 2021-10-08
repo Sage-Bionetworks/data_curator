@@ -37,7 +37,7 @@ shinyServer(function(input, output, session) {
   synStore_obj <- NULL # gets list of projects they have access to
   project_synID <- NULL # selected project synapse ID
   folder_synID <- NULL # selected foler synapse ID
-  template_schema_name <- NULL # selected template schema name
+  template_schema_name <- reactiveVal(NULL) # selected template schema name
 
   isUpdateFolder <- reactiveVal(FALSE)
   datatype_list <- list(projects = NULL, folders = NULL, manifests = template_namedList, files = NULL)
@@ -162,7 +162,7 @@ shinyServer(function(input, output, session) {
   ######## Update Template ########
   # update selected schema template name
   observeEvent(input$dropdown_template, {
-    template_schema_name <<- template_namedList[match(input$dropdown_template, names(template_namedList))]
+    template_schema_name(template_namedList[match(input$dropdown_template, names(template_namedList))])
   })
 
   # hide tags when users select new template
@@ -177,10 +177,8 @@ shinyServer(function(input, output, session) {
   )
 
   ######## Template Google Sheet Link ########
-  # warning message if folder is empty and data type is assay
   observeEvent(input$dropdown_folder, {
-
-    hide("div_download_warn")
+    
     req(input[["tabs"]]== "tab_template")
   
     dcWaiter("show", msg = paste0("Getting files in ", input$dropdown_folder, "..."))
@@ -195,10 +193,17 @@ shinyServer(function(input, output, session) {
       folder_synID
     )
     datatype_list$files <<- list2Vector(file_list)
-  
     dcWaiter("hide")
+  })
 
-    if (length(datatype_list$files) == 0) {
+  # display warning message if folder is empty and data type is assay
+  observeEvent(c(input$dropdown_folder, template_schema_name()), {
+    
+    req(input[["tabs"]]== "tab_template")
+    
+    hide("div_download_warn")
+    template_type <- config$manifest_schemas$type[match(template_schema_name(), template_namedList)]
+    req(length(datatype_list$files) == 0 & template_type == "assay")
       output$text_download_warn <- renderUI({
         tagList(
           br(),
@@ -214,8 +219,7 @@ shinyServer(function(input, output, session) {
           )
         )
       })
-      show("div_download_warn")
-    }
+    show("div_download_warn")
   })
 
   observeEvent(input$btn_download, {
@@ -225,7 +229,7 @@ shinyServer(function(input, output, session) {
 
     manifest_url <-
       metadata_model$getModelManifest(paste0(config$community, " ", input$dropdown_template),
-        template_schema_name,
+        template_schema_name(),
         filenames = as.list(names(datatype_list$files)),
         datasetId = folder_synID
       )
