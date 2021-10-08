@@ -6,7 +6,7 @@ DTableUI <- function(id) {
 }
 
 DTableServer <- function(id, data,
-                         rownames = FALSE, caption = NULL,
+                         rownames = TRUE, caption = NULL, filter = "top",
                          options = list(lengthChange = FALSE, scrollX = TRUE),
                          highlight = NULL, hightlight.col = NULL, hightlight.value = NULL) {
   if (!is.null(highlight)) {
@@ -21,6 +21,7 @@ DTableServer <- function(id, data,
   df <- datatable(data,
     caption = caption,
     rownames = rownames,
+    filter = filter,
     options = options
   )
 
