@@ -264,6 +264,7 @@ shinyServer(function(input, output, session) {
       if (valRes$errorType == "Invalid Value") {
         DTableServer("tbl_validate", valRes$errorDT,
           rownames = FALSE, filter = "none",
+          caption = "View all the error(s) highlighted in the preview table above",
           options = list(
             pageLength = 50, scrollX = TRUE,
             scrollY = min(50 * nrow(valRes$errorDT), 400), lengthChange = FALSE,
