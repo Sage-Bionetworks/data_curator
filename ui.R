@@ -124,6 +124,7 @@ ui <- shinydashboardPlus::dashboardPage(
         h2("Set Dataset and Metadata Template for Curation"),
         fluidRow(
           box(
+            id = "box_pick_project",
             status = "primary",
             width = 6,
             title = "Choose a Project and Folder: ",
@@ -142,6 +143,7 @@ ui <- shinydashboardPlus::dashboardPage(
             )
           ),
           box(
+            id = "box_pick_template",
             status = "primary",
             width = 6,
             title = "Choose a Metadata Template Type: ",
@@ -168,6 +170,11 @@ ui <- shinydashboardPlus::dashboardPage(
               class = "btn-primary-color"
             ),
             hidden(
+              div(
+                id = "div_download_warn",
+                height = "100%",
+                htmlOutput("text_download_warn")
+              ),
               div(
                 id = "div_download",
                 height = "100%",

@@ -181,6 +181,44 @@ shinyServer(function(input, output, session) {
   )
 
   ######## Template Google Sheet Link ########
+
+  observeEvent(c(input[["tabs"]], input$dropdown_folder), {
+    req(input[["tabs"]] == "tab_template")
+
+    dcWaiter("show", msg = paste0("Getting files in ", input$dropdown_folder, "..."))
+    # update selected folder ID
+    folder_synID <<- datatype_list$folders[[input$dropdown_folder]]
+
+    # get file list in selected folder
+    # don't put in the observation of folder dropdown
+    # it will crash if users switch folders too often
+    file_list <- synapse_driver$getFilesInStorageDataset(
+      synStore_obj,
+      folder_synID
+    )
+    datatype_list$files <<- list2Vector(file_list)
+    dcWaiter("hide")
+
+    if (length(datatype_list$files) == 0) {
+      show("div_download_warn")
+      output$text_download_warn <- renderUI({
+        tagList(
+          br(),
+          span(class="warn_msg", 
+            HTML(paste0(
+              sQuote(input$dropdown_folder), " folder is empty, 
+              please upload your data before generating manifest.",
+              "<br>", sQuote(input$dropdown_template), 
+              " requires data files to be uploaded prior generating and submitting templates.",
+              "<br>", "Filling in a template before uploading your data, 
+              may result in errors and delays in your data submission later")
+            )
+          )
+        )
+      })
+    }
+  })
+
   observeEvent(input$btn_download, {
 
     # loading screen for template link generation
@@ -189,38 +227,26 @@ shinyServer(function(input, output, session) {
     # update selected folder ID
     folder_synID <<- datatype_list$folders[[input$dropdown_folder]]
 
-    if (is.null(input$dropdown_template)) {
-      output$text_download <- renderUI({
-        tags$span(class = "error_msg", HTML("Please <b>select a template</b> from the 'Select your Dataset' tab !"))
-      })
-    } else {
-      # checks if a manifest already exists
-      existing_manifestID <- synapse_driver$getDatasetManifest(
-        synStore_obj,
-        folder_synID
+    # get file list in selected folder
+    # don't put in the observation of folder dropdown
+    # it will crash if users switch folders too often
+    file_list <- synapse_driver$getFilesInStorageDataset(
+      synStore_obj,
+      folder_synID
+    )
+    datatype_list$files <<- list2Vector(file_list)
+
+    manifest_url <-
+      metadata_model$getModelManifest(paste0(config$community, " ", input$dropdown_template),
+        template_schema_name,
+        filenames = as.list(names(datatype_list$files)),
+        datasetId = folder_synID
       )
 
-      # get file list in selected folder
-      # don't put in the observation of folder dropdown
-      # it will crash if users switch folders too often
-      file_list <- synapse_driver$getFilesInStorageDataset(
-        synStore_obj,
-        folder_synID
-      )
-      datatype_list$files <<- list2Vector(file_list)
-
-      manifest_url <-
-        metadata_model$getModelManifest(paste0(config$community, " ", input$dropdown_template),
-          template_schema_name,
-          filenames = as.list(names(datatype_list$files)),
-          datasetId = folder_synID
-        )
-
-      # generate link
-      output$text_download <- renderUI({
-        tags$a(href = manifest_url, manifest_url, target = "_blank")
-      })
-    }
+    # generate link
+    output$text_download <- renderUI({
+      tags$a(href = manifest_url, manifest_url, target = "_blank")
+    })
 
     dcWaiter("hide", sleep = 1)
     # display link
