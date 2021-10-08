@@ -165,17 +165,6 @@ shinyServer(function(input, output, session) {
     template_schema_name(template_namedList[match(input$dropdown_template, names(template_namedList))])
   })
 
-  # hide tags when users select new template
-  observeEvent(
-    {
-      input$dropdown_folder
-      input$dropdown_template
-    },
-    {
-      sapply(clean_tags, FUN = hide)
-    }
-  )
-
   ######## Template Google Sheet Link ########
   observeEvent(input$dropdown_folder, {
     
@@ -198,9 +187,12 @@ shinyServer(function(input, output, session) {
 
   # display warning message if folder is empty and data type is assay
   observeEvent(c(input$dropdown_folder, template_schema_name()), {
-    
+  
+    # hide tags when users select new template
+    sapply(clean_tags, FUN = hide)
+  
     req(input[["tabs"]]== "tab_template")
-    
+
     hide("div_download_warn")
     template_type <- config$manifest_schemas$type[match(template_schema_name(), template_namedList)]
     req(length(datatype_list$files) == 0 & template_type == "assay")
@@ -265,7 +257,7 @@ shinyServer(function(input, output, session) {
       silent = TRUE,
       annotation_status <- metadata_model$validateModelManifest(
         inFile$raw()$datapath,
-        template_schema_name
+        template_schema_name()
       )
     )
 
@@ -326,7 +318,7 @@ shinyServer(function(input, output, session) {
     filled_manifest <- metadata_model$populateModelManifest(paste0(
       config$community,
       " ", input$dropdown_template
-    ), inFile$raw()$datapath, template_schema_name)
+    ), inFile$raw()$datapath, template_schema_name())
 
     # rerender and change button to link
     output$val_gsheet <- renderUI({
