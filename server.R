@@ -35,7 +35,7 @@ shinyServer(function(input, output, session) {
   names(template_namedList) <- config$manifest_schemas$display_name
 
   synStore_obj <- NULL # gets list of projects they have access to
-  project_synID <- NULL # selected project synapse ID
+  project_synID <- reactiveVal() # selected project synapse ID
   folder_synID <- NULL # selected foler synapse ID
   template_schema_name <- NULL # selected template schema name
 
@@ -124,14 +124,22 @@ shinyServer(function(input, output, session) {
     )
   })
 
-  observeEvent(input$update_confirm, {
-    if (input$update_confirm == TRUE) {
-      lapply(c("project", "template"), function(x) {
+  observe({
+    input$update_confirm
+    req(input$update_confirm == TRUE)
+    isolate(
+      updateSelectInput(session, "dropdown_project", 
+        selected = input[["header_dropdown_project"]])
+    )
+    # wait folder list updating finish first
+    project_synID()
+    isolate({
+      lapply(c("folder", "template"), function(x) {
         updateSelectInput(session, paste0("dropdown_", x),
           selected = input[[paste0("header_dropdown_", x)]]
         )
       })
-    }
+    })
   })
 
   ######## Update Folder List ########
@@ -147,12 +155,9 @@ shinyServer(function(input, output, session) {
       updateSelectInput(session, paste0(x, "folder"), choices = sort(names(folder_list)))
 
       if (x == "dropdown_") {
-        project_synID <<- projectID
+        project_synID(projectID)
         datatype_list$folders <<- folder_list
       }
-
-      req(input$update_confirm)
-      updateSelectInput(session, "dropdown_folder", selected = input[["header_dropdown_folder"]])
     })
   })
 
