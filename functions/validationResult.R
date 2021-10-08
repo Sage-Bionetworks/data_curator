@@ -66,14 +66,14 @@ validationResult <- function(valRes, template, inFile) {
         Error = sapply(valRes, function(i) i[[3]])
       )
 
-      # collapse similiar errors with one row
+      # collapse similiar errors into one row
       errorDT <- errorDT %>%
         mutate(Options = gsub("^'.*?'(.*)", "\\1", Error)) %>%
         group_by(Column, Options) %>%
         summarise(
           n = n_distinct(Value),
-          Row = str_c(unique(Row), collapse = ", "),
-          Value = str_c(unique(Value), collapse = ", "),
+          Row = str_c(unique(Row), collapse = ", ") %>% TruncateEllipsis(10, ", "),
+          Value = str_c(unique(Value), collapse = ", ") %>% TruncateEllipsis(10, ", "),
           .groups = "drop"
         ) %>%
         mutate(
