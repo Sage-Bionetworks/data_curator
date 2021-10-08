@@ -108,16 +108,6 @@ shinyServer(function(input, output, session) {
   })
 
   lapply(datatypes, function(x) {
-    selector <- paste0("header_dropdown_", x)
-    observeEvent(input[[selector]], {
-      if (nchar(input[[selector]]) > 20) {
-        short <- paste0(substr(input[[selector]], 1, 20), " ...")
-        runjs(paste0("$('#header_content_", x, " .item').text('", short, "');"))
-      }
-    })
-  })
-
-  lapply(datatypes, function(x) {
     observeEvent(input[[paste0("dropdown_", x)]], {
       updateSelectInput(session, paste0("header_dropdown_", x),
         selected = input[[paste0("dropdown_", x)]]
