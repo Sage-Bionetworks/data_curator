@@ -39,6 +39,7 @@ shinyServer(function(input, output, session) {
   folder_synID <- NULL # selected foler synapse ID
   template_schema_name <- NULL # selected template schema name
 
+  isUpdateFolder <- reactiveVal(FALSE)
   datatype_list <- list(projects = NULL, folders = NULL, manifests = template_namedList, files = NULL)
 
   tabs_list <- c("tab_instructions", "tab_data", "tab_template", "tab_upload")
@@ -135,15 +136,13 @@ shinyServer(function(input, output, session) {
   })
 
   observeEvent(input$update_confirm, {
-    if (input$update_confirm == TRUE) {
-      lapply(c("project", "template"), function(x) {
-        updateSelectInput(session, paste0("dropdown_", x),
-          selected = input[[paste0("header_dropdown_", x)]]
-        )
-      })
-    }
-    logjs(paste0("1----", input[["dropdown_project"]]))
-    logjs(paste0("1----", input[["dropdown_folder"]]))
+    req(input$update_confirm == TRUE)
+    isUpdateFolder(TRUE)
+    lapply(datatypes, function(x) {
+      updateSelectInput(session, paste0("dropdown_", x),
+        selected = input[[paste0("header_dropdown_", x)]]
+      )
+    })
   })
 
   ######## Update Folder List ########
@@ -163,8 +162,10 @@ shinyServer(function(input, output, session) {
         datatype_list$folders <<- folder_list
       }
 
-      req(input$update_confirm)
+      req(isUpdateFolder() == TRUE)
+      # sync with header dropdown
       updateSelectInput(session, "dropdown_folder", selected = input[["header_dropdown_folder"]])
+      isUpdateFolder(FALSE)
     })
   })
 
@@ -187,45 +188,45 @@ shinyServer(function(input, output, session) {
 
   ######## Template Google Sheet Link ########
   # warning message if folder is empty and data type is assay
-  # observeEvent(c(input[["tabs"]], input$dropdown_folder), {
-  #   req(input[["tabs"]] == "tab_template")
+  observeEvent(input$dropdown_folder, {
 
-  #    logjs(paste0("2----", input[["dropdown_project"]]))
-  #   logjs(paste0("2----", input[["dropdown_folder"]]))
-  #   dcWaiter("show", msg = paste0("Getting files in ", input$dropdown_folder, "..."))
-  #   # update selected folder ID
-  #   folder_synID <<- datatype_list$folders[[input$dropdown_folder]]
-
-  #   # get file list in selected folder
-  #   # don't put in the observation of folder dropdown
-  #   # it will crash if users switch folders too often
-  #   file_list <- synapse_driver$getFilesInStorageDataset(
-  #     synStore_obj,
-  #     folder_synID
-  #   )
-  #   datatype_list$files <<- list2Vector(file_list)
+    hide("div_download_warn")
+    req(input[["tabs"]]== "tab_template")
   
-  #   dcWaiter("hide")
+    dcWaiter("show", msg = paste0("Getting files in ", input$dropdown_folder, "..."))
+    # update selected folder ID
+    folder_synID <<- datatype_list$folders[[input$dropdown_folder]]
 
-  #   if (length(datatype_list$files) == 0) {
-  #     show("div_download_warn")
-  #     output$text_download_warn <- renderUI({
-  #       tagList(
-  #         br(),
-  #         span(class="warn_msg", 
-  #           HTML(paste0(
-  #             sQuote(input$dropdown_folder), " folder is empty, 
-  #             please upload your data before generating manifest.",
-  #             "<br>", sQuote(input$dropdown_template), 
-  #             " requires data files to be uploaded prior generating and submitting templates.",
-  #             "<br>", "Filling in a template before uploading your data, 
-  #             may result in errors and delays in your data submission later")
-  #           )
-  #         )
-  #       )
-  #     })
-  #   }
-  # })
+    # get file list in selected folder
+    # don't put in the observation of folder dropdown
+    # it will crash if users switch folders too often
+    file_list <- synapse_driver$getFilesInStorageDataset(
+      synStore_obj,
+      folder_synID
+    )
+    datatype_list$files <<- list2Vector(file_list)
+  
+    dcWaiter("hide")
+
+    if (length(datatype_list$files) == 0) {
+      output$text_download_warn <- renderUI({
+        tagList(
+          br(),
+          span(class="warn_msg", 
+            HTML(paste0(
+              sQuote(input$dropdown_folder), " folder is empty, 
+              please upload your data before generating manifest.",
+              "<br>", sQuote(input$dropdown_template), 
+              " requires data files to be uploaded prior generating and submitting templates.",
+              "<br>", "Filling in a template before uploading your data, 
+              may result in errors and delays in your data submission later")
+            )
+          )
+        )
+      })
+      show("div_download_warn")
+    }
+  })
 
   observeEvent(input$btn_download, {
 
