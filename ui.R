@@ -169,6 +169,11 @@ ui <- shinydashboardPlus::dashboardPage(
             ),
             hidden(
               div(
+                id = "div_download_warn",
+                height = "100%",
+                htmlOutput("text_download_warn")
+              ),
+              div(
                 id = "div_download",
                 height = "100%",
                 htmlOutput("text_download")
