@@ -36,7 +36,7 @@ shinyServer(function(input, output, session) {
 
   synStore_obj <- NULL # gets list of projects they have access to
   project_synID <- NULL # selected project synapse ID
-  folder_synID <- NULL # selected foler synapse ID
+  folder_synID <- reactiveVal("") # selected foler synapse ID
   template_schema_name <- reactiveVal(NULL) # selected template schema name
 
   isUpdateFolder <- reactiveVal(FALSE)
@@ -107,6 +107,7 @@ shinyServer(function(input, output, session) {
     }
   })
 
+  # sync header dropdown with main dropdown
   lapply(datatypes, function(x) {
     observeEvent(input[[paste0("dropdown_", x)]], {
       updateSelectInput(session, paste0("header_dropdown_", x),
@@ -152,10 +153,11 @@ shinyServer(function(input, output, session) {
         datatype_list$folders <<- folder_list
       }
 
-      req(isUpdateFolder() == TRUE)
-      # sync with header dropdown
-      updateSelectInput(session, "dropdown_folder", selected = input[["header_dropdown_folder"]])
-      isUpdateFolder(FALSE)
+      if (isUpdateFolder()) {
+        # sync with header dropdown
+        updateSelectInput(session, "dropdown_folder", selected = input[["header_dropdown_folder"]])
+        isUpdateFolder(FALSE)
+      }
     })
   })
 
@@ -166,51 +168,50 @@ shinyServer(function(input, output, session) {
   })
 
   ######## Template Google Sheet Link ########
-  observeEvent(input$dropdown_folder, {
-    
-    req(input[["tabs"]]== "tab_template")
-  
+  observeEvent(c(input$dropdown_folder, input$tabs), {
+    req(input$tabs == "tab_template")
+    tmp_folder_synID <- datatype_list$folders[[input$dropdown_folder]]
+    req(tmp_folder_synID != folder_synID()) # if folder changes
+
     dcWaiter("show", msg = paste0("Getting files in ", input$dropdown_folder, "..."))
     # update selected folder ID
-    folder_synID <<- datatype_list$folders[[input$dropdown_folder]]
+    folder_synID(tmp_folder_synID)
 
     # get file list in selected folder
-    # don't put in the observation of folder dropdown
-    # it will crash if users switch folders too often
     file_list <- synapse_driver$getFilesInStorageDataset(
       synStore_obj,
-      folder_synID
+      folder_synID()
     )
     datatype_list$files <<- list2Vector(file_list)
     dcWaiter("hide")
   })
 
   # display warning message if folder is empty and data type is assay
-  observeEvent(c(input$dropdown_folder, template_schema_name()), {
-  
+  observeEvent(c(folder_synID(), template_schema_name()), {
+
     # hide tags when users select new template
     sapply(clean_tags, FUN = hide)
-  
-    req(input[["tabs"]]== "tab_template")
 
+    req(input$tabs == "tab_template")
     hide("div_download_warn")
     template_type <- config$manifest_schemas$type[match(template_schema_name(), template_namedList)]
     req(length(datatype_list$files) == 0 & template_type == "assay")
-      output$text_download_warn <- renderUI({
-        tagList(
-          br(),
-          span(class="warn_msg", 
-            HTML(paste0(
-              sQuote(input$dropdown_folder), " folder is empty, 
+    output$text_download_warn <- renderUI({
+      tagList(
+        br(),
+        span(
+          class = "warn_msg",
+          HTML(paste0(
+            sQuote(input$dropdown_folder), " folder is empty,
               please upload your data before generating manifest.",
-              "<br>", sQuote(input$dropdown_template), 
-              " requires data files to be uploaded prior generating and submitting templates.",
-              "<br>", "Filling in a template before uploading your data, 
-              may result in errors and delays in your data submission later")
-            )
-          )
+            "<br>", sQuote(input$dropdown_template),
+            " requires data files to be uploaded prior generating and submitting templates.",
+            "<br>", "Filling in a template before uploading your data,
+              may result in errors and delays in your data submission later"
+          ))
         )
-      })
+      )
+    })
     show("div_download_warn")
   })
 
@@ -223,7 +224,7 @@ shinyServer(function(input, output, session) {
       metadata_model$getModelManifest(paste0(config$community, " ", input$dropdown_template),
         template_schema_name(),
         filenames = as.list(names(datatype_list$files)),
-        datasetId = folder_synID
+        datasetId = folder_synID()
       )
 
     # generate link
@@ -343,7 +344,7 @@ shinyServer(function(input, output, session) {
     # the type to filter (eg assay) on could probably also be a config choice
     assay_schemas <- config$manifest_schemas$display_name[config$manifest_schemas$type == "assay"]
     # if folder_ID has not been updated yet
-    if (is.null(folder_synID)) folder_synID <<- datatype_list$folders[[input$dropdown_folder]]
+    if (folder_synID() == "") folder_synID(datatype_list$folders[[input$dropdown_folder]])
 
     if (input$dropdown_template %in% assay_schemas) {
       # make into a csv or table for assay components already has entityId
@@ -353,7 +354,7 @@ shinyServer(function(input, output, session) {
           quote = TRUE, row.names = FALSE, na = ""
         )
       } else {
-        file_list <- synapse_driver$getFilesInStorageDataset(synStore_obj, folder_synID)
+        file_list <- synapse_driver$getFilesInStorageDataset(synStore_obj, folder_synID())
         datatype_list$files <<- list2Vector(file_list)
 
         # better filename checking is needed
@@ -372,7 +373,7 @@ shinyServer(function(input, output, session) {
       # associates metadata with data and returns manifest id
       manifest_id <- synapse_driver$associateMetadataWithFiles(
         synStore_obj,
-        "./tmp/synapse_storage_manifest.csv", folder_synID
+        "./tmp/synapse_storage_manifest.csv", folder_synID()
       )
       manifest_path <- paste0("synapse.org/#!Synapse:", manifest_id)
       # if no error
@@ -402,7 +403,7 @@ shinyServer(function(input, output, session) {
       # associates metadata with data and returns manifest id
       manifest_id <- synapse_driver$associateMetadataWithFiles(
         synStore_obj,
-        "./tmp/synapse_storage_manifest.csv", folder_synID
+        "./tmp/synapse_storage_manifest.csv", folder_synID()
       )
       manifest_path <- paste0("synapse.org/#!Synapse:", manifest_id)
 
