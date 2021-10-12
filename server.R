@@ -43,7 +43,7 @@ shinyServer(function(input, output, session) {
   datatype_list <- list(projects = NULL, folders = NULL, manifests = template_namedList, files = NULL)
 
   tabs_list <- c("tab_instructions", "tab_data", "tab_template", "tab_upload")
-  clean_tags <- c("div_download", "div_validate", NS("tbl_validate", "table"), "btn_val_gsheet", "btn_submit")
+  clean_tags <- c("div_template", "div_validate", NS("tbl_validate", "table"), "btn_val_gsheet", "btn_submit")
 
   # add box effects
   boxEffect(zoom = TRUE, float = TRUE)
@@ -193,29 +193,25 @@ shinyServer(function(input, output, session) {
     sapply(clean_tags, FUN = hide)
 
     req(input$tabs == "tab_template")
-    hide("div_download_warn")
+    hide("div_template_warn")
     template_type <- config$manifest_schemas$type[match(template_schema_name(), template_namedList)]
     req(length(datatype_list$files) == 0 & template_type == "assay")
-    output$text_download_warn <- renderUI({
-      tagList(
-        br(),
-        span(
-          class = "warn_msg",
-          HTML(paste0(
-            sQuote(input$dropdown_folder), " folder is empty,
-              please upload your data before generating manifest.",
-            "<br>", sQuote(input$dropdown_template),
-            " requires data files to be uploaded prior generating and submitting templates.",
-            "<br>", "Filling in a template before uploading your data,
-              may result in errors and delays in your data submission later"
-          ))
-        )
-      )
-    })
-    show("div_download_warn")
+    warn_text <- paste0(
+      strong(sQuote(input$dropdown_folder)), " folder is empty,
+       please upload your data before generating manifest.",
+      "<br><br>", strong(sQuote(input$dropdown_template)),
+      " requires data files to be uploaded prior generating and submitting templates.",
+      "<br><br>", "Filling in a template before uploading your data,
+       may result in errors and delays in your data submission later."
+    )
+
+    nx_report_warning("Warning", HTML(warn_text))
+    output$text_template_warn <- renderUI(tagList(br(), span(class = "warn_msg", HTML(warn_text))))
+    
+    show("div_template_warn")
   })
 
-  observeEvent(input$btn_download, {
+  observeEvent(input$btn_template, {
 
     # loading screen for template link generation
     dcWaiter("show", msg = "Generating link...")
@@ -228,13 +224,13 @@ shinyServer(function(input, output, session) {
       )
 
     # generate link
-    output$text_download <- renderUI({
+    output$text_template <- renderUI({
       tags$a(href = manifest_url, manifest_url, target = "_blank")
     })
 
     dcWaiter("hide", sleep = 1)
     # display link
-    show("div_download") # TODO: add progress bar on (loading) screen
+    show("div_template") # TODO: add progress bar on (loading) screen
   })
 
 
