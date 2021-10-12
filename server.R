@@ -196,23 +196,19 @@ shinyServer(function(input, output, session) {
     hide("div_download_warn")
     template_type <- config$manifest_schemas$type[match(template_schema_name(), template_namedList)]
     req(length(datatype_list$files) == 0 & template_type == "assay")
-    output$text_download_warn <- renderUI({
-      tagList(
-        br(),
-        span(
-          class = "warn_msg",
-          HTML(paste0(
-            sQuote(input$dropdown_folder), " folder is empty,
-              please upload your data before generating manifest.",
-            "<br>", sQuote(input$dropdown_template),
-            " requires data files to be uploaded prior generating and submitting templates.",
-            "<br>", "Filling in a template before uploading your data,
-              may result in errors and delays in your data submission later"
-          ))
-        )
-      )
-    })
-    show("div_download_warn")
+    warn_text <- paste0(
+      strong(sQuote(input$dropdown_folder)), " folder is empty,
+       please upload your data before generating manifest.",
+      "<br><br>", strong(sQuote(input$dropdown_template)),
+      " requires data files to be uploaded prior generating and submitting templates.",
+      "<br><br>", "Filling in a template before uploading your data,
+       may result in errors and delays in your data submission later."
+    )
+
+    nx_report_warning("Warning", HTML(warn_text))
+    output$text_template_warn <- renderUI(tagList(br(), span(class = "warn_msg", HTML(warn_text))))
+    
+    show("div_template_warn")
   })
 
   observeEvent(input$btn_download, {
