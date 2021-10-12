@@ -207,7 +207,7 @@ shinyServer(function(input, output, session) {
 
     nx_report_warning("Warning", HTML(warn_text))
     output$text_template_warn <- renderUI(tagList(br(), span(class = "warn_msg", HTML(warn_text))))
-    
+
     show("div_template_warn")
   })
 
@@ -215,12 +215,14 @@ shinyServer(function(input, output, session) {
 
     # loading screen for template link generation
     dcWaiter("show", msg = "Generating link...")
+
     manifest_url <-
       metadata_model$getModelManifest(paste0(config$community, " ", input$dropdown_template),
         template_schema_name(),
         filenames = as.list(names(datatype_list$files)),
         datasetId = folder_synID()
       )
+
     # generate link
     output$text_template <- renderUI(
       tags$a(id = "template_link", href = manifest_url, list(icon("hand-point-right"), manifest_url), target = "_blank")
@@ -234,7 +236,7 @@ shinyServer(function(input, output, session) {
       message = paste0("click 'Go' to edit your ", sQuote(input$dropdown_template), " template on the google sheet"),
       button_ok = "Go",
     )
-  
+
     # display link
     show("div_template") # TODO: add progress bar on (loading) screen
   })
