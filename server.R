@@ -215,14 +215,12 @@ shinyServer(function(input, output, session) {
 
     # loading screen for template link generation
     dcWaiter("show", msg = "Generating link...")
-  
     manifest_url <-
       metadata_model$getModelManifest(paste0(config$community, " ", input$dropdown_template),
         template_schema_name(),
         filenames = as.list(names(datatype_list$files)),
         datasetId = folder_synID()
       )
-  
     # generate link
     output$text_template <- renderUI(
       tags$a(id = "template_link", href = manifest_url, list(icon("hand-point-right"), manifest_url), target = "_blank")
