@@ -52,6 +52,20 @@
   }
 }
 
+#div_template {
+  margin: 20px 0;
+
+  #template_link {
+    margin-left: 2.5px; // align help text
+    color: $organe_red;
+    font-size: 1.2em;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
 #div_download, #div_validate, #div_val_gsheet {
     font-size: 18px; 
     background-color: white; 
