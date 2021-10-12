@@ -236,8 +236,8 @@ shinyServer(function(input, output, session) {
 
     nx_confirm(
       inputId = "btn_template_confirm",
-      title = "Edit the template on the google sheet now?",
-      message = "click 'Go' to redirect to the template in a new tab",
+      title = "Go to the template now?",
+      message = paste0("click 'Go' to edit your ", sQuote(input$dropdown_template), " template on the google sheet"),
       button_ok = "Go",
     )
   
