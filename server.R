@@ -236,7 +236,8 @@ shinyServer(function(input, output, session) {
 
     nx_confirm(
       inputId = "btn_template_confirm",
-      title = "Go to the spreadsheet now?", 
+      title = "Edit the template on the google sheet now?",
+      message = "click 'Go' to redirect to the template in a new tab",
       button_ok = "Go",
     )
   
