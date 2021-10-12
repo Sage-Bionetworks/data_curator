@@ -43,7 +43,7 @@ shinyServer(function(input, output, session) {
   datatype_list <- list(projects = NULL, folders = NULL, manifests = template_namedList, files = NULL)
 
   tabs_list <- c("tab_instructions", "tab_data", "tab_template", "tab_upload")
-  clean_tags <- c("div_download", "div_validate", NS("tbl_validate", "table"), "btn_val_gsheet", "btn_submit")
+  clean_tags <- c("div_template", "div_validate", NS("tbl_validate", "table"), "btn_val_gsheet", "btn_submit")
 
   # add box effects
   boxEffect(zoom = TRUE, float = TRUE)
@@ -193,7 +193,7 @@ shinyServer(function(input, output, session) {
     sapply(clean_tags, FUN = hide)
 
     req(input$tabs == "tab_template")
-    hide("div_download_warn")
+    hide("div_template_warn")
     template_type <- config$manifest_schemas$type[match(template_schema_name(), template_namedList)]
     req(length(datatype_list$files) == 0 & template_type == "assay")
     warn_text <- paste0(
@@ -211,7 +211,7 @@ shinyServer(function(input, output, session) {
     show("div_template_warn")
   })
 
-  observeEvent(input$btn_download, {
+  observeEvent(input$btn_template, {
 
     # loading screen for template link generation
     dcWaiter("show", msg = "Generating link...")
@@ -224,13 +224,13 @@ shinyServer(function(input, output, session) {
       )
 
     # generate link
-    output$text_download <- renderUI({
+    output$text_template <- renderUI({
       tags$a(href = manifest_url, manifest_url, target = "_blank")
     })
 
     dcWaiter("hide", sleep = 1)
     # display link
-    show("div_download") # TODO: add progress bar on (loading) screen
+    show("div_template") # TODO: add progress bar on (loading) screen
   })
 
 
