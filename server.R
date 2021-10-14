@@ -207,7 +207,7 @@ shinyServer(function(input, output, session) {
 
     nx_report_warning("Warning", HTML(warn_text))
     output$text_template_warn <- renderUI(tagList(br(), span(class = "warn_msg", HTML(warn_text))))
-    
+
     show("div_template_warn")
   })
 
@@ -224,15 +224,27 @@ shinyServer(function(input, output, session) {
       )
 
     # generate link
-    output$text_template <- renderUI({
-      tags$a(href = manifest_url, manifest_url, target = "_blank")
-    })
+    output$text_template <- renderUI(
+      tags$a(id = "template_link", href = manifest_url, list(icon("hand-point-right"), manifest_url), target = "_blank")
+    )
 
     dcWaiter("hide", sleep = 1)
+
+    nx_confirm(
+      inputId = "btn_template_confirm",
+      title = "Go to the template now?",
+      message = paste0("click 'Go' to edit your ", sQuote(input$dropdown_template), " template on the google sheet"),
+      button_ok = "Go",
+    )
+
     # display link
     show("div_template") # TODO: add progress bar on (loading) screen
   })
 
+  observeEvent(input$btn_template_confirm, {
+    req(input$btn_template_confirm == TRUE)
+    runjs("$('#template_link')[0].click();")
+  })
 
   ######## Reads .csv File ########
   inFile <- csvInfileServer("inputFile", colsAsCharacters = TRUE, keepBlank = TRUE)

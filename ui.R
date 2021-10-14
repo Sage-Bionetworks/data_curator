@@ -34,10 +34,7 @@ ui <- shinydashboardPlus::dashboardPage(
               )
             )
           }),
-          actionButton(
-            inputId = "btn_header_update", class = "btn-shiny-effect",
-            label = NULL, icon = icon("sync-alt")
-          )
+          actionButton("btn_header_update", NULL, icon("sync-alt"), class = "btn-shiny-effect")
         )
       )
     ),
