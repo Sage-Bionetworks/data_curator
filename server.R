@@ -38,6 +38,7 @@ shinyServer(function(input, output, session) {
   project_synID <- NULL # selected project synapse ID
   folder_synID <- reactiveVal("") # selected foler synapse ID
   template_schema_name <- reactiveVal(NULL) # selected template schema name
+  template_type <- NULL # type of selected template
 
   isUpdateFolder <- reactiveVal(FALSE)
   datatype_list <- list(projects = NULL, folders = NULL, manifests = template_namedList, files = NULL)
@@ -194,7 +195,7 @@ shinyServer(function(input, output, session) {
 
     req(input$tabs == "tab_template")
     hide("div_template_warn")
-    template_type <- config$manifest_schemas$type[match(template_schema_name(), template_namedList)]
+    template_type <<- config$manifest_schemas$type[match(template_schema_name(), template_namedList)]
     req(length(datatype_list$files) == 0 & template_type == "assay")
     warn_text <- paste0(
       strong(sQuote(input$dropdown_folder)), " folder is empty,
@@ -215,11 +216,11 @@ shinyServer(function(input, output, session) {
 
     # loading screen for template link generation
     dcWaiter("show", msg = "Generating link...")
-
+  
     manifest_url <-
       metadata_model$getModelManifest(paste0(config$community, " ", input$dropdown_template),
         template_schema_name(),
-        filenames = as.list(names(datatype_list$files)),
+        filenames = switch((template_type == "assay") + 1, NULL, as.list(names(datatype_list$files))),
         datasetId = folder_synID()
       )
 
