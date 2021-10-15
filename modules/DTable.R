@@ -5,17 +5,18 @@ DTableUI <- function(id) {
   DT::DTOutput(ns("table"))
 }
 
-DTableServer <- function(id, data, highlight = NULL,
+DTableServer <- function(id, data,
+                         rownames = TRUE, caption = NULL, filter = "top",
                          selection = "none", cell_border = FALSE,
-                         rownames = FALSE, caption = NULL, escape = TRUE,
                          options = list(lengthChange = FALSE, scrollX = TRUE),
                          ht.color = NULL, ht.column = NULL, ht.value = NULL) {
   df <- datatable(data,
     caption = caption,
     escape = escape,
     rownames = rownames,
-    options = options,
     selection = selection
+    filter = filter,
+    options = options
   )
 
   if (!is.null(highlight)) {

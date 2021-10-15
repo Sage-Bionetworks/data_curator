@@ -35,7 +35,12 @@ csvInfileServer <- function(id, na = c("", "NA"), colsAsCharacters = FALSE, keep
         # remove empty rows/columns where readr called it 'X'[digit] for unnamed col
         infile <- infile[, !grepl("^X", colnames(infile))]
         infile <- infile[rowSums(is.na(infile)) != ncol(infile), ]
+        # add 1 to row index to match spreadsheet's row index
+        rownames(infile) <- as.numeric(rownames(infile)) + 1
+
+        return(infile)
       })
+
       return(list(
         raw = reactive({
           input$file
