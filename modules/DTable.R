@@ -5,7 +5,7 @@ DTableUI <- function(id) {
   DT::DTOutput(ns("table"))
 }
 
-DTableServer <- function(id, data,
+DTableServer <- function(id, data, escape = TRUE, highlight = NULL,
                          rownames = TRUE, caption = NULL, filter = "top",
                          selection = "none", cell_border = FALSE,
                          options = list(lengthChange = FALSE, scrollX = TRUE),
@@ -14,7 +14,7 @@ DTableServer <- function(id, data,
     caption = caption,
     escape = escape,
     rownames = rownames,
-    selection = selection
+    selection = selection,
     filter = filter,
     options = options
   )
