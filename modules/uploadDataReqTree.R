@@ -13,7 +13,7 @@ uploadDataReqTreeUI <- function(id, width = "100%", height = "400px") {
       tags$i(style = "color: #28a745; margin-right: 5px", icon("circle"), "Uploaded Metadata"),
       tags$i(style = "color: #E53935;", icon("circle"), "Missing"),
       br(),
-      "Click nodes to expand the required manifests"
+      "Click nodes to expand the required metadata requirements"
     )
   )
 }

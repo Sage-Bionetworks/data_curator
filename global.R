@@ -87,5 +87,5 @@ source_files <- list.files(c("functions", "modules"), pattern = "*\\.R$", recurs
 sapply(source_files, FUN = source)
 
 # Global variables
-datatypes <- c("project", "folder", "template")
+dropdown_types <- c("project", "folder", "template")
 options(sass.cache = FALSE)

@@ -36,7 +36,7 @@ shinyServer(function(input, output, session) {
 
   synStore_obj <- NULL # gets list of projects they have access to
   project_synID <- NULL # selected project synapse ID
-  folder_synID <- reactiveVal("") # selected foler synapse ID
+  folder_synID <- reactiveVal("") # selected folder synapse ID
   template_schema_name <- reactiveVal(NULL) # selected template schema name
   template_type <- NULL # type of selected template
 
@@ -76,10 +76,8 @@ shinyServer(function(input, output, session) {
 
         # updates project dropdown
         lapply(c("header_dropdown_", "dropdown_"), function(x) {
-          lapply(c(1, 3), function(i) {
-            updateSelectInput(session, paste0(x, "project"), choices = sort(names(datatype_list$projects)))
-            updateSelectInput(session, paste0(x, "template"), choices = sort(names(template_namedList)))
-          })
+          updateSelectInput(session, paste0(x, "project"), choices = sort(names(datatype_list$projects)))
+          updateSelectInput(session, paste0(x, "template"), choices = sort(names(template_namedList)))
         })
 
         # update waiter loading screen once login successful
@@ -110,7 +108,7 @@ shinyServer(function(input, output, session) {
   })
 
   # sync header dropdown with main dropdown
-  lapply(datatypes, function(x) {
+  lapply(dropdown_types, function(x) {
     observeEvent(input[[paste0("dropdown_", x)]], {
       updateSelectInput(session, paste0("header_dropdown_", x),
         selected = input[[paste0("dropdown_", x)]]
@@ -131,7 +129,7 @@ shinyServer(function(input, output, session) {
   observeEvent(input$update_confirm, {
     req(input$update_confirm == TRUE)
     isUpdateFolder(TRUE)
-    lapply(datatypes, function(x) {
+    lapply(dropdown_types, function(x) {
       updateSelectInput(session, paste0("dropdown_", x),
         selected = input[[paste0("header_dropdown_", x)]]
       )
@@ -277,6 +275,8 @@ shinyServer(function(input, output, session) {
   observeEvent(c(upload_manifest(), template_req(), input$dashboard$visible), {
     req(input$dashboard_control != 0 & input$dashboard$visible)
     # check list of requirments of selected template
+    output$dashboard_tab1_title <- renderUI(
+      paste0("Completion of requirements on the datatype: ", sQuote(input$dropdown_template)))
     checkListServer("checklist_template", upload_manifest(), template_req())
     # networks plot for requirements of selected template
     selectDataReqNetServer("template_network", upload_manifest(), template_req(), template_schema_name())
@@ -285,6 +285,7 @@ shinyServer(function(input, output, session) {
 
   observeEvent(c(all_require_manifest(), input$dashboard$visible), {
     req(input$dashboard_control != 0 & input$dashboard$visible)
+    output$dashboard_tab2_title <- renderUI(paste0("Completion of requirements in the project: ", sQuote(input$dropdown_project)))
     # tree plot for requirements of all uploaded data
     uploadDataReqTreeServer("upload_tree", upload_manifest(), all_require_manifest(), input$dropdown_project)
   })
@@ -324,6 +325,24 @@ shinyServer(function(input, output, session) {
   })
 
   ######## Template Google Sheet Link ########
+  observeEvent(c(input$dropdown_folder, input$tabs), {
+    req(input$tabs == "tab_template")
+    tmp_folder_synID <- datatype_list$folders[[input$dropdown_folder]]
+    req(tmp_folder_synID != folder_synID()) # if folder changes
+
+    dcWaiter("show", msg = paste0("Getting files in ", input$dropdown_folder, "..."))
+    # update selected folder ID
+    folder_synID(tmp_folder_synID)
+
+    # get file list in selected folder
+    file_list <- synapse_driver$getFilesInStorageDataset(
+      synStore_obj,
+      folder_synID()
+    )
+    datatype_list$files <<- list2Vector(file_list)
+    dcWaiter("hide")
+  })
+
   # display warning message if folder is empty and data type is assay
   observeEvent(c(folder_synID(), template_schema_name()), {
 

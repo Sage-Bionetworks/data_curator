@@ -24,7 +24,7 @@ ui <- shinydashboardPlus::dashboardPage(
         icon = icon("sliders"),
         badgeStatus = "info",
         fluidRow(
-          lapply(datatypes, function(x) {
+          lapply(dropdown_types, function(x) {
             div(
               id = paste0("header_content_", x),
               selectInput(
@@ -131,7 +131,7 @@ ui <- shinydashboardPlus::dashboardPage(
               choices = "Generating..."
             ),
             selectInput(
-              inputId = "dropdown_dataset",
+              inputId = "dropdown_folder",
               label = "Dataset:",
               choices = "Generating..."
             ),
@@ -150,6 +150,7 @@ ui <- shinydashboardPlus::dashboardPage(
               choices = "Generating..."
             )
           ),
+          # dashboard section
           column(12, 
             div(id = "dashboard_switch_container",
               actionButton("dashboard_control", div(span(), p("Show Data Dashboard")), class = "scroll-down"),
@@ -166,7 +167,7 @@ ui <- shinydashboardPlus::dashboardPage(
               id = "dashboard_tabs",
               tabPanel(
                 "Selected Datatype",
-                p(class = "tab-title", "Complete your Selected Datatype"),
+                uiOutput("dashboard_tab1_title", class = "tab-title"),
                 fluidRow(
                   column(6, checkListUI("checklist_template")),
                   column(6, selectDataReqNetUI("template_network", height = "400px"))
@@ -174,7 +175,7 @@ ui <- shinydashboardPlus::dashboardPage(
               ),
               tabPanel(
                 "All datasets",
-                p(class = "tab-title", "Progress of Uploaded Data in Synapse"),
+                uiOutput("dashboard_tab2_title", class = "tab-title"),
                 uploadDataReqTreeUI("upload_tree")
               ),
               tabPanel(
@@ -189,7 +190,6 @@ ui <- shinydashboardPlus::dashboardPage(
             )
           )
         ),
-        # dashboard section
         switchTabUI("switchTab2", direction = "both")
       ),
       # Third tab item
