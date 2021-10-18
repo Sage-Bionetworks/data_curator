@@ -24,28 +24,13 @@ checkListServer <- function(id, upload_data, req_data) {
           class = "checklist-container",
           div(
             class = "checklist-header",
-            p(class = "checklist-title", "Requirement List"),
+            p(class = "checklist-title", "Required Metadata List"),
           ),
           div(
             class = "checklist-content",
             div(
               class = "checklist-item",
-              span(class = "checklist-subtitle", "Not Yet"),
-              div(
-                class = "checklist-data",
-                if (length(not_up) > 0) {
-                  lapply(not_up, function(name) {
-                    div(
-                      class = "checklist-icon",
-                      name, tags$span(class = "error_msg", icon("circle-o"))
-                    )
-                  })
-                }
-              )
-            ),
-            div(
-              class = "checklist-item",
-              span(class = "checklist-subtitle", "Uploaded"),
+              span(class = "checklist-subtitle upload", "Uploaded"),
               div(
                 class = "checklist-data",
                 if (length(up) > 0) {
@@ -63,9 +48,24 @@ checkListServer <- function(id, upload_data, req_data) {
                   })
                 }
               )
+            ),
+            div(
+              class = "checklist-item",
+              span(class = "checklist-subtitle", "Not Yet"),
+              div(
+                class = "checklist-data",
+                if (length(not_up) > 0) {
+                  lapply(not_up, function(name) {
+                    div(
+                      class = "checklist-icon",
+                      name, tags$span(class = "error_msg", icon("circle-o"))
+                    )
+                  })
+                }
+              )
             )
           ),
-          if (anyDuplicated(upData$schema) != 0) helpText(icon("lightbulb"), "multiple manifest with same component are detected")
+          if (anyDuplicated(upData$schema) != 0) helpText(icon("lightbulb"), "multiple manifests with the same datatype are detected")
         )
       })
     }

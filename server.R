@@ -36,7 +36,7 @@ shinyServer(function(input, output, session) {
 
   synStore_obj <- NULL # gets list of projects they have access to
   project_synID <- NULL # selected project synapse ID
-  folder_synID <- reactiveVal("") # selected foler synapse ID
+  folder_synID <- reactiveVal("") # selected folder synapse ID
   template_schema_name <- reactiveVal(NULL) # selected template schema name
   template_type <- NULL # type of selected template
 
@@ -47,7 +47,7 @@ shinyServer(function(input, output, session) {
   clean_tags <- c("div_template", "div_validate", NS("tbl_validate", "table"), "btn_val_gsheet", "btn_submit")
 
   # add box effects
-  boxEffect(zoom = TRUE, float = TRUE)
+  boxEffect(zoom = FALSE, float = TRUE)
   # remove dashboard box initially
   shinydashboardPlus::updateBox("dashboard", action = "remove")
 
@@ -76,10 +76,8 @@ shinyServer(function(input, output, session) {
 
         # updates project dropdown
         lapply(c("header_dropdown_", "dropdown_"), function(x) {
-          lapply(c(1, 3), function(i) {
-            updateSelectInput(session, paste0(x, "project"), choices = sort(names(datatype_list$projects)))
-            updateSelectInput(session, paste0(x, "template"), choices = sort(names(template_namedList)))
-          })
+          updateSelectInput(session, paste0(x, "project"), choices = sort(names(datatype_list$projects)))
+          updateSelectInput(session, paste0(x, "template"), choices = sort(names(template_namedList)))
         })
 
         # update waiter loading screen once login successful
@@ -110,7 +108,7 @@ shinyServer(function(input, output, session) {
   })
 
   # sync header dropdown with main dropdown
-  lapply(datatypes, function(x) {
+  lapply(dropdown_types, function(x) {
     observeEvent(input[[paste0("dropdown_", x)]], {
       updateSelectInput(session, paste0("header_dropdown_", x),
         selected = input[[paste0("dropdown_", x)]]
@@ -131,7 +129,7 @@ shinyServer(function(input, output, session) {
   observeEvent(input$update_confirm, {
     req(input$update_confirm == TRUE)
     isUpdateFolder(TRUE)
-    lapply(datatypes, function(x) {
+    lapply(dropdown_types, function(x) {
       updateSelectInput(session, paste0("dropdown_", x),
         selected = input[[paste0("header_dropdown_", x)]]
       )
@@ -180,12 +178,12 @@ shinyServer(function(input, output, session) {
   observeEvent(input$dashboard$visible, {
     if (!input$dashboard$visible) {
       Sys.sleep(0.3) # 0.3 is optimal
-      show("dashboard_control")
+      show("dashboard_switch_container")
     }
   })
 
   observeEvent(input$dashboard_control, {
-    hide("dashboard_control")
+    hide("dashboard_switch_container")
     shinydashboardPlus::updateBox("dashboard", action = "restore")
   })
 
@@ -258,7 +256,7 @@ shinyServer(function(input, output, session) {
           manifest_df <- data.table::fread(path)
           # if no error, output is list()
           # TODO: check with backend - ValueError: c("LungCancerTier3", "BreastCancerTier3", "ScRNA-seqAssay", "MolecularTest", "NaN", "") ...
-          valRes <- tryCatch(metadata_model$validateModelManifest(path, component), error = function(err) "Invalid Component")
+          valRes <- tryCatch(metadata_model$validateModelManifest(path, component), error = function(err) "Out of Date")
           if (is.list(valRes)) {
             res <- validationResult(valRes, component, manifest_df)
           } else {
@@ -277,9 +275,23 @@ shinyServer(function(input, output, session) {
   observeEvent(c(upload_manifest(), template_req(), input$dashboard$visible), {
     req(input$dashboard_control != 0 & input$dashboard$visible)
     # check list of requirments of selected template
+    output$dashboard_tab1_title <- renderUI(
+      p(paste0("Completion of requirements on the datatype: ", sQuote(input$dropdown_template))))
     checkListServer("checklist_template", upload_manifest(), template_req())
     # networks plot for requirements of selected template
     selectDataReqNetServer("template_network", upload_manifest(), template_req(), template_schema_name())
+  
+    output$dashboard_tab2_title <- renderUI({
+      p(paste0("Completion of requirements in the project: ", sQuote(input$dropdown_project)))
+    })
+
+    output$dashboard_tab3_title <- renderUI({
+      p(HTML(paste0(
+        actionButton("btn_dashboard_validate", "Validate", class = "btn-primary-color"),
+        "  your existing metadata in the project: ", sQuote(input$dropdown_project)
+      )))
+    })
+
     load_upload$hide() # hide the partial loading screen
   })
 
@@ -293,26 +305,29 @@ shinyServer(function(input, output, session) {
     valRes <- isolate(quick_val())
     if (nrow(valRes) > 0) {
       df <- data.frame(
-        Component = upload_manifest()$schema,
-        Folder_Name = upload_manifest()$folder,
-        Status = valRes$is_valid,
-        Error_Type = valRes$error_type,
-        SynapseId = paste0(
+        Datatype = paste0(
           '<a href="https://www.synapse.org/#!Synapse:',
-          upload_manifest()$synID, '" target="_blank">', upload_manifest()$synID, "</a>"
+          upload_manifest()$synID, '" target="_blank">', upload_manifest()$schema, "</a>"
         ),
-        Create_On = upload_manifest()$create,
-        Last_Modified = upload_manifest()$modify,
-        Internal_links = c("Pass/Fail")
-      )
+        Dataset = upload_manifest()$folder,
+        Status = valRes$is_valid,
+        Error = ifelse(valRes$error_type == "Wrong Schema", "Out of Date", valRes$error_type),
+        createOn = upload_manifest()$create,
+        lastModified = upload_manifest()$modify,
+        nameModified = c("HTAN user"),
+        internalLinks = c("Pass/Fail")
+        ) %>%
+        arrange(Status)
 
       DTableServer("tbl_dashboard_validate", df,
         highlight = "column", escape = FALSE,
         caption = htmltools::tags$caption(HTML(
           paste0(
+            "Invalid Results: <b>", sum(df$Status == "invalid"), "</b>", "<br>",
             "Schematic Version: <code>v1.0.0</code> ",
             tags$a(icon("github"), style = "color:#000;", href = "https://github.com/Sage-Bionetworks/schematic", target = "_blank"),
-            "<br>Invalid Results: <b>", sum(df$Status == "invalid"), "</b>"
+            "</b>", "<br><br>",
+            "Click on the datatype name to download your existing metadata."
           )
         )),
         ht.color = c("#82E0AA", "#F7DC6F"), ht.value = c("valid", "invalid"), ht.column = "Status",
@@ -322,7 +337,25 @@ shinyServer(function(input, output, session) {
     load_upload$hide()
   })
 
-  ######## Template Google Sheet Link ########
+  # ######## Template Google Sheet Link ########
+  observeEvent(c(input$dropdown_folder, input$tabs), {
+    req(input$tabs == "tab_template")
+    tmp_folder_synID <- datatype_list$folders[[input$dropdown_folder]]
+    req(tmp_folder_synID != folder_synID()) # if folder changes
+
+    dcWaiter("show", msg = paste0("Getting files in ", input$dropdown_folder, "..."))
+    # update selected folder ID
+    folder_synID(tmp_folder_synID)
+
+    # get file list in selected folder
+    file_list <- synapse_driver$getFilesInStorageDataset(
+      synStore_obj,
+      folder_synID()
+    )
+    datatype_list$files <<- list2Vector(file_list)
+    dcWaiter("hide")
+  })
+
   # display warning message if folder is empty and data type is assay
   observeEvent(c(folder_synID(), template_schema_name()), {
 

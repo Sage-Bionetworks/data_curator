@@ -7,13 +7,13 @@ uploadDataReqTreeUI <- function(id, width = "100%", height = "400px") {
   tagList(
     d3Output(ns("tree"), width = width, height = height),
     helpText(
-      tags$i(style = "color: grey; margin-right: 5px", icon("circle"), " Project"),
-      tags$i(style = "color: #694489; margin-right: 5px", icon("circle"), "Complete"),
-      tags$i(style = "color: #F7DC6F; margin-right: 5px", icon("circle"), "Not Complete"),
-      tags$i(style = "color: #28a745; margin-right: 5px", icon("circle"), "Uploaded"),
-      tags$i(style = "color: #E53935;", icon("circle"), " Not Uploaded"),
+      tags$i(style = "color: grey; margin-right: 5px", icon("circle"), "Selected Project"),
+      tags$i(style = "color: #694489; margin-right: 5px", icon("circle"), "Datasets complete all metadata"),
+      tags$i(style = "color: #F7DC6F; margin-right: 5px", icon("circle"), "Datasets not complete all metadata"),
+      tags$i(style = "color: #28a745; margin-right: 5px", icon("circle"), "Uploaded Metadata"),
+      tags$i(style = "color: #E53935;", icon("circle"), "Missing"),
       br(),
-      "Click nodes to expand the required manifests"
+      "Click nodes to expand the required metadata requirements"
     )
   )
 }
