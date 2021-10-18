@@ -275,8 +275,8 @@ shinyServer(function(input, output, session) {
   observeEvent(c(upload_manifest(), template_req(), input$dashboard$visible), {
     req(input$dashboard_control != 0 & input$dashboard$visible)
     # check list of requirments of selected template
-    output$dashboard_tab1_title <- renderUI(
-      paste0("Completion of requirements on the datatype: ", sQuote(input$dropdown_template)))
+    # output$dashboard_tab1_title <- renderUI(
+    #   paste0("Completion of requirements on the datatype: ", sQuote(input$dropdown_template)))
     checkListServer("checklist_template", upload_manifest(), template_req())
     # networks plot for requirements of selected template
     selectDataReqNetServer("template_network", upload_manifest(), template_req(), template_schema_name())
@@ -285,7 +285,7 @@ shinyServer(function(input, output, session) {
 
   observeEvent(c(all_require_manifest(), input$dashboard$visible), {
     req(input$dashboard_control != 0 & input$dashboard$visible)
-    output$dashboard_tab2_title <- renderUI(paste0("Completion of requirements in the project: ", sQuote(input$dropdown_project)))
+    # output$dashboard_tab2_title <- renderUI(paste0("Completion of requirements in the project: ", sQuote(input$dropdown_project)))
     # tree plot for requirements of all uploaded data
     uploadDataReqTreeServer("upload_tree", upload_manifest(), all_require_manifest(), input$dropdown_project)
   })

@@ -5,6 +5,10 @@ selectDataReqNetUI <- function(id, height = 500) {
   # namespace
   ns <- NS(id)
   tagList(
+    span(
+      HTML(paste0("A", icon("long-arrow-right"), "B: Metadata A requires Metadata B"), collapse = " "), 
+      style = "margin-left: 15px; font-family: serif; font-size: 14px"
+    ),
     forceNetworkOutput(ns("network"), height = height),
     uiOutput(ns("pbOut"))
   )
