@@ -174,12 +174,15 @@ ui <- shinydashboardPlus::dashboardPage(
                 )
               ),
               tabPanel(
-                "All datasets",
-                uiOutput("dashboard_tab2_title", class = "tab-title"),
+                "Selected Project",
+                tagList(
+                  uiOutput("dashboard_tab2_title", class = "tab-title"),
+                  helpText(HTML(paste0("Go the <code>Metadata Validation</code> tab to validate your existing metadata")))
+                ),
                 uploadDataReqTreeUI("upload_tree")
               ),
               tabPanel(
-                "Metadata Components",
+                "Metadata Validation",
                 uiOutput("dashboard_tab3_title", class = "tab-title"),
                 tagList(
                   DTableUI("tbl_dashboard_validate"),

@@ -21,7 +21,7 @@ selectDataReqNetServer <- function(id, upload_data, req_data, selected_manifest)
 
       output$arrow <- renderUI({
         span(
-          HTML(str_c("A", icon("long-arrow-right"), "B: Metadata A requires Metadata B"), collapse = " "), 
+          HTML(paste0("A ", icon("long-arrow-right"), " B: Metadata A requires Metadata B")), 
           style = "margin-left: 15px; font-family: serif; font-size: 14px"
         )
       })
