@@ -26,7 +26,7 @@ selectDataReqNetServer <- function(id, upload_data, req_data, selected_manifest)
 
         if (is.null(names(reqData))) {
           links <- data.frame(source = reqData, target = reqData, value = 5)
-          nodes <- data.frame(name = selected, group = "Selected Template", size = c(20))
+          nodes <- data.frame(name = selected, group = "Selected Datatype", size = c(20))
         } else {
           links <- data.frame(
             source = reqData, target = names(reqData),
@@ -41,7 +41,7 @@ selectDataReqNetServer <- function(id, upload_data, req_data, selected_manifest)
         links$IDsource <- match(links$source, nodes$name) - 1
         links$IDtarget <- match(links$target, nodes$name) - 1
         cols <- 'd3.scaleOrdinal()
-                .domain(["Selected Template", "Uploaded", "Not Uploaded"])
+                .domain(["Selected Datatype", "Uploaded Metadata", "Missing"])
                 .range(["#694489", "#28a745", "#E53935"]);'
 
         forceNetwork(

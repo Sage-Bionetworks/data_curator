@@ -304,7 +304,7 @@ shinyServer(function(input, output, session) {
         createOn = upload_manifest()$create,
         lastModified = upload_manifest()$modify,
         nameModified = c("HTAN user"),
-        internalLinks = c("Pass/Fail"),
+        internalLinks = c("Pass/Fail")
       )
 
       DTableServer("tbl_dashboard_validate", df,
