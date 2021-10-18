@@ -180,11 +180,11 @@ ui <- shinydashboardPlus::dashboardPage(
               ),
               tabPanel(
                 "Metadata Components",
-                p(class = "tab-title", "Uploaded metadata"),
+                uiOutput("dashboard_tab3_title", class = "tab-title"),
                 tagList(
-                  p(actionButton("btn_dashboard_validate", "Validate", class = "btn-primary-color")),
                   DTableUI("tbl_dashboard_validate"),
-                  helpText("If there is any validation error, please resubmit the corresponding metadata. Click on the datatype name to download your existing metadata.")
+                  helpText("If there is any validation error, 
+                    please re-validate the corresponding metadata to see detailed errors and re-submit once you have corrected metadata.")
                 )
               )
             )

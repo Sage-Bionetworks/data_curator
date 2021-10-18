@@ -5,10 +5,7 @@ selectDataReqNetUI <- function(id, height = 500) {
   # namespace
   ns <- NS(id)
   tagList(
-    span(
-      HTML(paste0("A", icon("long-arrow-right"), "B: Metadata A requires Metadata B"), collapse = " "), 
-      style = "margin-left: 15px; font-family: serif; font-size: 14px"
-    ),
+    uiOutput(ns("arrow")),
     forceNetworkOutput(ns("network"), height = height),
     uiOutput(ns("pbOut"))
   )
@@ -22,6 +19,13 @@ selectDataReqNetServer <- function(id, upload_data, req_data, selected_manifest)
       upData <- isolate(upload_data)
       selected <- isolate(selected_manifest)
 
+      output$arrow <- renderUI({
+        span(
+          HTML(str_c("A", icon("long-arrow-right"), "B: Metadata A requires Metadata B"), collapse = " "), 
+          style = "margin-left: 15px; font-family: serif; font-size: 14px"
+        )
+      })
+ 
       output$network <- renderForceNetwork({
 
         # reorder to make selected manifest always on the left in plot

@@ -47,7 +47,7 @@ shinyServer(function(input, output, session) {
   clean_tags <- c("div_template", "div_validate", NS("tbl_validate", "table"), "btn_val_gsheet", "btn_submit")
 
   # add box effects
-  boxEffect(zoom = TRUE, float = TRUE)
+  boxEffect(zoom = FALSE, float = TRUE)
   # remove dashboard box initially
   shinydashboardPlus::updateBox("dashboard", action = "remove")
 
@@ -256,7 +256,7 @@ shinyServer(function(input, output, session) {
           manifest_df <- data.table::fread(path)
           # if no error, output is list()
           # TODO: check with backend - ValueError: c("LungCancerTier3", "BreastCancerTier3", "ScRNA-seqAssay", "MolecularTest", "NaN", "") ...
-          valRes <- tryCatch(metadata_model$validateModelManifest(path, component), error = function(err) "Invalid Component")
+          valRes <- tryCatch(metadata_model$validateModelManifest(path, component), error = function(err) "Out of Date")
           if (is.list(valRes)) {
             res <- validationResult(valRes, component, manifest_df)
           } else {
@@ -275,17 +275,25 @@ shinyServer(function(input, output, session) {
   observeEvent(c(upload_manifest(), template_req(), input$dashboard$visible), {
     req(input$dashboard_control != 0 & input$dashboard$visible)
     # check list of requirments of selected template
-    # output$dashboard_tab1_title <- renderUI(
-    #   paste0("Completion of requirements on the datatype: ", sQuote(input$dropdown_template)))
+    output$dashboard_tab1_title <- renderUI(
+      paste0("Completion of requirements on the datatype: ", sQuote(input$dropdown_template)))
     checkListServer("checklist_template", upload_manifest(), template_req())
     # networks plot for requirements of selected template
     selectDataReqNetServer("template_network", upload_manifest(), template_req(), template_schema_name())
+
+    output$dashboard_tab3_title <- renderUI({
+      p(HTML(paste0(
+        actionButton("btn_dashboard_validate", "Validate", class = "btn-primary-color"),
+        "  your existing metadata in the project: ", sQuote(input$dropdown_project)
+      )))
+    })
+
     load_upload$hide() # hide the partial loading screen
   })
 
   observeEvent(c(all_require_manifest(), input$dashboard$visible), {
     req(input$dashboard_control != 0 & input$dashboard$visible)
-    # output$dashboard_tab2_title <- renderUI(paste0("Completion of requirements in the project: ", sQuote(input$dropdown_project)))
+    output$dashboard_tab2_title <- renderUI(paste0("Completion of requirements in the project: ", sQuote(input$dropdown_project)))
     # tree plot for requirements of all uploaded data
     uploadDataReqTreeServer("upload_tree", upload_manifest(), all_require_manifest(), input$dropdown_project)
   })
@@ -300,21 +308,23 @@ shinyServer(function(input, output, session) {
         ),
         Dataset = upload_manifest()$folder,
         Status = valRes$is_valid,
-        Error = valRes$error_type,
+        Error = ifelse(valRes$error_type == "Wrong Schema", "Out of Date", valRes$error_type),
         createOn = upload_manifest()$create,
         lastModified = upload_manifest()$modify,
         nameModified = c("HTAN user"),
         internalLinks = c("Pass/Fail")
-      )
+        ) %>%
+        arrange(Status)
 
       DTableServer("tbl_dashboard_validate", df,
         highlight = "column", escape = FALSE,
         caption = htmltools::tags$caption(HTML(
           paste0(
-            "Invalid Results: <b>", sum(df$Status == "invalid"), "</b>",
+            "Invalid Results: <b>", sum(df$Status == "invalid"), "</b>", "<br>",
             "Schematic Version: <code>v1.0.0</code> ",
             tags$a(icon("github"), style = "color:#000;", href = "https://github.com/Sage-Bionetworks/schematic", target = "_blank"),
-            "</b>"
+            "</b>", "<br><br>",
+            "Click on the datatype name to download your existing metadata."
           )
         )),
         ht.color = c("#82E0AA", "#F7DC6F"), ht.value = c("valid", "invalid"), ht.column = "Status",
