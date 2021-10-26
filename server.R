@@ -41,7 +41,7 @@ shinyServer(function(input, output, session) {
   template_type <- NULL # type of selected template
 
   isUpdateFolder <- reactiveVal(FALSE)
-  datatype_list <- list(projects = NULL, folders = NULL, manifests = template_namedList, files = NULL)
+  datatype_list <- list(projects = NULL, folders = reactiveVal(NULL), manifests = template_namedList, files = NULL)
 
   tabs_list <- c("tab_instructions", "tab_data", "tab_template", "tab_upload")
   clean_tags <- c("div_template", "div_validate", NS("tbl_validate", "table"), "btn_val_gsheet", "btn_submit")
@@ -150,7 +150,7 @@ shinyServer(function(input, output, session) {
 
       if (x == "dropdown_") {
         project_synID <<- projectID
-        datatype_list$folders <<- folder_list
+        datatype_list$folders(folder_list)
       }
 
       if (isUpdateFolder()) {
@@ -186,14 +186,14 @@ shinyServer(function(input, output, session) {
     hide("dashboard_switch_container")
     shinydashboardPlus::updateBox("dashboard", action = "restore")
   })
-
+  
   # get all uploaded files in project
-  upload_manifest <- eventReactive(c(datatype_list$folders, input$dashboard$visible), {
+  upload_manifest <- eventReactive(c(datatype_list$folders(), input$dashboard$visible), {
     req(input$dashboard_control != 0 & input$dashboard$visible)
     load_upload$show() # initiate partial loading screen for generating plot
     DTableServer("tbl_dashboard_validate", data.frame(NULL))
     lapply(c("box_pick_project", "box_pick_manifest"), FUN = disable) # disable selection to prevent change before finish below fun
-    all_manifest <- sapply(datatype_list$folders, function(i) {
+    all_manifest <- sapply(datatype_list$folders(), function(i) {
       synapse_driver$getDatasetManifest(synStore_obj, i, 
                                         downloadFile = TRUE, 
                                         downloadPath = file.path("manifests", i)) %>% 
@@ -340,7 +340,7 @@ shinyServer(function(input, output, session) {
   # ######## Template Google Sheet Link ########
   observeEvent(c(input$dropdown_folder, input$tabs), {
     req(input$tabs == "tab_template")
-    tmp_folder_synID <- datatype_list$folders[[input$dropdown_folder]]
+    tmp_folder_synID <- datatype_list$folders()[[input$dropdown_folder]]
     req(tmp_folder_synID != folder_synID()) # if folder changes
 
     dcWaiter("show", msg = paste0("Getting files in ", input$dropdown_folder, "..."))
@@ -522,7 +522,7 @@ shinyServer(function(input, output, session) {
     # the type to filter (eg assay) on could probably also be a config choice
     assay_schemas <- config$manifest_schemas$display_name[config$manifest_schemas$type == "assay"]
     # if folder_ID has not been updated yet
-    if (folder_synID() == "") folder_synID(datatype_list$folders[[input$dropdown_folder]])
+    if (folder_synID() == "") folder_synID(datatype_list$folders()[[input$dropdown_folder]])
 
     if (input$dropdown_template %in% assay_schemas) {
       # make into a csv or table for assay components already has entityId
