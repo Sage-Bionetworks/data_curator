@@ -19,34 +19,33 @@
 // TODO: Make it function or use existing function
 .box-primary {
   border-radius: 10px !important;
-  background-color: #FFF; 
-  border-color: rgba($primary_col, 0.8) !important; 
+  background-color: #fff;
+  border-color: rgba($primary_col, 0.8) !important;
   top: 15px;
 
   .box-title {
     font-size: 1.6em;
   }
-  
+
   // help msg
   .help-block {
-    margin: 8px 5px 2.5px 5px ;
+    margin: 8px 5px 2.5px 5px;
   }
 }
 
 // if use solidHeader box
 .box-solid {
-
   @extend .box-primary;
   border: 0px !important;
 
- .box-header {
+  .box-header {
     border-radius: 10px;
     background: rgba($primary_col, 0.8) !important;
     margin: 0 5px 5px 5px;
     top: -7px;
 
     // collapse button
-    .box-tools .btn{
+    .box-tools .btn {
       background: rgba($primary_col, 0.8);
     }
   }
@@ -76,16 +75,24 @@
   }
 
   .nav-tabs {
-
-    &>li.active>a {
+    & > li.active > a {
       color: #fff !important;
       background-color: rgba($primary_col, 0.8) !important;
     }
-  
-    &>li>a {
+
+    & > li > a {
       color: #000;
       background-color: transparent;
     }
+  }
+
+  .progress-group {
+    margin: 0 40px 20px 15px;
+  }
+
+  #dashboard_tab3_error {
+    margin-left: 5px;
+    font-size: 16px;
   }
 }
 
@@ -107,9 +114,11 @@
   margin-left: 5px;
 }
 
-#div_download, #div_validate, #div_val_gsheet {
-    font-size: 18px; 
-    background-color: white; 
-    margin: 10px 0; 
-    padding: 10px 0;
+#div_download,
+#div_validate,
+#div_val_gsheet {
+  font-size: 18px;
+  background-color: white;
+  margin: 10px 0;
+  padding: 10px 0;
 }

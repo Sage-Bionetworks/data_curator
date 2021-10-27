@@ -6,7 +6,7 @@ DTableUI <- function(id) {
 }
 
 DTableServer <- function(id, data, escape = TRUE, highlight = NULL,
-                         rownames = TRUE, caption = NULL, filter = "top",
+                         rownames = TRUE, caption = NULL, filter = "none",
                          selection = "none", cell_border = FALSE,
                          options = list(lengthChange = FALSE, scrollX = TRUE),
                          ht.color = NULL, ht.column = NULL, ht.value = NULL) {

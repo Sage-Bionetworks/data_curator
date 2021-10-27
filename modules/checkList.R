@@ -9,7 +9,7 @@ checkListUI <- function(id) {
   )
 }
 
-checkListServer <- function(id, upload_data, req_data) {
+checkListServer <- function(id, upload_data, req_data, config) {
   moduleServer(
     id,
     function(input, output, session) {
@@ -24,7 +24,7 @@ checkListServer <- function(id, upload_data, req_data) {
           class = "checklist-container",
           div(
             class = "checklist-header",
-            p(class = "checklist-title", "Required Metadata List"),
+            p(class = "checklist-title", "Required Datasets"),
           ),
           div(
             class = "checklist-content",
@@ -36,14 +36,13 @@ checkListServer <- function(id, upload_data, req_data) {
                 if (length(up) > 0) {
                   lapply(up, function(name) {
                     synID <- upData$synID[upData$schema == name]
-
-                    if (length(synID) > 1) notif_icon <- icon("lightbulb") else notif_icon <- NULL
+                    if (length(synID) > 1) dup_icon <- icon("lightbulb") else dup_icon <- NULL
                     div(
                       class = "checklist-icon",
                       name, lapply(synID, function(id) {
                         tags$a("", icon("link"), target = "_blank", href = paste0("https://www.synapse.org/#!Synapse:", id))
                       }),
-                      tags$span(notif_icon, tags$span(class = "success_msg", icon("check-circle")))
+                      tags$span(dup_icon, tags$span(class = "success_msg", icon("check-circle")))
                     )
                   })
                 }
@@ -56,6 +55,8 @@ checkListServer <- function(id, upload_data, req_data) {
                 class = "checklist-data",
                 if (length(not_up) > 0) {
                   lapply(not_up, function(name) {
+                    # type <- config$type[match(name, config$schema_name)]
+                    # if (type == "assay") type_icon <- icon("lightbulb") else datatype_icon <- NULL
                     div(
                       class = "checklist-icon",
                       name, tags$span(class = "error_msg", icon("circle-o"))
@@ -65,7 +66,8 @@ checkListServer <- function(id, upload_data, req_data) {
               )
             )
           ),
-          if (anyDuplicated(upData$schema) != 0) helpText(icon("lightbulb"), "multiple manifests with the same datatype are detected")
+          # helpText("Please upload the data and metadata")
+          if (anyDuplicated(upData$schema) != 0) helpText(icon("lightbulb"), "multiple datasets with the same data type are detected")
         )
       })
     }

@@ -5,15 +5,19 @@ uploadDataReqTreeUI <- function(id, width = "100%", height = "400px") {
   # namespace
   ns <- NS(id)
   tagList(
+    helpText(
+      HTML(paste0(
+        "Click nodes to expand the data requirements for the selected project. If a node is yellow, click it to see which data requirement is missing.<br>
+        If a dataset has been uploaded, the node is green. Please see validation details in the <code>Data Validation</code> tab to check if your uploaded data meets the validation requirements."
+      ))
+    ),
     d3Output(ns("tree"), width = width, height = height),
     helpText(
       tags$i(style = "color: grey; margin-right: 5px", icon("circle"), "Selected Project"),
-      tags$i(style = "color: #694489; margin-right: 5px", icon("circle"), "Datasets complete all metadata"),
-      tags$i(style = "color: #F7DC6F; margin-right: 5px", icon("circle"), "Datasets not complete all metadata"),
-      tags$i(style = "color: #28a745; margin-right: 5px", icon("circle"), "Uploaded Metadata"),
-      tags$i(style = "color: #E53935;", icon("circle"), "Missing"),
-      br(),
-      "Click nodes to expand the required metadata requirements"
+      tags$i(style = "color: #694489; margin-right: 5px", icon("circle"), "Completed Datasets"),
+      tags$i(style = "color: #F7DC6F; margin-right: 5px", icon("circle"), "Incompleted Datasets"),
+      tags$i(style = "color: #28a745; margin-right: 5px", icon("circle"), "Uploaded Data"),
+      tags$i(style = "color: #E53935;", icon("circle"), "Missing")
     )
   )
 }

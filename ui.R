@@ -118,7 +118,7 @@ ui <- shinydashboardPlus::dashboardPage(
       # second tab content
       tabItem(
         tabName = "tab_data",
-        h2("Set Dataset and Datatype for Curation"),
+        h2("Set Dataset and Data type for Curation"),
         fluidRow(
           box(
             id = "box_pick_project",
@@ -143,7 +143,7 @@ ui <- shinydashboardPlus::dashboardPage(
             id = "box_pick_manifest",
             status = "primary",
             width = 6,
-            title = "Choose a datatype template: ",
+            title = "Choose a data type template: ",
             selectInput(
               inputId = "dropdown_template",
               label = "Template:",
@@ -154,7 +154,7 @@ ui <- shinydashboardPlus::dashboardPage(
           column(12, 
             div(id = "dashboard_switch_container",
               actionButton("dashboard_control", div(span(), p("Show Data Dashboard")), class = "scroll-down"),
-              helpText("check your data ingress status and metadata compliance")
+              helpText("check your data ingress status and data compliance")
             )
           ),
           box(
@@ -166,25 +166,31 @@ ui <- shinydashboardPlus::dashboardPage(
             tabsetPanel(
               id = "dashboard_tabs",
               tabPanel(
-                "Selected Datatype",
+                "Selected Data Type",
                 uiOutput("dashboard_tab1_title", class = "tab-title"),
                 fluidRow(
                   column(6, checkListUI("checklist_template")),
-                  column(6, selectDataReqNetUI("template_network", height = "400px"))
-                )
+                  column(6, dataReqNetUI("template_network", height = "400px"))
+                ),
+                helpText(HTML(
+                  "If there is a data requirement you have not yet completed, please generate its data type template and submit the validated metadata via the process of this app.<br>
+                  Note: For file-based data types (scRNA-seq, Bulk WES, etc.), please upload the data files before submitting the metadata.<br>
+                  Visit <a href='https://ncihtan.github.io/HTAN-Data-Ingress-Docs/organize-your-data-upload.html' target='_blank'>HTAN-Data-Ingress-Docs</a> 
+                  to know more details about the types of data (record-based vs filed-based)."
+                ))
               ),
               tabPanel(
                 "Selected Project",
                 tagList(
-                  uiOutput("dashboard_tab2_title", class = "tab-title"),
-                  helpText(HTML(paste0("Go the <code>Metadata Validation</code> tab to validate your existing metadata")))
+                  uiOutput("dashboard_tab2_title", class = "tab-title")
                 ),
                 uploadDataReqTreeUI("upload_tree")
               ),
               tabPanel(
-                "Metadata Validation",
+                "Data Validation",
                 uiOutput("dashboard_tab3_title", class = "tab-title"),
                 tagList(
+                  uiOutput("dashboard_tab3_error"),
                   DTableUI("tbl_dashboard_validate"),
                   helpText("If there is any validation error, 
                     please re-validate the corresponding metadata to see detailed errors and re-submit once you have corrected metadata.")

@@ -18,7 +18,7 @@ suppressPackageStartupMessages({
   library(shinydashboardPlus)
   library(networkD3)
   # TODO: remove `shinyWidgets` after create own progress bar widgets
-  library(shinyWidgets)
+  # library(shinyWidgets)
   library(data.tree)
   library(r2d3)
 })
