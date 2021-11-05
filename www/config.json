@@ -34,7 +34,8 @@
       {"display_name": "Biospecimen Tier 1 & 2", "schema_name": "Biospecimen", "type": "biospecimen"},
       {"display_name": "Other Assay (Minimal Metadata)", "schema_name": "OtherAssay", "type": "assay"},
       {"display_name": "SRRS Biospecimen Tier 1 & 2", "schema_name": "SRRSBiospecimen", "type": "biospecimen"},
-      {"display_name": "SRRS Clinical Tier 2", "schema_name": "SRRSClinicalDataTier2", "type": "clinical"}
+      {"display_name": "SRRS Clinical Tier 2", "schema_name": "SRRSClinicalDataTier2", "type": "clinical"},
+      {"display_name": "SRRS Imaging Level 2", "schema_name": "SRRSImagingLevel2", "type": "assay"}
   ],
   "main_fileview" : "syn20446927",
   "community" : "HTAN"
