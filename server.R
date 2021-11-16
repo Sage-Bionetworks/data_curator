@@ -392,11 +392,11 @@ shinyServer(function(input, output, session) {
         dcWaiter("hide")
         nx_report_success("Success!", paste0("Manifest submitted to: ", manifest_path))
 
-        # clean up inputfile
+        # clean up old inputs/results
         sapply(clean_tags, FUN = hide)
+        reset("inputFile-file")
         DTableServer("tbl_preview", data.frame(NULL))
-        # TODO: input file not reset yet
-        # reset(c(clean_tags, "inputFile", "tbl_preview")) if reset works
+
       } else {
         dcWaiter("update", msg = HTML(paste0(
           "Uh oh, looks like something went wrong!",
