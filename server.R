@@ -170,7 +170,7 @@ shinyServer(function(input, output, session) {
 
   ######## Template Google Sheet Link ########
   observeEvent(c(input$dropdown_folder, input$tabs), {
-    req(input$tabs == "tab_template")
+    req(input$tabs %in% c("tab_template", "tab_upload"))
     tmp_folder_synID <- datatype_list$folders[[input$dropdown_folder]]
     req(tmp_folder_synID != folder_synID()) # if folder changes
 
@@ -259,7 +259,7 @@ shinyServer(function(input, output, session) {
 
   ######## Validation Section #######
   observeEvent(input$btn_validate, {
-
+  
     # loading screen for validating metadata
     dcWaiter("show", msg = "Validating...")
 
