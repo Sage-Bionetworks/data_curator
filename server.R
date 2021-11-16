@@ -174,17 +174,19 @@ shinyServer(function(input, output, session) {
     tmp_folder_synID <- datatype_list$folders[[input$dropdown_folder]]
     req(tmp_folder_synID != folder_synID()) # if folder changes
 
-    dcWaiter("show", msg = paste0("Getting files in ", input$dropdown_folder, "..."))
     # update selected folder ID
     folder_synID(tmp_folder_synID)
 
-    # get file list in selected folder
-    file_list <- synapse_driver$getFilesInStorageDataset(
-      synStore_obj,
-      folder_synID()
-    )
-    datatype_list$files <<- list2Vector(file_list)
-    dcWaiter("hide")
+    if (input$tabs == "tab_template") {
+      dcWaiter("show", msg = paste0("Getting files in ", input$dropdown_folder, "..."))
+      # get file list in selected folder
+      file_list <- synapse_driver$getFilesInStorageDataset(
+        synStore_obj,
+        folder_synID()
+      )
+      datatype_list$files <<- list2Vector(file_list)
+      dcWaiter("hide")
+    }
   })
 
   # display warning message if folder is empty and data type is assay
