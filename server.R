@@ -386,11 +386,12 @@ shinyServer(function(input, output, session) {
         synStore_obj,
         "./tmp/synapse_storage_manifest.csv", folder_synID()
       )
-      manifest_path <- paste0("synapse.org/#!Synapse:", manifest_id)
+      manifest_path <-  tags$a(href = paste0("synapse.org/#!Synapse:", manifest_id), manifest_id, target = "_blank")
+
       # if no error
       if (startsWith(manifest_id, "syn") == TRUE) {
         dcWaiter("hide")
-        nx_report_success("Success!", paste0("Manifest submitted to: ", manifest_path))
+        nx_report_success("Success!", HTML(paste0("Manifest submitted to: ", manifest_path)))
 
         # clean up old inputs/results
         sapply(clean_tags, FUN = hide)
@@ -416,12 +417,12 @@ shinyServer(function(input, output, session) {
         synStore_obj,
         "./tmp/synapse_storage_manifest.csv", folder_synID()
       )
-      manifest_path <- paste0("synapse.org/#!Synapse:", manifest_id)
+      manifest_path <- tags$a(href = paste0("synapse.org/#!Synapse:", manifest_id), manifest_id, target = "_blank")
 
       # if uploaded provided valid synID message
       if (startsWith(manifest_id, "syn") == TRUE) {
         dcWaiter("hide")
-        nx_report_success("Success!", paste0("Manifest submitted to: ", manifest_path))
+        nx_report_success("Success!", HTML(paste0("Manifest submitted to: ", manifest_path)))
 
         # clear inputs
         sapply(clean_tags, FUN = hide)
