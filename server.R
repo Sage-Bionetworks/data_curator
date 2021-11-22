@@ -53,44 +53,40 @@ shinyServer(function(input, output, session) {
   # synapse cookies
   session$sendCustomMessage(type = "readCookie", message = list())
 
-  # login page
+  # initial loading page
   observeEvent(input$cookie, {
-    # login and update session; otherwise, notify to login to Synapse first
-    tryCatch(
-      {
-        syn_login(sessionToken = input$cookie, rememberMe = FALSE)
-
-        # welcome message
-        # output$title <- renderUI({
-        #   titlePanel(h4(sprintf("Welcome, %s", syn_getUserProfile()$userName)))
-        # })
-
-        # updating global vars with values for projects
-        synStore_obj <<- synapse_driver(token = input$cookie)
-
-        # get_projects_list(synStore_obj)
-        projects_list <- synapse_driver$getStorageProjects(synStore_obj)
-        datatype_list$projects <<- list2Vector(projects_list)
-
-        # updates project dropdown
-        lapply(c("header_dropdown_", "dropdown_"), function(x) {
-          lapply(c(1, 3), function(i) {
-            updateSelectInput(session, paste0(x, datatypes[i]),
-              choices = sort(names(datatype_list[[i]]))
-            )
-          })
+    # login and update session
+    syn_login(sessionToken = input$cookie, rememberMe = FALSE)
+  
+    # updating syn storage
+    tryCatch(synStore_obj <<- synapse_driver(token = input$cookie), error = function(e) NULL)
+  
+    if (is.null(synStore_obj)) {
+      message("'synapse_driver' fails, run 'synapse_driver' to see detailed error")
+      dcWaiter("update", landing = TRUE, isPermission = FALSE)
+    } else {
+      projects_list <- synapse_driver$getStorageProjects(synStore_obj)
+      datatype_list$projects <<- list2Vector(projects_list)
+    
+      # updates project dropdown
+      lapply(c("header_dropdown_", "dropdown_"), function(x) {
+        lapply(c(1, 3), function(i) {
+          updateSelectInput(session, paste0(x, datatypes[i]),
+            choices = sort(names(datatype_list[[i]]))
+          )
         })
+      })
 
+      user_name <- syn_getUserProfile()$userName
+
+      if (!syn_is_certified(user_name)) {
+        dcWaiter("update", landing = TRUE, isCertified = FALSE)
+      } else {
         # update waiter loading screen once login successful
-        dcWaiter("update", isLogin = TRUE, isPass = TRUE, usrName = syn_getUserProfile()$userName)
-      },
-      error = function(err) {
-        message(err) # write log error
-        dcWaiter("update", isLogin = TRUE, isPass = FALSE)
+        dcWaiter("update", landing = TRUE, userName = user_name)
       }
-    )
+    }
   })
-
 
   ######## Arrow Button ########
   lapply(1:3, function(i) {
