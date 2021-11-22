@@ -1,7 +1,11 @@
-# This file contains the oauth client id and secret required for
-# the application.  This file needs to have chmod 400 permissions
-# client_id and APP_URL has to be a string
-CLIENT_ID: 
-CLIENT_SECRET: 
-APP_URL: "https://shinypro.synapse.org/users/rchai/dc/"
-CONDA_ENV_NAME: "data_curator_env"
+# This file needs to have chmod 400 permissions
+
+# oauth client id and secret required for the application.
+CLIENT_ID: '<Your Client ID>'
+CLIENT_SECRET: '<Your Client Secret>'
+
+# for local testing, the default port 8100 is used: http://localhost:8100/
+# change port based on your OAuth Client's redirect_uri
+APP_URL: '<Your APP URL>'
+# change the conda environment name here, this must be the last line
+CONDA_NAME: 'data_curator_env'
