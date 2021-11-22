@@ -47,7 +47,7 @@ dcWaiter <- function(stage = c("show", "update", "hide"), landing = FALSE, userN
       # when user is not certified synapse user
       waiter_update(html = tagList(
         img(src = "img/synapse_logo.png", height = "120px"),
-        h3("Looks like you're not a certified synapse user!"),
+        h3("Looks like you're not a synapse certified user!"),
         span("Please follow the ", 
           a("instruction", 
             href = "https://help.synapse.org/docs/User-Account-Tiers.2007072795.html#UserAccountTiers-CertifiedUsers", 
