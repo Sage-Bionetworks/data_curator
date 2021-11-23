@@ -33,7 +33,16 @@ oauth_client <- yaml.load_file("config.yaml")
 
 client_id <- toString(oauth_client$CLIENT_ID)
 client_secret <- toString(oauth_client$CLIENT_SECRET)
-app_url <- toString(oauth_client$APP_URL)
+
+if (interactive()) {
+  # for local development
+  options(shiny.port = 8100)
+  app_url <- "http://localhost:8100/"
+} else {
+  # deployed url
+  app_url <- toString(oauth_client$APP_URL)
+}
+
 conda_name <- toString(oauth_client$CONDA_ENV_NAME)
 
 if (is.null(client_id)) stop("config.yaml is missing CLIENT_ID")
