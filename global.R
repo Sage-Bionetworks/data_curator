@@ -42,12 +42,12 @@ if (interactive()) {
   app_url <- toString(oauth_client$APP_URL)
 }
 
-conda_name <- toString(oauth_client$CONDA_ENV_NAME)
+conda_name <- toString(oauth_client$CONDA_ENV)
 
 if (is.null(client_id)) stop("config.yaml is missing CLIENT_ID")
 if (is.null(client_secret)) stop("config.yaml is missing CLIENT_SECRET")
 if (is.null(app_url)) stop("config.yaml is missing APP_URL")
-if (is.null(conda_name)) stop("config.yaml is missing CONDA_ENV_NAME")
+if (is.null(conda_name)) stop("config.yaml is missing CONDA_ENV")
 
 app <- oauth_app("shinysynapse",
   key = client_id,
