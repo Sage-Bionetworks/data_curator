@@ -27,7 +27,7 @@ Follow the steps below to make sure the _Data Curator App_ is fully setup to wor
 
 3.  Create and activate the conda environment:
 
-        export CONDA_NAME=$(tail -n1 config.yaml | cut -f2 -d':' | tr -d \''"')
+        export CONDA_NAME=$(tail -n1 config.yaml | cut -f2 -d':' | tr -d \''" ')
         conda env create -f environment.yml -n $CONDA_NAME
         conda activate $CONDA_NAME
 
