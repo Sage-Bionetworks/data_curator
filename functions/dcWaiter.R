@@ -60,8 +60,9 @@ dcWaiter <- function(stage = c("show", "update", "hide"), landing = FALSE, userN
       # when user is not certified synapse user
       waiter_update(html = tagList(
         img(src = "img/synapse_logo.png", height = "120px"),
-        h3("Looks like you dont have access to fileview"),
-        span("placeholder ...")
+        h3("Fileview access denied!"),
+        span("You may not have sufficient permissions for curation.
+         Please contact your team and project administrators.")
       ))
     } else {
       # success loading page; userName needed to provide
