@@ -8,4 +8,5 @@
 }
 
 options(stringsAsFactors = FALSE)
-source("renv/activate.R")
+#source("renv/activate.R")
+Sys.setenv("RETICULATE_PYTHON" = "env/bin/python")

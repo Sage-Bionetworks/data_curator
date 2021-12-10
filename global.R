@@ -43,7 +43,7 @@ if (interactive()) {
   app_url <- toString(oauth_client$APP_URL)
 }
 
-conda_name <- toString(oauth_client$CONDA_ENV_NAME)
+conda_name <- toString(oauth_client$CONDA_NAME)
 
 if (is.null(client_id)) stop("config.yaml is missing CLIENT_ID")
 if (is.null(client_secret)) stop("config.yaml is missing CLIENT_SECRET")
@@ -87,7 +87,7 @@ scope <- "openid view download modify"
 
 # Activate conda env
 # Don't necessarily have to set `RETICULATE_PYTHON` env variable
-reticulate::use_condaenv(conda_name)
+reticulate::use_virtualenv(conda_name)
 
 # Import functions/modules
 source_files <- list.files(c("functions", "modules"), pattern = "*\\.R$", recursive = TRUE, full.names = TRUE)
