@@ -25,13 +25,19 @@ Follow the steps below to make sure the _Data Curator App_ is fully setup to wor
     - `APP_URL`: the redirection url to your app
     - `CONDA_NAME`: conda environment name
 
-3.  Create and activate the conda environment:
+3.  Create and activate the conda environment or virtualenv:
 
         export CONDA_NAME=$(tail -n1 config.yaml | cut -f2 -d':' | tr -d \''"')
         conda env create -f environment.yml -n $CONDA_NAME
         conda activate $CONDA_NAME
 
-4.  Install required R pacakges dependencies:
+  Or if using virtualenv
+
+        export CONDA_NAME=$(tail -n1 config.yaml | cut -f2 -d':' | tr -d \''"')
+        python -m venv $CONDA_NAME
+        source "$CONDA_NAME"/bin/activate
+
+4.  Install required R pacakges dependencies. SKIP THIS IF NOT USING A CONDA ENVIRONMENT:
 
         R -e "renv::restore()"
 
@@ -52,6 +58,10 @@ Follow the steps below to make sure the _Data Curator App_ is fully setup to wor
         pip install dist/schematicpy-*-py3-none-any.whl
 
 3.  Set up the `schematic` configuration. To do so, follow the instructions on the `schematic` repository [README](https://github.com/Sage-Bionetworks/schematic/tree/develop#12-installation-requirements-and-pre-requisites)
+
+4. If not using a conda environment. Install the required dependencies.
+        
+        pip install -r requirements.txt
 
 ### Data Model Configuration
 
