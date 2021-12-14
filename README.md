@@ -44,7 +44,7 @@ Follow the steps below to make sure the _Data Curator App_ is fully setup to wor
 4a. If not using a conda environment nor renv, install the necessary packages using
 the installation script provided.
 
-        R -f install-pkgs.R
+        R -f install-pkgs.R 
 
 ### Schematic Setup
 
