@@ -1,6 +1,7 @@
 .RData
 .Rhistory
 .Rproj.user/
+.DS_Store
 HTAN_test_shiny.Rproj
 app.bak.R
 get_manifest_anno.R
@@ -11,13 +12,10 @@ www/getdata.js
 www/message-handler.js
 tmp/synapse_storage_manifest.csv
 .Rproj.user
-schematic/schema_explorer/__pycache__/*
-schematic/__pycache__/*
-schematic/.DS_Store
-schematic/credentials.json
-schematic/token.pickle
-credentials.json
-token.pickle
+schematic/
+**/credentials.json
+**/schematic_service_account_creds.json
+**/token.pickle
 **/__pycache__
 config.yaml
 manifests/*
