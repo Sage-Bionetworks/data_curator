@@ -41,6 +41,11 @@ Follow the steps below to make sure the _Data Curator App_ is fully setup to wor
 
         R -e "renv::restore()"
 
+4a. If not using a conda environment nor renv, install the necessary packages using
+the installation script provided.
+
+        R -f install-pkgs.R
+
 ### Schematic Setup
 
 1.  Clone the [schematic] (backend) as a folder `schematic` inside the `data_curator` folder:
