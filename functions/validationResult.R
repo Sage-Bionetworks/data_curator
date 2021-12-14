@@ -59,34 +59,33 @@ validationResult <- function(valRes, template, inFile) {
         )
       }
 
-      errorDT <- data.frame(
-        Row = sapply(valRes, function(i) i[[1]]),
-        Column = sapply(valRes, function(i) i[[2]]),
-        Value = sapply(valRes, function(i) i[[4]][[1]]),
-        Error = sapply(valRes, function(i) i[[3]])
-      )
+      errorDT <- lapply(valRes, function(i) {
+        error_row <- i[[1]] 
+        error_col <- i[[2]]
+        error_val <- inFile[as.numeric(error_row) - 1, error_col]
+        tibble(
+          Row = error_row,
+          Column = error_col,
+          Value = error_val,
+          Error = i[[3]]
+        ) %>% mutate(across(everything(), as.character))
+      }) %>% bind_rows()
 
       # collapse similiar errors into one row
       errorDT <- errorDT %>%
-        mutate(Options = gsub("^'.*?'(.*)", "\\1", Error)) %>%
-        group_by(Column, Options) %>%
+        mutate(Error = gsub(".*(not .*)[[:punct:]]", "\\1", Error)) %>%
+        group_by(Column, Error) %>%
         summarise(
-          n = n_distinct(Value),
           Row = str_c(unique(Row), collapse = ", ") %>% TruncateEllipsis(10, ", "),
           Value = str_c(unique(Value), collapse = ", ") %>% TruncateEllipsis(10, ", "),
           .groups = "drop"
-        ) %>%
-        mutate(
-          Options = ifelse(n > 1, str_replace(Options, "^ is", " are"), Options),
-          Error = str_c(sQuote(Value), Options)
         ) %>%
         ungroup() %>%
         dplyr::select(Row, Column, Value, Error)
 
       # sort rows based on input column names
       errorDT <- errorDT[order(match(errorDT$Column, colnames(inFile))), ]
-      # TODO: to reduce parameter, sort just based on alphabetic
-      # errorDT <- errorDT[order(errorDT$Column),]
+
     } else {
       validation_res <- "valid"
       errorType <- "No Error"
