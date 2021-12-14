@@ -62,6 +62,7 @@ validationResult <- function(valRes, template, inFile) {
       errorDT <- lapply(valRes, function(i) {
         error_row <- i[[1]] 
         error_col <- i[[2]]
+        # get invalid value
         error_val <- inFile[as.numeric(error_row) - 1, error_col]
         tibble(
           Row = error_row,
@@ -73,7 +74,7 @@ validationResult <- function(valRes, template, inFile) {
 
       # collapse similiar errors into one row
       errorDT <- errorDT %>%
-        mutate(Error = gsub(".*(not .*)[[:punct:]]", "\\1", Error)) %>%
+        mutate(Error = gsub(".*(not.*)\\.?$", "\\1", Error)) %>%
         group_by(Column, Error) %>%
         summarise(
           Row = str_c(unique(Row), collapse = ", ") %>% TruncateEllipsis(10, ", "),
