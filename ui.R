@@ -174,9 +174,9 @@ ui <- shinydashboardPlus::dashboardPage(
                 ),
                 helpText(HTML(
                   "If there is a data requirement you have not yet completed, please generate its data type template and submit the validated metadata via the process of this app.<br>
-                  Note: For file-based data types (scRNA-seq, Bulk WES, etc.), please upload the data files before submitting the metadata.<br>
+                  Note: For file-based data types (scRNA-seq, Bulk WES, etc.), please upload the data files before submitting the metadata. 
                   Visit <a href='https://ncihtan.github.io/HTAN-Data-Ingress-Docs/organize-your-data-upload.html' target='_blank'>HTAN-Data-Ingress-Docs</a> 
-                  to know more details about the types of data (record-based vs filed-based)."
+                  to know more details about the types of data (record-based vs file-based)."
                 ))
               ),
               tabPanel(
