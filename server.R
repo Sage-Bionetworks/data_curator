@@ -30,6 +30,10 @@ shinyServer(function(input, output, session) {
   # read config in
   config <- as.data.frame(fromJSON("www/config.json")[[1]])
 
+  # mapping from display name to schema name
+  template_namedList <- config$schema_name
+  names(template_namedList) <- config$display_name
+
   synStore_obj <- NULL # gets list of projects they have access to
   project_synID <- NULL # selected project synapse ID
   folder_synID <- reactiveVal("") # selected folder synapse ID
@@ -37,7 +41,7 @@ shinyServer(function(input, output, session) {
   template_type <- NULL # type of selected template
 
   isUpdateFolder <- reactiveVal(FALSE)
-  data_list <- list(projects = NULL, folders = reactiveVal(NULL), manifests = config$schema_name, files = NULL)
+  data_list <- list(projects = NULL, folders = reactiveVal(NULL), manifests = template_namedList, files = NULL)
 
   tabs_list <- c("tab_instructions", "tab_data", "tab_template", "tab_upload")
   clean_tags <- c("div_template", "div_validate", NS("tbl_validate", "table"), "btn_val_gsheet", "btn_submit")
@@ -65,13 +69,13 @@ shinyServer(function(input, output, session) {
       dcWaiter("update", landing = TRUE, isPermission = FALSE)
     } else {
       projects_list <- synapse_driver$getStorageProjects(synStore_obj)
-      datatype_list$projects <<- list2Vector(projects_list)
+      data_list$projects <<- list2Vector(projects_list)
     
       # updates project dropdown
       lapply(c("header_dropdown_", "dropdown_"), function(x) {
         lapply(c(1, 3), function(i) {
-          updateSelectInput(session, paste0(x, datatypes[i]),
-            choices = sort(names(datatype_list[[i]]))
+          updateSelectInput(session, paste0(x, dropdown_types[i]),
+            choices = sort(names(data_list[[i]]))
           )
         })
       })
@@ -136,7 +140,7 @@ shinyServer(function(input, output, session) {
   lapply(c("header_dropdown_", "dropdown_"), function(x) {
     observeEvent(ignoreInit = TRUE, input[[paste0(x, "project")]], {
       # get synID of selected project
-      projectID <- data_list$projects[[input[[paste0(x, "project")]]]]
+      projectID <- data_list$projects[input[[paste0(x, "project")]]]
 
       # gets folders per project
       folder_list <- synapse_driver$getStorageDatasetsInProject(synStore_obj, projectID) %>% list2Vector()
@@ -188,6 +192,7 @@ shinyServer(function(input, output, session) {
     req(input$dashboard_control != 0 & input$dashboard$visible)
     load_upload$show() # initiate partial loading screen for generating plot
     DTableServer("tbl_dashboard_validate", data.frame(NULL))
+
     lapply(c("box_pick_project", "box_pick_manifest"), FUN = disable) # disable selection to prevent change before finish below fun
     all_manifest <- sapply(data_list$folders(), function(i) {
       synapse_driver$getDatasetManifest(synStore_obj, i, 
@@ -195,7 +200,6 @@ shinyServer(function(input, output, session) {
                                         downloadPath = file.path("manifests", i)) %>% 
       collectManifestInfo()
     }) %>% extractManifests()
-
     lapply(c("box_pick_project", "box_pick_manifest"), FUN = enable) # enable selection btns
 
     return(all_manifest)
@@ -204,9 +208,8 @@ shinyServer(function(input, output, session) {
   # only process getting requirements of selected manifest when manifest change & box shown - !use reactive not input$dropdown
   template_req <- eventReactive(c(template_schema_name(), input$dashboard$visible), {
     req(input$dashboard_control != 0 & input$dashboard$visible)
-
     # get requirements, otherwise output unamed vector of schema name
-    req_data <- tryCatch(metadata_model$get_component_requirements(template_schema_name(), as_graph = TRUE), error = function() list())
+    req_data <- tryCatch(metadata_model$get_component_requirements(template_schema_name(), as_graph = TRUE), error = function(err) list())
     if (length(req_data) == 0) req_data <- as.character(template_schema_name()) else req_data <- list2Vector(req_data)
 
     return(req_data)
@@ -352,7 +355,7 @@ shinyServer(function(input, output, session) {
         synStore_obj,
         folder_synID()
       )
-      datatype_list$files <<- list2Vector(file_list)
+      data_list$files(list2Vector(file_list))
       dcWaiter("hide")
     }
   })
