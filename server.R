@@ -51,41 +51,41 @@ shinyServer(function(input, output, session) {
   # synapse cookies
   session$sendCustomMessage(type = "readCookie", message = list())
 
-  # login page
+  # initial loading page
   observeEvent(input$cookie, {
-    # login and update session; otherwise, notify to login to Synapse first
-    tryCatch(
-      {
-        syn_login(sessionToken = input$cookie, rememberMe = FALSE)
 
-        # welcome message
-        # output$title <- renderUI({
-        #   titlePanel(h4(sprintf("Welcome, %s", syn_getUserProfile()$userName)))
-        # })
-
-        # updating global vars with values for projects
-        synStore_obj <<- synapse_driver(token = input$cookie)
-
-        # get_projects_list(synStore_obj)
-        projects_list <- synapse_driver$getStorageProjects(synStore_obj)
-        data_list$projects <<- list2Vector(projects_list)
-
-        # updates project dropdown
-        lapply(c("header_dropdown_", "dropdown_"), function(x) {
-          updateSelectInput(session, paste0(x, "project"), choices = sort(names(data_list$projects)))
-          updateSelectInput(session, paste0(x, "template"), choices = sort(config$display_name))
+    # login and update session
+    syn_login(sessionToken = input$cookie, rememberMe = FALSE)
+  
+    # updating syn storage
+    tryCatch(synStore_obj <<- synapse_driver(token = input$cookie), error = function(e) NULL)
+  
+    if (is.null(synStore_obj)) {
+      message("'synapse_driver' fails, run 'synapse_driver' to see detailed error")
+      dcWaiter("update", landing = TRUE, isPermission = FALSE)
+    } else {
+      projects_list <- synapse_driver$getStorageProjects(synStore_obj)
+      datatype_list$projects <<- list2Vector(projects_list)
+    
+      # updates project dropdown
+      lapply(c("header_dropdown_", "dropdown_"), function(x) {
+        lapply(c(1, 3), function(i) {
+          updateSelectInput(session, paste0(x, datatypes[i]),
+            choices = sort(names(datatype_list[[i]]))
+          )
         })
+      })
 
+      user_name <- syn_getUserProfile()$userName
+
+      if (!syn_is_certified(user_name)) {
+        dcWaiter("update", landing = TRUE, isCertified = FALSE)
+      } else {
         # update waiter loading screen once login successful
-        dcWaiter("update", isLogin = TRUE, isPass = TRUE, usrName = syn_getUserProfile()$userName)
-      },
-      error = function(err) {
-        message(err) # write log error
-        dcWaiter("update", isLogin = TRUE, isPass = FALSE)
+        dcWaiter("update", landing = TRUE, userName = user_name)
       }
-    )
+    }
   })
-
 
   ######## Arrow Button ########
   lapply(1:3, function(i) {
@@ -337,21 +337,24 @@ shinyServer(function(input, output, session) {
 
   # ######## Template Google Sheet Link ########
   observeEvent(c(input$dropdown_folder, input$tabs), {
-    req(input$tabs == "tab_template")
+
+    req(input$tabs %in% c("tab_template", "tab_upload"))
     tmp_folder_synID <- data_list$folders()[[input$dropdown_folder]]
     req(tmp_folder_synID != folder_synID()) # if folder changes
 
-    dcWaiter("show", msg = paste0("Getting files in ", input$dropdown_folder, "..."))
     # update selected folder ID
     folder_synID(tmp_folder_synID)
 
-    # get file list in selected folder
-    file_list <- synapse_driver$getFilesInStorageDataset(
-      synStore_obj,
-      folder_synID()
-    )
-    data_list$files <<- list2Vector(file_list)
-    dcWaiter("hide")
+    if (input$tabs == "tab_template") {
+      dcWaiter("show", msg = paste0("Getting files in ", input$dropdown_folder, "..."))
+      # get file list in selected folder
+      file_list <- synapse_driver$getFilesInStorageDataset(
+        synStore_obj,
+        folder_synID()
+      )
+      datatype_list$files <<- list2Vector(file_list)
+      dcWaiter("hide")
+    }
   })
 
   # display warning message if folder is empty and data type is assay
@@ -426,7 +429,7 @@ shinyServer(function(input, output, session) {
 
   ######## Validation Section #######
   observeEvent(input$btn_validate, {
-
+  
     # loading screen for validating metadata
     dcWaiter("show", msg = "Validating...")
 
@@ -551,17 +554,18 @@ shinyServer(function(input, output, session) {
         synStore_obj,
         "./tmp/synapse_storage_manifest.csv", folder_synID()
       )
-      manifest_path <- paste0("synapse.org/#!Synapse:", manifest_id)
+      manifest_path <-  tags$a(href = paste0("synapse.org/#!Synapse:", manifest_id), manifest_id, target = "_blank")
+
       # if no error
       if (startsWith(manifest_id, "syn") == TRUE) {
         dcWaiter("hide")
-        nx_report_success("Success!", paste0("Manifest submitted to: ", manifest_path))
+        nx_report_success("Success!", HTML(paste0("Manifest submitted to: ", manifest_path)))
 
-        # clean up inputfile
+        # clean up old inputs/results
         sapply(clean_tags, FUN = hide)
+        reset("inputFile-file")
         DTableServer("tbl_preview", data.frame(NULL))
-        # TODO: input file not reset yet
-        # reset(c(clean_tags, "inputFile", "tbl_preview")) if reset works
+
       } else {
         dcWaiter("update", msg = HTML(paste0(
           "Uh oh, looks like something went wrong!",
@@ -581,12 +585,12 @@ shinyServer(function(input, output, session) {
         synStore_obj,
         "./tmp/synapse_storage_manifest.csv", folder_synID()
       )
-      manifest_path <- paste0("synapse.org/#!Synapse:", manifest_id)
+      manifest_path <- tags$a(href = paste0("synapse.org/#!Synapse:", manifest_id), manifest_id, target = "_blank")
 
       # if uploaded provided valid synID message
       if (startsWith(manifest_id, "syn") == TRUE) {
         dcWaiter("hide")
-        nx_report_success("Success!", paste0("Manifest submitted to: ", manifest_path))
+        nx_report_success("Success!", HTML(paste0("Manifest submitted to: ", manifest_path)))
 
         # clear inputs
         sapply(clean_tags, FUN = hide)
