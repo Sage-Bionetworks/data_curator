@@ -7,6 +7,7 @@ on:
   push:
     branches:
       - shiny-server-main
+      - switch-python-venv
       - release*
 
 jobs:
