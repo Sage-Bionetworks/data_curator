@@ -39,9 +39,13 @@ jobs:
         run: |
           pip install -r requirements.txt
         
-      - name: Install R packages
+      - name: Install R packages from CRAN
         run: |
           R -f install-pkgs.R
+        
+      - name: Install R packages from GitHub
+        run: |
+          R -f install-github.R
         
       - name: Authorize and deploy app
         shell: Rscript {0}
