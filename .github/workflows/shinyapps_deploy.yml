@@ -1,0 +1,71 @@
+# Workflow derived from https://github.com/r-lib/actions/tree/master/examples
+# Need help debugging build failures? Start at https://github.com/r-lib/actions#where-to-find-help
+
+name: shiny-deploy
+
+on:
+  push:
+    branches:
+      - shiny-server-main
+      - release*
+
+jobs:
+  shiny-deploy:
+    runs-on: ubuntu-latest
+    env:
+      CONDA_ENV_NAME: "virtual_env"
+
+    steps:
+      - name: Install libcurl
+        run: sudo apt-get install -y libcurl4-openssl-dev
+ 
+      - uses: actions/checkout@v2
+
+      - uses: r-lib/actions/setup-pandoc@v1
+
+      - uses: r-lib/actions/setup-r@v1
+        with:
+          use-public-rspm: true
+
+      - uses: r-lib/actions/setup-renv@v1
+
+      - name: Install rsconnect
+        shell: Rscript {0}
+        run: install.packages(c("rsconnect", "yaml", "reticulate"))
+        
+      - name: Virtual Environment, Schematic install, R packages install
+        run: |
+          python -m venv ${{ env.CONDA_ENV_NAME }}
+          source "${{ env.CONDA_ENV_NAME }}"/bin/activate
+          python -m pip install schematicpy
+          pip install -r requirements.txt
+          R -f install-pkgs.R
+        
+      - name: Authorize and deploy app
+        shell: Rscript {0}
+        run: |
+          branch<-Sys.getenv("GITHUB_REF_NAME")
+          repo<-Sys.getenv("GITHUB_REPOSITORY")
+          appName<-strsplit(repo, "/")[[1]][2]
+          if (!startsWith(branch, "release")) {
+             appName <- paste(appName, "staging", sep="-")
+          }
+          rsConnectUser <-"${{ secrets.RSCONNECT_USER }}"
+          rsConnectToken <- "${{ secrets.RSCONNECT_TOKEN }}"
+          rsConnectSecret <- "${{ secrets.RSCONNECT_SECRET }}"
+          
+          # create config file
+          config <- "CLIENT_ID: ${{ secrets.OAUTH_CLIENT_ID }}"
+          config <- c(config, "CLIENT_SECRET: ${{ secrets.OAUTH_CLIENT_SECRET }}")
+          config <- c(config, "CONDA_ENV_NAME: ${{ env.CONDA_ENV_NAME }}")
+          appUrl<- sprintf("https://%s.shinyapps.io/%s", rsConnectUser, appName)
+          config <- c(config, sprintf("APP_URL: %s", appUrl))
+          
+          configFileConn<-file("config.yaml")
+          tryCatch(
+             writeLines(config, configFileConn),
+             finally=close(configFileConn)
+          )
+          rsconnect::setAccountInfo(rsConnectUser, rsConnectToken, rsConnectSecret)
+          rsconnect::deployApp(appName = appName)
+ 
