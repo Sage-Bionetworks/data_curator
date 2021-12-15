@@ -22,5 +22,7 @@ cran <- c(
 "remotes",
 "rsconnect")
 
+gh <- "dreamRs/shinypop"
 
 install.packages(cran)
+remotes::install_github(gh)

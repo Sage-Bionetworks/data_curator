@@ -87,6 +87,7 @@ scope <- "openid view download modify"
 
 # Activate conda env
 # Don't necessarily have to set `RETICULATE_PYTHON` env variable
+message(sprintf("Activating virtual environment %s", conda_name))
 reticulate::use_virtualenv(conda_name)
 
 # Import functions/modules
