@@ -1,4 +1,6 @@
-cran <- c("shiny",
+cran <- c(
+"ellipsis",
+"shiny",
 "httr",
 "rjson",
 "yaml",
