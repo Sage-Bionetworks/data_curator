@@ -25,5 +25,7 @@ cran <- c(
 gh <- "dreamRs/shinypop"
 
 install.packages(cran)
-# auth_token=NULL only works for public repo's
-remotes::install_github(gh, auth_token=NULL)
+
+# We will only install public repo's from Github
+Sys.unsetenv("GITHUB_PAT")
+remotes::install_github(gh)
