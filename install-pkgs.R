@@ -17,7 +17,8 @@ cran <- c("shiny",
 "waiter",
 "readr",
 "sass",
-"remotes")
+"remotes",
+"rsconnect")
 
 gh <- "dreamRs/shinypop"
 

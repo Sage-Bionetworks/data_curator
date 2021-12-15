@@ -30,16 +30,17 @@ jobs:
 
       - uses: r-lib/actions/setup-renv@v1
 
-      - name: Install rsconnect
-        shell: Rscript {0}
-        run: install.packages(c("rsconnect", "yaml", "reticulate"))
-        
-      - name: Virtual Environment, Schematic install, R packages install
+      - name: Create and Activate Python Virtual Environment
         run: |
           python -m venv ${{ env.CONDA_ENV_NAME }}
           source "${{ env.CONDA_ENV_NAME }}"/bin/activate
-          python -m pip install schematicpy
+        
+      - name: Install Python Dependencies
+        run: |
           pip install -r requirements.txt
+        
+      - name: Install R packages
+        run: |
           R -f install-pkgs.R
         
       - name: Authorize and deploy app
