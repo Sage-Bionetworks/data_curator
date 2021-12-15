@@ -31,8 +31,13 @@ has_auth_code <- function(params) {
 
 oauth_client <- yaml.load_file("config.yaml")
 
+
 client_id <- toString(oauth_client$CLIENT_ID)
 client_secret <- toString(oauth_client$CLIENT_SECRET)
+
+message(sprintf("Read client id %s", client_id))
+message(sprintf("venv name %s", oauth_client$CONDA_NAME))
+
 
 if (interactive()) {
   # for local development
@@ -48,7 +53,7 @@ conda_name <- toString(oauth_client$CONDA_NAME)
 if (is.null(client_id)) stop("config.yaml is missing CLIENT_ID")
 if (is.null(client_secret)) stop("config.yaml is missing CLIENT_SECRET")
 if (is.null(app_url)) stop("config.yaml is missing APP_URL")
-if (is.null(conda_name)) stop("config.yaml is missing CONDA_ENV_NAME")
+if (is.null(conda_name) || nchar(conda_name)==0) stop("config.yaml is missing CONDA_ENV_NAME")
 
 app <- oauth_app("shinysynapse",
   key = client_id,
@@ -87,7 +92,7 @@ scope <- "openid view download modify"
 
 # Activate conda env
 # Don't necessarily have to set `RETICULATE_PYTHON` env variable
-message(sprintf("Activating virtual environment %s", conda_name))
+message(sprintf("Activating virtual environment <%s>", conda_name))
 reticulate::use_virtualenv(conda_name)
 
 # Import functions/modules

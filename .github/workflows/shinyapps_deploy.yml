@@ -61,10 +61,10 @@ jobs:
           # create config file
           config <- "CLIENT_ID: ${{ secrets.OAUTH_CLIENT_ID }}"
           config <- c(config, "CLIENT_SECRET: ${{ secrets.OAUTH_CLIENT_SECRET }}")
-          config <- c(config, "CONDA_ENV_NAME: ${{ env.CONDA_ENV_NAME }}")
           appUrl<- sprintf("https://%s.shinyapps.io/%s", rsConnectUser, appName)
           config <- c(config, sprintf("APP_URL: %s", appUrl))
-          
+          config <- c(config, "CONDA_ENV_NAME: ${{ env.CONDA_ENV_NAME }}")
+         
           configFileConn<-file("config.yaml")
           tryCatch(
              writeLines(config, configFileConn),
