@@ -10,11 +10,9 @@ dcWaiter <- function(stage = c("show", "update", "hide"), landing = FALSE, userN
   if (!is.logical(isCertified)) stop("isCertified must be a boolean")
   if (!is.logical(isPermission)) stop("isPermission must be a boolean")
   if (!is.numeric(sleep)) stop("sleep must be a numeric")
-  if (!stage %in% c("show", "update", "hide")) {
-    stop("Please provide a value for stage: 'show', 'update' or 'hide'.")
-  }
   if (is.null(msg)) msg <- "Loading ..."
   if (is.null(spin)) spin <- spin_plus()
+  match.arg(stage, c("show", "update", "hide"))
 
   # if "hide", proceed hiding process immediately and exit function
   if (stage == "hide") {

@@ -23,10 +23,6 @@ shinyServer(function(input, output, session) {
   access_token <- token_response$access_token
 
   ######## session global variables ########
-  source_python("functions/synapse_func_alias.py")
-  source_python("functions/metadata_model.py")
-  # import module that contains SynapseStorage class
-  synapse_driver <- import("schematic.store.synapse")$SynapseStorage
   # read config in
   config <- as.data.frame(fromJSON("www/config.json")[[1]])
 
@@ -48,7 +44,7 @@ shinyServer(function(input, output, session) {
 
   # add box effects
   boxEffect(zoom = FALSE, float = TRUE)
-  # remove dashboard box initially
+  # make visible of dashboard false by default
   shinydashboardPlus::updateBox("dashboard", action = "remove")
 
   ######## Initiate Login Process ########
@@ -186,99 +182,49 @@ shinyServer(function(input, output, session) {
     hide("dashboard_switch_container")
     shinydashboardPlus::updateBox("dashboard", action = "restore")
   })
-  
-  # get all uploaded files in project
-  upload_manifest <- eventReactive(c(data_list$folders(), input$dashboard$visible), {
+
+  # set up variables
+  uploaded_manifests <- reactiveVal(NULL)
+  all_component_requirements <- reactiveVal(NULL)
+  selected_component_requirement <- reactiveVal(NULL)
+  quick_val <- reactiveVal(NULL)
+
+  observeEvent(c(data_list$folders(), input$dashboard$visible), {
     req(input$dashboard_control != 0 & input$dashboard$visible)
     load_upload$show() # initiate partial loading screen for generating plot
-    DTableServer("tbl_dashboard_validate", data.frame(NULL))
-
-    lapply(c("box_pick_project", "box_pick_manifest"), FUN = disable) # disable selection to prevent change before finish below fun
-    all_manifest <- sapply(data_list$folders(), function(i) {
-      synapse_driver$getDatasetManifest(synStore_obj, i, 
-                                        downloadFile = TRUE, 
-                                        downloadPath = file.path("manifests", i)) %>% 
-      collectManifestInfo()
-    }) %>% extractManifests()
-    lapply(c("box_pick_project", "box_pick_manifest"), FUN = enable) # enable selection btns
-
-    return(all_manifest)
+    dashboardValidationServer("validation_table", data.frame(NULL)) # reset validation table
+  
+    # disable selection to prevent changes before finishing querying all uploaded manifests
+    lapply(c("box_pick_project", "box_pick_manifest"), FUN = disable) 
+    
+    # get all uploaded manifests for selected project
+    all_manifests <- getManifests(synStore_obj, data_list$folders(), downloadFolder = "manifests")
+    uploaded_manifests(all_manifests)
+    # get all data type requirements for uploaded manifests
+    all_component_requirements(getManifestRequirements(all_manifests))
+    
+    # enable selection btns
+    lapply(c("box_pick_project", "box_pick_manifest"), FUN = enable) 
   })
 
   # only process getting requirements of selected manifest when manifest change & box shown - !use reactive not input$dropdown
-  template_req <- eventReactive(c(template_schema_name(), input$dashboard$visible), {
+  observeEvent(c(template_schema_name(), input$dashboard$visible), {
     req(input$dashboard_control != 0 & input$dashboard$visible)
     # get requirements, otherwise output unamed vector of schema name
-    req_data <- tryCatch(metadata_model$get_component_requirements(template_schema_name(), as_graph = TRUE), error = function(err) list())
-    if (length(req_data) == 0) req_data <- as.character(template_schema_name()) else req_data <- list2Vector(req_data)
-
-    return(req_data)
-  })
-
-  all_require_manifest <- eventReactive(upload_manifest(), {
-    req(input$dashboard_control != 0 & input$dashboard$visible)
-    all_manifest <- upload_manifest()
-
-    all_req <- lapply(1:nrow(all_manifest), function(i) {
-      out <- tryCatch(metadata_model$get_component_requirements(all_manifest$schema[i], as_graph = TRUE), error = function(err) list())
-
-      if (length(out) == 0) {
-        return(data.frame())
-      } else {
-        out <- list2Vector(out)
-        # check if the uploaded file contains any missed requirement
-        has_miss <- ifelse(any(!union(names(out), out) %in% all_manifest$schema), TRUE, FALSE)
-        folder_name <- all_manifest$folder[i]
-        # names(has_miss) <- folder_name
-        # change upload schema to folder names
-        out[which(out == all_manifest$schema[i])] <- folder_name
-        df <- data.frame(from = as.character(out), to = names(out), folder = rep(folder_name, length(out)), has_miss = rep(has_miss, length(out)))
-        return(df)
-      }
-    }) %>% bind_rows()
-
-    return(all_req)
-  })
-
-  quick_val <- eventReactive(upload_manifest(), {
-    load_upload$show()
-
-    all_manifest <- upload_manifest()
-
-    if (nrow(all_manifest) == 0) {
-      return(data.frame())
-    } else {
-      t <- runTime(
-        valDF <- lapply(1:nrow(all_manifest), function(i) {
-          path <- all_manifest$path[i]
-          component <- all_manifest$schema[i]
-          manifest_df <- data.table::fread(path)
-          # if no error, output is list()
-          # TODO: check with backend - ValueError: c("LungCancerTier3", "BreastCancerTier3", "ScRNA-seqAssay", "MolecularTest", "NaN", "") ...
-          valRes <- tryCatch(metadata_model$validateModelManifest(path, component), error = function(err) "Out of Date")
-          if (is.list(valRes)) {
-            res <- validationResult(valRes, component, manifest_df)
-          } else {
-            res <- list(validationRes = "invalid", errorType = valRes)
-          }
-          # manifest[[2]] <- list(res$validationRes, res$errorType)
-          out <- data.frame(is_valid = res$validationRes, error_type = res$errorType)
-        }) %>% bind_rows()
-      )
-
-      return(valDF)
-    }
+    requirement <- tryCatch(metadata_model$get_component_requirements(template_schema_name(), as_graph = TRUE), error = function(err) list())
+    if (length(requirement) == 0) requirement <- as.character(template_schema_name()) else requirement <- list2Vector(requirement)
+    selected_component_requirement(requirement)
   })
 
   # render dashboard plots when input data updated & box shown
-  observeEvent(c(upload_manifest(), template_req(), input$dashboard$visible), {
+  observeEvent(c(uploaded_manifests(), selected_component_requirement(), input$dashboard$visible), {
     req(input$dashboard_control != 0 & input$dashboard$visible)
     # check list of requirments of selected template
     output$dashboard_tab1_title <- renderUI(
       p(paste0("Completion of requirements for data type: ", sQuote(input$dropdown_template))))
-    checkListServer("checklist_template", upload_manifest(), template_req(), config)
+    checkListServer("checklist_template", uploaded_manifests(), selected_component_requirement(), config)
     # networks plot for requirements of selected template
-    dataReqNetServer("template_network", upload_manifest(), template_req(), template_schema_name())
+    dataReqNetServer("template_network", uploaded_manifests(), selected_component_requirement(), template_schema_name())
   
     output$dashboard_tab2_title <- renderUI({
       p(paste0("Completion of requirements for project: ", sQuote(input$dropdown_project)))
@@ -294,51 +240,21 @@ shinyServer(function(input, output, session) {
     load_upload$hide() # hide the partial loading screen
   })
 
-  observeEvent(c(all_require_manifest(), input$dashboard$visible), {
+  observeEvent(c(all_component_requirements(), input$dashboard$visible), {
     req(input$dashboard_control != 0 & input$dashboard$visible)
     # tree plot for requirements of all uploaded data
-    uploadDataReqTreeServer("upload_tree", upload_manifest(), all_require_manifest(), input$dropdown_project)
+    uploadDataReqTreeServer("upload_tree", uploaded_manifests(), all_component_requirements(), input$dropdown_project)
   })
 
   observeEvent(input$btn_dashboard_validate, {
-    valRes <- isolate(quick_val())
-    if (nrow(valRes) > 0) {
-      df <- data.frame(
-        dataType = paste0(
-          '<a href="https://www.synapse.org/#!Synapse:',
-          upload_manifest()$synID, '" target="_blank">', upload_manifest()$schema, "</a>"
-        ),
-        Dataset = upload_manifest()$folder,
-        Status = valRes$is_valid,
-        Error = ifelse(valRes$error_type == "Wrong Schema", "Out of Date", valRes$error_type),
-        createdOn = upload_manifest()$create,
-        lastModified = upload_manifest()$modify,
-        nameModified = c("HTAN user"),
-        internalLinks = c("Pass/Fail")
-        ) %>%
-        arrange(Status)
-
-      DTableServer("tbl_dashboard_validate", df,
-        highlight = "column", escape = FALSE,
-        caption = htmltools::tags$caption(HTML(
-          paste0(
-            "Invalid Results: <b>", sum(df$Status == "invalid"), "</b>", "<br>",
-            "Schematic Version: <code>v1.0.0</code> ",
-            tags$a(icon("github"), style = "color:#000;", href = "https://github.com/Sage-Bionetworks/schematic", target = "_blank"),
-            "</b>", "<br><br>",
-            "Click on the data type name to download your existing data."
-          )
-        )),
-        ht.color = c("#82E0AA", "#F7DC6F"), ht.value = c("valid", "invalid"), ht.column = "Status",
-        options = list(dom = "t", columnDefs = list(list(className = "dt-center", targets = "_all")))
-      )
-    } else {
-      output$dashboard_tab3_error <- renderUI(span("No uploaded file found !!!", class = "error_msg"))
-    }
+    load_upload$show()
+    manifest <- isolate(uploaded_manifests())
+    valDF <- getManifestValidation(manifest)
+    dashboardValidationServer("validation_table", valDF)
     load_upload$hide()
   })
 
-  # ######## Template Google Sheet Link ########
+  ######## Template Google Sheet Link ########
   observeEvent(c(input$dropdown_folder, input$tabs), {
 
     req(input$tabs %in% c("tab_template", "tab_upload"))

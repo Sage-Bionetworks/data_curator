@@ -190,8 +190,7 @@ ui <- shinydashboardPlus::dashboardPage(
                 "Data Validation",
                 uiOutput("dashboard_tab3_title", class = "tab-title"),
                 tagList(
-                  uiOutput("dashboard_tab3_error"),
-                  DTableUI("tbl_dashboard_validate"),
+                  dashboardValidationUI("validation_table"),
                   helpText("If there is any validation error, 
                     please re-validate the corresponding metadata to see detailed errors and re-submit once you have corrected metadata.")
                 )

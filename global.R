@@ -17,8 +17,6 @@ suppressPackageStartupMessages({
   library(sass)
   library(shinydashboardPlus)
   library(networkD3)
-  # TODO: remove `shinyWidgets` after create own progress bar widgets
-  # library(shinyWidgets)
   library(data.tree)
   library(r2d3)
 })
@@ -92,6 +90,12 @@ reticulate::use_condaenv(conda_name)
 # Import functions/modules
 source_files <- list.files(c("functions", "modules"), pattern = "*\\.R$", recursive = TRUE, full.names = TRUE)
 sapply(source_files, FUN = source)
+source_python("functions/synapse_func_alias.py")
+source_python("functions/metadata_model.py")
+# import synapseclient
+syn <- import("synapseclient")$Synapse()
+# import module that contains SynapseStorage class
+synapse_driver <- import("schematic.store.synapse")$SynapseStorage
 
 # Global variables
 dropdown_types <- c("project", "folder", "template")
