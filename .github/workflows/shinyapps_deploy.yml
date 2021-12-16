@@ -31,12 +31,14 @@ jobs:
       - uses: r-lib/actions/setup-pandoc@v1
 
       - name: Create and Activate Python Virtual Environment
+        shell: bash
         run: |
-          python3 -m venv ${{ env.CONDA_ENV_NAME }}
-          chmod 755 ${{ env.CONDA_ENV_NAME }}/bin/activate
-          source ${{ env.CONDA_ENV_NAME }}/bin/activate
+          python3 -m venv "${{ env.CONDA_ENV_NAME }}"
+          chmod 755 "${{ env.CONDA_ENV_NAME }}"/bin/activate
+          source "${{ env.CONDA_ENV_NAME }}"/bin/activate
         
       - name: Install Python Dependencies
+        shell: bash
         run: |
           source "${{ env.CONDA_ENV_NAME }}"/bin/activate 
           pip3 install -r requirements.txt
