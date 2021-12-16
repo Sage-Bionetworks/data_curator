@@ -13,6 +13,7 @@ on:
 jobs:
   shiny-deploy:
     runs-on: ubuntu-latest
+    container: rocker/rstudio
     env:
       CONDA_ENV_NAME: "virtual_env"
       # This should not be necessary for installing from public repo's however remotes::install_github() fails without it.
