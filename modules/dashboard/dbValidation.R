@@ -1,11 +1,11 @@
-validationTableUI <- function(id) {
+dbValidationUI <- function(id) {
   
   ns <- NS(id)
   
   DT::DTOutput(ns("validation-table"))
 }
 
-validationTable <- function(id, data, columns = "Status") {
+dbValidation <- function(id, data, columns = "Status") {
   moduleServer(
     id,
     function(input, output, session) {

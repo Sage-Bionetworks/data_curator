@@ -23,8 +23,8 @@ dashboardUI <- function(id) {
           "Selected Data Type",
           setTabTitleUI(ns("tab1")),
           fluidRow(
-            column(6, checkListUI(ns("checklist"))),
-            column(6, dataReqNetUI(ns("network"), height = "400px"))
+            column(6, dbChecklistUI(ns("checklist"))),
+            column(6, dbNetworkUI(ns("network"), height = "400px"))
           ),
           helpText(HTML(
             "If there is a data requirement you have not yet completed, please generate its data type template and submit the validated metadata via the process of this app.<br>
@@ -36,13 +36,13 @@ dashboardUI <- function(id) {
         tabPanel(
           "Selected Project",
           setTabTitleUI(ns("tab2")),
-          uploadDataReqTreeUI(ns("tree"))
+          dbTreeUI(ns("tree"))
         ),
         tabPanel(
           "Data Validation",
           setTabTitleUI(ns("tab3")),
           tagList(
-            validationTableUI(ns("validation-table")),
+            dbValidationUI(ns("validation-table")),
             helpText("If there is any validation error, 
               please re-validate the corresponding metadata to see detailed errors and re-submit once you have corrected metadata.")
           )
@@ -111,16 +111,16 @@ dashboard <- function(id, syn, project, foldeList, template, downloadFolder, con
         req(dashboardOnChange())
         # check list of requirments of selected template
         setTabTitle("tab1", paste0("Completion of requirements for data type: ", sQuote(templateName())))
-        checkList("checklist", uploaded_manifests(), selected_component_requirement(), config)
+        dbChecklist("checklist", uploaded_manifests(), selected_component_requirement(), config)
         # networks plot for requirements of selected template
-        dataReqNet("network", uploaded_manifests(), selected_component_requirement(), template())
+        dbNetwork("network", uploaded_manifests(), selected_component_requirement(), template())
       })
 
       observeEvent(c(all_component_requirements(), input$box$visible), {
         req(dashboardOnChange())
         setTabTitle("tab2", paste0("Completion of requirements for project: ", sQuote(project())))
         # tree plot for requirements of all uploaded data
-        uploadDataReqTree("tree", uploaded_manifests(), all_component_requirements(), project())
+        dbTree("tree", uploaded_manifests(), all_component_requirements(), project())
       })
 
       # validation table for all uploaded data
@@ -128,7 +128,7 @@ dashboard <- function(id, syn, project, foldeList, template, downloadFolder, con
         manifest <- isolate(uploaded_manifests())
         setTabTitle("tab3", paste0("Validate your uploaded data in the project: ", sQuote(project())))
         validation_res <- getManifestValidation(manifest)
-        validationTable("validation-table", validation_res)
+        dbValidation("validation-table", validation_res)
         # update and hide the partial loading screen
         dcWaiter(id = ns("box"), "hide")
       })

@@ -1,4 +1,4 @@
-dataReqNetUI <- function(id, height = 500) {
+dbNetworkUI <- function(id, height = 500) {
 
   # namespace
   ns <- NS(id)
@@ -9,7 +9,7 @@ dataReqNetUI <- function(id, height = 500) {
   )
 }
 
-dataReqNet <- function(id, upload_data, req_data, selected_manifest) {
+dbNetwork <- function(id, upload_data, req_data, selected_manifest) {
   moduleServer(
     id,
     function(input, output, session) {

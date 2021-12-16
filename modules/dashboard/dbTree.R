@@ -1,6 +1,6 @@
 # This is the module to
 # , width = "100%", height = "100%"
-uploadDataReqTreeUI <- function(id, width = "100%", height = "400px") {
+dbTreeUI <- function(id, width = "100%", height = "400px") {
 
   # namespace
   ns <- NS(id)
@@ -22,7 +22,7 @@ uploadDataReqTreeUI <- function(id, width = "100%", height = "400px") {
   )
 }
 
-uploadDataReqTree <- function(id, upload_data, upload_require_data, project_name) {
+dbTree <- function(id, upload_data, upload_require_data, project_name) {
   moduleServer(
     id,
     function(input, output, session) {

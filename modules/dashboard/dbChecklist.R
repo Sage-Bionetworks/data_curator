@@ -1,6 +1,6 @@
 # This is the module to
 
-checkListUI <- function(id) {
+dbChecklistUI <- function(id) {
 
   # namespace
   ns <- NS(id)
@@ -9,7 +9,7 @@ checkListUI <- function(id) {
   )
 }
 
-checkList <- function(id, upload_data, req_data, config) {
+dbChecklist <- function(id, upload_data, req_data, config) {
   moduleServer(
     id,
     function(input, output, session) {
