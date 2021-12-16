@@ -20,7 +20,8 @@ cran <- c(
 "readr",
 "sass",
 "remotes",
-"rsconnect")
+"rsconnect",
+"png")
 
 gh <- "dreamRs/shinypop"
 
