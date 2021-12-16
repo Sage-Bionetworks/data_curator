@@ -33,8 +33,8 @@ jobs:
       - name: Create and Activate Python Virtual Environment
         run: |
           python3 -m venv ${{ env.CONDA_ENV_NAME }}
-          chmod 755 "${{ env.CONDA_ENV_NAME }}"/bin/activate
-          source "${{ env.CONDA_ENV_NAME }}"/bin/activate
+          chmod 755 ${{ env.CONDA_ENV_NAME }}/bin/activate
+          source ${{ env.CONDA_ENV_NAME }}/bin/activate
         
       - name: Install Python Dependencies
         run: |
