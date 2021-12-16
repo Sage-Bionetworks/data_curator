@@ -82,6 +82,7 @@ jobs:
              writeLines(config, configFileConn),
              finally=close(configFileConn)
           )
+          options("rsconnect.max.bundle.files option"=20000) # doubled from the default
           rsconnect::setAccountInfo(rsConnectUser, rsConnectToken, rsConnectSecret)
           rsconnect::deployApp(appName = appName)
  
