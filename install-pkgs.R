@@ -24,6 +24,6 @@ cran <- c(
 "png")
 
 gh <- "dreamRs/shinypop"
-
+options(repos = c(REPO_NAME = "https://packagemanager.rstudio.com/all/__linux__/bionic/latest", getOption("repos")))
 install.packages(cran)
 remotes::install_github(gh)
