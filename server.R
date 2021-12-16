@@ -268,7 +268,7 @@ shinyServer(function(input, output, session) {
         template_schema_name()
       )
     )
-
+    logjs(annotation_status)
     # validation messages
     valRes <- validationResult(annotation_status, input$dropdown_template, inFile$data())
     ValidationMsgServer("text_validate", valRes, input$dropdown_template, inFile$data())

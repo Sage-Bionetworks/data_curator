@@ -60,16 +60,15 @@ validationResult <- function(valRes, template, inFile) {
       }
 
       errorDT <- lapply(valRes, function(i) {
-        error_row <- i[[1]] 
-        error_col <- i[[2]]
-        # get invalid value
-        error_val <- inFile[as.numeric(error_row) - 1, error_col]
         tibble(
-          Row = error_row,
-          Column = error_col,
-          Value = error_val,
+          Row = i[[1]],
+          Column = i[[2]],
+          Value = i[[4]][[1]],
           Error = i[[3]]
-        ) %>% mutate(across(everything(), as.character))
+        ) %>%
+        # ensure highlight function to work
+        # convert to all characters since {inFile} in preview are all characters
+        mutate(across(everything(), as.character))
       }) %>% bind_rows()
 
       # collapse similiar errors into one row
