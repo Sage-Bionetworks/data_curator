@@ -52,7 +52,7 @@ the installation script provided.
 
         git clone --single-branch --branch develop https://github.com/Sage-Bionetworks/schematic.git
 
-2.  Install the latest release of the `schematic` via `pip`:
+2.  Install the latest release of the `schematic` via `pip`. IF NOT USING CONDA, install the devel version below:
 
         python -m pip install schematicpy
 
@@ -64,7 +64,7 @@ the installation script provided.
 
 3.  Set up the `schematic` configuration. To do so, follow the instructions on the `schematic` repository [README](https://github.com/Sage-Bionetworks/schematic/tree/develop#12-installation-requirements-and-pre-requisites)
 
-4. If not using a conda environment. Install the required dependencies.
+4. If not using a conda environment. Install the required dependencies. Skip this step if not using conda.
         
         pip install -r requirements.txt
 
