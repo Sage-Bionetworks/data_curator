@@ -9,7 +9,7 @@ dataReqNetUI <- function(id, height = 500) {
   )
 }
 
-dataReqNetServer <- function(id, upload_data, req_data, selected_manifest) {
+dataReqNet <- function(id, upload_data, req_data, selected_manifest) {
   moduleServer(
     id,
     function(input, output, session) {

@@ -9,7 +9,7 @@ checkListUI <- function(id) {
   )
 }
 
-checkListServer <- function(id, upload_data, req_data, config) {
+checkList <- function(id, upload_data, req_data, config) {
   moduleServer(
     id,
     function(input, output, session) {

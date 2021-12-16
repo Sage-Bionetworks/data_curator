@@ -1,9 +1,11 @@
 # This is script to wrap up the waiter screen for data curator app
 # TODO: maybe we could split into UI and server if we need
 
-dcWaiter <- function(stage = c("show", "update", "hide"), landing = FALSE, userName = NULL,
+dcWaiter <- function(stage = c("show", "update", "hide"),
+                     id = NULL, landing = FALSE, userName = NULL,
                      isLogin = TRUE, isCertified = TRUE, isPermission = TRUE,
-                     sleep = 2, msg = NULL, spin = NULL) {
+                     sleep = 2, msg = NULL, spin = NULL, 
+                     color = "rgba(66, 72, 116, .9)", style = NULL) {
   # validate arguments
   if (!is.logical(landing)) stop("landing must be a boolean")
   if (!is.logical(isLogin)) stop("isLogin must be a boolean")
@@ -17,7 +19,7 @@ dcWaiter <- function(stage = c("show", "update", "hide"), landing = FALSE, userN
   # if "hide", proceed hiding process immediately and exit function
   if (stage == "hide") {
     Sys.sleep(sleep)
-    return(waiter_hide())
+    return(waiter_hide(id = id))
   }
 
   # first loading screen of app
@@ -77,14 +79,15 @@ dcWaiter <- function(stage = c("show", "update", "hide"), landing = FALSE, userN
     # other loading screens
     if (stage == "show") {
       waiter_show(
-        html = tagList(spin, br(), h3(msg)),
-        color = "rgba(66, 72, 116, .9)"
+        id = id,
+        html = tagList(spin, br(), h4(msg, style = style)),
+        color = color
       )
     } else {
       Sys.sleep(2) # has to put at least 2s before to make update work
-      waiter_update(html = tagList(spin, br(), h3(msg)))
+      waiter_update(id = id, html = tagList(spin, br(), h4(msg, style = style)))
       Sys.sleep(sleep)
-      waiter_hide()
+      waiter_hide(id = id)
     }
   }
 }

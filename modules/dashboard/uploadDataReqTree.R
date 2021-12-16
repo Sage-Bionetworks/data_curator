@@ -22,7 +22,7 @@ uploadDataReqTreeUI <- function(id, width = "100%", height = "400px") {
   )
 }
 
-uploadDataReqTreeServer <- function(id, upload_data, upload_require_data, project_name) {
+uploadDataReqTree <- function(id, upload_data, upload_require_data, project_name) {
   moduleServer(
     id,
     function(input, output, session) {

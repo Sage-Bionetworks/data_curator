@@ -150,53 +150,54 @@ ui <- shinydashboardPlus::dashboardPage(
               choices = "Generating..."
             )
           ),
-          # dashboard section
-          column(12, 
-            div(id = "dashboard_switch_container",
-              actionButton("dashboard_control", div(span(), p("Show Data Dashboard")), class = "scroll-down"),
-              helpText("check your data ingress status and data compliance")
-            )
-          ),
-          box(
-            status = "primary",
-            id = "dashboard",
-            width = 12,
-            closable = TRUE,
-            title = "Track your Data Status",
-            tabsetPanel(
-              id = "dashboard_tabs",
-              tabPanel(
-                "Selected Data Type",
-                uiOutput("dashboard_tab1_title", class = "tab-title"),
-                fluidRow(
-                  column(6, checkListUI("checklist_template")),
-                  column(6, dataReqNetUI("template_network", height = "400px"))
-                ),
-                helpText(HTML(
-                  "If there is a data requirement you have not yet completed, please generate its data type template and submit the validated metadata via the process of this app.<br>
-                  Note: For file-based data types (scRNA-seq, Bulk WES, etc.), please upload the data files before submitting the metadata. 
-                  Visit <a href='https://ncihtan.github.io/HTAN-Data-Ingress-Docs/organize-your-data-upload.html' target='_blank'>HTAN-Data-Ingress-Docs</a> 
-                  to know more details about the types of data (record-based vs file-based)."
-                ))
-              ),
-              tabPanel(
-                "Selected Project",
-                tagList(
-                  uiOutput("dashboard_tab2_title", class = "tab-title")
-                ),
-                uploadDataReqTreeUI("upload_tree")
-              ),
-              tabPanel(
-                "Data Validation",
-                uiOutput("dashboard_tab3_title", class = "tab-title"),
-                tagList(
-                  dashboardValidationUI("validation_table"),
-                  helpText("If there is any validation error, 
-                    please re-validate the corresponding metadata to see detailed errors and re-submit once you have corrected metadata.")
-                )
-              )
-            )
-          )
+          dashboardUI("dashboard")
+          # # dashboard section
+          # column(12, 
+          #   div(id = "dashboard_switch_container",
+          #     actionButton("dashboard_control", div(span(), p("Show Data Dashboard")), class = "scroll-down"),
+          #     helpText("check your data ingress status and data compliance")
+          #   )
+          # ),
+          # box(
+          #   status = "primary",
+          #   id = "dashboard",
+          #   width = 12,
+          #   closable = TRUE,
+          #   title = "Track your Data Status",
+          #   tabsetPanel(
+          #     id = "dashboard_tabs",
+          #     tabPanel(
+          #       "Selected Data Type",
+          #       uiOutput("dashboard_tab1_title", class = "tab-title"),
+          #       fluidRow(
+          #         column(6, checkListUI("checklist_template")),
+          #         column(6, dataReqNetUI("template_network", height = "400px"))
+          #       ),
+          #       helpText(HTML(
+          #         "If there is a data requirement you have not yet completed, please generate its data type template and submit the validated metadata via the process of this app.<br>
+          #         Note: For file-based data types (scRNA-seq, Bulk WES, etc.), please upload the data files before submitting the metadata. 
+          #         Visit <a href='https://ncihtan.github.io/HTAN-Data-Ingress-Docs/organize-your-data-upload.html' target='_blank'>HTAN-Data-Ingress-Docs</a> 
+          #         to know more details about the types of data (record-based vs file-based)."
+          #       ))
+          #     ),
+          #     tabPanel(
+          #       "Selected Project",
+          #       tagList(
+          #         uiOutput("dashboard_tab2_title", class = "tab-title")
+          #       ),
+          #       uploadDataReqTreeUI("upload_tree")
+          #     ),
+          #     tabPanel(
+          #       "Data Validation",
+          #       uiOutput("dashboard_tab3_title", class = "tab-title"),
+          #       tagList(
+          #         dashboardValidationUI("validation_table"),
+          #         helpText("If there is any validation error, 
+          #           please re-validate the corresponding metadata to see detailed errors and re-submit once you have corrected metadata.")
+          #       )
+          #     )
+          #   )
+          # )
         ),
         switchTabUI("switchTab2", direction = "both")
       ),

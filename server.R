@@ -45,7 +45,7 @@ shinyServer(function(input, output, session) {
   # add box effects
   boxEffect(zoom = FALSE, float = TRUE)
   # make visible of dashboard false by default
-  shinydashboardPlus::updateBox("dashboard", action = "remove")
+  shinydashboardPlus::updateBox("dashboard-box", action = "remove")
 
   ######## Initiate Login Process ########
   # synapse cookies
@@ -163,96 +163,17 @@ shinyServer(function(input, output, session) {
     template_schema_name(config$schema_name[match(input$dropdown_template, config$display_name)])
   })
 
-  ######## Update Dashboard Stats ########
-  # all functions should not be executed until dashboard visable
-  load_upload <- Waiter$new(
-    id = "dashboard",
-    html = tagList(spin_google(), h4("Loading", style = "color: #000")),
-    color = transparent(0.2)
+  ######## Dashboard ########
+  dashboard(
+    id = "dashboard", 
+    syn = synStore_obj, 
+    project = reactive(input$dropdown_project), 
+    folder_list = data_list$folders, 
+    template = template_schema_name, 
+    downloadFolder = "manifests", 
+    config = config
+    disableIds = c("box_pick_project", "box_pick_manifest")
   )
-
-  observeEvent(input$dashboard$visible, {
-    if (!input$dashboard$visible) {
-      Sys.sleep(0.3) # 0.3 is optimal
-      show("dashboard_switch_container")
-    }
-  })
-
-  observeEvent(input$dashboard_control, {
-    hide("dashboard_switch_container")
-    shinydashboardPlus::updateBox("dashboard", action = "restore")
-  })
-
-  # set up variables
-  uploaded_manifests <- reactiveVal(NULL)
-  all_component_requirements <- reactiveVal(NULL)
-  selected_component_requirement <- reactiveVal(NULL)
-  quick_val <- reactiveVal(NULL)
-
-  observeEvent(c(data_list$folders(), input$dashboard$visible), {
-    req(input$dashboard_control != 0 & input$dashboard$visible)
-    load_upload$show() # initiate partial loading screen for generating plot
-    dashboardValidationServer("validation_table", data.frame(NULL)) # reset validation table
-  
-    # disable selection to prevent changes before finishing querying all uploaded manifests
-    lapply(c("box_pick_project", "box_pick_manifest"), FUN = disable) 
-    
-    # get all uploaded manifests for selected project
-    all_manifests <- getManifests(synStore_obj, data_list$folders(), downloadFolder = "manifests")
-    uploaded_manifests(all_manifests)
-    # get all data type requirements for uploaded manifests
-    all_component_requirements(getManifestRequirements(all_manifests))
-    
-    # enable selection btns
-    lapply(c("box_pick_project", "box_pick_manifest"), FUN = enable) 
-  })
-
-  # only process getting requirements of selected manifest when manifest change & box shown - !use reactive not input$dropdown
-  observeEvent(c(template_schema_name(), input$dashboard$visible), {
-    req(input$dashboard_control != 0 & input$dashboard$visible)
-    # get requirements, otherwise output unamed vector of schema name
-    requirement <- tryCatch(metadata_model$get_component_requirements(template_schema_name(), as_graph = TRUE), error = function(err) list())
-    if (length(requirement) == 0) requirement <- as.character(template_schema_name()) else requirement <- list2Vector(requirement)
-    selected_component_requirement(requirement)
-  })
-
-  # render dashboard plots when input data updated & box shown
-  observeEvent(c(uploaded_manifests(), selected_component_requirement(), input$dashboard$visible), {
-    req(input$dashboard_control != 0 & input$dashboard$visible)
-    # check list of requirments of selected template
-    output$dashboard_tab1_title <- renderUI(
-      p(paste0("Completion of requirements for data type: ", sQuote(input$dropdown_template))))
-    checkListServer("checklist_template", uploaded_manifests(), selected_component_requirement(), config)
-    # networks plot for requirements of selected template
-    dataReqNetServer("template_network", uploaded_manifests(), selected_component_requirement(), template_schema_name())
-  
-    output$dashboard_tab2_title <- renderUI({
-      p(paste0("Completion of requirements for project: ", sQuote(input$dropdown_project)))
-    })
-
-    output$dashboard_tab3_title <- renderUI({
-      p(HTML(paste0(
-        actionButton("btn_dashboard_validate", "Validate", class = "btn-primary-color"),
-        "  your existing data in the project: ", sQuote(input$dropdown_project)
-      )))
-    })
-
-    load_upload$hide() # hide the partial loading screen
-  })
-
-  observeEvent(c(all_component_requirements(), input$dashboard$visible), {
-    req(input$dashboard_control != 0 & input$dashboard$visible)
-    # tree plot for requirements of all uploaded data
-    uploadDataReqTreeServer("upload_tree", uploaded_manifests(), all_component_requirements(), input$dropdown_project)
-  })
-
-  observeEvent(input$btn_dashboard_validate, {
-    load_upload$show()
-    manifest <- isolate(uploaded_manifests())
-    valDF <- getManifestValidation(manifest)
-    dashboardValidationServer("validation_table", valDF)
-    load_upload$hide()
-  })
 
   ######## Template Google Sheet Link ########
   observeEvent(c(input$dropdown_folder, input$tabs), {
@@ -347,193 +268,193 @@ shinyServer(function(input, output, session) {
   })
 
   ######## Validation Section #######
-  observeEvent(input$btn_validate, {
+  # observeEvent(input$btn_validate, {
   
-    # loading screen for validating metadata
-    dcWaiter("show", msg = "Validating...")
+  #   # loading screen for validating metadata
+  #   dcWaiter("show", msg = "Validating...")
 
-    try(
-      silent = TRUE,
-      annotation_status <- metadata_model$validateModelManifest(
-        inFile$raw()$datapath,
-        template_schema_name()
-      )
-    )
+  #   try(
+  #     silent = TRUE,
+  #     annotation_status <- metadata_model$validateModelManifest(
+  #       inFile$raw()$datapath,
+  #       template_schema_name()
+  #     )
+  #   )
 
-    # validation messages
-    valRes <- validationResult(annotation_status, input$dropdown_template, inFile$data())
-    ValidationMsgServer("text_validate", valRes, input$dropdown_template, inFile$data())
+  #   # validation messages
+  #   valRes <- validationResult(annotation_status, input$dropdown_template, inFile$data())
+  #   ValidationMsgServer("text_validate", valRes, input$dropdown_template, inFile$data())
 
-    # if there is a file uploaded
-    if (!is.null(valRes$validationRes)) {
+  #   # if there is a file uploaded
+  #   if (!is.null(valRes$validationRes)) {
 
-      # output error messages as data table if it is invalid value type
-      # render empty if error is not "invaid value" type - ifelse() will not work
-      if (valRes$errorType == "Invalid Value") {
-        DTableServer("tbl_validate", valRes$errorDT,
-          rownames = FALSE,
-          caption = "View all the error(s) highlighted in the preview table above",
-          options = list(
-            pageLength = 50, scrollX = TRUE,
-            scrollY = min(50 * nrow(valRes$errorDT), 400), lengthChange = FALSE,
-            info = FALSE, searching = FALSE
-          )
-        )
-        show(NS("tbl_validate", "table"))
-      }
+  #     # output error messages as data table if it is invalid value type
+  #     # render empty if error is not "invaid value" type - ifelse() will not work
+  #     if (valRes$errorType == "Invalid Value") {
+  #       DTableServer("tbl_validate", valRes$errorDT,
+  #         rownames = FALSE,
+  #         caption = "View all the error(s) highlighted in the preview table above",
+  #         options = list(
+  #           pageLength = 50, scrollX = TRUE,
+  #           scrollY = min(50 * nrow(valRes$errorDT), 400), lengthChange = FALSE,
+  #           info = FALSE, searching = FALSE
+  #         )
+  #       )
+  #       show(NS("tbl_validate", "table"))
+  #     }
 
-      # highlight invalue cells in preview table
-      if (valRes$errorType == "Wrong Schema") {
-        DTableServer("tbl_preview", data = inFile$data(), 
-          filter = "top", highlight = "row", ht.column = 1, ht.value = inFile$data()[, 1])
-      } else {
-        DTableServer("tbl_preview",
-          data = inFile$data(), filter = "top",
-          highlight = "column", ht.column = valRes$errorDT$Column, ht.value = valRes$errorDT$Value)
-      }
+  #     # highlight invalue cells in preview table
+  #     if (valRes$errorType == "Wrong Schema") {
+  #       DTableServer("tbl_preview", data = inFile$data(), 
+  #         filter = "top", highlight = "row", ht.column = 1, ht.value = inFile$data()[, 1])
+  #     } else {
+  #       DTableServer("tbl_preview",
+  #         data = inFile$data(), filter = "top",
+  #         highlight = "column", ht.column = valRes$errorDT$Column, ht.value = valRes$errorDT$Value)
+  #     }
 
-      if (valRes$validationRes == "valid") {
-        # show submit button
-        output$submit <- renderUI(actionButton("btn_submit", "Submit to Synapse", class = "btn-primary-color"))
-        dcWaiter("update", msg = paste0(valRes$errorType, " Found !!! "), spin = spin_inner_circles(), sleep = 2.5)
-      } else {
-        output$val_gsheet <- renderUI(
-          actionButton("btn_val_gsheet", "  Generate Google Sheet Link", icon = icon("table"), class = "btn-primary-color")
-        )
-        dcWaiter("update", msg = paste0(valRes$errorType, " Found !!! "), spin = spin_pulsar(), sleep = 2.5)
-      }
-    } else {
-      dcWaiter("hide")
-    }
+  #     if (valRes$validationRes == "valid") {
+  #       # show submit button
+  #       output$submit <- renderUI(actionButton("btn_submit", "Submit to Synapse", class = "btn-primary-color"))
+  #       dcWaiter("update", msg = paste0(valRes$errorType, " Found !!! "), spin = spin_inner_circles(), sleep = 2.5)
+  #     } else {
+  #       output$val_gsheet <- renderUI(
+  #         actionButton("btn_val_gsheet", "  Generate Google Sheet Link", icon = icon("table"), class = "btn-primary-color")
+  #       )
+  #       dcWaiter("update", msg = paste0(valRes$errorType, " Found !!! "), spin = spin_pulsar(), sleep = 2.5)
+  #     }
+  #   } else {
+  #     dcWaiter("hide")
+  #   }
 
-    show("div_validate")
-  })
+  #   show("div_validate")
+  # })
 
-  # if user click gsheet_btn, generating gsheet
-  observeEvent(input$btn_val_gsheet, {
-    # loading screen for Google link generation
-    dcWaiter("show", msg = "Generating link...")
+  # # if user click gsheet_btn, generating gsheet
+  # observeEvent(input$btn_val_gsheet, {
+  #   # loading screen for Google link generation
+  #   dcWaiter("show", msg = "Generating link...")
 
-    filled_manifest <- metadata_model$populateModelManifest(paste0(
-      config$community,
-      " ", input$dropdown_template
-    ), inFile$raw()$datapath, template_schema_name())
+  #   filled_manifest <- metadata_model$populateModelManifest(paste0(
+  #     config$community,
+  #     " ", input$dropdown_template
+  #   ), inFile$raw()$datapath, template_schema_name())
 
-    # rerender and change button to link
-    output$val_gsheet <- renderUI({
-      HTML(paste0("<a target=\"_blank\" href=\"", filled_manifest, "\">Edit on the Google Sheet.</a>"))
-    })
+  #   # rerender and change button to link
+  #   output$val_gsheet <- renderUI({
+  #     HTML(paste0("<a target=\"_blank\" href=\"", filled_manifest, "\">Edit on the Google Sheet.</a>"))
+  #   })
 
-    dcWaiter("hide")
-  })
+  #   dcWaiter("hide")
+  # })
 
 
-  ######## Submission Section ########
-  observeEvent(input$btn_submit, {
-    # loading screen for submitting data
-    dcWaiter("show", msg = "Submitting...")
+  # ######## Submission Section ########
+  # observeEvent(input$btn_submit, {
+  #   # loading screen for submitting data
+  #   dcWaiter("show", msg = "Submitting...")
 
-    dir.create("./tmp", showWarnings = FALSE)
+  #   dir.create("./tmp", showWarnings = FALSE)
 
-    # reads file csv again
-    submit_data <- csvInfileServer("inputFile")$data()
+  #   # reads file csv again
+  #   submit_data <- csvInfileServer("inputFile")$data()
 
-    # If an assay component selected (define assay components) note for future
-    # the type to filter (eg assay) on could probably also be a config choice
-    assay_schemas <- config$manifest_schemas$display_name[config$manifest_schemas$type == "assay"]
-    # if folder_ID has not been updated yet
-    if (folder_synID() == "") folder_synID(data_list$folders()[[input$dropdown_folder]])
+  #   # If an assay component selected (define assay components) note for future
+  #   # the type to filter (eg assay) on could probably also be a config choice
+  #   assay_schemas <- config$manifest_schemas$display_name[config$manifest_schemas$type == "assay"]
+  #   # if folder_ID has not been updated yet
+  #   if (folder_synID() == "") folder_synID(data_list$folders()[[input$dropdown_folder]])
 
-    if (input$dropdown_template %in% assay_schemas) {
-      # make into a csv or table for assay components already has entityId
-      if ("entityId" %in% colnames(submit_data)) {
-        write.csv(submit_data,
-          file = "./tmp/synapse_storage_manifest.csv",
-          quote = TRUE, row.names = FALSE, na = ""
-        )
-      } else {
-        file_list <- synapse_driver$getFilesInStorageDataset(synStore_obj, folder_synID())
-        data_list$files <<- list2Vector(file_list)
+  #   if (input$dropdown_template %in% assay_schemas) {
+  #     # make into a csv or table for assay components already has entityId
+  #     if ("entityId" %in% colnames(submit_data)) {
+  #       write.csv(submit_data,
+  #         file = "./tmp/synapse_storage_manifest.csv",
+  #         quote = TRUE, row.names = FALSE, na = ""
+  #       )
+  #     } else {
+  #       file_list <- synapse_driver$getFilesInStorageDataset(synStore_obj, folder_synID())
+  #       data_list$files <<- list2Vector(file_list)
 
-        # better filename checking is needed
-        # TODO: crash if no file existing
-        files_df <- stack(data_list$files)
-        # adds entityID, saves it as synapse_storage_manifest.csv, then associates with synapse files
-        colnames(files_df) <- c("entityId", "Filename")
-        files_entity <- inner_join(submit_data, files_df, by = "Filename")
+  #       # better filename checking is needed
+  #       # TODO: crash if no file existing
+  #       files_df <- stack(data_list$files)
+  #       # adds entityID, saves it as synapse_storage_manifest.csv, then associates with synapse files
+  #       colnames(files_df) <- c("entityId", "Filename")
+  #       files_entity <- inner_join(submit_data, files_df, by = "Filename")
 
-        write.csv(files_entity,
-          file = "./tmp/synapse_storage_manifest.csv",
-          quote = TRUE, row.names = FALSE, na = ""
-        )
-      }
+  #       write.csv(files_entity,
+  #         file = "./tmp/synapse_storage_manifest.csv",
+  #         quote = TRUE, row.names = FALSE, na = ""
+  #       )
+  #     }
 
-      # associates metadata with data and returns manifest id
-      manifest_id <- synapse_driver$associateMetadataWithFiles(
-        synStore_obj,
-        "./tmp/synapse_storage_manifest.csv", folder_synID()
-      )
-      manifest_path <-  tags$a(href = paste0("synapse.org/#!Synapse:", manifest_id), manifest_id, target = "_blank")
+  #     # associates metadata with data and returns manifest id
+  #     manifest_id <- synapse_driver$associateMetadataWithFiles(
+  #       synStore_obj,
+  #       "./tmp/synapse_storage_manifest.csv", folder_synID()
+  #     )
+  #     manifest_path <-  tags$a(href = paste0("synapse.org/#!Synapse:", manifest_id), manifest_id, target = "_blank")
 
-      # if no error
-      if (startsWith(manifest_id, "syn") == TRUE) {
-        dcWaiter("hide")
-        nx_report_success("Success!", HTML(paste0("Manifest submitted to: ", manifest_path)))
+  #     # if no error
+  #     if (startsWith(manifest_id, "syn") == TRUE) {
+  #       dcWaiter("hide")
+  #       nx_report_success("Success!", HTML(paste0("Manifest submitted to: ", manifest_path)))
 
-        # clean up old inputs/results
-        sapply(clean_tags, FUN = hide)
-        reset("inputFile-file")
-        DTableServer("tbl_preview", data.frame(NULL))
+  #       # clean up old inputs/results
+  #       sapply(clean_tags, FUN = hide)
+  #       reset("inputFile-file")
+  #       DTableServer("tbl_preview", data.frame(NULL))
 
-      } else {
-        dcWaiter("update", msg = HTML(paste0(
-          "Uh oh, looks like something went wrong!",
-          manifest_id,
-          " is not a valid Synapse ID. Try again?"
-        )), sleep = 3)
-      }
-    } else {
-      # if not assay type tempalte
-      write.csv(submit_data,
-        file = "./tmp/synapse_storage_manifest.csv", quote = TRUE,
-        row.names = FALSE, na = ""
-      )
+  #     } else {
+  #       dcWaiter("update", msg = HTML(paste0(
+  #         "Uh oh, looks like something went wrong!",
+  #         manifest_id,
+  #         " is not a valid Synapse ID. Try again?"
+  #       )), sleep = 3)
+  #     }
+  #   } else {
+  #     # if not assay type tempalte
+  #     write.csv(submit_data,
+  #       file = "./tmp/synapse_storage_manifest.csv", quote = TRUE,
+  #       row.names = FALSE, na = ""
+  #     )
 
-      # associates metadata with data and returns manifest id
-      manifest_id <- synapse_driver$associateMetadataWithFiles(
-        synStore_obj,
-        "./tmp/synapse_storage_manifest.csv", folder_synID()
-      )
-      manifest_path <- tags$a(href = paste0("synapse.org/#!Synapse:", manifest_id), manifest_id, target = "_blank")
+  #     # associates metadata with data and returns manifest id
+  #     manifest_id <- synapse_driver$associateMetadataWithFiles(
+  #       synStore_obj,
+  #       "./tmp/synapse_storage_manifest.csv", folder_synID()
+  #     )
+  #     manifest_path <- tags$a(href = paste0("synapse.org/#!Synapse:", manifest_id), manifest_id, target = "_blank")
 
-      # if uploaded provided valid synID message
-      if (startsWith(manifest_id, "syn") == TRUE) {
-        dcWaiter("hide")
-        nx_report_success("Success!", HTML(paste0("Manifest submitted to: ", manifest_path)))
+  #     # if uploaded provided valid synID message
+  #     if (startsWith(manifest_id, "syn") == TRUE) {
+  #       dcWaiter("hide")
+  #       nx_report_success("Success!", HTML(paste0("Manifest submitted to: ", manifest_path)))
 
-        # clear inputs
-        sapply(clean_tags, FUN = hide)
+  #       # clear inputs
+  #       sapply(clean_tags, FUN = hide)
 
-        # rerenders fileinput UI
-        output$fileInput_ui <- renderUI({
-          fileInput("file1", "Upload CSV File", accept = c(
-            "text/csv", "text/comma-separated-values",
-            ".csv"
-          ))
-        })
-        # renders empty df
-        output$tbl_preview <- renderDT(datatable(as.data.frame(matrix(0,
-          ncol = 0,
-          nrow = 0
-        ))))
-      } else {
-        dcWaiter("update", msg = HTML(paste0(
-          "Uh oh, looks like something went wrong!",
-          manifest_id, " is not a valid Synapse ID. Try again?"
-        )), sleep = 3)
-      }
-    }
-    # delete tmp manifest
-    unlink("./tmp/synapse_storage_manifest.csv")
-  })
+  #       # rerenders fileinput UI
+  #       output$fileInput_ui <- renderUI({
+  #         fileInput("file1", "Upload CSV File", accept = c(
+  #           "text/csv", "text/comma-separated-values",
+  #           ".csv"
+  #         ))
+  #       })
+  #       # renders empty df
+  #       output$tbl_preview <- renderDT(datatable(as.data.frame(matrix(0,
+  #         ncol = 0,
+  #         nrow = 0
+  #       ))))
+  #     } else {
+  #       dcWaiter("update", msg = HTML(paste0(
+  #         "Uh oh, looks like something went wrong!",
+  #         manifest_id, " is not a valid Synapse ID. Try again?"
+  #       )), sleep = 3)
+  #     }
+  #   }
+  #   # delete tmp manifest
+  #   unlink("./tmp/synapse_storage_manifest.csv")
+  # })
 })

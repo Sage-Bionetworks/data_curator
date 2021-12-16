@@ -52,27 +52,16 @@
 }
 
 // ui dashboard
-#dashboard_switch_container {
+#dashboard-toggle-btn-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   margin-top: 20px;
 }
 
-#dashboard {
+#dashboard-box {
   margin-top: 20px;
-
-  .tab-title {
-    text-align: center;
-    font-weight: bold;
-    font-size: 1.6em;
-    margin: 15px 0;
-  }
-
-  .valueBox-title {
-    @extend .tab-title;
-    padding-top: 42px;
-  }
+  min-height: 600px;
 
   .nav-tabs {
     & > li.active > a {
@@ -88,11 +77,6 @@
 
   .progress-group {
     margin: 0 40px 20px 15px;
-  }
-
-  #dashboard_tab3_error {
-    margin-left: 5px;
-    font-size: 16px;
   }
 }
 
