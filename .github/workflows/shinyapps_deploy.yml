@@ -13,6 +13,7 @@ on:
 jobs:
   shiny-deploy:
     runs-on: ubuntu-latest
+    # This image seems to be based on rocker/r-ver which in turn is based on debian
     container: rocker/rstudio
     env:
       CONDA_ENV_NAME: "virtual_env"
@@ -29,21 +30,15 @@ jobs:
 
       - uses: r-lib/actions/setup-pandoc@v1
 
- #     - uses: r-lib/actions/setup-r@v1
- #       with:
- #         use-public-rspm: true
-
- #     - uses: r-lib/actions/setup-renv@v1
-
       - name: Create and Activate Python Virtual Environment
         run: |
           python3 -m venv ${{ env.CONDA_ENV_NAME }}
           chmod 755 "${{ env.CONDA_ENV_NAME }}"/bin/activate
-          "${{ env.CONDA_ENV_NAME }}"/bin/activate
+          source "${{ env.CONDA_ENV_NAME }}"/bin/activate
         
       - name: Install Python Dependencies
         run: |
-          "${{ env.CONDA_ENV_NAME }}"/bin/activate 
+          source "${{ env.CONDA_ENV_NAME }}"/bin/activate 
           pip3 install -r requirements.txt
         
       - name: Install R packages
