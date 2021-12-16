@@ -63,11 +63,12 @@ validationResult <- function(valRes, template, inFile) {
         tibble(
           Row = i[[1]],
           Column = i[[2]],
-          # ensure highlight function to work
-          # convert to all characters since {inFile} in preview are all characters
-          Value = as.character(i[[4]][[1]]),
+          Value = i[[4]][[1]],
           Error = i[[3]]
-        )
+        ) %>%
+        # ensure highlight function to work
+        # convert to all characters since {inFile} in preview are all characters
+        mutate(across(everything(), as.character))
       }) %>% bind_rows()
 
       # collapse similiar errors into one row
