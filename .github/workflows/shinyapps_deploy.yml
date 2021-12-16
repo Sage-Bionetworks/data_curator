@@ -34,13 +34,13 @@ jobs:
 
       - name: Create and Activate Python Virtual Environment
         run: |
-          python -m venv ${{ env.CONDA_ENV_NAME }}
+          python3 -m venv ${{ env.CONDA_ENV_NAME }}
           source "${{ env.CONDA_ENV_NAME }}"/bin/activate
         
       - name: Install Python Dependencies
         run: |
           source "${{ env.CONDA_ENV_NAME }}"/bin/activate 
-          pip install -r requirements.txt
+          pip3 install -r requirements.txt
         
       - name: Install R packages
         run: |
