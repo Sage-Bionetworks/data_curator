@@ -43,7 +43,7 @@ jobs:
         
       - name: Install Python Dependencies
         run: |
-          source "${{ env.CONDA_ENV_NAME }}"/bin/activate 
+          "${{ env.CONDA_ENV_NAME }}"/bin/activate 
           pip3 install -r requirements.txt
         
       - name: Install R packages
