@@ -1,5 +1,5 @@
 
-dbTreeUI <- function(id, width = "100%", height = "600px") {
+dbTreeUI <- function(id, width = "100%", height = "500px") {
 
   ns <- NS(id)
   tagList(
@@ -9,14 +9,7 @@ dbTreeUI <- function(id, width = "100%", height = "600px") {
         If a dataset has been uploaded, the node is green. Please see validation details in the <code>Data Validation</code> tab to check if your uploaded data meets the validation requirements."
       ))
     ),
-    d3Output(ns("tree"), width = width, height = height),
-    helpText(
-      tags$i(style = "color: #694489; margin-right: 5px", icon("circle"), "Selected Project"),
-      tags$i(style = "color: grey; margin-right: 5px", icon("circle"), "Completed Datasets"),
-      tags$i(style = "color: #FF9900; margin-right: 5px", icon("circle"), "Incompleted Datasets"),
-      tags$i(style = "color: #28a745; margin-right: 5px", icon("circle"), "Uploaded Data"),
-      tags$i(style = "color: #E53935;", icon("circle"), "Missing")
-    )
+    d3Output(ns("tree"), width = width, height = height)
   )
 }
 
@@ -43,7 +36,7 @@ dbTree <- function(id, upload_data, upload_require_data, project_name) {
           project_df <- data.frame(
             from = rep(project_name, n_file),
             to = upData$folder,
-            node_color = ifelse(upData$folder %in% file_has_miss$folder, "#FF9900", "grey")
+            node_color = ifelse(upData$folder %in% file_has_miss$folder, "#FF794A", "#A287AF")
           )
 
           reqData <-
@@ -59,9 +52,15 @@ dbTree <- function(id, upload_data, upload_require_data, project_name) {
           tree_list <- as.list(tree_list, mode = "explicit", unname = TRUE)
         }
 
+        # make color list for legends
+        legend <- data.frame(
+          col = c("#694489", "#A287AF", "#FF794A", "#28a745", "#E53935"), 
+          name = c("Selected Project", "Completed Datasets", "Incompleted Datasets", "Uploaded Data", "Missing")
+        )
+
         r2d3(
-          data = tree_list, d3_version = "4",
-          script = "www/js/collapsibleTree.js", css = sass(sass_import("www/scss/basic/collapsibleTree"))
+          # if need css, use e.g. css = sass(sass_import("www/scss/basic/collapsibleTree"))
+          data = tree_list, options = list(legend = legend), d3_version = "4", script = "www/js/collapsibleTree.js"
         )
       })
     }

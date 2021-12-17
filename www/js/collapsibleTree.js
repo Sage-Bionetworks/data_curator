@@ -2,6 +2,7 @@
 svg.selectAll('g').remove();
 
 var treeData = data;
+var legend = options.legend;
 
 var margin = { top: 10, right: 40, bottom: 10, left: 40 },
   width = width - margin.left - margin.right,
@@ -23,15 +24,42 @@ if (!data) {
     .attr('x', width / 2)
     .attr('y', height / 2)
     .attr('text-anchor', 'middle')
-    .style('font-size', '16px')
+    .style('font-size', '1em')
     .style('fill', '#E53935')
     .text('It seems like you do not have uploaded files !!!');
 } else {
   var i = 0,
     duration = 600,
     linkScale = 0.5,
-    nodeDistanceScale = 2,
-    root;
+    nodeDistanceScale = 1.8,
+    root,
+    legend_y_col = 0,
+    legend_y_name = 0;
+
+  legend['col'].forEach(function (col) {
+    svg
+      .append('circle')
+      .attr('r', 6)
+      .attr('cx', width - 150)
+      .attr('cy', 10 + legend_y_col)
+      .style('fill', '#fff')
+      .style('stroke', col)
+      .style('stroke-width', '5px');
+    // hardcode for now
+    legend_y_col += 25;
+  });
+
+  legend['name'].forEach(function (name) {
+    svg
+      .append('text')
+      .attr('x', width - 135)
+      .attr('y', 10 + legend_y_name)
+      .text(name)
+      .style('font-size', '15px')
+      .attr('alignment-baseline', 'middle');
+    // hardcode for now
+    legend_y_name += 25;
+  });
 
   // declares a tree layout and assigns the size
   var treemap = d3.tree().size([height / nodeDistanceScale, width]);
@@ -122,12 +150,12 @@ if (!data) {
     nodeEnter
       .append('text')
       .attr('dy', '.35em')
-      .attr('y', -18)
+      .attr('y', -15)
       .attr('text-anchor', 'middle')
       .text(function (d) {
         return d.data.name;
       })
-      .style('font-size', '1em')
+      .style('font', '0.8em sans-serif')
       .style('opacity', 0)
       .style('fill', function (d) {
         return d.data.node_color;
@@ -149,10 +177,12 @@ if (!data) {
     // Update the node attributes and style
     nodeUpdate
       .select('circle.node')
-      .attr('r', 10)
-      .style('fill', function (d) {
+      .attr('r', 6)
+      .style('fill', '#fff')
+      .style('stroke', function (d) {
         return d.data.node_color;
       })
+      .style('stroke-width', '5px')
       .attr('cursor', 'pointer');
 
     // Remove any exiting nodes
@@ -189,6 +219,8 @@ if (!data) {
       .enter()
       .insert('path', 'g')
       .attr('class', 'link')
+      .style('fill', 'none')
+      .style('stroke-width', '2.5px')
       .style('stroke', function (d) {
         return d.data.node_color;
       })
