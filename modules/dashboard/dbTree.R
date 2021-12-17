@@ -1,8 +1,6 @@
-# This is the module to
-# , width = "100%", height = "100%"
-dbTreeUI <- function(id, width = "100%", height = "400px") {
 
-  # namespace
+dbTreeUI <- function(id, width = "100%", height = "600px") {
+
   ns <- NS(id)
   tagList(
     helpText(
@@ -13,9 +11,9 @@ dbTreeUI <- function(id, width = "100%", height = "400px") {
     ),
     d3Output(ns("tree"), width = width, height = height),
     helpText(
-      tags$i(style = "color: grey; margin-right: 5px", icon("circle"), "Selected Project"),
-      tags$i(style = "color: #694489; margin-right: 5px", icon("circle"), "Completed Datasets"),
-      tags$i(style = "color: #F7DC6F; margin-right: 5px", icon("circle"), "Incompleted Datasets"),
+      tags$i(style = "color: #694489; margin-right: 5px", icon("circle"), "Selected Project"),
+      tags$i(style = "color: grey; margin-right: 5px", icon("circle"), "Completed Datasets"),
+      tags$i(style = "color: #FF9900; margin-right: 5px", icon("circle"), "Incompleted Datasets"),
       tags$i(style = "color: #28a745; margin-right: 5px", icon("circle"), "Uploaded Data"),
       tags$i(style = "color: #E53935;", icon("circle"), "Missing")
     )
@@ -45,7 +43,7 @@ dbTree <- function(id, upload_data, upload_require_data, project_name) {
           project_df <- data.frame(
             from = rep(project_name, n_file),
             to = upData$folder,
-            node_color = ifelse(upData$folder %in% file_has_miss$folder, "#F7DC6F", "#694489")
+            node_color = ifelse(upData$folder %in% file_has_miss$folder, "#FF9900", "grey")
           )
 
           reqData <-
@@ -57,7 +55,7 @@ dbTree <- function(id, upload_data, upload_require_data, project_name) {
           # convert to list (name; children) using `data.tree`
           tree_list <- data.tree::FromDataFrameNetwork(tree_df)
           # tree_list$Set(group = ifelse(tree_list$Get("name") %in% c(upData$folder, upData$schema), "upload", "not_load"))
-          tree_list$node_color <- "grey"
+          tree_list$node_color <- "#694489"
           tree_list <- as.list(tree_list, mode = "explicit", unname = TRUE)
         }
 

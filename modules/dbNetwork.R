@@ -1,6 +1,14 @@
+#' create reactive network to show relationship between selected datatype and its requirements
+#' create progress bar under the network to show ingress progress percentage
+#' 
+#' @param id id name of this module
+#' @param height height in px of network container, 500px by default
+#' @param uploadData output from \code{getManifests}
+#' @param reqData output from \code{getDatatypeRequirement}
+#' @param selectedDataType the selected data type/schema name of template dropdown
+#' @return reactive network and progress bar
 dbNetworkUI <- function(id, height = 500) {
 
-  # namespace
   ns <- NS(id)
   tagList(
     uiOutput(ns("instruction")),
@@ -9,14 +17,12 @@ dbNetworkUI <- function(id, height = 500) {
   )
 }
 
-dbNetwork <- function(id, upload_data, req_data, selected_manifest) {
+dbNetwork <- function(id, uploadData, reqData, selectedDataType) {
   moduleServer(
     id,
     function(input, output, session) {
-      reqData <- isolate(req_data)
-      upData <- isolate(upload_data)
-      selected <- isolate(selected_manifest)
 
+      # add extra legends manually
       output$instruction <- renderUI({
         tagList(
           div(
@@ -29,30 +35,32 @@ dbNetwork <- function(id, upload_data, req_data, selected_manifest) {
  
       output$network <- renderForceNetwork({
 
-        # reorder to make selected manifest always on the left in plot
-        inx <- which(reqData == selected)
-        reqData <- c(reqData[inx], reqData[-inx])
-
+        # create input data for network function, forceNetwork
         if (is.null(names(reqData))) {
+          # if reqData is a single string of datatype without name, aka no requirements
+          # still create data frame for network to prevent breaking the app
           links <- data.frame(source = reqData, target = reqData, value = 5)
-          nodes <- data.frame(name = selected, group = "Selected Data Type", size = c(20))
+          nodes <- data.frame(name = selectedDataType, group = "Selected Data Type", size = c(20))
         } else {
           links <- data.frame(
             source = reqData, target = names(reqData),
-            value = ifelse(reqData == selected, 5, 1)
+            value = ifelse(reqData == selectedDataType, 5, 1) # make selected datatype node bigger than others
           )
           nodes <- data.frame(
-            name = c(selected, links$target),
-            group = c("Selected Data Type", ifelse(links$target %in% upData$schema, "Uploaded Data", "Missing")),
+            name = c(selectedDataType, links$target),
+            group = c("Selected Data Type", ifelse(links$target %in% uploadData$schema, "Uploaded Data", "Missing")),
             size = c(20)
           )
         }
+        # convert to numbers starting from 0
         links$IDsource <- match(links$source, nodes$name) - 1
         links$IDtarget <- match(links$target, nodes$name) - 1
+        # assign colors to groups
         cols <- 'd3.scaleOrdinal()
                 .domain(["Selected Data Type", "Uploaded Data", "Missing"])
                 .range(["#694489", "#28a745", "#E53935"]);'
 
+        # render network
         forceNetwork(
           Links = links, Nodes = nodes, Source = "IDsource", Target = "IDtarget",
           Group = "group", Value = "value", NodeID = "name", Nodesize = "size",
@@ -63,13 +71,14 @@ dbNetwork <- function(id, upload_data, req_data, selected_manifest) {
         )
       })
 
-      all_req <- union(reqData, names(reqData))
-      pb_pct <- round(length(intersect(all_req, upData$schema)) / length(all_req), 2) * 100
+      # progress bar section
+      all_req <- union(reqData, names(reqData)) # number of total requirements
+      pb_pct <- round(length(intersect(all_req, uploadData$schema)) / length(all_req), 2) * 100
       progressBarServer(
         id = "pb",
         value = pb_pct, 
         title = "Uploading progress for required data",
-        subtitle = "( progress % = the total number of uploaded data / the total number of required data )"
+        subtitle = "( progress % = # of total uploaded data / # of total required data )"
       )
     }
   )

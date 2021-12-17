@@ -86,7 +86,7 @@ dashboard <- function(id, syn, project, foldeList, template, downloadFolder, con
         req(dashboardOnChange())
         # initiate partial loading screen for generating plot
         dcWaiter("show", id = ns("box"), msg = "Loading, please wait...", spin = spin_google(), style = "color: #000", color = transparent(0.2))
-        validationTable("validation-table", data.frame(NULL)) # reset validation table
+        dbValidation("validation-table", data.frame(NULL)) # reset validation table
 
         # disable selection to prevent changes until all uploaded manifests are queried
         lapply(disableIds, FUN = disable) 

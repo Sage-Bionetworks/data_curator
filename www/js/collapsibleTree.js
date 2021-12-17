@@ -3,7 +3,7 @@ svg.selectAll('g').remove();
 
 var treeData = data;
 
-var margin = { top: 20, right: 90, bottom: 30, left: 50 },
+var margin = { top: 10, right: 40, bottom: 10, left: 40 },
   width = width - margin.left - margin.right,
   height = height - margin.top - margin.bottom;
 
@@ -28,11 +28,13 @@ if (!data) {
     .text('It seems like you do not have uploaded files !!!');
 } else {
   var i = 0,
-    duration = 750,
+    duration = 600,
+    linkScale = 0.5,
+    nodeDistanceScale = 2,
     root;
 
   // declares a tree layout and assigns the size
-  var treemap = d3.tree().size([height, width]);
+  var treemap = d3.tree().size([height / nodeDistanceScale, width]);
 
   // Assigns parent, children, height, depth
   root = d3.hierarchy(treeData, function (d) {
@@ -75,20 +77,26 @@ if (!data) {
       return d.id || (d.id = ++i);
     });
 
-    // Enter any new modes at the parent's previous position.
+    // Enter any new nodes at the parent's previous position.
     var nodeEnter = node
       .enter()
       .append('g')
       .attr('class', 'node')
       .attr('transform', function (d) {
-        return 'translate(' + source.y0 + ',' + source.x0 + ')';
+        return (
+          'translate(' +
+          source.y0 * linkScale +
+          ',' +
+          source.x0 * nodeDistanceScale +
+          ')'
+        );
       })
       .on('click', click)
       .on('mouseover', function (d) {
         d3.select(this)
           .select('text')
           .transition()
-          .duration(500)
+          .duration(duration)
           .ease(d3.easeLinear)
           .style('opacity', 1);
       })
@@ -96,7 +104,7 @@ if (!data) {
         d3.select(this)
           .select('text')
           .transition()
-          .duration(500)
+          .duration(duration)
           .ease(d3.easeLinear)
           .style('opacity', 0);
       });
@@ -114,12 +122,16 @@ if (!data) {
     nodeEnter
       .append('text')
       .attr('dy', '.35em')
-      .attr('x', 13)
-      .attr('text-anchor', 'start')
+      .attr('y', -18)
+      .attr('text-anchor', 'middle')
       .text(function (d) {
         return d.data.name;
       })
-      .style('opacity', 0);
+      .style('font-size', '1em')
+      .style('opacity', 0)
+      .style('fill', function (d) {
+        return d.data.node_color;
+      });
 
     // UPDATE
     var nodeUpdate = nodeEnter.merge(node);
@@ -129,7 +141,9 @@ if (!data) {
       .transition()
       .duration(duration)
       .attr('transform', function (d) {
-        return 'translate(' + d.y + ',' + d.x + ')';
+        return (
+          'translate(' + d.y * linkScale + ',' + d.x * nodeDistanceScale + ')'
+        );
       });
 
     // Update the node attributes and style
@@ -147,7 +161,13 @@ if (!data) {
       .transition()
       .duration(duration)
       .attr('transform', function (d) {
-        return 'translate(' + source.y + ',' + source.x + ')';
+        return (
+          'translate(' +
+          source.y * linkScale +
+          ',' +
+          source.x * nodeDistanceScale +
+          ')'
+        );
       })
       .remove();
 
@@ -169,6 +189,9 @@ if (!data) {
       .enter()
       .insert('path', 'g')
       .attr('class', 'link')
+      .style('stroke', function (d) {
+        return d.data.node_color;
+      })
       .attr('d', function (d) {
         var o = { x: source.x0, y: source.y0 };
         return diagonal(o, o);
@@ -204,11 +227,10 @@ if (!data) {
 
     // Creates a curved (diagonal) path from parent to the child nodes
     function diagonal(s, d) {
-      path = `M ${s.y} ${s.x}
-              C ${(s.y + d.y) / 2} ${s.x},
-                ${(s.y + d.y) / 2} ${d.x},
-                ${d.y} ${d.x}`;
-
+      path = `M ${s.y * linkScale} ${s.x * nodeDistanceScale}
+              C ${((s.y + d.y) / 2) * linkScale} ${s.x * nodeDistanceScale},
+                ${((s.y + d.y) / 2) * linkScale} ${d.x * nodeDistanceScale},
+                ${d.y * linkScale} ${d.x * nodeDistanceScale}`;
       return path;
     }
 

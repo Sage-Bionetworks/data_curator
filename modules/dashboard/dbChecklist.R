@@ -9,16 +9,15 @@ dbChecklistUI <- function(id) {
   )
 }
 
-dbChecklist <- function(id, upload_data, req_data, config) {
+dbChecklist <- function(id, uploadData, reqData, config) {
   moduleServer(
     id,
     function(input, output, session) {
       output$checklist <- renderUI({
-        reqData <- isolate(req_data)
-        upData <- isolate(upload_data)
+
         all_req <- union(reqData, names(reqData))
-        not_up <- setdiff(all_req, upData$schema)
-        up <- intersect(all_req, upData$schema)
+        not_up <- setdiff(all_req, uploadData$schema)
+        up <- intersect(all_req, uploadData$schema)
 
         div(
           class = "checklist-container",
@@ -35,7 +34,7 @@ dbChecklist <- function(id, upload_data, req_data, config) {
                 class = "checklist-data",
                 if (length(up) > 0) {
                   lapply(up, function(name) {
-                    synID <- upData$synID[upData$schema == name]
+                    synID <- uploadData$synID[uploadData$schema == name]
                     if (length(synID) > 1) dup_icon <- icon("lightbulb") else dup_icon <- NULL
                     div(
                       class = "checklist-icon",
@@ -67,7 +66,7 @@ dbChecklist <- function(id, upload_data, req_data, config) {
             )
           ),
           # helpText("Please upload the data and metadata")
-          if (anyDuplicated(upData$schema) != 0) helpText(icon("lightbulb"), "multiple datasets with the same data type are detected")
+          if (anyDuplicated(uploadData$schema) != 0) helpText(icon("lightbulb"), "multiple datasets with the same data type are detected")
         )
       })
     }

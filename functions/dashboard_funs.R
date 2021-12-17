@@ -50,9 +50,10 @@ getDatatypeRequirement <- function(datatype) {
 
   requirement <- tryCatch(metadata_model$get_component_requirements(datatype, as_graph = TRUE), error = function(err) list())
 
-  # get a list of requirements, otherwise output unamed vector of schema name
+  # get a list of requirements, otherwise output unamed vector of datatype name
   if (length(requirement) == 0) {
-    requirement <- as.character(template())
+    # it will be used to detect whether output has name in network
+    requirement <- as.character(datatype)
    } else {
     requirement <- list2Vector(requirement)
    }

@@ -97,22 +97,23 @@ ui <- shinydashboardPlus::dashboardPage(
       # First tab content
       tabItem(
         tabName = "tab_instructions",
-        h2("Instructions for the Data Curator App (DCA):"),
-        h3(
-          "1. Go to",
-          strong("Select your Dataset"),
-          "tab - select your project; choose your folder and metadata template type matching your metadata."
-        ),
-        h3(
-          "2. Go to",
-          strong("Get Metadata Template"),
-          "tab - click on the link to generate the metadata template, then fill out and download the file as a CSV. If you already have an annotated metadata template, you may skip this step."
-        ),
-        h3(
-          "3. Go to",
-          strong("Submit and Validate Metadata"),
-          "tab - upload your filled CSV and validate your metadata. If you receive errors correct them, reupload your CSV, and revalidate until you receive no more errors. When your metadata is valid, you will be able to see a 'Submit' button. Press it to submit your metadata."
-        ),
+        # h2("Instructions for the Data Curator App (DCA):"),
+        # h3(
+        #   "1. Go to",
+        #   strong("Select your Dataset"),
+        #   "tab - select your project; choose your folder and metadata template type matching your metadata."
+        # ),
+        # h3(
+        #   "2. Go to",
+        #   strong("Get Metadata Template"),
+        #   "tab - click on the link to generate the metadata template, then fill out and download the file as a CSV. If you already have an annotated metadata template, you may skip this step."
+        # ),
+        # h3(
+        #   "3. Go to",
+        #   strong("Submit and Validate Metadata"),
+        #   "tab - upload your filled CSV and validate your metadata. If you receive errors correct them, reupload your CSV, and revalidate until you receive no more errors. When your metadata is valid, you will be able to see a 'Submit' button. Press it to submit your metadata."
+        # ),
+        dbTreeUI("test"),
         switchTabUI("switchTab1", direction = "right")
       ),
       # second tab content
@@ -230,7 +231,7 @@ ui <- shinydashboardPlus::dashboardPage(
       )
     ),
     # waiter loading screen
-    dcWaiter("show", landing = TRUE)
+    # dcWaiter("show", landing = TRUE)
   )
 )
 
