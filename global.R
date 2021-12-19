@@ -12,6 +12,7 @@ if (is.null(conda_name) || nchar(conda_name)==0) stop("config.yaml is missing CO
 
 # unzip <conda_name>.zip
 utils::unzip(paste0(conda_name, ".zip"))
+system(sprintf("chmod -R +x %s", conda_name))
 message(sprintf("unzipped %s.zip to %s", conda_name, getwd()))
 message(paste(dir(), collapse="\n"))
 # Activate conda env
