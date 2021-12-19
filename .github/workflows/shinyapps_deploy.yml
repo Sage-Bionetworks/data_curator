@@ -53,7 +53,7 @@ jobs:
           #
           # This is to fix the error I see when the app starts up:
           # No such file or directory: 'tests/data/example.model.jsonld'
-          cp -R schematic/tests/data/ tests/data/
+          cp -R tests/data/ ../tests/data/
         
       - name: Install R packages
         run: |
