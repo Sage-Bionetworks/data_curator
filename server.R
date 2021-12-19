@@ -21,6 +21,8 @@ shinyServer(function(input, output, session) {
   stop_for_status(req, task = "get an access token")
   token_response <- content(req, type = NULL)
   access_token <- token_response$access_token
+  
+  session$userData$access_token<-access_token
 
   ######## session global variables ########
   source_python("functions/synapse_func_alias.py")
@@ -54,12 +56,26 @@ shinyServer(function(input, output, session) {
   session$sendCustomMessage(type = "readCookie", message = list())
 
   # initial loading page
+  # 
+  # TODO:  If we don't use cookies, then what event sbould trigger this?
+  #
   observeEvent(input$cookie, {
     # login and update session
-    syn_login(sessionToken = input$cookie, rememberMe = FALSE)
+    #
+    # The original code pulled the auth token from a cookie, but it
+    # should actually come from session$userData.  The former is 
+    # the Synapse login, only works when the Shiny app' is hosted
+    # in the synapse.org domain, and is unscoped.  The latter will
+    # work in any domain and is scoped to the access required by the 
+    # Shiny app'
+    #
+    access_token<-session$userData$access_token
+    message(sprintf("In server.R, cookie: %s access_token: %s", input$cookie, access_token))
+    
+    syn_login(authToken = access_token, rememberMe = FALSE)
   
     # updating syn storage
-    tryCatch(synStore_obj <<- synapse_driver(token = input$cookie), error = function(e) NULL)
+    tryCatch(synStore_obj <<- synapse_driver(token = access_token), error = function(e) NULL)
   
     if (is.null(synStore_obj)) {
       message("'synapse_driver' fails, run 'synapse_driver' to see detailed error")

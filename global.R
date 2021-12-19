@@ -10,17 +10,20 @@ if (is.null(client_id) || nchar(client_id)==0) stop("config.yaml is missing CLIE
 if (is.null(client_secret) || nchar(client_secret)==0) stop("config.yaml is missing CLIENT_SECRET")
 if (is.null(conda_name) || nchar(conda_name)==0) stop("config.yaml is missing CONDA_ENV_NAME")
 
+# ShinyAppys has a limit of 7000 files which this app' grossly exceeds
+# due to its Python dependencies.  To get around the limit we zip up
+# the virtual environment before deployment and unzip it here.
+#
 # unzip <conda_name>.zip
 utils::unzip(paste0(conda_name, ".zip"))
+#
+# We get a '126' error (non-executable) if we don't do this:
 system(sprintf("chmod -R +x %s", conda_name))
-message(sprintf("unzipped %s.zip to %s", conda_name, getwd()))
-message(paste(dir(), collapse="\n"))
+
 # Activate conda env
 # Don't necessarily have to set `RETICULATE_PYTHON` env variable
 Sys.unsetenv("RETICULATE_PYTHON")
-d<-"/opt/R/4.1.2/lib/R/library/reticulate/config/"
-message(sprintf("contents of %s:", d))
-message(paste(dir(d), collapse="\n"))
+
 reticulate::use_virtualenv(file.path(getwd(),conda_name))
 
 
