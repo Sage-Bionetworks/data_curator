@@ -50,20 +50,10 @@ jobs:
           poetry build
           pip3 install dist/schematicpy-1.0.0-py3-none-any.whl
           # This was the old way: pip3 install -r requirements.txt
-          # where did the dependencies end up?  Let's look for a couple:
-          find / -name "*jeepney*"
-          find / -name "*inflection*"
         
       - name: Install R packages
         run: |
           R -f install-pkgs.R
-          
-      - name: Spot check Python dependencies
-        shell: bash
-        run: |
-          # Could it be that the dependencies get lost between steps?
-          find / -name "*jeepney*"
-          find / -name "*inflection*"
   
       - name: Authorize and deploy app
         shell: Rscript {0}
