@@ -13,6 +13,12 @@ if (is.null(conda_name) || nchar(conda_name)==0) stop("config.yaml is missing CO
 # unzip <conda_name>.zip
 utils::unzip(paste0(conda_name, ".zip"))
 message(sprintf("unzipped %s.zip to %s", conda_name, getwd()))
+message(paste(dir(), collapse="\n"))
+# Activate conda env
+# Don't necessarily have to set `RETICULATE_PYTHON` env variable
+Sys.unsetenv("RETICULATE_PYTHON")
+reticulate::use_virtualenv(file.path(getwd(),conda_name))
+
 
 suppressPackageStartupMessages({
   library(shiny)
@@ -89,11 +95,6 @@ api <- oauth_endpoint(
 
 # The 'openid' scope is required by the protocol for retrieving user information.
 scope <- "openid view download modify"
-
-# Activate conda env
-# Don't necessarily have to set `RETICULATE_PYTHON` env variable
-Sys.unsetenv("RETICULATE_PYTHON")
-reticulate::use_virtualenv(conda_name)
 
 # Import functions/modules
 source_files <- list.files(c("functions", "modules"), pattern = "*\\.R$", recursive = TRUE, full.names = TRUE)
