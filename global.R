@@ -1,8 +1,22 @@
+library(yaml)
+
+oauth_client <- yaml.load_file("config.yaml")
+
+client_id <- toString(oauth_client$CLIENT_ID)
+client_secret <- toString(oauth_client$CLIENT_SECRET)
+conda_name <- toString(oauth_client$CONDA_NAME)
+
+if (is.null(client_id) || nchar(client_id)==0) stop("config.yaml is missing CLIENT_ID")
+if (is.null(client_secret) || nchar(client_secret)==0) stop("config.yaml is missing CLIENT_SECRET")
+if (is.null(conda_name) || nchar(conda_name)==0) stop("config.yaml is missing CONDA_ENV_NAME")
+
+# unzip <conda_name>.zip
+utils::unzip(paste0(conda_name, ".zip"))
+
 suppressPackageStartupMessages({
   library(shiny)
   library(httr)
   library(rjson)
-  library(yaml)
   library(shinyjs)
   library(dplyr)
   library(shinythemes)
@@ -29,11 +43,6 @@ has_auth_code <- function(params) {
   return(!is.null(params$code))
 }
 
-oauth_client <- yaml.load_file("config.yaml")
-
-client_id <- toString(oauth_client$CLIENT_ID)
-client_secret <- toString(oauth_client$CLIENT_SECRET)
-
 if (interactive()) {
   # for local development
   options(shiny.port = 8100)
@@ -43,12 +52,7 @@ if (interactive()) {
   app_url <- toString(oauth_client$APP_URL)
 }
 
-conda_name <- toString(oauth_client$CONDA_NAME)
-
-if (is.null(client_id) || nchar(client_id)==0) stop("config.yaml is missing CLIENT_ID")
-if (is.null(client_secret) || nchar(client_secret)==0) stop("config.yaml is missing CLIENT_SECRET")
 if (is.null(app_url) || nchar(app_url)==0) stop("config.yaml is missing APP_URL")
-if (is.null(conda_name) || nchar(conda_name)==0) stop("config.yaml is missing CONDA_ENV_NAME")
 
 app <- oauth_app("shinysynapse",
   key = client_id,

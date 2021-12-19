@@ -54,6 +54,12 @@ jobs:
       - name: Install R packages
         run: |
           R -f install-pkgs.R
+          
+      - name: zip virtual env
+        shell: bash
+        run: |
+          zip -r "${{ env.CONDA_ENV_NAME }}".zip "${{ env.CONDA_ENV_NAME }}"
+          rm -r "${{ env.CONDA_ENV_NAME }}"
   
       - name: Authorize and deploy app
         shell: Rscript {0}
