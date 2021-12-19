@@ -50,6 +50,10 @@ jobs:
           poetry build
           pip3 install dist/schematicpy-1.0.0-py3-none-any.whl
           # This was the old way: pip3 install -r requirements.txt
+          #
+          # This is to fix the error I see when the app starts up:
+          # No such file or directory: 'tests/data/example.model.jsonld'
+          cp -R schematic/tests/data/ tests/data/
         
       - name: Install R packages
         run: |
