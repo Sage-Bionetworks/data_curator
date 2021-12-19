@@ -17,6 +17,9 @@ message(paste(dir(), collapse="\n"))
 # Activate conda env
 # Don't necessarily have to set `RETICULATE_PYTHON` env variable
 Sys.unsetenv("RETICULATE_PYTHON")
+d<-"/opt/R/4.1.2/lib/R/library/reticulate/config/"
+message(sprintf("contents of %s:", d))
+message(paste(dir(d), collapse="\n"))
 reticulate::use_virtualenv(file.path(getwd(),conda_name))
 
 
