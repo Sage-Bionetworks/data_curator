@@ -41,7 +41,11 @@ jobs:
         shell: bash
         run: |
           source "${{ env.CONDA_ENV_NAME }}"/bin/activate 
-          pip3 install -r requirements.txt
+          git clone --single-branch --branch develop https://github.com/Sage-Bionetworks/schematic.git
+          cd schematic
+          poetry build
+          pip3 install dist/schematicpy-1.0.0-py3-none-any.whl
+          # This was the old way: pip3 install -r requirements.txt
           # where did the dependencies end up?  Let's look for a couple:
           find / -name "*jeepney*"
           find / -name "*inflection*"
