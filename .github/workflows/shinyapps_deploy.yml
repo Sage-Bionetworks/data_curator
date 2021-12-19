@@ -41,7 +41,10 @@ jobs:
       - name: Install Python Dependencies
         shell: bash
         run: |
-          source "${{ env.CONDA_ENV_NAME }}"/bin/activate 
+          source "${{ env.CONDA_ENV_NAME }}"/bin/activate
+          #wget -o get-poetry.py https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py
+          #python3 get-poetry.py
+          pip3 install poetry
           git clone --single-branch --branch develop https://github.com/Sage-Bionetworks/schematic.git
           cd schematic
           poetry build
