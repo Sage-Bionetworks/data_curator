@@ -42,16 +42,16 @@ jobs:
         shell: bash
         run: |
           source "${{ env.CONDA_ENV_NAME }}"/bin/activate
-          #wget -o get-poetry.py https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py
-          #python3 get-poetry.py
+          # install 'poetry' and then use it to install 'schematic'
           pip3 install poetry
           git clone --single-branch --branch develop https://github.com/Sage-Bionetworks/schematic.git
           cd schematic
           poetry build
           pip3 install dist/schematicpy-1.0.0-py3-none-any.whl
           # This was the old way: pip3 install -r requirements.txt
+          # However, per Anthony Williams, "poetry will install all of the dependencies necessary for the app to run"
           #
-          # This is to fix the error I see when the app starts up:
+          # This is to fix the error we otherwise see when the app starts up:
           # No such file or directory: 'tests/data/example.model.jsonld'
           mkdir -p ../tests/data/
           cp -R tests/data/ ../tests/
@@ -61,6 +61,9 @@ jobs:
           R -f install-pkgs.R
           
       - name: zip virtual env
+        # ShinyApps has a limit of 7000 files, far exceeded by the many Python dependencies
+        # that this app' has.  As a workaround we zip the virtual environment and later
+        # unzip it in 'global.R'
         shell: bash
         run: |
           zip -r "${{ env.CONDA_ENV_NAME }}".zip "${{ env.CONDA_ENV_NAME }}"
@@ -91,7 +94,6 @@ jobs:
              writeLines(config, configFileConn),
              finally=close(configFileConn)
           )
-          options("rsconnect.max.bundle.files"=200000) # 20x the default
           rsconnect::setAccountInfo(rsConnectUser, rsConnectToken, rsConnectSecret)
           rsconnect::deployApp(appName = appName)
  

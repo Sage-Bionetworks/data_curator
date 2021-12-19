@@ -70,7 +70,6 @@ shinyServer(function(input, output, session) {
     # Shiny app'
     #
     access_token<-session$userData$access_token
-    message(sprintf("In server.R, cookie: %s access_token: %s", input$cookie, access_token))
     
     syn_login(authToken = access_token, rememberMe = FALSE)
   

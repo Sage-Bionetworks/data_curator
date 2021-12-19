@@ -24,6 +24,8 @@ cran <- c(
 "png")
 
 gh <- "dreamRs/shinypop"
+
+# The binary package distributions from R Studio dramatically speed up installation time
 # For Ubuntu 18.04 (Bionic) it's https://packagemanager.rstudio.com/all/__linux__/bionic/latest
 # For Ubuntu 20.04 (Focal)  it's https://packagemanager.rstudio.com/all/__linux__/focal/latest
 options(repos = c(REPO_NAME = "https://packagemanager.rstudio.com/all/__linux__/bionic/latest", getOption("repos")))
