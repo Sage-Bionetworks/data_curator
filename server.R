@@ -57,7 +57,7 @@ shinyServer(function(input, output, session) {
 
   # initial loading page
   # 
-  # TODO:  If we don't use cookies, then what event sbould trigger this?
+  # TODO:  If we don't use cookies, then what event should trigger this?
   #
   observeEvent(input$cookie, {
     # login and update session
@@ -75,7 +75,7 @@ shinyServer(function(input, output, session) {
     syn_login(authToken = access_token, rememberMe = FALSE)
   
     # updating syn storage
-    tryCatch(synStore_obj <<- synapse_driver(token = access_token), error = function(e) NULL)
+    tryCatch(synStore_obj <<- synapse_driver(access_token = access_token), error = function(e) NULL)
   
     if (is.null(synStore_obj)) {
       message("'synapse_driver' fails, run 'synapse_driver' to see detailed error")
