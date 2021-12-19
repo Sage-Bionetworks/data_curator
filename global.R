@@ -12,6 +12,7 @@ if (is.null(conda_name) || nchar(conda_name)==0) stop("config.yaml is missing CO
 
 # unzip <conda_name>.zip
 utils::unzip(paste0(conda_name, ".zip"))
+message(sprintf("unzipped %s.zip to %s", conda_name, getwd()))
 
 suppressPackageStartupMessages({
   library(shiny)
