@@ -18,3 +18,5 @@ schematic/
 **/token.pickle
 **/__pycache__
 config.yaml
+.project
+.settings/**
