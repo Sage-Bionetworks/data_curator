@@ -1,0 +1,15 @@
+.tab2-container {
+  .dataset-stats-container {
+    display: flex;
+    justify-content: space-between;
+
+    .dataset-stats-title {
+      font-size: 1em;
+    }
+
+    .dataset-stats-number {
+      font-size: 0.8em;
+      font-weight: 600;
+    }
+  }
+}

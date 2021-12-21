@@ -1,15 +1,30 @@
+nodeSVG <- function(color) {
+  HTML(paste0(
+    '
+    <svg width="22" height="22">
+      <circle class="node" cx="11" cy="11" r="6" cursor="pointer"
+       style="fill: #fff; stroke: ', color, '; stroke-width: 5px;"></circle>
+    </svg>
+    '
+  ))
+}
+
 
 dbTreeUI <- function(id, width = "100%", height = "500px") {
 
   ns <- NS(id)
-  tagList(
+
+  div(class="collapsibleTree-container",
+    d3Output(ns("tree"), width = width, height = height),
     helpText(
       HTML(paste0(
-        "Click nodes to expand the data requirements for the selected project. If a node is yellow, click it to see which data requirement is missing.<br>
-        If a dataset has been uploaded, the node is green. Please see validation details in the <code>Data Validation</code> tab to check if your uploaded data meets the validation requirements."
+        '
+        Click nodes to expand the data requirements for the selected project.<br>
+        Click ', nodeSVG("#FF794A"), 'nodes to see which data requirement is missing.<br>
+        If datasets have been uploaded, you will see ', nodeSVG("#A287AF"), ' nodes.
+        '
       ))
-    ),
-    d3Output(ns("tree"), width = width, height = height)
+    )
   )
 }
 

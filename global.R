@@ -19,6 +19,8 @@ suppressPackageStartupMessages({
   library(networkD3)
   library(data.tree)
   library(r2d3)
+  library(ggplot2)
+  library(plotly)
 })
 
 has_auth_code <- function(params) {

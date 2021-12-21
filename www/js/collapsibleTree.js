@@ -55,7 +55,7 @@ if (!data) {
       .attr('x', width - 135)
       .attr('y', 10 + legend_y_name)
       .text(name)
-      .style('font-size', '15px')
+      .style('font-size', '1em')
       .attr('alignment-baseline', 'middle');
     // hardcode for now
     legend_y_name += 25;

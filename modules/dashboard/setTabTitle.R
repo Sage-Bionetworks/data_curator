@@ -13,7 +13,7 @@ setTabTitle <- function(id, title) {
       '
       text-align: center;
       font-weight: bold;
-      font-size: 1.6em;
+      font-size: 1.4em;
       margin: 15px 0;
       '
       )

@@ -29,8 +29,9 @@ shinyServer(function(input, output, session) {
   # mapping from display name to schema name
   template_namedList <- config$schema_name
   names(template_namedList) <- config$display_name
-
+  
   synStore_obj <- NULL # gets list of projects they have access to
+  user_name <- NULL # user name
   project_synID <- NULL # selected project synapse ID
   folder_synID <- reactiveVal("") # selected folder synapse ID
   template_schema_name <- reactiveVal(NULL) # selected template schema name
@@ -76,7 +77,7 @@ shinyServer(function(input, output, session) {
         })
       })
 
-      user_name <- syn_getUserProfile()$userName
+      user_name <<- syn_getUserProfile()$userName
 
       if (!syn_is_certified(user_name)) {
         dcWaiter("update", landing = TRUE, isCertified = FALSE)
@@ -92,10 +93,19 @@ shinyServer(function(input, output, session) {
     switchTabServer(id = paste0("switchTab", i), tabId = "tabs", tab = reactive(input$tabs)(), tabList = tabs_list, parent = session)
   })
 
-  # upload <- readRDS("upload.rds")
-  # req <- readRDS("req.rds")
-  # project <- readRDS("project.rds")
-  # dbTree("test", upload, req, project)
+  # u <- readRDS("upload.rds")
+  # r <- readRDS("req.rds")
+  # p <- readRDS("project.rds")
+  # sr <- readRDS("sr.rds")
+
+  # upload <- reactiveVal(NULL); reqD <- reactiveVal(NULL); project <- reactiveVal(NULL); 
+  # template<-reactiveVal(NULL); reqSingle <- reactiveVal(NULL)
+  # upload(u)
+  # reqD(r)
+  # project(p)
+  # reqSingle(sr)
+  # template("Biospecimen")
+  # selectedDataTypeTab("test", upload(), reqSingle(), template(), config())
 
   ######## Header Dropdown Button ########
   # Adjust header selection dropdown based on tabs
@@ -177,6 +187,7 @@ shinyServer(function(input, output, session) {
     template = template_schema_name, 
     downloadFolder = "manifests", 
     config = config,
+    userName = user_name,
     disableIds = c("box_pick_project", "box_pick_manifest")
   )
 

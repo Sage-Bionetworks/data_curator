@@ -18,28 +18,23 @@ dashboardUI <- function(id) {
       closable = TRUE,
       title = "Track your Data Status",
       tabsetPanel(
-        id = ns("box-tabs"),
+        id = ns("dashboard-tabs"),
         tabPanel(
           "Selected Data Type",
+          value = "db-tab1",
           setTabTitleUI(ns("tab1")),
-          fluidRow(
-            column(6, dbChecklistUI(ns("checklist"))),
-            column(6, dbNetworkUI(ns("network"), height = "400px"))
-          ),
-          helpText(HTML(
-            "If there is a data requirement you have not yet completed, please generate its data type template and submit the validated metadata via the process of this app.<br>
-            Note: For file-based data types (scRNA-seq, Bulk WES, etc.), please upload the data files before submitting the metadata. 
-            Visit <a href='https://ncihtan.github.io/HTAN-Data-Ingress-Docs/organize-your-data-upload.html' target='_blank'>HTAN-Data-Ingress-Docs</a> 
-            to know more details about the types of data (record-based vs file-based)."
-          ))
+          selectedDataTypeTabUI(ns("dashboard-tab1"))
         ),
         tabPanel(
           "Selected Project",
+          value = "db-tab2",
           setTabTitleUI(ns("tab2")),
-          dbTreeUI(ns("tree"))
+          # dbTreeUI(ns("tree"))
+          allUploadManifestsTabUI(ns("dashboard-tab2"))
         ),
         tabPanel(
           "Data Validation",
+          value = "db-tab3",
           setTabTitleUI(ns("tab3")),
           tagList(
             dbValidationUI(ns("validation-table")),
@@ -52,7 +47,7 @@ dashboardUI <- function(id) {
   )
 }
 
-dashboard <- function(id, syn, project, foldeList, template, downloadFolder, config, disableIds=NULL) {
+dashboard <- function(id, syn, project, foldeList, template, downloadFolder, config, userName, disableIds=NULL) {
   moduleServer(
     id,
     function(input, output, session) {
@@ -109,18 +104,18 @@ dashboard <- function(id, syn, project, foldeList, template, downloadFolder, con
       # render dashboard plots
       observeEvent(c(uploaded_manifests(), selected_component_requirement(), input$dashboard$visible), {
         req(dashboardOnChange())
-        # check list of requirments of selected template
         setTabTitle("tab1", paste0("Completion of requirements for data type: ", sQuote(templateName())))
-        dbChecklist("checklist", uploaded_manifests(), selected_component_requirement(), config)
-        # networks plot for requirements of selected template
-        dbNetwork("network", uploaded_manifests(), selected_component_requirement(), template())
+        selectedDataTypeTab(
+          "dashboard-tab1", userName = userName,
+          uploaded_manifests(), selected_component_requirement(), template(),
+          tabId = "dashboard-tabs", validationTab = "db-tab3", parent = session
+        )
       })
 
       observeEvent(c(all_component_requirements(), input$box$visible), {
         req(dashboardOnChange())
         setTabTitle("tab2", paste0("Completion of requirements for project: ", sQuote(project())))
-        # tree plot for requirements of all uploaded data
-        dbTree("tree", uploaded_manifests(), all_component_requirements(), project())
+        allUploadManifestsTab("dashboard-tab2", uploaded_manifests(), all_component_requirements(), project())
       })
 
       # validation table for all uploaded data

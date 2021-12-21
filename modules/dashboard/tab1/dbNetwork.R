@@ -11,9 +11,10 @@ dbNetworkUI <- function(id, height = 500) {
 
   ns <- NS(id)
   tagList(
+    helpText(align = "center", "Usage: mouse over nodes to see the data types, drag nodes to change layout"),
     uiOutput(ns("instruction")),
     forceNetworkOutput(ns("network"), height = height),
-    progressBarUI(ns("pb"))
+    helpText(align = "center", HTML(paste0("A ", icon("long-arrow-right"), " B: Data type A requires Data type B")))
   )
 }
 
@@ -21,17 +22,11 @@ dbNetwork <- function(id, uploadData, reqData, selectedDataType) {
   moduleServer(
     id,
     function(input, output, session) {
+      
 
-      # add extra legends manually
-      output$instruction <- renderUI({
-        tagList(
-          div(
-            style = "display: flex; flex-direction: column; margin-left: 15px; font-family: serif; font-size: 14px",
-            span("Usage: mouse over nodes to see the data types, drag nodes to change layout"),
-            span(HTML(paste0("A ", icon("long-arrow-right"), " B: Data type A requires Data type B")))
-          )
-        )
-      })
+      upData <- isolate(uploadData)
+      reqData <- isolate(reqData)
+      selectedDataType <- isolate(selectedDataType)
  
       output$network <- renderForceNetwork({
 
@@ -65,7 +60,7 @@ dbNetwork <- function(id, uploadData, reqData, selectedDataType) {
           Links = links, Nodes = nodes, Source = "IDsource", Target = "IDtarget",
           Group = "group", Value = "value", NodeID = "name", Nodesize = "size",
           linkColour = ifelse(links$IDsource == 5, "#694489", "black"),
-          colourScale = JS(cols), legend = TRUE, linkDistance = 40,
+          colourScale = JS(cols), legend = FALSE, linkDistance = 40,
           zoom = FALSE, bounded = TRUE, arrows = TRUE,
           opacity = 0.9, fontSize = 16, charge = -500
         )
@@ -74,12 +69,6 @@ dbNetwork <- function(id, uploadData, reqData, selectedDataType) {
       # progress bar section
       all_req <- union(reqData, names(reqData)) # number of total requirements
       pb_pct <- round(length(intersect(all_req, uploadData$schema)) / length(all_req), 2) * 100
-      progressBarServer(
-        id = "pb",
-        value = pb_pct, 
-        title = "Uploading progress for required data",
-        subtitle = "( progress % = # of total uploaded data / # of total required data )"
-      )
     }
   )
 }
