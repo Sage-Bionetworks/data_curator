@@ -2,31 +2,34 @@ allUploadManifestsTabUI <- function(id) {
 
   ns <- NS(id)
   div(class="tab2-container",
-    fluidRow(
-      column(3,
-        fluidRow(
-          column(12, class = "section-title", span("Each dataset progress")),
-          column(12, align = "center", class = "progress-container", uiOutput(ns("dataset-pb"))),
-          column(12, class = "section-title", span("Overall progress")),
-          column(12, align = "center", 
-            tagList(
-              progressBarUI(ns("all-pb")),
-              uiOutput(ns("dataset-stats"))
+    tagList(
+      setTabTitleUI(ns("title")),
+      fluidRow(
+        column(3,
+          fluidRow(
+            column(12, class = "section-title", span("Each dataset progress")),
+            column(12, align = "center", class = "progress-container", uiOutput(ns("dataset-pb"))),
+            column(12, class = "section-title", span("Overall progress")),
+            column(12, align = "center", 
+              tagList(
+                progressBarUI(ns("all-pb")),
+                uiOutput(ns("dataset-stats"))
+              )
             )
           )
-        )
-      ),
-      column(width = 9,
-        fluidRow(
-          column(12, class = "section-title", span("Requirment Tree")),
-          column(12, dbTreeUI(ns("requirement-tree")))
+        ),
+        column(width = 9,
+          fluidRow(
+            column(12, class = "section-title", span("Requirment Relationship Tree")),
+            column(12, dbTreeUI(ns("requirement-tree")))
+          )
         )
       )
     )
   )
 }
 
-allUploadManifestsTab <- function(id, uploadData, reqData, project) {
+allUploadManifestsTab <- function(id, uploadData, reqData, selectedProject) {
   moduleServer(
     id,
     function(input, output, session) {
@@ -75,8 +78,9 @@ allUploadManifestsTab <- function(id, uploadData, reqData, project) {
           )
         )
       })
-    
-      dbTree("requirement-tree", uploadData, reqData, project)
+      
+      setTabTitle("title", paste0("Completion of requirements for project: ", sQuote(selectedProject)))
+      dbTree("requirement-tree", uploadData, reqData, selectedProject)
     }
   )
 }

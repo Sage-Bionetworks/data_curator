@@ -28,35 +28,34 @@ dbTreeUI <- function(id, width = "100%", height = "500px") {
   )
 }
 
-dbTree <- function(id, upload_data, upload_require_data, project_name) {
+dbTree <- function(id, upload_data, reqData, selectedProject) {
   moduleServer(
     id,
     function(input, output, session) {
       output$tree <- renderD3({
-        upData <- isolate(upload_data)
-        reqData <- isolate(upload_require_data)
 
-        if (length(upData) == 0) {
+        if (length(upload_data) == 0) {
           tree_list <- NULL
+
         } else {
 
           # remove project name in children to trim long names
-          pattern <- paste0(str_replace(project_name, " ", "_"), "_")
-          n_file <- length(upData$folder)
+          pattern <- paste0(str_replace(selectedProject, " ", "_"), "_")
+          n_file <- length(upload_data$folder)
 
           # has_miss: dataset contains any missing requirement children
           file_has_miss <- reqData[, c("folder", "has_miss")] %>%
             distinct() %>%
             filter(has_miss)
           project_df <- data.frame(
-            from = rep(project_name, n_file),
-            to = upData$folder,
-            node_color = ifelse(upData$folder %in% file_has_miss$folder, "#FF794A", "#A287AF")
+            from = rep(selectedProject, n_file),
+            to = upload_data$folder,
+            node_color = ifelse(upload_data$folder %in% file_has_miss$folder, "#FF794A", "#A287AF")
           )
 
           reqData <-
             reqData %>%
-            mutate(node_color = if_else(reqData$to %in% upData$schema, "#28a745", "#E53935")) %>%
+            mutate(node_color = if_else(reqData$to %in% upload_data$schema, "#28a745", "#E53935")) %>%
             select(from, to, node_color)
 
           tree_df <- rbind(project_df, reqData) %>% mutate_at(1:2, ~ gsub(pattern, "", .))

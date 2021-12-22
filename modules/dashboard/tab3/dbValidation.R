@@ -30,7 +30,7 @@ dbValidation <- function(id, data, columns = "Status") {
           escape = FALSE,
           options = list(dom = "t", columnDefs = list(list(className = "dt-center", targets = "_all")))
         ) %>%
-        formatStyle(columns, backgroundColor = styleEqual(c("valid", "invalid"), c("#82E0AA", "#F7DC6F")))
+        formatStyle(columns, backgroundColor = styleEqual(c("Pass", "Fail"), c("#82E0AA", "#F7DC6F")))
       })
     }
   )

@@ -22,12 +22,7 @@ dbNetwork <- function(id, uploadData, reqData, selectedDataType) {
   moduleServer(
     id,
     function(input, output, session) {
-      
 
-      upData <- isolate(uploadData)
-      reqData <- isolate(reqData)
-      selectedDataType <- isolate(selectedDataType)
- 
       output$network <- renderForceNetwork({
 
         # create input data for network function, forceNetwork

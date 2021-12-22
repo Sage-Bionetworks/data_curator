@@ -5,15 +5,12 @@ dbCheckListUI <- function(id) {
   uiOutput(ns("checklist"))
 }
 
-dbCheckList <- function(id, uploadData, reqData, config) {
+dbCheckList <- function(id, uploadData, reqData) {
   moduleServer(
     id,
     function(input, output, session) {
 
       ns <- session$ns
-
-      uploadData <- isolate(uploadData)
-      reqData <- isolate(reqData)
 
       all_req <- union(reqData, names(reqData))
       not_up <- setdiff(all_req, uploadData$schema)

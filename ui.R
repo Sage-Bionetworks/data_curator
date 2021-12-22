@@ -113,13 +113,27 @@ ui <- shinydashboardPlus::dashboardPage(
           strong("Submit and Validate Metadata"),
           "tab - upload your filled CSV and validate your metadata. If you receive errors correct them, reupload your CSV, and revalidate until you receive no more errors. When your metadata is valid, you will be able to see a 'Submit' button. Press it to submit your metadata."
         ),
-        # box(
-        #     id = "ttt",
-        #     status = "primary",
-        #     width = 12,
-        #     title = "Choose a data type template: ",
-        #     selectedDataTypeTabUI("test")
-        #   ),
+        # # box(
+        # #   status = "primary",
+        # #   width = 12,
+        # #   closable = TRUE,
+        # #   title = "Track your Data Status",
+        # #   div(id = "tab-container",
+        # #     tabsetPanel(
+        # #       id = "dashboard-tabs",
+        # #       tabPanel(
+        # #         "Selected Data Type",
+        # #         value = "db-tab3",
+        # #         selectedDataTypeTabUI("tab1")
+        # #       ),
+        # #     tabPanel(
+        # #       "Selected Project",
+        # #       value = "db-tab2",
+        # #       allUploadManifestsTabUI("tab2")
+        # #     )
+        # #     )
+        # #   )
+        # # ),
         switchTabUI("switchTab1", direction = "right")
       ),
       # second tab content
@@ -237,7 +251,7 @@ ui <- shinydashboardPlus::dashboardPage(
       )
     ),
     # waiter loading screen
-    # dcWaiter("show", landing = TRUE)
+    dcWaiter("show", landing = TRUE)
   )
 )
 

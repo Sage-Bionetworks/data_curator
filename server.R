@@ -5,6 +5,7 @@
 # using the session token.  https://www.synapse.org
 
 shinyServer(function(input, output, session) {
+  options(shiny.reactlog=TRUE) 
   params <- parseQueryString(isolate(session$clientData$url_search))
   if (!has_auth_code(params)) {
     return()
@@ -97,15 +98,30 @@ shinyServer(function(input, output, session) {
   # r <- readRDS("req.rds")
   # p <- readRDS("project.rds")
   # sr <- readRDS("sr.rds")
-
+  
   # upload <- reactiveVal(NULL); reqD <- reactiveVal(NULL); project <- reactiveVal(NULL); 
   # template<-reactiveVal(NULL); reqSingle <- reactiveVal(NULL)
+  
+  # observeEvent(c(upload(), reqSingle()), {
+  #   dcWaiter("show", id = "tab-container", msg = "Loading, please wait...", spin = spin_google(), style = "color: #000", color = transparent(0.9))
+
+  #   selectedDataTypeTab(
+  #     "tab1", userName = "tester",
+  #     upload(), reqSingle(), template(),
+  #     tabId = "dashboard-tabs", validationTab = "db-tab3", parent = session
+  #   )
+  #    dcWaiter(id = "tab-container", "hide")
+  # })
+  
+  # observeEvent(reqD(), {
+  #     allUploadManifestsTab("tab2", upload(), reqD(), project())
+  # })
   # upload(u)
   # reqD(r)
   # project(p)
   # reqSingle(sr)
   # template("Biospecimen")
-  # selectedDataTypeTab("test", upload(), reqSingle(), template(), config())
+
 
   ######## Header Dropdown Button ########
   # Adjust header selection dropdown based on tabs
@@ -182,11 +198,10 @@ shinyServer(function(input, output, session) {
   dashboard(
     id = "dashboard", 
     syn = synStore_obj, 
-    project = reactive(input$dropdown_project), 
-    foldeList = data_list$folders, 
-    template = template_schema_name, 
+    selectedProject = reactive(input$dropdown_project), 
+    folderList = data_list$folders, 
+    selectedDataType = template_schema_name, 
     downloadFolder = "manifests", 
-    config = config,
     userName = user_name,
     disableIds = c("box_pick_project", "box_pick_manifest")
   )
@@ -200,7 +215,7 @@ shinyServer(function(input, output, session) {
     
     # update selected folder ID
     folder_synID(tmp_folder_synID)
-    logjs(folder_synID())
+
     if (input$tabs == "tab_template") {
       dcWaiter("show", msg = paste0("Getting files in ", input$dropdown_folder, "..."))
       # get file list in selected folder

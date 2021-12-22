@@ -17,29 +17,23 @@ dashboardUI <- function(id) {
       width = 12,
       closable = TRUE,
       title = "Track your Data Status",
-      tabsetPanel(
-        id = ns("dashboard-tabs"),
-        tabPanel(
-          "Selected Data Type",
-          value = "db-tab1",
-          setTabTitleUI(ns("tab1")),
-          selectedDataTypeTabUI(ns("dashboard-tab1"))
-        ),
-        tabPanel(
-          "Selected Project",
-          value = "db-tab2",
-          setTabTitleUI(ns("tab2")),
-          # dbTreeUI(ns("tree"))
-          allUploadManifestsTabUI(ns("dashboard-tab2"))
-        ),
-        tabPanel(
-          "Data Validation",
-          value = "db-tab3",
-          setTabTitleUI(ns("tab3")),
-          tagList(
-            dbValidationUI(ns("validation-table")),
-            helpText("If there is any validation error, 
-              please re-validate the corresponding metadata to see detailed errors and re-submit once you have corrected metadata.")
+      div(id = ns("tab-container"),
+        tabsetPanel(
+          id = ns("dashboard-tabs"),
+          tabPanel(
+            "Selected Data Type",
+            value = "db-tab1",
+            selectedDataTypeTabUI(ns("dashboard-tab1"))
+          ),
+          tabPanel(
+            "Selected Project",
+            value = "db-tab2",
+            allUploadManifestsTabUI(ns("dashboard-tab2"))
+          ),
+          tabPanel(
+            "Data Validation",
+            value = "db-tab3",
+            validationTabUI(ns("dashboard-tab3"))
           )
         )
       )
@@ -47,7 +41,7 @@ dashboardUI <- function(id) {
   )
 }
 
-dashboard <- function(id, syn, project, foldeList, template, downloadFolder, config, userName, disableIds=NULL) {
+dashboard <- function(id, syn, selectedProject, folderList, selectedDataType, downloadFolder, userName, disableIds=NULL) {
   moduleServer(
     id,
     function(input, output, session) {
@@ -60,8 +54,7 @@ dashboard <- function(id, syn, project, foldeList, template, downloadFolder, con
       all_component_requirements <- reactiveVal(NULL)
       selected_component_requirement <- reactiveVal(NULL)
       quick_val <- reactiveVal(NULL)
-      # get template display name
-      templateName <- reactive(config$display_name[match(template(), config$schema_name)])
+
       # all functions should not be executed until dashboard visiable, except initial one
       dashboardOnChange <- reactive(input$`toggle-btn` != 0 & input$box$visible)
 
@@ -73,21 +66,20 @@ dashboard <- function(id, syn, project, foldeList, template, downloadFolder, con
 
       observeEvent(input$`toggle-btn`, {
         hide("toggle-btn-container")
-        logjs(dashboardOnChange())
         shinydashboardPlus::updateBox("box", action = "restore")
       })
 
-      observeEvent(c(foldeList(), input$box$visible), {
+      observeEvent(c(folderList(), input$box$visible), {
         req(dashboardOnChange())
         # initiate partial loading screen for generating plot
-        dcWaiter("show", id = ns("box"), msg = "Loading, please wait...", spin = spin_google(), style = "color: #000", color = transparent(0.2))
+        dcWaiter("show", id = ns("tab-container"), msg = "Loading, please wait...", spin = spin_google(), style = "color: #000", color = transparent(0.9))
         dbValidation("validation-table", data.frame(NULL)) # reset validation table
 
         # disable selection to prevent changes until all uploaded manifests are queried
         lapply(disableIds, FUN = disable) 
         
         # get all uploaded manifests for selected project
-        all_manifests <- getManifests(syn, foldeList(), downloadFolder = downloadFolder)
+        all_manifests <- getManifests(syn, folderList(), downloadFolder = downloadFolder)
         uploaded_manifests(all_manifests)
         # get all data type requirements for uploaded manifests
         all_component_requirements(getManifestRequirements(all_manifests))
@@ -95,37 +87,33 @@ dashboard <- function(id, syn, project, foldeList, template, downloadFolder, con
         lapply(disableIds, FUN = enable)
       })
 
-      # get requirements for selected template
-      observeEvent(c(template(), input$box$visible), {
+      # get requirements for selected data type
+      observeEvent(c(selectedDataType(), input$box$visible), {
         req(dashboardOnChange())
-        selected_component_requirement(getDatatypeRequirement(template()))
+        selected_component_requirement(getDatatypeRequirement(selectedDataType()))
       })
 
       # render dashboard plots
       observeEvent(c(uploaded_manifests(), selected_component_requirement(), input$dashboard$visible), {
         req(dashboardOnChange())
-        setTabTitle("tab1", paste0("Completion of requirements for data type: ", sQuote(templateName())))
+        setTabTitle("tab1", paste0("Completion of requirements for data type: ", sQuote(selectedDataType())))
         selectedDataTypeTab(
           "dashboard-tab1", userName = userName,
-          uploaded_manifests(), selected_component_requirement(), template(),
+          uploaded_manifests(), selected_component_requirement(), selectedDataType(),
           tabId = "dashboard-tabs", validationTab = "db-tab3", parent = session
         )
       })
 
       observeEvent(c(all_component_requirements(), input$box$visible), {
         req(dashboardOnChange())
-        setTabTitle("tab2", paste0("Completion of requirements for project: ", sQuote(project())))
-        allUploadManifestsTab("dashboard-tab2", uploaded_manifests(), all_component_requirements(), project())
+        allUploadManifestsTab("dashboard-tab2", uploaded_manifests(), all_component_requirements(), selectedProject())
       })
 
       # validation table for all uploaded data
       observeEvent(c(uploaded_manifests()), {
-        manifest <- isolate(uploaded_manifests())
-        setTabTitle("tab3", paste0("Validate your uploaded data in the project: ", sQuote(project())))
-        validation_res <- getManifestValidation(manifest)
-        dbValidation("validation-table", validation_res)
+        # validationTab("dashboard-tab3", uploaded_manifests(), selectedProject())
         # update and hide the partial loading screen
-        dcWaiter(id = ns("box"), "hide")
+        dcWaiter(id = ns("tab-container"), "hide")
       })
     }
   )

@@ -24,6 +24,16 @@ getManifests <- function(syn, datasets, downloadFile=TRUE, downloadFolder) {
       if ("Component" %in% colnames(manifest_df) & nrow(manifest_df) > 0) {
         manifest_component <- manifest_df[["Component"]][1]
 
+        # validate manifest, if no error, output is list()
+        # TODO: check with backend - ValueError: c("LungCancerTier3", "BreastCancerTier3", "ScRNA-seqAssay", "MolecularTest", "NaN", "") ...
+        val_res <- tryCatch(metadata_model$validateModelManifest(manifest_path, manifest_component), error = function(err) "Out of Date")
+        # clean validation res from schematic
+        if (is.list(val_res)) {
+          res <- validationResult(val_res, manifest_component, manifest_df)
+        } else {
+          res <- list(validationRes = "invalid", errorType = val_res)
+        }
+
         df <- tibble(
           synID = manifest["properties"]["id"],
           schema = manifest_component,
@@ -31,12 +41,14 @@ getManifests <- function(syn, datasets, downloadFile=TRUE, downloadFolder) {
           modifiedOn = as.Date(manifest["properties"]["modifiedOn"]),
           modifiedUser = paste0("@", mofified_user),
           path = manifest_path,
-          folder = names(datasets)[which(datasets == id)]
+          folder = names(datasets)[which(datasets == id)],
+          isValid = ifelse(res$validationRes == "valid", TRUE, FALSE),
+          errorType = res$errorType
         ) %>% 
           filter(schema != "" & schema != "NaN")
       }
     }
-
+    
     return(df)
   }) %>% bind_rows()
 }
@@ -90,46 +102,4 @@ getManifestRequirements <- function(manifest) {
       return(df)
     }
   }) %>% bind_rows()
-}
-
-
-#' create validation table for uploaded data
-#' 
-#' @param manifest output from \code{getManifests}.
-#' @return data frame contains quick validation results for dashboard
-getManifestValidation <- function(manifest) {
-
-  if (nrow(manifest) == 0) {
-    valDF <- data.frame()
-  } else {
-    valDF <- lapply(1:nrow(manifest), function(i) {
-      path <- manifest$path[i]
-      component <- manifest$schema[i]
-      manifest_df <- data.table::fread(path)
-      # if no error, output is list()
-      # TODO: check with backend - ValueError: c("LungCancerTier3", "BreastCancerTier3", "ScRNA-seqAssay", "MolecularTest", "NaN", "") ...
-      valRes <- tryCatch(metadata_model$validateModelManifest(path, component), error = function(err) "Out of Date")
-      if (is.list(valRes)) {
-        res <- validationResult(valRes, component, manifest_df)
-      } else {
-        res <- list(validationRes = "invalid", errorType = valRes)
-      }
-      # manifest[[2]] <- list(res$validationRes, res$errorType)
-      out <- data.frame(is_valid = res$validationRes, error_type = res$errorType)
-    }) %>% bind_rows()
-
-    data.frame(
-      dataType = paste0(
-        '<a href="https://www.synapse.org/#!Synapse:',
-        manifest$synID, '" target="_blank">', manifest$schema, "</a>"
-      ),
-      Dataset = manifest$folder,
-      Status = valDF$is_valid,
-      Error = ifelse(valDF$error_type == "Wrong Schema", "Out of Date", valDF$error_type),
-      createdOn = manifest$createdOn,
-      lastModified = manifest$modifiedOn,
-      userModified = manifest$modifiedUser,
-      internalLinks = c("Pass/Fail")
-    ) %>% arrange(Status)
-  }
 }
