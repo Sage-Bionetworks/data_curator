@@ -18,12 +18,15 @@ validationTab <- function(id, uploadData, selectedProject) {
       
       ns <- session$ns
 
+      # render tab title
       setTabTitle("title", paste0("Validate your uploaded data in the project: ", sQuote(selectedProject)))
 
       internalLink <- sample(c("Pass", "Fail"), nrow(uploadData), replace = TRUE)
       internalLinkRes <- ifelse(internalLink == "Pass", TRUE, FALSE)
       valRes <- ifelse(uploadData$errorType == "Wrong Schema", "Out of Date", 
         ifelse(uploadData$errorType == "No Error", "Valid", uploadData$errorType))
+
+      # process validation result
       validation_df <- data.frame(
         DataType = paste0(
           '<a href="https://www.synapse.org/#!Synapse:',
@@ -37,7 +40,8 @@ validationTab <- function(id, uploadData, selectedProject) {
         LastModified = uploadData$modifiedOn,
         UserModified = uploadData$modifiedUser
       ) %>% arrange(Status)
-
+      
+      # render the validation result table
       dbValidation("validation-table", validation_df)
     }
   )

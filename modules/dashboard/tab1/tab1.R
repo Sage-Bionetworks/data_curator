@@ -40,13 +40,23 @@ selectedDataTypeTab <- function(id, userName, uploadData, reqData, selectedDataT
       
       ns <- session$ns
       
+      # collect all required datatype including selected datatype
       all_req <- union(reqData, names(reqData))
+      # get number of total requirements
       n_req <- length(all_req)
+      # get number of manifests are required but not yet uploaded
       n_not_up <- length(setdiff(all_req, uploadData$schema))
+      # get number of manifests uploaded to synapse
       n_up <- length(intersect(all_req, uploadData$schema))
+      # get number of manifests that are out of date
       n_outdate <- sum(uploadData$errorType %in% c("Wrong Schema", "Out of Date"))
+      # calculate the values for progress bar: number of uploaded / number of total requirements
       progress_value <- round(n_up/n_req * 100, 0)
 
+      # render tab title
+      setTabTitle("title", paste0("Completion of requirements for data type: ", sQuote(selectedDataType)))
+
+      # render banner contents
       output$`summary-box` <- renderUI({
         div(class = "summary-box", align = "center",
           div(
@@ -58,6 +68,7 @@ selectedDataTypeTab <- function(id, userName, uploadData, reqData, selectedDataT
         )
       })
 
+      # render summary stats boxes
       output$`stats-box` <- renderUI({
         div(class = "stats-box",
           column(12, 
@@ -93,17 +104,16 @@ selectedDataTypeTab <- function(id, userName, uploadData, reqData, selectedDataT
         )
       })
 
-      setTabTitle("title", paste0("Completion of requirements for data type: ", sQuote(selectedDataType)))
-
+      # render circular progress bar
       progressBar("progress-box", value = progress_value, r = 65, circular = TRUE)
 
-      # check list of requirments of selected template
+      # render check list of requirments for selected datatype
       dbCheckList("checklist", uploadData, reqData)
-      # networks plot for requirements of selected template
+      # render network plot for requirements of selected datatype
       dbNetwork("network", uploadData, reqData, selectedDataType)
 
+      # redirect to validation tab of dashboard once the btn clicked
       observeEvent(input$`view-btn`, {
-        # redirect to validation tab of dashboard
         req(input$`view-btn` != 0)
         updateTabsetPanel(parent, tabId, selected = validationTab)
       })

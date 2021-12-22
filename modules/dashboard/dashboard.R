@@ -19,21 +19,21 @@ dashboardUI <- function(id) {
       title = "Track your Data Status",
       div(id = ns("tab-container"),
         tabsetPanel(
-          id = ns("dashboard-tabs"),
+          id = ns("tabs"),
           tabPanel(
             "Selected Data Type",
             value = "db-tab1",
-            selectedDataTypeTabUI(ns("dashboard-tab1"))
+            selectedDataTypeTabUI(ns("tab-selected-datatype"))
           ),
           tabPanel(
             "Selected Project",
             value = "db-tab2",
-            allUploadManifestsTabUI(ns("dashboard-tab2"))
+            allUploadManifestsTabUI(ns("tab-selected-project"))
           ),
           tabPanel(
             "Data Validation",
             value = "db-tab3",
-            validationTabUI(ns("dashboard-tab3"))
+            validationTabUI(ns("tab-validation"))
           )
         )
       )
@@ -49,28 +49,28 @@ dashboard <- function(id, syn, selectedProject, folderList, selectedDataType, do
       # do not need to use ns() for shinyjs functions, which is supported in module
       ns <- session$ns
       
-      # set up variables
+      # set up inital reactive value for all uploaded manifests
       uploaded_manifests <- reactiveVal(NULL)
-      all_component_requirements <- reactiveVal(NULL)
-      selected_component_requirement <- reactiveVal(NULL)
-      quick_val <- reactiveVal(NULL)
 
       # all functions should not be executed until dashboard visiable, except initial one
-      dashboardOnChange <- reactive(input$`toggle-btn` != 0 & input$box$visible)
-
+      isDashboardOpen <- reactive(input$`toggle-btn` != 0 & input$box$visible)
+      
+      # show toggle btn when dashboard is closed
       observeEvent(input$box$visible, {
         req(!input$box$visible)
         Sys.sleep(0.3) # 0.3 is optimal
         show("toggle-btn-container")
       })
 
+      # once toggle btn is clicked, hide the btn and show dashboard
       observeEvent(input$`toggle-btn`, {
         hide("toggle-btn-container")
         shinydashboardPlus::updateBox("box", action = "restore")
       })
 
+      # get all uploaded manifests once the project/folder changed
       observeEvent(c(folderList(), input$box$visible), {
-        req(dashboardOnChange())
+        req(isDashboardOpen())
         # initiate partial loading screen for generating plot
         dcWaiter("show", id = ns("tab-container"), msg = "Loading, please wait...", spin = spin_google(), style = "color: #000", color = transparent(0.9))
         dbValidation("validation-table", data.frame(NULL)) # reset validation table
@@ -80,38 +80,44 @@ dashboard <- function(id, syn, selectedProject, folderList, selectedDataType, do
         
         # get all uploaded manifests for selected project
         all_manifests <- getManifests(syn, folderList(), downloadFolder = downloadFolder)
+        # update reactive value
         uploaded_manifests(all_manifests)
-        # get all data type requirements for uploaded manifests
-        all_component_requirements(getManifestRequirements(all_manifests))
 
         lapply(disableIds, FUN = enable)
       })
-
+      
       # get requirements for selected data type
-      observeEvent(c(selectedDataType(), input$box$visible), {
-        req(dashboardOnChange())
-        selected_component_requirement(getDatatypeRequirement(selectedDataType()))
+      selected_datatype_requirement <- eventReactive(c(selectedDataType(), input$box$visible), {
+        req(isDashboardOpen())
+        getDatatypeRequirement(selectedDataType())
       })
 
-      # render dashboard plots
-      observeEvent(c(uploaded_manifests(), selected_component_requirement(), input$dashboard$visible), {
-        req(dashboardOnChange())
-        setTabTitle("tab1", paste0("Completion of requirements for data type: ", sQuote(selectedDataType())))
+      # get requirements for all uploaded manifests 
+      uploaded_manifests_requirement <- eventReactive(uploaded_manifests(), {
+        req(isDashboardOpen())
+        getManifestRequirements(uploaded_manifests())
+      })
+
+      # render info/plots for selected datatype
+      observeEvent(c(uploaded_manifests(), selected_datatype_requirement(), input$dashboard$visible), {
+        req(isDashboardOpen())
         selectedDataTypeTab(
-          "dashboard-tab1", userName = userName,
-          uploaded_manifests(), selected_component_requirement(), selectedDataType(),
-          tabId = "dashboard-tabs", validationTab = "db-tab3", parent = session
+          "tab-selected-datatype", userName = userName,
+          uploaded_manifests(), selected_datatype_requirement(), selectedDataType(),
+          tabId = "tabs", validationTab = "db-tab3", parent = session
         )
+        allUploadManifestsTab("tab-selected-project", uploaded_manifests(), uploaded_manifests_requirement(), selectedProject())
       })
 
-      observeEvent(c(all_component_requirements(), input$box$visible), {
-        req(dashboardOnChange())
-        allUploadManifestsTab("dashboard-tab2", uploaded_manifests(), all_component_requirements(), selectedProject())
-      })
+      # render info/plots for all uploaded manifests and validation
+      # to reduce running time, selected template updates should not initiate this event
+      observeEvent(c(uploaded_manifests_requirement(), input$box$visible), {
+        req(isDashboardOpen())
+      
+        allUploadManifestsTab("tab-selected-project", uploaded_manifests(), uploaded_manifests_requirement(), selectedProject())
+        # validation table for all uploaded data
+        validationTab("tab-validation", uploaded_manifests(), selectedProject())
 
-      # validation table for all uploaded data
-      observeEvent(c(uploaded_manifests()), {
-        # validationTab("dashboard-tab3", uploaded_manifests(), selectedProject())
         # update and hide the partial loading screen
         dcWaiter(id = ns("tab-container"), "hide")
       })

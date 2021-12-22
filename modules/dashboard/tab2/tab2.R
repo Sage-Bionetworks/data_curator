@@ -35,9 +35,15 @@ allUploadManifestsTab <- function(id, uploadData, reqData, selectedProject) {
     function(input, output, session) {
       
       ns <- session$ns
+
+      # set colors that can be used for dataset progress bars
       col_list <- c("#5B008C", "#B4007A", "#EA3360", "#FF794A", "#FFBB49",
                     "#004BC3", "#0076E2", "#009AE8", "#00BADA", "#00D8C3")
+      # set reactive value for folder lists
       folder_list <- reactive(unique(uploadData$folder))
+
+      # render tab title
+      setTabTitle("title", paste0("Completion of requirements for project: ", sQuote(selectedProject)))
 
       # render (multiple) progress bar for each dataset 
       output$`dataset-pb` <- renderUI({
@@ -60,8 +66,9 @@ allUploadManifestsTab <- function(id, uploadData, reqData, selectedProject) {
         })
       })
 
-      progressBar("all-pb", value = 50, circular = TRUE)
-
+      # render circular progress bar: total number of completed dataset / total number of datasets
+      progressBar("all-pb", value = 50, circular = TRUE)       
+      # display stats below the progress
       output$`dataset-stats` <- renderUI({
         div(class = "dataset-stats-container",
           div(class = "dataset-stats",
@@ -79,7 +86,7 @@ allUploadManifestsTab <- function(id, uploadData, reqData, selectedProject) {
         )
       })
       
-      setTabTitle("title", paste0("Completion of requirements for project: ", sQuote(selectedProject)))
+      # render collasiple tree
       dbTree("requirement-tree", uploadData, reqData, selectedProject)
     }
   )
