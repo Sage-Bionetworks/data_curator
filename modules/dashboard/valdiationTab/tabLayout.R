@@ -4,7 +4,7 @@ validationTabUI <- function(id) {
   div(class="tab3-container",
     tagList(
       setTabTitleUI(ns("title")),
-      dbValidationUI(ns("validation-table")),
+      dbValidationTableUI(ns("validation-table")),
       helpText("If there is any validation error, 
         please re-validate the corresponding metadata to see detailed errors and re-submit once you have corrected metadata.")
     )
@@ -42,7 +42,7 @@ validationTab <- function(id, uploadData, selectedProject) {
       ) %>% arrange(Status)
       
       # render the validation result table
-      dbValidation("validation-table", validation_df)
+      dbValidationTable("validation-table", validation_df)
     }
   )
 }

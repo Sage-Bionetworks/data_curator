@@ -1,12 +1,5 @@
-// global variables
-@import 'basic/variables';
-
-// feature styles
-@import 'basic/animation';
-@import 'basic/button';
-@import 'basic/box';
-@import 'basic/message';
-@import 'basic/waiter';
+// basic
+@import 'basic/load';
 
 // components
 @import 'components/load';

@@ -28,7 +28,7 @@ dashboardUI <- function(id) {
           tabPanel(
             "Selected Project",
             value = "db-tab2",
-            allUploadManifestsTabUI(ns("tab-selected-project"))
+            selectedProjectTabUI(ns("tab-selected-project"))
           ),
           tabPanel(
             "Data Validation",
@@ -73,7 +73,7 @@ dashboard <- function(id, syn, selectedProject, folderList, selectedDataType, do
         req(isDashboardOpen())
         # initiate partial loading screen for generating plot
         dcWaiter("show", id = ns("tab-container"), msg = "Loading, please wait...", spin = spin_google(), style = "color: #000", color = transparent(0.9))
-        dbValidation("validation-table", data.frame(NULL)) # reset validation table
+        dbValidationTable("validation-table", data.frame(NULL)) # reset validation table
 
         # disable selection to prevent changes until all uploaded manifests are queried
         lapply(disableIds, FUN = disable) 
@@ -106,7 +106,6 @@ dashboard <- function(id, syn, selectedProject, folderList, selectedDataType, do
           uploaded_manifests(), selected_datatype_requirement(), selectedDataType(),
           tabId = "tabs", validationTab = "db-tab3", parent = session
         )
-        allUploadManifestsTab("tab-selected-project", uploaded_manifests(), uploaded_manifests_requirement(), selectedProject())
       })
 
       # render info/plots for all uploaded manifests and validation
@@ -114,7 +113,7 @@ dashboard <- function(id, syn, selectedProject, folderList, selectedDataType, do
       observeEvent(c(uploaded_manifests_requirement(), input$box$visible), {
         req(isDashboardOpen())
       
-        allUploadManifestsTab("tab-selected-project", uploaded_manifests(), uploaded_manifests_requirement(), selectedProject())
+        selectedProjectTab("tab-selected-project", uploaded_manifests(), uploaded_manifests_requirement(), selectedProject())
         # validation table for all uploaded data
         validationTab("tab-validation", uploaded_manifests(), selectedProject())
 

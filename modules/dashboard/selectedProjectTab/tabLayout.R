@@ -1,4 +1,4 @@
-allUploadManifestsTabUI <- function(id) {
+selectedProjectTabUI <- function(id) {
 
   ns <- NS(id)
   div(class="tab2-container",
@@ -29,7 +29,7 @@ allUploadManifestsTabUI <- function(id) {
   )
 }
 
-allUploadManifestsTab <- function(id, uploadData, reqData, selectedProject) {
+selectedProjectTab <- function(id, uploadData, reqData, selectedProject) {
   moduleServer(
     id,
     function(input, output, session) {
