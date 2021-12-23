@@ -1,11 +1,10 @@
 # This is script to wrap up the waiter screen for data curator app
-# TODO: maybe we could split into UI and server if we need
-
 dcWaiter <- function(stage = c("show", "update", "hide"),
                      id = NULL, landing = FALSE, userName = NULL,
                      isLogin = TRUE, isCertified = TRUE, isPermission = TRUE,
-                     sleep = 2, msg = NULL, spin = NULL, 
-                     color = "rgba(66, 72, 116, .9)", style = NULL) {
+                     sleep = 2, msg = NULL, style = NULL,
+                     spin = NULL, custom_spinner = FALSE, url = '',
+                     color = "rgba(66, 72, 116, .9)") {
   # validate arguments
   if (!is.logical(landing)) stop("landing must be a boolean")
   if (!is.logical(isLogin)) stop("isLogin must be a boolean")
@@ -75,17 +74,33 @@ dcWaiter <- function(stage = c("show", "update", "hide"),
     }
 
   } else {
-  
+    
+    # prepare loading tags
+    if (custom_spinner) {
+      img_type <- tools::file_ext(basename(url))
+      if (img_type == "svg") img_type <- "svg+xml" 
+      b64 <- base64enc::dataURI(file = url, mime=paste0("image/", img_type))
+      spinner <- 
+        tagList(
+          # div(class="custom-spinner",
+            img(src = b64, class = "image-spin"),
+            h4(msg, style = style)
+          # )
+        )
+    } else {
+      spinner <- tagList(spin, br(), h4(msg, style = style))
+    }
+
     # other loading screens
     if (stage == "show") {
       waiter_show(
         id = id,
-        html = tagList(spin, br(), h4(msg, style = style)),
+        html = spinner,
         color = color
       )
     } else {
       Sys.sleep(2) # has to put at least 2s before to make update work
-      waiter_update(id = id, html = tagList(spin, br(), h4(msg, style = style)))
+      waiter_update(id = id, html = spinner)
       Sys.sleep(sleep)
       waiter_hide(id = id)
     }

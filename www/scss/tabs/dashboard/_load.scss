@@ -10,3 +10,12 @@
   font-size: 1.2em;
   font-weight: 400;
 }
+
+.image-spin {
+  display: inline-block;
+  margin: auto;
+  width: 3.5em;
+  height: 3.5em;
+  -webkit-animation: spin 2s infinite linear;
+  animation: spin 2s infinite linear;
+}

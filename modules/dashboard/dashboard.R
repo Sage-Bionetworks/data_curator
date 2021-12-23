@@ -72,7 +72,10 @@ dashboard <- function(id, synStoreObj, selectedProject, folderList, selectedData
       observeEvent(c(folderList(), input$box$visible), {
         req(isDashboardOpen())
         # initiate partial loading screen for generating plot
-        dcWaiter("show", id = ns("tab-container"), msg = "Loading, please wait...", spin = spin_google(), style = "color: #000", color = transparent(0.9))
+        dcWaiter(
+          "show", id = ns("tab-container"), url ="www/img/logo.svg", custom_spinner = TRUE,
+          msg = "Loading, please wait...", style = "color: #000;", color = transparent(0.9)
+        )
         dbValidationTable("validation-table", data.frame(NULL)) # reset validation table
 
         # disable selection to prevent changes until all uploaded manifests are queried
@@ -118,7 +121,7 @@ dashboard <- function(id, synStoreObj, selectedProject, folderList, selectedData
         validationTab("tab-validation", uploaded_manifests(), selectedProject())
 
         # update and hide the partial loading screen
-        dcWaiter(id = ns("tab-container"), "hide")
+        # dcWaiter(id = ns("tab-container"), "hide")
       })
     }
   )
