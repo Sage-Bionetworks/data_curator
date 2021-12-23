@@ -40,6 +40,7 @@ dbTree <- function(id, uploadData, reqData, selectedProject) {
   moduleServer(
     id,
     function(input, output, session) {
+
       output$tree <- renderD3({
 
         if (length(uploadData) == 0) {

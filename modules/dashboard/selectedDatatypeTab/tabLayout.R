@@ -39,7 +39,7 @@ selectedDataTypeTab <- function(id, userName, uploadData, reqData, selectedDataT
     function(input, output, session) {
       
       ns <- session$ns
-      
+
       # collect all required datatype including selected datatype
       all_req <- union(reqData, names(reqData))
       # get number of total requirements

@@ -201,7 +201,6 @@ shinyServer(function(input, output, session) {
     selectedProject = reactive(input$dropdown_project), 
     folderList = data_list$folders, 
     selectedDataType = template_schema_name, 
-    downloadFolder = "manifests", 
     userName = user_name,
     disableIds = c("box_pick_project", "box_pick_manifest")
   )

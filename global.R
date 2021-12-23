@@ -87,7 +87,7 @@ scope <- "openid view download modify"
 
 # Activate conda env
 # Don't necessarily have to set `RETICULATE_PYTHON` env variable
-reticulate::use_condaenv(conda_name)
+reticulate::use_condaenv(conda_name, required = TRUE)
 
 # import synapse client
 syn <- import("synapseclient")$Synapse()

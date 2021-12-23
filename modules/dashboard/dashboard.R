@@ -41,7 +41,7 @@ dashboardUI <- function(id) {
   )
 }
 
-dashboard <- function(id, synStoreObj, selectedProject, folderList, selectedDataType, downloadFolder, userName, disableIds=NULL) {
+dashboard <- function(id, synStoreObj, selectedProject, folderList, selectedDataType, userName, disableIds=NULL) {
   moduleServer(
     id,
     function(input, output, session) {
@@ -76,11 +76,10 @@ dashboard <- function(id, synStoreObj, selectedProject, folderList, selectedData
           "show", id = ns("tab-container"), url ="www/img/logo.svg", custom_spinner = TRUE,
           msg = "Loading, please wait...", style = "color: #000;", color = transparent(0.9)
         )
-        dbValidationTable("validation-table", data.frame(NULL)) # reset validation table
 
         # disable selection to prevent changes until all uploaded manifests are queried
         lapply(disableIds, FUN = disable) 
-        
+
         # get all uploaded manifests for selected project
         all_manifests <- getManifests(synStoreObj, folderList())
         # update reactive value
@@ -115,13 +114,12 @@ dashboard <- function(id, synStoreObj, selectedProject, folderList, selectedData
       # to reduce running time, selected template updates should not initiate this event
       observeEvent(c(uploaded_manifests_requirement(), input$box$visible), {
         req(isDashboardOpen())
-      
         selectedProjectTab("tab-selected-project", uploaded_manifests(), uploaded_manifests_requirement(), selectedProject())
         # validation table for all uploaded data
         validationTab("tab-validation", uploaded_manifests(), selectedProject())
 
         # update and hide the partial loading screen
-        # dcWaiter(id = ns("tab-container"), "hide")
+        dcWaiter(id = ns("tab-container"), "hide")
       })
     }
   )
