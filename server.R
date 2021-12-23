@@ -57,7 +57,7 @@ shinyServer(function(input, output, session) {
   observeEvent(input$cookie, {
 
     # login and update session
-    syn_login(sessionToken = input$cookie, rememberMe = FALSE)
+    syn$login(sessionToken = input$cookie, rememberMe = FALSE)
   
     # updating syn storage
     tryCatch(synStore_obj <<- synapse_driver(token = input$cookie), error = function(e) NULL)
@@ -78,9 +78,9 @@ shinyServer(function(input, output, session) {
         })
       })
 
-      user_name <<- syn_getUserProfile()$userName
+      user_name <<- syn$getUserProfile()$userName
 
-      if (!syn_is_certified(user_name)) {
+      if (!syn$is_certified(user_name)) {
         dcWaiter("update", landing = TRUE, isCertified = FALSE)
       } else {
         # update waiter loading screen once login successful
@@ -197,7 +197,7 @@ shinyServer(function(input, output, session) {
   ######## Dashboard ########
   dashboard(
     id = "dashboard", 
-    syn = synStore_obj, 
+    synStore_obj = synStore_obj, 
     selectedProject = reactive(input$dropdown_project), 
     folderList = data_list$folders, 
     selectedDataType = template_schema_name, 

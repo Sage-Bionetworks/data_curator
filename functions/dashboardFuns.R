@@ -1,25 +1,26 @@
 #' get all uploaded manifests based on provided folder list
 #' 
-#' @param syn synapse objecy.
+#' @param synStore_obj synapse object.
 #' @param datasets a list of folder syn Ids, named by folder names
-#' @param downloadFolder the folder to save manifest, only if downloadFile is TRUE
 #' @return data frame that contains manifest essential information for dashboard
-getManifests <- function(syn, datasets, downloadFile=TRUE, downloadFolder) {
+getManifests <- function(synStore_obj, datasets) {
+
+  all_files <- synStore_obj$storageFileviewTable
+  all_files <- all_files[all_files$name == basename(synStore_obj$manifest), ]
 
   sapply(datasets, function(id) {
-    manifest <- synapse_driver$getDatasetManifest(syn, id,
-      downloadFile = downloadFile,
-      downloadPath = file.path(downloadFolder, id)
-    ) 
+
+    manifest_id <- all_files[all_files$parentId == id, "id"]
     
     # return empty tibble if no manifest or no component in the manifest
     df <- tibble()
-  
-    # extract manifest essential information for dashboard
-    if (manifest != "") {
+
+    if (length(manifest_id) != 0) {
+      manifest <- syn$get(manifest_id)
+      # extract manifest essential information for dashboard
       manifest_path <- manifest["path"]
       manifest_df <- data.table::fread(manifest_path)
-      mofified_user <- syn_getUserProfile(manifest["properties"]["modifiedBy"])["userName"]
+      mofified_user <- syn$getUserProfile(manifest["properties"]["modifiedBy"])["userName"]
 
       if ("Component" %in% colnames(manifest_df) & nrow(manifest_df) > 0) {
         manifest_component <- manifest_df[["Component"]][1]
