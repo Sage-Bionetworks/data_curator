@@ -1,4 +1,4 @@
-.tab2-container {
+.selectedProjectTab-container {
   .dataset-stats-container {
     display: flex;
     justify-content: space-between;
@@ -8,6 +8,7 @@
     }
 
     .dataset-stats-number {
+      text-align: center;
       font-size: 0.8em;
       font-weight: 600;
     }

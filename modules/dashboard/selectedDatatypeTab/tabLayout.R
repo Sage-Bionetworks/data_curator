@@ -1,7 +1,7 @@
 selectedDataTypeTabUI <- function(id) {
 
   ns <- NS(id)
-  div(class = "tab1-container",
+  div(class = "selectedDataTypeTab-container",
     tagList(
       setTabTitleUI(ns("title")),
       fluidRow(

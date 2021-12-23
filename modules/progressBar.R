@@ -48,6 +48,7 @@ progressBar <- function(id, value = 100, title = NULL, subtitle = NULL,
               '
               var ', unique_var_name, '_Num = document.getElementById("', pct_id_name, '");
               var ', unique_var_name, '_Counter = 0;
+              ', unique_var_name, '_Num.innerHTML = "0%";
               setInterval(() => {
                 if (', unique_var_name, '_Counter == ', value, ') {
                   clearInterval();

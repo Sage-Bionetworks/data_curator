@@ -1,7 +1,7 @@
 validationTabUI <- function(id) {
 
   ns <- NS(id)
-  div(class="tab3-container",
+  div(class="validationTab-container",
     tagList(
       setTabTitleUI(ns("title")),
       dbValidationTableUI(ns("validation-table")),

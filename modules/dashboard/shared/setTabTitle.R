@@ -9,18 +9,9 @@ setTabTitle <- function(id, title) {
     id,
     function(input, output, session) {
 
-      dashboardTabTitleStyle <- paste0(
-      '
-      text-align: center;
-      font-weight: bold;
-      font-size: 1.4em;
-      margin: 15px 0;
-      '
-      )
-
-      output$`dashboard-tab-title` <- renderUI(
-        p(title, style = dashboardTabTitleStyle)
-      )
+      output$`dashboard-tab-title` <- renderUI({
+        p(title, class = "section-title")
+      })
     }
   )
 }

@@ -2,10 +2,11 @@
 @import 'selectedProjectTab';
 
 .section-title {
-  margin: 20px 15px 15px 15px;
-  padding: 0;
-  padding-bottom: 5px;
+  margin: 20px 15px 15px;
+  padding: 0 0 5px;
   width: calc(100% - 30px);
   border-bottom: 1px solid #ccc;
+  text-align: center;
   font-size: 1.2em;
+  font-weight: 400;
 }
