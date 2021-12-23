@@ -1,12 +1,12 @@
 #' get all uploaded manifests based on provided folder list
 #' 
-#' @param synStore_obj synapse object.
+#' @param synStoreObj synapse storage object.
 #' @param datasets a list of folder syn Ids, named by folder names
 #' @return data frame that contains manifest essential information for dashboard
-getManifests <- function(synStore_obj, datasets) {
+getManifests <- function(synStoreObj, datasets) {
 
-  all_files <- synStore_obj$storageFileviewTable
-  all_files <- all_files[all_files$name == basename(synStore_obj$manifest), ]
+  all_files <- synStoreObj$storageFileviewTable
+  all_files <- all_files[all_files$name == basename(synStoreObj$manifest), ]
 
   sapply(datasets, function(id) {
 

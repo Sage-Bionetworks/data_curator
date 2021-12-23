@@ -41,7 +41,7 @@ dashboardUI <- function(id) {
   )
 }
 
-dashboard <- function(id, synStore_obj, selectedProject, folderList, selectedDataType, downloadFolder, userName, disableIds=NULL) {
+dashboard <- function(id, synStoreObj, selectedProject, folderList, selectedDataType, downloadFolder, userName, disableIds=NULL) {
   moduleServer(
     id,
     function(input, output, session) {
@@ -79,7 +79,7 @@ dashboard <- function(id, synStore_obj, selectedProject, folderList, selectedDat
         lapply(disableIds, FUN = disable) 
         
         # get all uploaded manifests for selected project
-        all_manifests <- getManifests(synStore_obj, folderList())
+        all_manifests <- getManifests(synStoreObj, folderList())
         # update reactive value
         uploaded_manifests(all_manifests)
 

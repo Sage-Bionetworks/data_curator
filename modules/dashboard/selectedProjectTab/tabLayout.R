@@ -43,7 +43,7 @@ selectedProjectTab <- function(id, uploadData, reqData, selectedProject) {
       folder_list <- reactive(unique(uploadData$folder))
 
       # render tab title
-      setTabTitle("title", paste0("Completion of requirements for project: ", sQuote(selectedProject)))
+      setTabTitle("title", paste0("Completion of Requirements for Project: ", sQuote(selectedProject)))
 
       # render (multiple) progress bar for each dataset 
       output$`dataset-pb` <- renderUI({

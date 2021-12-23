@@ -19,7 +19,7 @@ validationTab <- function(id, uploadData, selectedProject) {
       ns <- session$ns
 
       # render tab title
-      setTabTitle("title", paste0("Validate your uploaded data in the project: ", sQuote(selectedProject)))
+      setTabTitle("title", paste0("Validation of Uploaded Data for Project: ", sQuote(selectedProject)))
 
       internalLink <- sample(c("Pass", "Fail"), nrow(uploadData), replace = TRUE)
       internalLinkRes <- ifelse(internalLink == "Pass", TRUE, FALSE)

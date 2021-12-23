@@ -89,15 +89,14 @@ scope <- "openid view download modify"
 # Don't necessarily have to set `RETICULATE_PYTHON` env variable
 reticulate::use_condaenv(conda_name)
 
-# import synapseclient
+# import synapse client
 syn <- import("synapseclient")$Synapse()
+# import schematic modules
+source_python("functions/metadataModel.py")
+synapse_driver <- import("schematic.store.synapse")$SynapseStorage
 # Import functions/modules
 source_files <- list.files(c("functions", "modules"), pattern = "*\\.R$", recursive = TRUE, full.names = TRUE)
 sapply(source_files, FUN = source)
-# source_python("functions/synapseAlias.py")
-source_python("functions/metadataModel.py")
-# import module that contains SynapseStorage class
-synapse_driver <- import("schematic.store.synapse")$SynapseStorage
 
 # Global variables
 dropdown_types <- c("project", "folder", "template")

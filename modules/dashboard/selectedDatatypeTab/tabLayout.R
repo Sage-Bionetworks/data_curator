@@ -54,7 +54,7 @@ selectedDataTypeTab <- function(id, userName, uploadData, reqData, selectedDataT
       progress_value <- round(n_up/n_req * 100, 0)
 
       # render tab title
-      setTabTitle("title", paste0("Completion of requirements for data type: ", sQuote(selectedDataType)))
+      setTabTitle("title", paste0("Completion of Requirements for Data Type: ", sQuote(selectedDataType)))
 
       # render banner contents
       output$`summary-box` <- renderUI({
