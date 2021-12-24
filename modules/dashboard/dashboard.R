@@ -78,14 +78,15 @@ dashboard <- function(id, synStoreObj, selectedProject, folderList, selectedData
         )
 
         # disable selection to prevent changes until all uploaded manifests are queried
-        lapply(disableIds, FUN = disable) 
+        # make sure to use asis, otherwise it will add module's namespaces
+        lapply(disableIds, FUN = disable, asis = TRUE) 
 
         # get all uploaded manifests for selected project
         all_manifests <- getManifests(synStoreObj, folderList())
         # update reactive value
         uploaded_manifests(all_manifests)
 
-        lapply(disableIds, FUN = enable)
+        lapply(disableIds, FUN = enable, asis = TRUE)
       })
       
       # get requirements for selected data type
