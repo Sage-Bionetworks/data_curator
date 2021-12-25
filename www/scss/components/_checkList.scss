@@ -73,7 +73,7 @@
   flex-direction: column;
 }
 
-@media (min-width: $tablet) and (max-width: $desktop) {
+@media (max-width: $desktop) {
   .checklist-container {
     .checklist-item-container {
       grid-template-columns: repeat(1, 1fr) !important;

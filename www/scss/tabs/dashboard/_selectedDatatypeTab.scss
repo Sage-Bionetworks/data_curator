@@ -2,7 +2,6 @@
   .top-container {
     display: flex;
     align-items: center;
-    margin-bottom: 10px;
   }
 
   .bottom-title-container {
@@ -29,6 +28,7 @@
     align-items: center;
     min-height: 150px;
     padding: 20px 15px;
+    margin-bottom: 15px;
     background-color: rgba($primary_col, 0.6);
     color: #fff;
     box-shadow: $primary_shadow;
@@ -118,7 +118,7 @@
   color: $warning_col;
 }
 
-@media (min-width: $tablet) and (max-width: $desktop) {
+@media (max-width: $desktop) {
   .selectedDataTypeTab-container {
     .summary-box {
       flex-direction: column;
@@ -126,6 +126,14 @@
       .progress-group {
         margin-top: 20px;
       }
+    }
+  }
+}
+
+@media (max-width: $tablet) {
+  .selectedDataTypeTab-container {
+    .top-container {
+      flex-direction: column;
     }
   }
 }
