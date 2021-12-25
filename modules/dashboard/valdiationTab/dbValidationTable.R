@@ -28,7 +28,7 @@ dbValidationTable <- function(id, data, columns = "Status") {
             )
           )),
           escape = FALSE,
-          options = list(dom = "t", columnDefs = list(list(className = "dt-center", targets = "_all")))
+          options = list(dom = "t", scrollX = TRUE, columnDefs = list(list(className = "dt-center", targets = "_all")))
         ) %>%
         formatStyle(columns, backgroundColor = styleEqual(c("Pass", "Fail"), c("#82E0AA", "#F7DC6F")))
       })
