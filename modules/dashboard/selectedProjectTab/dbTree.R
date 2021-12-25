@@ -47,31 +47,35 @@ dbTree <- function(id, uploadData, reqData, selectedProject) {
           tree_list <- NULL
 
         } else {
+  logjs("1")
 
           # remove project name in children to trim long names
           pattern <- paste0(str_replace(selectedProject, " ", "_"), "_")
-          n_file <- length(uploadData$folder)
-
-          # has_miss: dataset contains any missing requirement children
-          file_has_miss <- reqData[, c("folder", "has_miss")] %>%
-            distinct() %>%
-            filter(has_miss)
+          # get dataset contains any missing requirement children
+          incompleted_ds <- reqData %>%
+            distinct(folderSynId, .keep_all = TRUE) %>%
+            filter(nMiss > 0)
+          # make nodes data from project to datasets
           project_to_dataset <- data.frame(
-            from = rep(selectedProject, n_file),
+            from = c(selectedProject),
             to = uploadData$folder,
             node_opacity = c(0),
-            node_color = ifelse(uploadData$folder %in% file_has_miss$folder, "#FF794A", "#A287AF")
+            node_color = ifelse(uploadData$folder %in% incompleted_ds$folder, "#FF794A", "#A287AF")
           )
-
-          dataset_to_req <-
-            reqData %>%
+          # make nodes data from datasets to their requirements
+          dataset_to_req <- reqData %>%
             mutate(
               node_opacity = if_else(reqData$to %in% reqData$from, 0, 1),
               node_color = if_else(reqData$to %in% uploadData$schema, "#28a745", "#E53935")
             ) %>%
             select(from, to, node_opacity, node_color)
 
-          tree_df <- rbind(project_to_dataset, dataset_to_req) %>% mutate_at(1:2, ~ gsub(pattern, "", .))
+          tree_df <- rbind(project_to_dataset, dataset_to_req) %>% 
+            mutate_at(1:2, ~ gsub(pattern, "", .)) %>% 
+            # remove duplicated rows to save conversion time
+            distinct()
+  logjs("2")
+
           # convert to list (name; children) using `data.tree`
           tree_list <- data.tree::FromDataFrameNetwork(tree_df)
           # tree_list$Set(group = ifelse(tree_list$Get("name") %in% c(upData$folder, upData$schema), "upload", "not_load"))

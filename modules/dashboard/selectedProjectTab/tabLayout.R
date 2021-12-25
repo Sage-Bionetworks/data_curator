@@ -36,47 +36,52 @@ selectedProjectTab <- function(id, uploadData, reqData, selectedProject) {
       
       ns <- session$ns
 
-      # get number of total dataset
-      uniq_ds <- reqData %>% group_by(folder, has_miss) %>% distinct(folder)
+      # number of total dataset
+      uniq_ds <- reqData %>% distinct(folderSynId, .keep_all = TRUE)
       n_ds <- nrow(uniq_ds)
-      # get number of completed dataset
-      n_completed <- sum(!uniq_ds$has_miss)
-      # get number of incompleted dataset
-      n_miss <- sum(uniq_ds$has_miss)
+      # number of completed dataset
+      n_completed <- sum(uniq_ds$nMiss == 0)
+      # number of incompleted dataset
+      n_miss <- sum(uniq_ds$nMiss > 0)
 
+      # unique folder names
+      folder_list <- unique(uploadData$folder)
+logjs("c-pb")
       # set colors that can be used for dataset progress bars
-      col_list <- c("#5B008C", "#B4007A", "#EA3360", "#FF794A", "#FFBB49",
-                    "#004BC3", "#0076E2", "#009AE8", "#00BADA", "#00D8C3")
-      # set reactive value for folder lists
-      folder_list <- reactive(unique(uploadData$folder))
+      col_list <- rep(c("#5B008C", "#B4007A", "#EA3360", "#FF794A", "#FFBB49",
+                    "#004BC3", "#0076E2", "#009AE8", "#00BADA", "#00D8C3"), 2)
+      # progress values
+      ds_pb_values <- sapply(folder_list, function(f) {
+        tmp <- reqData[reqData$folder == f, ]
+        sum(tmp$to %in% uploadData$schema) / nrow(tmp)  * 100
+      })
 
       # render tab title
       setTabTitle("title", paste0("Completion of Requirements for Project: ", sQuote(selectedProject)))
-
       # render circular progress bar: total number of completed dataset / total number of datasets
       progressBar("all-pb", value = n_completed / n_ds * 100, circular = TRUE)   
+logjs("l-pb")
 
       # render (multiple) progress bar for each dataset 
       output$`dataset-pb` <- renderUI({
         fluidRow(
           # !important: add ns to pb's id, otherwise pb server will not be able to find
-          lapply(folder_list(), function(f) column(6, progressBarUI(ns(f))))
+          lapply(folder_list, function(f) column(6, progressBarUI(ns(f))))
         )
       })
 
-      observeEvent(folder_list(), {
-        lapply(folder_list(), function(f) {
-          progressBar(
-            id = f,
-            value = sample.int(1e2, 1), 
-            display_pct = FALSE,
-            height = "10px",
-            color = sample(col_list, 1),
-            subtitle = f
-          )
-        })
+      lapply(seq_along(folder_list), function(i) {
+        progressBar(
+          id = folder_list[i],
+          value = ds_pb_values[i], 
+          display_pct = FALSE,
+          height = "10px",
+          color = col_list[i],
+          subtitle = folder_list[i]
+        )
       })
-    
+logjs("stats")
+
       # display stats below the progress
       output$`dataset-stats` <- renderUI({
         div(class = "dataset-stats-container",
@@ -94,9 +99,12 @@ selectedProjectTab <- function(id, uploadData, reqData, selectedProject) {
           )
         )
       })
-      
+  logjs("tree")
+    
       # render collasiple tree
       dbTree("requirement-tree", uploadData, reqData, selectedProject)
+        logjs("done")
+
     }
   )
 }

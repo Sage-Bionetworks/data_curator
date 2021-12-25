@@ -21,7 +21,7 @@ progressBar <- function(id, value = 100, title = NULL, subtitle = NULL,
       ns <- session$ns
 
       # set values
-      value <- as.numeric(value)
+      value <- round(as.numeric(value), 0)
       value <- case_when(
         value < 0 ~ 0,
         value > 100 ~ 100,

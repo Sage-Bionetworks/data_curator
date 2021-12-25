@@ -43,6 +43,7 @@ getManifests <- function(synStoreObj, datasets) {
           modifiedUser = paste0("@", mofified_user),
           path = manifest_path,
           folder = names(datasets)[which(datasets == id)],
+          folderSynId = as.character(id),
           isValid = ifelse(res$validationRes == "valid", TRUE, FALSE),
           errorType = res$errorType
         ) %>% 
@@ -82,25 +83,17 @@ getDatatypeRequirement <- function(datatype) {
 getManifestRequirements <- function(manifest) {
 
   lapply(1:nrow(manifest), function(i) {
-    out <- tryCatch(metadata_model$get_component_requirements(manifest$schema[i], as_graph = TRUE), error = function(err) list())
 
-    if (length(out) == 0) {
-      return(data.frame())
-    } else {
-      out <- list2Vector(out)
-      # check if the uploaded file contains any missed requirement
-      has_miss <- ifelse(any(!union(names(out), out) %in% manifest$schema), TRUE, FALSE)
-      folder_name <- manifest$folder[i]
-      # names(has_miss) <- folder_name
-      # change upload schema to folder names
-      out[which(out == manifest$schema[i])] <- folder_name
-      df <- data.frame(
-        from = as.character(out),
-        to = names(out),
-        folder = rep(folder_name, length(out)),
-        has_miss = rep(has_miss, length(out))
-      )
-      return(df)
-    }
+    # get all required data types
+    out <- tryCatch(metadata_model$get_component_requirements(manifest$schema[i], as_graph = TRUE), error = function(err) list())
+    # convert to a named list, output (name: to, value: from)
+    out <- list2Vector(out)
+    # calculate how many misisng requirements each dataset
+    n_miss <- sum(!union(names(out), out) %in% manifest$schema)
+    # add data from dataset to its data type name
+    from <- c(manifest$folder[i], as.character(out))
+    to <- c(manifest$schema[i], names(out))
+    # output nodes data as data frame
+    data.frame(from = from,to = to, folder = c(manifest$folder[i]), folderSynId = c(manifest$folderSynId[i]), nMiss = c(n_miss))
   }) %>% bind_rows()
 }
