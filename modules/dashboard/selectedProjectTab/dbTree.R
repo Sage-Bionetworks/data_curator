@@ -47,7 +47,6 @@ dbTree <- function(id, uploadData, reqData, selectedProject) {
           tree_list <- NULL
 
         } else {
-  logjs("1")
 
           # remove project name in children to trim long names
           pattern <- paste0(str_replace(selectedProject, " ", "_"), "_")
@@ -74,7 +73,6 @@ dbTree <- function(id, uploadData, reqData, selectedProject) {
             mutate_at(1:2, ~ gsub(pattern, "", .)) %>% 
             # remove duplicated rows to save conversion time
             distinct()
-  logjs("2")
 
           # convert to list (name; children) using `data.tree`
           tree_list <- data.tree::FromDataFrameNetwork(tree_df)
@@ -83,12 +81,6 @@ dbTree <- function(id, uploadData, reqData, selectedProject) {
           tree_list$node_color <- "#694489"
           tree_list <- as.list(tree_list, mode = "explicit", unname = TRUE)
         }
-
-        # # hardcode legend
-        # legend <- data.frame(
-        #   col = c("#694489", "#A287AF", "#FF794A", "#28a745", "#E53935"), 
-        #   name = c("Selected Project", "Completed Datasets", "Incompleted Datasets", "Uploaded Data", "Missing")
-        # )
 
         r2d3(
           # if need css, use e.g. css = sass(sass_import("www/scss/basic/collapsibleTree"))

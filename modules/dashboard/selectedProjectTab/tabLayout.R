@@ -46,7 +46,7 @@ selectedProjectTab <- function(id, uploadData, reqData, selectedProject) {
 
       # unique folder names
       folder_list <- unique(uploadData$folder)
-logjs("c-pb")
+
       # set colors that can be used for dataset progress bars
       col_list <- rep(c("#5B008C", "#B4007A", "#EA3360", "#FF794A", "#FFBB49",
                     "#004BC3", "#0076E2", "#009AE8", "#00BADA", "#00D8C3"), 2)
@@ -60,7 +60,6 @@ logjs("c-pb")
       setTabTitle("title", paste0("Completion of Requirements for Project: ", sQuote(selectedProject)))
       # render circular progress bar: total number of completed dataset / total number of datasets
       progressBar("all-pb", value = n_completed / n_ds * 100, circular = TRUE)   
-logjs("l-pb")
 
       # render (multiple) progress bar for each dataset 
       output$`dataset-pb` <- renderUI({
@@ -80,7 +79,6 @@ logjs("l-pb")
           subtitle = folder_list[i]
         )
       })
-logjs("stats")
 
       # display stats below the progress
       output$`dataset-stats` <- renderUI({
@@ -99,12 +97,9 @@ logjs("stats")
           )
         )
       })
-  logjs("tree")
     
       # render collasiple tree
       dbTree("requirement-tree", uploadData, reqData, selectedProject)
-        logjs("done")
-
     }
   )
 }

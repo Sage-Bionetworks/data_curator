@@ -94,35 +94,6 @@ shinyServer(function(input, output, session) {
     switchTabServer(id = paste0("switchTab", i), tabId = "tabs", tab = reactive(input$tabs)(), tabList = tabs_list, parent = session)
   })
 
-  # u <- readRDS("upload.rds")
-  # r <- readRDS("req.rds")
-  # p <- readRDS("project.rds")
-  # sr <- readRDS("sr.rds")
-  
-  # upload <- reactiveVal(NULL); reqD <- reactiveVal(NULL); project <- reactiveVal(NULL); 
-  # template<-reactiveVal(NULL); reqSingle <- reactiveVal(NULL)
-  
-  # observeEvent(c(upload(), reqSingle()), {
-  #   dcWaiter("show", id = "tab-container", msg = "Loading, please wait...", spin = spin_google(), style = "color: #000", color = transparent(0.9))
-
-  #   selectedDataTypeTab(
-  #     "tab1", userName = "tester",
-  #     upload(), reqSingle(), template(),
-  #     tabId = "dashboard-tabs", validationTab = "db-tab3", parent = session
-  #   )
-  #    dcWaiter(id = "tab-container", "hide")
-  # })
-  
-  # observeEvent(reqD(), {
-  #     allUploadManifestsTab("tab2", upload(), reqD(), project())
-  # })
-  # upload(u)
-  # reqD(r)
-  # project(p)
-  # reqSingle(sr)
-  # template("Biospecimen")
-
-
   ######## Header Dropdown Button ########
   # Adjust header selection dropdown based on tabs
   observe({
