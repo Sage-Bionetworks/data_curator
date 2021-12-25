@@ -1,8 +1,7 @@
 .selectedDataTypeTab-container {
-  display: flex;
-  flex-direction: column;
-
   .top-container {
+    display: flex;
+    align-items: center;
     margin-bottom: 10px;
   }
 
@@ -28,8 +27,8 @@
     display: flex;
     justify-content: space-around;
     align-items: center;
-    height: 150px;
-    padding: 20px 10px;
+    min-height: 150px;
+    padding: 20px 15px;
     background-color: rgba($primary_col, 0.6);
     color: #fff;
     box-shadow: $primary_shadow;
@@ -38,8 +37,12 @@
       color: #f7dc6f;
     }
 
-    .progress-circular-inner {
-      background-color: rgba($primary_col, 0.6);
+    .progress-group {
+      margin-left: 15px;
+
+      .progress-circular-inner {
+        background-color: rgba($primary_col, 0.6);
+      }
     }
   }
 
@@ -47,37 +50,47 @@
     display: flex;
     flex-direction: column;
     justify-content: space-evenly;
-    height: 150px;
+    min-height: 150px;
 
-    .stats-item {
-      display: inline-flex;
-      align-items: center;
-      font-size: 1.2em;
+    .stats-item-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, 135px); // dont use auto-fill
+      grid-gap: 5px;
+      justify-content: space-evenly;
 
-      i {
-        margin-right: 8px;
-      }
+      .stats-item {
+        display: inline-flex;
+        align-items: center;
+        font-size: 1.2em;
 
-      .stat-text {
-        h4 {
-          width: 5em;
-          margin: 0;
-          margin-bottom: 3px;
-          padding-bottom: 3px;
-          color: #878787;
-          font-size: 0.8em;
+        i {
+          margin-right: 8px;
         }
 
-        span {
-          font-weight: 600;
+        .stat-text {
+          width: 100%;
+
+          h4 {
+            width: 100%;
+            margin: 0;
+            margin-bottom: 3px;
+            padding-bottom: 3px;
+            color: #878787;
+            font-size: 0.8em;
+          }
+
+          span {
+            font-weight: 600;
+          }
         }
       }
     }
 
-    .stats-box-btn {
+    .stats-btn-container {
       display: inline-flex;
       justify-content: center;
       align-items: center;
+      margin-top: 15px;
 
       .btn-primary-color {
         background-color: rgba($primary_col, 0.6);
@@ -103,4 +116,16 @@
 
 .outdate {
   color: $warning_col;
+}
+
+@media (min-width: $tablet) and (max-width: $desktop) {
+  .selectedDataTypeTab-container {
+    .summary-box {
+      flex-direction: column;
+
+      .progress-group {
+        margin-top: 20px;
+      }
+    }
+  }
 }

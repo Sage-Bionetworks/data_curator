@@ -5,7 +5,7 @@ selectedProjectTabUI <- function(id) {
     tagList(
       setTabTitleUI(ns("title")),
       fluidRow(
-        column(3,
+        column(3, class = "progress-box",
           fluidRow(
             column(12, class = "section-title", span("Overall progress")),
             column(12, align = "center", 
@@ -15,13 +15,13 @@ selectedProjectTabUI <- function(id) {
               )
             ),
             column(12, class = "section-title", span("Each dataset progress")),
-            column(12, align = "center", class = "progress-container", uiOutput(ns("dataset-pb")))
+            column(12, align = "center", uiOutput(ns("dataset-pb")))
           )
         ),
-        column(width = 9,
+        column(width = 9, class = "tree-box",
           fluidRow(
             column(12, class = "section-title", span("Requirment Relationship Tree")),
-            column(12, dbTreeUI(ns("requirement-tree")))
+            column(12, align = "center", dbTreeUI(ns("requirement-tree")))
           )
         )
       )
@@ -81,16 +81,16 @@ selectedProjectTab <- function(id, uploadData, reqData, selectedProject) {
       output$`dataset-stats` <- renderUI({
         div(class = "dataset-stats-container",
           div(class = "dataset-stats",
-            column(12, class = "dataset-stats-title", span("Dataset")),
-            column(12, class = "dataset-stats-number", span(n_ds))
+            div(class = "dataset-stats-title", span("Dataset")),
+            div(class = "dataset-stats-number", span(n_ds))
           ),
           div(class = "dataset-stats",
-            column(12, class = "dataset-stats-title", span("Completed")),
-            column(12, class = "dataset-stats-number", span(n_completed))
+            div(class = "dataset-stats-title", span("Completed")),
+            div(class = "dataset-stats-number", span(n_completed))
           ),
           div(class = "dataset-stats",
-            column(12, class = "dataset-stats-title", span("Missing")),
-            column(12, class = "dataset-stats-number", span(n_miss))
+            div(class = "dataset-stats-title", span("Missing")),
+            div(class = "dataset-stats-number", span(n_miss))
           )
         )
       })

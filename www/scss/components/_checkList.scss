@@ -8,7 +8,6 @@
     width: 100%;
 
     .checklist-item {
-      flex: 0 0 47%;
       display: inline-flex;
       align-items: center;
       margin: 0 8px 14px 8px;
@@ -72,4 +71,12 @@
 .open-dropdown {
   display: flex !important;
   flex-direction: column;
+}
+
+@media (min-width: $tablet) and (max-width: $desktop) {
+  .checklist-container {
+    .checklist-item-container {
+      grid-template-columns: repeat(1, 1fr) !important;
+    }
+  }
 }

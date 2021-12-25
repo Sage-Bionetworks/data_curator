@@ -36,6 +36,11 @@ $float_shadow2: 0 5px 11px 0 rgba(0, 0, 0, 0.18),
 //font-size
 $base-font-size: 14px;
 
+// breakpoints
+$phone: 320px;
+$tablet: 768px;
+$desktop: 1024px;
+
 // mixin
 @mixin header_bg {
   background-image: linear-gradient(

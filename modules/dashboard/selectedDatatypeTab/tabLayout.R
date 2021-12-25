@@ -5,8 +5,8 @@ selectedDataTypeTabUI <- function(id) {
     tagList(
       setTabTitleUI(ns("title")),
       fluidRow(
-        column(12,
-          column(6, class = "top-container", uiOutput(ns("summary-box"))),
+        column(12, class = "top-container",
+          column(6, class = "summary-container", uiOutput(ns("summary-box"))),
           column(6, uiOutput(ns("stats-box")))
         ),
         column(12, class = "bottom-title-container",
@@ -71,8 +71,8 @@ selectedDataTypeTab <- function(id, userName, uploadData, reqData, selectedDataT
       # render summary stats boxes
       output$`stats-box` <- renderUI({
         div(class = "stats-box",
-          column(12, 
-            column(4, class = "stats-item",
+          div(class = "stats-item-container",
+            div(class = "stats-item",
               tagList(
                 icon("smile-wink", "fa-3x completed"),
                 div(class = "stat-text", 
@@ -80,7 +80,7 @@ selectedDataTypeTab <- function(id, userName, uploadData, reqData, selectedDataT
                 )
               )
             ),
-            column(4, class = "stats-item",
+            div(class = "stats-item",
               tagList(
                 icon("frown", "fa-3x missing"),
                 div(class = "stat-text", 
@@ -88,7 +88,7 @@ selectedDataTypeTab <- function(id, userName, uploadData, reqData, selectedDataT
                 )
               )
             ),
-            column(4, class = "stats-item",
+            div(class = "stats-item",
               tagList(
                 icon("surprise", "fa-3x outdate"),
                 div(class = "stat-text", 
@@ -97,7 +97,7 @@ selectedDataTypeTab <- function(id, userName, uploadData, reqData, selectedDataT
               )
             )
           ),
-          column(12, class = "stats-box-btn", align = "center",
+          div(class = "stats-btn-container",
             actionButton(ns("view-btn"), "View More", class = "btn-primary-color"),
             span("Click to know more about 'Outdate' manifests")
           )

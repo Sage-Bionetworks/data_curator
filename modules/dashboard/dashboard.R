@@ -51,6 +51,7 @@ dashboard <- function(id, synStoreObj, selectedProject, folderList, selectedData
       
       # set up inital reactive value for all uploaded manifests
       uploaded_manifests <- reactiveVal(NULL)
+      # selected_datatype_requirement <- reactiveVal(NULL)
 
       # all functions should not be executed until dashboard visiable, except initial one
       isDashboardOpen <- reactive(input$`toggle-btn` != 0 & input$box$visible)

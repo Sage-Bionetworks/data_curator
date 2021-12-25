@@ -10,7 +10,7 @@ setTabTitle <- function(id, title) {
     function(input, output, session) {
 
       output$`dashboard-tab-title` <- renderUI({
-        p(title, class = "section-title")
+        p(title, class = "tab-title")
       })
     }
   )
