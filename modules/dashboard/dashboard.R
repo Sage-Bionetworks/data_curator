@@ -17,7 +17,8 @@ dashboardUI <- function(id) {
       width = 12,
       closable = TRUE,
       title = "Track your Data Status",
-      div(id = ns("tab-container"),
+      div(
+        id = ns("tab-container"),
         tabsetPanel(
           id = ns("tabs"),
           tabPanel(
@@ -72,7 +73,7 @@ dashboard <- function(id, synStoreObj, selectedProject, folderList, selectedData
         # initiate partial loading screen for generating plot
         dcWaiter(
           "show", id = ns("tab-container"), url ="www/img/logo.svg", custom_spinner = TRUE,
-          msg = "Loading, please wait...", style = "color: #000;", color = transparent(0.92)
+          msg = "Loading, please wait...", style = "color: #000;", color = transparent(0.95)
         )
 
         # disable selection to prevent changes until all uploaded manifests are queried
@@ -116,6 +117,11 @@ dashboard <- function(id, synStoreObj, selectedProject, folderList, selectedData
         selectedProjectTab("tab-selected-project", uploaded_manifests(), uploaded_manifests_requirement(), selectedProject())
         # validation table for all uploaded data
         validationTab("tab-validation", uploaded_manifests(), selectedProject())
+        # force switch tabs to solve tabs content not rendered initially
+        if (input$`toggle-btn` == 1) {
+          updateTabsetPanel(session, "tabs", selected = "db-tab2")
+          updateTabsetPanel(session, "tabs", selected = "db-tab1")
+        }
         # update and hide the partial loading screen
         dcWaiter(id = ns("tab-container"), "hide")
       })
