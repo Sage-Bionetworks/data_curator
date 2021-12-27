@@ -47,7 +47,9 @@ dbTree <- function(id, uploadData, reqData, selectedProject) {
           tree_list <- NULL
 
         } else {
-
+          
+          # get folder list
+          folder_list <- unique(reqData$folder)
           # remove project name in children to trim long names
           pattern <- paste0(str_replace(selectedProject, " ", "_"), "_")
           # get dataset contains any missing requirement children
@@ -57,9 +59,9 @@ dbTree <- function(id, uploadData, reqData, selectedProject) {
           # make nodes data from project to datasets
           project_to_dataset <- data.frame(
             from = c(selectedProject),
-            to = uploadData$folder,
+            to = paste0("f:", folder_list),
             node_opacity = c(0),
-            node_color = ifelse(uploadData$folder %in% incompleted_ds$folder, "#FF794A", "#A287AF")
+            node_color = ifelse(folder_list %in% incompleted_ds$folder, "#FF794A", "#A287AF")
           )
           # make nodes data from datasets to their requirements
           dataset_to_req <- reqData %>%
@@ -68,13 +70,11 @@ dbTree <- function(id, uploadData, reqData, selectedProject) {
               node_color = if_else(reqData$to %in% uploadData$schema, "#28a745", "#E53935")
             ) %>%
             select(from, to, node_opacity, node_color)
-
           tree_df <- rbind(project_to_dataset, dataset_to_req) %>% 
             mutate_at(1:2, ~ gsub(pattern, "", .)) %>% 
             # remove duplicated rows to save conversion time
             distinct()
-
-          # convert to list (name; children) using `data.tree`
+          # convert to tree list using `data.tree`
           tree_list <- data.tree::FromDataFrameNetwork(tree_df)
           # tree_list$Set(group = ifelse(tree_list$Get("name") %in% c(upData$folder, upData$schema), "upload", "not_load"))
           tree_list$node_opacity <- 1

@@ -1,0 +1,45 @@
+.dc-tooltip {
+  position: relative;
+
+  &:before {
+    position: absolute;
+    z-index: 2;
+    display: none;
+    width: 80%;
+    padding: 10px;
+    font-size: 0.8em;
+    border-radius: 5px;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    content: attr(aria-label);
+  }
+
+  &:after {
+    position: absolute;
+    z-index: 1;
+    display: none;
+    width: 0;
+    height: 0;
+    border: 5px solid transparent;
+    content: '';
+  }
+
+  &:hover:before,
+  &:hover:after {
+    display: inline-block;
+  }
+
+  &.top:before {
+    bottom: calc(100% + 5px);
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  &.top:after {
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border-bottom-width: 0;
+    border-top-color: rgba(0, 0, 0, 0.8);
+  }
+}

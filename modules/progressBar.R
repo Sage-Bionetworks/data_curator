@@ -60,15 +60,18 @@ progressBar <- function(id, value = 100, title = NULL, subtitle = NULL,
               '
             )))
           },
-          tags$style(paste0(
-            '
-            @keyframes circularSlide-', pb_id, ' {
-              100% {
-                stroke-dashoffset: ',  progress_value, ';
-              }
-            };
-            '
-          )),
+          # TODO: add animation for linear progress bar
+          if (circular) {
+            tags$style(paste0(
+              '
+              @keyframes circularSlide-', pb_id, ' {
+                100% {
+                  stroke-dashoffset: ',  progress_value, ';
+                }
+              };
+              '
+            ))
+          },
           div(class="progress-group",
             tagList(
               if (!circular) {

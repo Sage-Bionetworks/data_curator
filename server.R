@@ -46,8 +46,6 @@ shinyServer(function(input, output, session) {
 
   # add box effects
   boxEffect(zoom = FALSE, float = TRUE)
-  # make visible of dashboard false by default
-  shinydashboardPlus::updateBox("dashboard-box", action = "remove")
 
   ######## Initiate Login Process ########
   # synapse cookies

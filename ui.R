@@ -91,6 +91,7 @@ ui <- shinydashboardPlus::dashboardPage(
       singleton(includeScript("www/js/readCookie.js")),
       tags$script(htmlwidgets::JS("setTimeout(function(){history.pushState({}, 'Data Curator', window.location.pathname);},2000);"))
     ),
+    # load dependencies
     use_notiflix_report(width = "400px"),
     use_waiter(),
     tabItems(

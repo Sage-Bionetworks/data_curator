@@ -31,3 +31,11 @@ TruncateEllipsis <- function(string, max, split_pattern = NULL) {
     }
   })
 }
+
+# addTooltip <- function(.data, message) {
+
+#   id <- .data %>% tagGetAttribute("id")
+#   addClass(id, " dc-tooltip top", asis = TRUE)
+
+#   .data %>% tagAppendAttributes(`aria-label` = message)
+# }

@@ -51,35 +51,6 @@
   }
 }
 
-// ui dashboard
-#dashboard-toggle-btn-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-top: 20px;
-}
-
-#dashboard-box {
-  margin-top: 20px;
-  // min-height: 400px;
-
-  .nav-tabs {
-    & > li.active > a {
-      color: #fff !important;
-      background-color: rgba($primary_col, 0.8) !important;
-    }
-
-    & > li > a {
-      color: #000;
-      background-color: transparent;
-    }
-  }
-
-  // .progress-group {
-  //   margin: 0 40px 20px 15px;
-  // }
-}
-
 #div_template {
   margin: 20px 0;
 

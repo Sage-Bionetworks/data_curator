@@ -91,9 +91,10 @@ getManifestRequirements <- function(manifest) {
     # calculate how many misisng requirements each dataset
     n_miss <- sum(!union(names(out), out) %in% manifest$schema)
     # add data from dataset to its data type name
-    from <- c(manifest$folder[i], as.character(out))
+    from <- c(paste0("f:", manifest$folder[i]), as.character(out))
     to <- c(manifest$schema[i], names(out))
     # output nodes data as data frame
-    data.frame(from = from,to = to, folder = c(manifest$folder[i]), folderSynId = c(manifest$folderSynId[i]), nMiss = c(n_miss))
+    data.frame(from = from, to = to, folder = c(manifest$folder[i]), folderSynId = c(manifest$folderSynId[i]), nMiss = c(n_miss))
+
   }) %>% bind_rows()
 }
