@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This branch is to test the data curator app using the latest updates from `schematic-dev` branch and not use `pip install` to install `schematicpy`.
+The _Data Curator App_ is an R Shiny app that serves as the _frontend_ to the schematic Python package. It allows data contributors to easily annotate, validate and submit their metadata.
 
 ---
 
