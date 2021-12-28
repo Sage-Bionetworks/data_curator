@@ -21,25 +21,26 @@ validationTab <- function(id, uploadData, selectedProject) {
       # render tab title
       setTabTitle("title", paste0("Validation of Uploaded Data for Project: ", sQuote(selectedProject)))
 
-      internalLink <- sample(c("Pass", "Fail"), nrow(uploadData), replace = TRUE)
-      internalLinkRes <- ifelse(internalLink == "Pass", TRUE, FALSE)
-      valRes <- ifelse(uploadData$errorType == "Wrong Schema", "Out of Date", 
+      # TODO: add real internal links results
+      internalLink <- sample(c("valid", "invalid"), nrow(uploadData), replace = TRUE, prob = c(4, 1))
+      isPassInternalLink <- ifelse(internalLink == "valid", TRUE, FALSE)
+      modelValidationRes <- ifelse(uploadData$errorType == "Wrong Schema", "Out of Date", 
         ifelse(uploadData$errorType == "No Error", "Valid", uploadData$errorType))
 
       # process validation result
-      validation_df <- data.frame(
-        DataType = paste0(
+      validation_df <- tibble(
+        `Data Type` = paste0(
           '<a href="https://www.synapse.org/#!Synapse:',
           uploadData$synID, '" target="_blank">', uploadData$schema, "</a>"
         ),
-        Dataset = uploadData$folder,
-        Status = ifelse(uploadData$isValid & internalLinkRes, "Pass", "Fail"),
-        valRes = valRes,
-        InternalLinks = internalLinkRes,
-        CreatedOn = uploadData$createdOn,
-        LastModified = uploadData$modifiedOn,
-        UserModified = uploadData$modifiedUser
-      ) %>% arrange(Status)
+        Dataset= uploadData$folder,
+        Validation = ifelse(uploadData$isValid & isPassInternalLink, "Pass", "Fail"),
+        `Schema Check` = modelValidationRes,
+        `Internal Links Check` = isPassInternalLink,
+        `Created On` = uploadData$createdOn,
+        `Last Modified` = uploadData$modifiedOn,
+        `User Modified` = uploadData$modifiedUser
+      ) %>% arrange(Validation)
       
       # render the validation result table
       dbValidationTable("validation-table", validation_df)
