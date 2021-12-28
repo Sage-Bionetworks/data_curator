@@ -1,27 +1,26 @@
 suppressPackageStartupMessages({
-  library(shiny)
+  # env
   library(httr)
-  library(rjson)
   library(yaml)
-  library(shinyjs)
-  library(dplyr)
-  library(tidyr)
-  library(shinythemes)
-  library(shinydashboard)
-  library(stringr)
-  library(DT)
-  library(jsonlite)
   library(reticulate)
-  library(shinypop)
-  library(waiter)
-  library(readr)
-  library(sass)
+  library(jsonlite)
+  # shiny function
+  library(shiny)
+  library(shinyjs)
+  library(shinydashboard)
   library(shinydashboardPlus)
+  library(sass)
+  library(shinypop) # dreamRs/shinypop
+  library(waiter)
+  # tidyverse
+  library(dplyr)
+  library(readr)
+  library(stringr)
+  library(tidyr)
+  # dashboard
   library(networkD3)
   library(data.tree)
   library(r2d3)
-  library(ggplot2)
-  library(plotly)
 })
 
 has_auth_code <- function(params) {

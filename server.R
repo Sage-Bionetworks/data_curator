@@ -25,7 +25,7 @@ shinyServer(function(input, output, session) {
 
   ######## session global variables ########
   # read config in
-  config <- as.data.frame(fromJSON("www/config.json")[[1]])
+  config <- as.data.frame(jsonlite::fromJSON("www/config.json")[[1]])
 
   # mapping from display name to schema name
   template_namedList <- config$schema_name
