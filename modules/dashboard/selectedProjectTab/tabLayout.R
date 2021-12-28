@@ -45,11 +45,11 @@ selectedProjectTab <- function(id, uploadData, reqData, selectedProject) {
       n_miss <- sum(uniq_ds$nMiss > 0)
 
       # unique folder names
-      folder_list <- unique(uploadData$folder)
+      folder_list <- sort(unique(uploadData$folder))
 
       # set colors that can be used for dataset progress bars
-      col_list <- rep(c("#5B008C", "#B4007A", "#EA3360", "#FF794A", "#FFBB49",
-                    "#004BC3", "#0076E2", "#009AE8", "#00BADA", "#00D8C3"), 2)
+      col_list <- c("#5B008C", "#B4007A", "#EA3360", "#FF794A", "#FFBB49",
+                    "#004BC3", "#0076E2", "#009AE8", "#00BADA", "#00D8C3")
       # progress values
       ds_pb_values <- sapply(folder_list, function(f) {
         tmp <- reqData[reqData$folder == f, ]
@@ -72,14 +72,14 @@ selectedProjectTab <- function(id, uploadData, reqData, selectedProject) {
           })
         )
       })
-
+      set.seed(1000)
       lapply(seq_along(folder_list), function(i) {
         progressBar(
           id = folder_list[i],
           value = ds_pb_values[i], 
           display_pct = FALSE,
           height = "10px",
-          color = col_list[i],
+          color = sample(col_list, 1),
           subtitle = folder_list[i]
         )
       })
