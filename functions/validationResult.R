@@ -2,9 +2,9 @@ validationResult <- function(valRes, template, inFile) {
   validation_res <- NULL
   error_msg <- NULL
   help_msg <- NULL
-  outMsg <- NULL
-  errorDT <- NULL
-  errorType <- NULL
+  out_msg <- NULL
+  error_table <- NULL
+  error_type <- NULL
 
   if (!is.null(inFile) && !is.null(template) && length(inFile) != 0) {
     if (length(valRes) != 0) {
@@ -26,7 +26,7 @@ validationResult <- function(valRes, template, inFile) {
 
       if (length(inx_mt) > 0) {
         # mismatched error(s): selected template mismatched with validating template
-        errorType <- "Mismatched Template"
+        error_type <- "Mismatched Template"
         # get all mismatched components
         error_values <- sapply(valRes[inx_mt], function(x) x[[4]][[1]]) %>%
           unique()
@@ -47,53 +47,50 @@ validationResult <- function(valRes, template, inFile) {
         )
       } else if (length(inx_ws) > 0) {
         # wrong schema error(s): validating metadata miss any required columns
-        errorType <- "Wrong Schema"
+        error_type <- "Wrong Schema"
         error_msg <- "The submitted metadata does not contain all required column(s)."
         help_msg <- "Please check that you used the correct template in the <b>'Get Metadata Template'</b> tab and
 						ensure your metadata contains all required columns."
       } else {
-        errorType <- "Invalid Value"
+        error_type <- "Invalid Value"
         error_msg <- paste0(
           "The submitted metadata have ", length(valRes),
           " errors."
         )
       }
 
-      errorDT <- data.frame(
-        Row = sapply(valRes, function(i) i[[1]]),
-        Column = sapply(valRes, function(i) i[[2]]),
-        Value = sapply(valRes, function(i) i[[4]][[1]]),
-        Error = sapply(valRes, function(i) i[[3]])
-      )
+      # create table to display errors for users
+      error_table <- lapply(valRes, function(i) {
+        data.frame(Row = as.numeric(i[[1]]), Column = i[[2]], Value = i[[4]][[1]], Error = i[[3]])
+      }) %>% bind_rows() 
+
+      # create list for hightlight function; key: error_column, value: error_value
+      highlight_values <- sapply(unique(error_table$Column), function(col) {
+        error_table$Value[error_table$Column == col]
+      })
 
       # collapse similiar errors into one row
-      errorDT <- errorDT %>%
-        mutate(Options = gsub("^'.*?'(.*)", "\\1", Error)) %>%
-        group_by(Column, Options) %>%
+      error_table <- error_table %>%
+        mutate(Error = gsub(".*(not.*)\\.?$", "\\1", Error)) %>%
+        group_by(Column, Error) %>%
         summarise(
-          n = n_distinct(Value),
           Row = str_c(unique(Row), collapse = ", ") %>% TruncateEllipsis(10, ", "),
           Value = str_c(unique(Value), collapse = ", ") %>% TruncateEllipsis(10, ", "),
           .groups = "drop"
         ) %>%
-        mutate(
-          Options = ifelse(n > 1, str_replace(Options, "^ is", " are"), Options),
-          Error = str_c(sQuote(Value), Options)
-        ) %>%
         ungroup() %>%
         dplyr::select(Row, Column, Value, Error)
-
+    
       # sort rows based on input column names
-      errorDT <- errorDT[order(match(errorDT$Column, colnames(inFile))), ]
-      # TODO: to reduce parameter, sort just based on alphabetic
-      # errorDT <- errorDT[order(errorDT$Column),]
+      error_table <- error_table[order(match(error_table$Column, colnames(inFile))), ]
+
     } else {
       validation_res <- "valid"
-      errorType <- "No Error"
+      error_type <- "No Error"
     }
 
     # combine all error messages into one, add an extra empty line to bottom
-    outMsg <- paste0(c(
+    out_msg <- paste0(c(
       paste0("Your metadata is <b>", validation_res, "</b> !!!"),
       error_msg, help_msg
     ), collapse = "<br><br>")
@@ -101,8 +98,9 @@ validationResult <- function(valRes, template, inFile) {
 
   return(list(
     validationRes = validation_res,
-    outMsg = outMsg,
-    errorDT = errorDT,
-    errorType = errorType
+    outMsg = out_msg,
+    errorDT = error_table,
+    errorHighlight = highlight_values,
+    errorType = error_type
   ))
 }
