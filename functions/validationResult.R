@@ -5,6 +5,7 @@ validationResult <- function(valRes, template, inFile) {
   out_msg <- NULL
   error_table <- NULL
   error_type <- NULL
+  highlight_values <- list()
 
   if (!is.null(inFile) && !is.null(template) && length(inFile) != 0) {
     if (length(valRes) != 0) {
@@ -65,8 +66,8 @@ validationResult <- function(valRes, template, inFile) {
       }) %>% bind_rows() 
 
       # create list for hightlight function; key: error_column, value: error_value
-      highlight_values <- sapply(unique(error_table$Column), function(col) {
-        error_table$Value[error_table$Column == col]
+      lapply(unique(error_table$Column), function(col) {
+        highlight_values[[col]] <<- error_table$Value[error_table$Column == col]
       })
 
       # collapse similiar errors into one row
