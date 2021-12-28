@@ -18,10 +18,10 @@ suppressPackageStartupMessages({
   library(sass)
   library(shinydashboardPlus)
   library(networkD3)
-  # TODO: remove `shinyWidgets` after create own progress bar widgets
-  # library(shinyWidgets)
   library(data.tree)
   library(r2d3)
+  library(ggplot2)
+  library(plotly)
 })
 
 has_auth_code <- function(params) {
@@ -90,6 +90,11 @@ scope <- "openid view download modify"
 # Don't necessarily have to set `RETICULATE_PYTHON` env variable
 reticulate::use_condaenv(conda_name, required = TRUE)
 
+# import synapse client
+syn <- import("synapseclient")$Synapse()
+# import schematic modules
+source_python("functions/metadataModel.py")
+synapse_driver <- import("schematic.store.synapse")$SynapseStorage
 # Import functions/modules
 source_files <- list.files(c("functions", "modules"), pattern = "*\\.R$", recursive = TRUE, full.names = TRUE)
 sapply(source_files, FUN = source)

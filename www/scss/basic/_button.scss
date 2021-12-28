@@ -18,7 +18,8 @@
   animation: TransitioningBackground 10s ease infinite;
   outline: none !important;
 
-  &:hover, &:focus {
+  &:hover,
+  &:focus {
     color: #fff;
     background-image: linear-gradient(to left, #2d8fe5, #d155b8);
     transform: scale(1.05);
@@ -51,7 +52,8 @@
     transform: translateX(-100px) skewX(-15deg);
   }
 
-  &::before, &::after {
+  &::before,
+  &::after {
     transform: translateX(300px) skewX(-15deg);
     transition: 0.7s;
   }
@@ -59,8 +61,8 @@
 
 // dropdown hover effect
 .option {
-
-  &:hover, &:focus {
+  &:hover,
+  &:focus {
     transform: scale(1.01);
     font-size: 1.02em;
     box-shadow: $primary_shadow;
@@ -70,7 +72,8 @@
 }
 
 // previous - next button
-.switch-tab-prev, .switch-tab-next {
+.switch-tab-prev,
+.switch-tab-next {
   background: #fff;
   color: #000;
   display: flex;
@@ -84,11 +87,12 @@
   box-shadow: $simple_shadow;
   outline: none !important;
 
-  &:hover, &:focus {
+  &:hover,
+  &:focus {
     background: #fff;
     outline: none !important;
   }
-  
+
   .fa {
     margin: 1.5px;
     font-size: 20px;
@@ -108,10 +112,9 @@
 }
 
 .switch-tab-next:hover {
-
   .fa {
     animation: move-right 2s infinite;
-    
+
     &:nth-child(2) {
       animation-delay: -0.2s;
     }
@@ -119,7 +122,7 @@
     &:nth-child(3) {
       animation-delay: -0.4s;
     }
-  } 
+  }
 }
 
 .scroll-down {
@@ -151,7 +154,7 @@
       font-size: 1.8em;
       text-align: center;
     }
-    
+
     span {
       position: relative;
       margin-right: 15px;
@@ -161,7 +164,7 @@
       border: 2.5px solid #000;
       border-radius: 50px;
       box-sizing: border-box;
-      
+
       &:before {
         content: '';
         position: absolute;
@@ -180,21 +183,21 @@
 }
 
 // simple float effect
-// #btn_download, #btn_validate, #btn_val_gsheet, #btn_submit 
+// #btn_download, #btn_validate, #btn_val_gsheet, #btn_submit
 .btn-primary-color {
-    background: $primary_col;
-    color: #fff;
-    border-color: transparent;
-    border-radius: 40px;
-    cursor: pointer;
-    outline: none !important;
+  background: $primary_col;
+  color: #fff;
+  border-color: transparent;
+  border-radius: 40px;
+  cursor: pointer;
+  outline: none !important;
 
-  &:hover, &:focus {
+  &:hover {
     background: $primary_col;
     color: #fff;
     box-shadow: $float_shadow2;
-    -webkit-transition: box-shadow .4s ease-out;
-    transition: box-shadow .4s ease-out;
+    -webkit-transition: box-shadow 0.4s ease-out;
+    transition: box-shadow 0.4s ease-out;
   }
 }
 

@@ -91,6 +91,7 @@ ui <- shinydashboardPlus::dashboardPage(
       singleton(includeScript("www/js/readCookie.js")),
       tags$script(htmlwidgets::JS("setTimeout(function(){history.pushState({}, 'Data Curator', window.location.pathname);},2000);"))
     ),
+    # load dependencies
     use_notiflix_report(width = "400px"),
     use_waiter(),
     tabItems(
@@ -113,6 +114,27 @@ ui <- shinydashboardPlus::dashboardPage(
           strong("Submit and Validate Metadata"),
           "tab - upload your filled CSV and validate your metadata. If you receive errors correct them, reupload your CSV, and revalidate until you receive no more errors. When your metadata is valid, you will be able to see a 'Submit' button. Press it to submit your metadata."
         ),
+        # # box(
+        # #   status = "primary",
+        # #   width = 12,
+        # #   closable = TRUE,
+        # #   title = "Track your Data Status",
+        # #   div(id = "tab-container",
+        # #     tabsetPanel(
+        # #       id = "dashboard-tabs",
+        # #       tabPanel(
+        # #         "Selected Data Type",
+        # #         value = "db-tab3",
+        # #         selectedDataTypeTabUI("tab1")
+        # #       ),
+        # #     tabPanel(
+        # #       "Selected Project",
+        # #       value = "db-tab2",
+        # #       allUploadManifestsTabUI("tab2")
+        # #     )
+        # #     )
+        # #   )
+        # # ),
         switchTabUI("switchTab1", direction = "right")
       ),
       # second tab content
@@ -150,54 +172,7 @@ ui <- shinydashboardPlus::dashboardPage(
               choices = "Generating..."
             )
           ),
-          # dashboard section
-          column(12, 
-            div(id = "dashboard_switch_container",
-              actionButton("dashboard_control", div(span(), p("Show Data Dashboard")), class = "scroll-down"),
-              helpText("check your data ingress status and data compliance")
-            )
-          ),
-          box(
-            status = "primary",
-            id = "dashboard",
-            width = 12,
-            closable = TRUE,
-            title = "Track your Data Status",
-            tabsetPanel(
-              id = "dashboard_tabs",
-              tabPanel(
-                "Selected Data Type",
-                uiOutput("dashboard_tab1_title", class = "tab-title"),
-                fluidRow(
-                  column(6, checkListUI("checklist_template")),
-                  column(6, dataReqNetUI("template_network", height = "400px"))
-                ),
-                helpText(HTML(
-                  "If there is a data requirement you have not yet completed, please generate its data type template and submit the validated metadata via the process of this app.<br>
-                  Note: For file-based data types (scRNA-seq, Bulk WES, etc.), please upload the data files before submitting the metadata. 
-                  Visit <a href='https://ncihtan.github.io/HTAN-Data-Ingress-Docs/organize-your-data-upload.html' target='_blank'>HTAN-Data-Ingress-Docs</a> 
-                  to know more details about the types of data (record-based vs file-based)."
-                ))
-              ),
-              tabPanel(
-                "Selected Project",
-                tagList(
-                  uiOutput("dashboard_tab2_title", class = "tab-title")
-                ),
-                uploadDataReqTreeUI("upload_tree")
-              ),
-              tabPanel(
-                "Data Validation",
-                uiOutput("dashboard_tab3_title", class = "tab-title"),
-                tagList(
-                  uiOutput("dashboard_tab3_error"),
-                  DTableUI("tbl_dashboard_validate"),
-                  helpText("If there is any validation error, 
-                    please re-validate the corresponding metadata to see detailed errors and re-submit once you have corrected metadata.")
-                )
-              )
-            )
-          )
+          dashboardUI("dashboard")
         ),
         switchTabUI("switchTab2", direction = "both")
       ),

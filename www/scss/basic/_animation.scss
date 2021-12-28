@@ -1,26 +1,39 @@
 /*** Animation ***/
 
 @keyframes fadeIn {
-
   0% {
-    transform:scale(0); opacity: 0
+    transform: scale(0);
+    opacity: 0;
   }
 
   30% {
-    transform: scale(0.3)
+    transform: scale(0.3);
   }
 
   70% {
-    transform: scale(0.7)
+    transform: scale(0.7);
   }
   100% {
-    transform: scale(1); opacity: 1
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@mixin fadeMove($name, $x_from, $x_to, $y_from, $y_to) {
+  @keyframes #{$name} {
+    0% {
+      transform: translate($x_from, $y_from);
+      opacity: 0;
+    }
+    100% {
+      transform: translate($x_to, $y_to);
+      opacity: 1;
+    }
   }
 }
 
 // update button animation
 @keyframes TransitioningBackground {
-
   0% {
     background-position: 1% 0%;
   }
@@ -36,10 +49,9 @@
 
 // switch tab animation
 @keyframes move-left {
-
   0% {
     opacity: 0;
-    transform:  translateX(10px);
+    transform: translateX(10px);
   }
 
   50% {
@@ -53,10 +65,9 @@
 }
 
 @keyframes move-right {
-
   0% {
     opacity: 0;
-    transform:  translateX(-10px);
+    transform: translateX(-10px);
   }
 
   50% {
@@ -70,7 +81,6 @@
 }
 
 @keyframes move-down {
-
   0% {
     transform: translate(0, 0);
     opacity: 0;
@@ -84,5 +94,40 @@
   }
   100% {
     opacity: 0;
+  }
+}
+
+// waiter spin for custom image
+// adpat from synapse web client
+
+@-webkit-keyframes spin {
+  0% {
+    -moz-transform: rotate(0deg);
+    -o-transform: rotate(0deg);
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+
+  100% {
+    -moz-transform: rotate(359deg);
+    -o-transform: rotate(359deg);
+    -webkit-transform: rotate(359deg);
+    transform: rotate(359deg);
+  }
+}
+
+@keyframes spin {
+  0% {
+    -moz-transform: rotate(0deg);
+    -o-transform: rotate(0deg);
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+
+  100% {
+    -moz-transform: rotate(359deg);
+    -o-transform: rotate(359deg);
+    -webkit-transform: rotate(359deg);
+    transform: rotate(359deg);
   }
 }

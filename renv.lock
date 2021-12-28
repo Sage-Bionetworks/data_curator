@@ -599,7 +599,7 @@
     },
     "waiter": {
       "Package": "waiter",
-      "Version": "0.2.0",
+      "Version": "0.2.4",
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "58bd688fb765cf778b633df0e2502003"

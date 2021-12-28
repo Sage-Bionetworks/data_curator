@@ -1,0 +1,23 @@
+.selectedProjectTab-container {
+  .dataset-stats-container {
+    display: flex;
+    justify-content: space-around;
+
+    .dataset-stats-title {
+      font-size: 1em;
+    }
+
+    .dataset-stats-number {
+      text-align: center;
+      font-size: 0.8em;
+      font-weight: 600;
+    }
+  }
+}
+
+@media (max-width: $desktop) {
+  .progress-box,
+  .tree-bpx {
+    width: 100%;
+  }
+}

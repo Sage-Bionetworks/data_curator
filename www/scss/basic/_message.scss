@@ -1,12 +1,13 @@
 /*** message ***/
 
-// message 
+// message
 .message-menu {
-  padding-top: 5px
+  padding-top: 5px;
 }
 
 // validation message
-.error_msg {
+.error_msg,
+.shiny-output-error {
   color: $error_col;
 }
 
@@ -17,23 +18,23 @@
 .warn_msg {
   color: $warning_col;
 }
-// notification 
+// notification
 .shiny-notification {
-  position:fixed;
+  position: fixed;
   bottom: 0;
   right: 0;
   width: 100%;
 }
 #shiny-notification-error {
-  height: 500px; 
-  padding :20px; 
-  display: table-cell
+  height: 500px;
+  padding: 20px;
+  display: table-cell;
 }
 
 #shiny-notification-processing {
-  background-color: $notif_process_col
+  background-color: $notif_process_col;
 }
 
 #shiny-notification-success {
-  background-color: $notif_success_col
+  background-color: $notif_success_col;
 }

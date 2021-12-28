@@ -1,0 +1,82 @@
+.checklist-container {
+  display: flex;
+  padding: 10px;
+
+  .checklist-item-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    width: 100%;
+
+    .checklist-item {
+      display: inline-flex;
+      align-items: center;
+      margin: 0 8px 14px 8px;
+      min-height: 36px;
+      padding: 2px 12px;
+      box-shadow: $primary_shadow;
+
+      i {
+        flex-basis: 10%;
+      }
+
+      span {
+        flex-basis: 60%;
+        margin-left: 5px;
+        white-space: nowrap;
+      }
+
+      .icon-btn {
+        flex-basis: 10%;
+        position: relative;
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        width: 32px;
+        height: 32px;
+        margin-left: auto;
+        background: transparent;
+        border: none;
+        border-radius: 50%;
+        outline: none;
+
+        .dropdown-list {
+          position: absolute;
+          display: none;
+          top: 24px;
+          left: 0;
+          overflow-y: auto;
+          overflow-x: hidden;
+          max-height: 200px;
+          background: #ffffff;
+          border: 1px solid rgba(0, 0, 0, 0.15);
+          z-index: 1000;
+
+          a {
+            padding: 8px 12px;
+            color: inherit;
+            text-align: left;
+            cursor: pointer;
+
+            &:hover {
+              color: rgba($primary_col, 0.6);
+              text-decoration: underline;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+.open-dropdown {
+  display: flex !important;
+  flex-direction: column;
+}
+
+@media (max-width: $desktop) {
+  .checklist-container {
+    .checklist-item-container {
+      grid-template-columns: repeat(1, 1fr) !important;
+    }
+  }
+}
