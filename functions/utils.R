@@ -32,10 +32,11 @@ TruncateEllipsis <- function(string, max, split_pattern = NULL) {
   })
 }
 
-# addTooltip <- function(.data, message) {
-
-#   id <- .data %>% tagGetAttribute("id")
-#   addClass(id, " dc-tooltip top", asis = TRUE)
-
-#   .data %>% tagAppendAttributes(`aria-label` = message)
-# }
+# add tooltip; only support its position on the top for now
+addTooltip <- function(.data, message, position = c("top")) {
+  position <- match.arg(position, c("top"))
+  tooltip_class <- paste0("dc-tooltip ", position)
+  .data %>% 
+    tagAppendAttributes(`aria-label` = message) %>% 
+    tagAppendAttributes(class = tooltip_class)
+}

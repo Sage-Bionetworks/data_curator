@@ -65,7 +65,11 @@ selectedProjectTab <- function(id, uploadData, reqData, selectedProject) {
       output$`dataset-pb` <- renderUI({
         fluidRow(
           # !important: add ns to pb's id, otherwise pb server will not be able to find
-          lapply(folder_list, function(f) column(6, progressBarUI(ns(f))))
+          lapply(folder_list, function(f) {
+            column(6, 
+              progressBarUI(ns(f)) %>% addTooltip(f, "top")
+            )
+          })
         )
       })
 

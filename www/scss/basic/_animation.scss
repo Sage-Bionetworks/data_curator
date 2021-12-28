@@ -19,6 +19,19 @@
   }
 }
 
+@mixin fadeMove($name, $x_from, $x_to, $y_from, $y_to) {
+  @keyframes #{$name} {
+    0% {
+      transform: translate($x_from, $y_from);
+      opacity: 0;
+    }
+    100% {
+      transform: translate($x_to, $y_to);
+      opacity: 1;
+    }
+  }
+}
+
 // update button animation
 @keyframes TransitioningBackground {
   0% {
