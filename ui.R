@@ -114,33 +114,12 @@ ui <- shinydashboardPlus::dashboardPage(
           strong("Submit and Validate Metadata"),
           "tab - upload your filled CSV and validate your metadata. If you receive errors correct them, reupload your CSV, and revalidate until you receive no more errors. When your metadata is valid, you will be able to see a 'Submit' button. Press it to submit your metadata."
         ),
-        # # box(
-        # #   status = "primary",
-        # #   width = 12,
-        # #   closable = TRUE,
-        # #   title = "Track your Data Status",
-        # #   div(id = "tab-container",
-        # #     tabsetPanel(
-        # #       id = "dashboard-tabs",
-        # #       tabPanel(
-        # #         "Selected Data Type",
-        # #         value = "db-tab3",
-        # #         selectedDataTypeTabUI("tab1")
-        # #       ),
-        # #     tabPanel(
-        # #       "Selected Project",
-        # #       value = "db-tab2",
-        # #       allUploadManifestsTabUI("tab2")
-        # #     )
-        # #     )
-        # #   )
-        # # ),
         switchTabUI("switchTab1", direction = "right")
       ),
       # second tab content
       tabItem(
         tabName = "tab_data",
-        h2("Set Dataset and Data type for Curation"),
+        h2("Set Dataset and Data Type for Curation"),
         fluidRow(
           box(
             id = "box_pick_project",
@@ -165,10 +144,10 @@ ui <- shinydashboardPlus::dashboardPage(
             id = "box_pick_manifest",
             status = "primary",
             width = 6,
-            title = "Choose a data type template: ",
+            title = "Choose a Data Type Template: ",
             selectInput(
               inputId = "dropdown_template",
-              label = "Template:",
+              label = "Data Type Template:",
               choices = "Generating..."
             )
           ),
