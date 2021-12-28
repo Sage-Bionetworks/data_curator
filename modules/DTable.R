@@ -48,7 +48,7 @@ DTableServer <- function(id, data, escape = TRUE,
 
             values <- highlightValues[[col]]
             df <- df %>%
-              formatStyle(col, backgroundColor = styleEqual(values, "yellow"))
+              formatStyle(col, backgroundColor = styleEqual(values, rep("yellow", length(values))))
           }
         }
       }
