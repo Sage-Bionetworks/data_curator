@@ -1,47 +1,62 @@
-# This moduel is to peformrender DT table function for preview/highlight
-
+#' This moduel is to wrap some of DT table functions, especially for hightlight functions
+#' 
+#' @param id id name of this module
+#' @param data a data object (either a matrix or a data frame)
+#' @param rownames TRUE (show row names) or FALSE (hide row names)
+#' @param caption a character vector or a tag object generated from \code{htmltools::tags$caption()}
+#' @param filter whether/where to use column filters, either "none", "top" or "bottom"
+#' @param options a list of initialization options (see https://datatables.net/reference/option/) 
+#' @param highlight whether to highlight cells in the table, either "full" (highlight entired table) or "partial" (highlight certain cells based on \code{highlightValues})
+#' @param highlightValues a list of values to be highlighted; each element of list following by key (column names) and value (a vector of values)
+#' @return a reactive table
 DTableUI <- function(id) {
   ns <- NS(id)
   DT::DTOutput(ns("table"))
 }
 
-DTableServer <- function(id, data, escape = TRUE, highlight = NULL,
-                         rownames = TRUE, caption = NULL, filter = "none",
+DTableServer <- function(id, data, escape = TRUE,
+                         rownames = TRUE, caption = NULL, filter = "top",
                          selection = "none", cell_border = FALSE,
                          options = list(lengthChange = FALSE, scrollX = TRUE),
-                         ht.color = NULL, ht.column = NULL, ht.value = NULL) {
-  df <- datatable(data,
-    caption = caption,
-    escape = escape,
-    rownames = rownames,
-    selection = selection,
-    filter = filter,
-    options = options
-  )
-
-  if (!is.null(highlight)) {
-    match.arg(highlight, c("row", "column"))
-
-    if (is.null(ht.color)) {
-      ht.color <- rep("yellow", length(ht.value))
-    }
-
-    if (highlight == "row") {
-      df <- df %>%
-        formatStyle(ht.column, target = "row", backgroundColor = styleEqual(ht.value, ht.color))
-    } else {
-      df <- df %>%
-        formatStyle(ht.column, backgroundColor = styleEqual(ht.value, ht.color))
-    }
-
-    if (cell_border) {
-      df <- df %>% formatStyle(1:ncol(data), border = "1px solid #ddd")
-    }
-  }
+                         highlight = NULL, highlightValues = NULL) {
 
   moduleServer(
     id,
     function(input, output, session) {
+
+      df <- datatable(data,
+        caption = caption,
+        escape = escape,
+        rownames = rownames,
+        selection = selection,
+        filter = filter,
+        options = options
+      )
+
+      if (!is.null(highlight)) {
+        
+        match.arg(highlight, c("full", "partial"))
+
+        if (highlight == "full") {
+
+          df <- df %>% formatStyle(1, target = "row", backgroundColor = "yellow")
+
+        } else if (highlight == "partial") {
+
+          # iterate each col to avoid messing around same value in multiple columns
+          for (col in names(highlightValues)) {
+
+            values <- highlightValues[[col]]
+            df <- df %>%
+              formatStyle(col, backgroundColor = styleEqual(values, rep("yellow", length(values))))
+          }
+        }
+      }
+      
+      if (cell_border) {
+        df <- df %>% formatStyle(1:ncol(data), border = "1px solid #ddd")
+      }
+
       output$table <- renderDT(df)
     }
   )

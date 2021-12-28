@@ -304,12 +304,12 @@ shinyServer(function(input, output, session) {
 
       # highlight invalue cells in preview table
       if (valRes$errorType == "Wrong Schema") {
-        DTableServer("tbl_preview", data = inFile$data(), 
-          filter = "top", highlight = "row", ht.column = 1, ht.value = inFile$data()[, 1])
+        DTableServer("tbl_preview", data = inFile$data(), highlight = "full")
       } else {
-        DTableServer("tbl_preview",
-          data = inFile$data(), filter = "top",
-          highlight = "column", ht.column = valRes$errorDT$Column, ht.value = valRes$errorDT$Value)
+        DTableServer(
+          "tbl_preview", data = inFile$data(), 
+          highlight = "partial", highlightValues = valRes$errorHighlight
+        )
       }
 
       if (valRes$validationRes == "valid") {
