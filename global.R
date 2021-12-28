@@ -40,10 +40,11 @@ if (interactive()) {
   # for local development
   # change port number associated with your client, here
   options(shiny.port = 8100)
+} else {
+  app_url <- toString(oauth_client$APP_URL)
 }
 
-app_url <- toString(oauth_client$APP_URL)
-conda_name <- toString(oauth_client$CONDA_NAME)
+conda_name <- toString(oauth_client$CONDA_ENV)
 
 if (is.null(client_id)) stop("config.yaml is missing CLIENT_ID")
 if (is.null(client_secret)) stop("config.yaml is missing CLIENT_SECRET")
