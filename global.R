@@ -5,6 +5,7 @@ suppressPackageStartupMessages({
   library(reticulate)
   library(jsonlite)
   # shiny function
+  library(DT)
   library(shiny)
   library(shinyjs)
   library(shinydashboard)
@@ -18,6 +19,7 @@ suppressPackageStartupMessages({
   library(stringr)
   library(tidyr)
   # dashboard
+  library(data.table)
   library(networkD3)
   library(data.tree)
   library(r2d3)

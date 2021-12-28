@@ -14,7 +14,7 @@ dbNetworkUI <- function(id, height = 500) {
     helpText(align = "center", "Usage: mouse over nodes to see the data types, drag nodes to change layout"),
     uiOutput(ns("instruction")),
     forceNetworkOutput(ns("network"), height = height),
-    helpText(align = "center", HTML(paste0("A ", icon("long-arrow-right"), " B: Data type A requires Data type B")))
+    helpText(align = "center", HTML(paste0("A ", icon("long-arrow-alt-right"), " B: Data type A requires Data type B")))
   )
 }
 

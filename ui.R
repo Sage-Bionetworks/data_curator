@@ -21,7 +21,7 @@ ui <- shinydashboardPlus::dashboardPage(
       dropdownBlock(
         id = "header_selection_dropdown",
         title = "Selection",
-        icon = icon("sliders"),
+        icon = icon("sliders-h"),
         badgeStatus = "info",
         fluidRow(
           lapply(dropdown_types, function(x) {
