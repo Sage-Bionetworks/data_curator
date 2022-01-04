@@ -310,9 +310,9 @@ shinyServer(function(input, output, session) {
       if (valRes$errorType == "Wrong Schema") {
         DTableServer("tbl_preview", data = inFile$data(), highlight = "full")
       } else {
-        DTableServer("tbl_preview",
-          data = inFile$data(),
-          highlight = "partial", hightlight.col = valRes$errorDT$Column, hightlight.value = valRes$errorDT$Value
+        DTableServer(
+          "tbl_preview", data = inFile$data(), 
+          highlight = "partial", highlightValues = valRes$errorHighlight
         )
       }
 

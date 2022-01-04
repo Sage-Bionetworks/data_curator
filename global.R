@@ -33,6 +33,7 @@ suppressPackageStartupMessages({
   library(rjson)
   library(shinyjs)
   library(dplyr)
+  library(tidyr)
   library(shinythemes)
   library(shinydashboard)
   library(stringr)
@@ -59,11 +60,8 @@ has_auth_code <- function(params) {
 
 if (interactive()) {
   # for local development
+  # change port number associated with your client, here
   options(shiny.port = 8100)
-  app_url <- "http://localhost:8100/"
-} else {
-  # deployed url
-  app_url <- toString(oauth_client$APP_URL)
 }
 
 if (is.null(app_url) || nchar(app_url)==0) stop("config.yaml is missing APP_URL")
