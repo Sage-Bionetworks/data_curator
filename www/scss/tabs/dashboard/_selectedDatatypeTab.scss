@@ -83,6 +83,40 @@
             font-weight: 600;
           }
         }
+
+        &.selected {
+          i {
+            color: $htan_col;
+          }
+
+          h4 {
+            border-bottom: 0.6px solid $htan_col;
+          }
+        }
+        &.completed {
+          i {
+            color: $success_col;
+          }
+
+          h4 {
+            border-bottom: 0.6px solid $success_col;
+          }
+        }
+        &.missing {
+          i {
+            color: $error_col;
+          }
+        }
+
+        &.outdated {
+          i {
+            color: $warning_col;
+          }
+
+          h4 {
+            border-bottom: 0.6px solid $warning_col;
+          }
+        }
       }
     }
 
@@ -102,20 +136,6 @@
       }
     }
   }
-}
-
-.selected {
-  color: $htan_col;
-}
-.completed {
-  color: $success_col;
-}
-.missing {
-  color: $error_col;
-}
-
-.outdate {
-  color: $warning_col;
 }
 
 @media (max-width: $desktop) {

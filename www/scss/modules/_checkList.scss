@@ -17,6 +17,13 @@
 
       i {
         flex-basis: 10%;
+
+        &.completed {
+          color: $success_col;
+        }
+        &.missing {
+          color: $error_col;
+        }
       }
 
       span {

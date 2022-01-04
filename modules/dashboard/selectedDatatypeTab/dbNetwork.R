@@ -30,7 +30,7 @@ dbNetwork <- function(id, uploadData, reqData, selectedDataType) {
           # if reqData is a single string of datatype without name, aka no requirements
           # still create data frame for network to prevent breaking the app
           links <- data.frame(source = reqData, target = reqData, value = 5)
-          nodes <- data.frame(name = selectedDataType, group = "Selected Data Type", size = c(20))
+          nodes <- data.frame(name = selectedDataType, group = "Selected", size = c(20))
         } else {
           links <- data.frame(
             source = reqData, target = names(reqData),
@@ -38,7 +38,7 @@ dbNetwork <- function(id, uploadData, reqData, selectedDataType) {
           )
           nodes <- data.frame(
             name = c(selectedDataType, links$target),
-            group = c("Selected Data Type", ifelse(links$target %in% uploadData$schema, "Uploaded Data", "Missing")),
+            group = c("Selected", ifelse(links$target %in% uploadData$schema, "Completed", "Missing")),
             size = c(20)
           )
         }
@@ -47,7 +47,7 @@ dbNetwork <- function(id, uploadData, reqData, selectedDataType) {
         links$IDtarget <- match(links$target, nodes$name) - 1
         # assign colors to groups
         cols <- 'd3.scaleOrdinal()
-                .domain(["Selected Data Type", "Uploaded Data", "Missing"])
+                .domain(["Selected", "Completed", "Missing"])
                 .range(["#694489", "#28a745", "#E53935"]);'
 
         # render network
@@ -55,7 +55,7 @@ dbNetwork <- function(id, uploadData, reqData, selectedDataType) {
           Links = links, Nodes = nodes, Source = "IDsource", Target = "IDtarget",
           Group = "group", Value = "value", NodeID = "name", Nodesize = "size",
           linkColour = ifelse(links$IDsource == 5, "#694489", "black"),
-          colourScale = JS(cols), legend = FALSE, linkDistance = 40,
+          colourScale = JS(cols), legend = TRUE, linkDistance = 40,
           zoom = FALSE, bounded = TRUE, arrows = TRUE,
           opacity = 0.9, fontSize = 16, charge = -500
         )

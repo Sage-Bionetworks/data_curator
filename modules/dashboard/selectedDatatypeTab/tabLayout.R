@@ -10,13 +10,7 @@ selectedDataTypeTabUI <- function(id) {
           column(6, uiOutput(ns("stats-box")))
         ),
         column(12, class = "bottom-title-container",
-          column(6, class = "section-title", span("Required Data Types")),
-          column(6, class = "section-title", span("Requirment Relationship Network"))
-        ),
-        column(12, class = "legend-container",
-          span(icon("circle"), "Selected Data Type", class = "selected"),
-          span(icon("circle"), "Uploaded Data Type", class = "completed"),
-          span(icon("circle"), "Missing Data Type", class = "missing")
+          column(12, class = "section-title", span("Required Data Types"))
         ),
         column(12, class = "bottom-container",
           column(6, column(12, dbCheckListUI(ns("checklist")))),
@@ -49,7 +43,7 @@ selectedDataTypeTab <- function(id, userName, uploadData, reqData, selectedDataT
       # get number of manifests uploaded to synapse
       n_up <- length(intersect(all_req, uploadData$schema))
       # get number of manifests that are out of date
-      n_outdate <- sum(uploadData$errorType %in% c("Wrong Schema", "Out of Date"))
+      n_outdated <- sum(uploadData$errorType %in% c("Wrong Schema", "Out of Date"))
       # calculate the values for progress bar: number of uploaded / number of total requirements
       progress_value <- round(n_up/n_req * 100, 0)
 
@@ -72,34 +66,34 @@ selectedDataTypeTab <- function(id, userName, uploadData, reqData, selectedDataT
       output$`stats-box` <- renderUI({
         div(class = "stats-box",
           div(class = "stats-item-container",
-            div(class = "stats-item",
+            div(class = "stats-item completed",
               tagList(
-                icon("smile-wink", "fa-3x completed"),
+                icon("smile-wink", "fa-3x"),
                 div(class = "stat-text", 
-                  h4("Completed", style = "border-bottom: 0.6px solid #28a745;"), span(n_up)
+                  h4("Completed"), span(n_up)
                 )
               )
             ),
-            div(class = "stats-item",
+            div(class = "stats-item missing",
               tagList(
-                icon("frown", "fa-3x missing"),
+                icon("frown", "fa-3x"),
                 div(class = "stat-text", 
-                  h4("Missing", style = "border-bottom: 0.6px solid #E53935;"), span(n_not_up)
+                  h4("Missing"), span(n_not_up)
                 )
               )
             ),
-            div(class = "stats-item",
+            div(class = "stats-item outdated",
               tagList(
-                icon("surprise", "fa-3x outdate"),
+                icon("surprise", "fa-3x"),
                 div(class = "stat-text", 
-                  h4("Outdate", style = "border-bottom: 0.6px solid #ff9900;"), span(n_outdate)
+                  h4("Out of Date"), span(n_outdated)
                 )
               )
             )
           ),
           div(class = "stats-btn-container",
             actionButton(ns("view-btn"), "View More", class = "btn-primary-color"),
-            span("Click to know more about 'Outdate' manifests")
+            span("Click to see the Out-of-Date manifests")
           )
         )
       })
