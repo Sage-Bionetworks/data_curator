@@ -15,7 +15,8 @@ selectedProjectTabUI <- function(id) {
               )
             ),
             column(12, class = "section-title", span("Each dataset progress")),
-            column(12, align = "center", uiOutput(ns("dataset-pb")))
+            column(12, align = "center", uiOutput(ns("complete-dataset-pb"))),
+            column(12, align = "center", uiOutput(ns("incomplete-dataset-pb")))
           )
         ),
         column(width = 9, class = "tree-box",
@@ -48,12 +49,12 @@ selectedProjectTab <- function(id, uploadData, reqData, selectedProject) {
       folder_list <- sort(unique(uploadData$folder))
 
       # set colors that can be used for dataset progress bars
-      col_list <- c("#5B008C", "#B4007A", "#EA3360", "#FF794A", "#FFBB49",
-                    "#004BC3", "#0076E2", "#009AE8", "#00BADA", "#00D8C3")
+      # col_list <- c("#5B008C", "#B4007A", "#EA3360", "#FF794A", "#FFBB49",
+      #               "#004BC3", "#0076E2", "#009AE8", "#00BADA", "#00D8C3")
       # progress values
       ds_pb_values <- sapply(folder_list, function(f) {
         tmp <- reqData[reqData$folder == f, ]
-        sum(tmp$to %in% uploadData$schema) / nrow(tmp)  * 100
+        round(sum(tmp$to %in% uploadData$schema) / nrow(tmp)  * 100, 0)
       })
 
       # render tab title
@@ -62,24 +63,40 @@ selectedProjectTab <- function(id, uploadData, reqData, selectedProject) {
       progressBar("all-pb", value = n_completed / n_ds * 100, circular = TRUE)   
 
       # render (multiple) progress bar for each dataset 
-      output$`dataset-pb` <- renderUI({
+      output$`complete-dataset-pb` <- renderUI({
+        inx <- which(ds_pb_values != 100)
         fluidRow(
           # !important: add ns to pb's id, otherwise pb server will not be able to find
-          lapply(folder_list, function(f) {
+          lapply(inx, function(i) {
             column(6, 
-              progressBarUI(ns(f)) %>% addTooltip(f, "top")
+              progressBarUI(ns(folder_list[i])) %>% 
+              addTooltip(HTML(paste0(folder_list[i], ": ", ds_pb_values[i], "%")), "top")
             )
           })
         )
       })
-      set.seed(1000)
+
+      output$`incomplete-dataset-pb` <- renderUI({
+        inx <- which(ds_pb_values == 100)
+        fluidRow(
+          # !important: add ns to pb's id, otherwise pb server will not be able to find
+          lapply(inx, function(i) {
+            column(6, 
+              progressBarUI(ns(folder_list[i])) %>% 
+              addTooltip(HTML(paste0(folder_list[i], ": ", ds_pb_values[i], "%")), "top")
+            )
+          })
+        )
+      })
+
       lapply(seq_along(folder_list), function(i) {
         progressBar(
           id = folder_list[i],
           value = ds_pb_values[i], 
           display_pct = FALSE,
           height = "10px",
-          color = sample(col_list, 1),
+          color = "#28a745",
+          backgoundCol = "#e53935",
           subtitle = folder_list[i]
         )
       })

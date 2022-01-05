@@ -6,7 +6,7 @@ progressBarUI <- function(id) {
 
 progressBar <- function(id, value = 100, title = NULL, subtitle = NULL, 
                         display_pct = TRUE, width = NULL, height = NULL, r = 80,
-                        circular = FALSE, color = NULL) {
+                        circular = FALSE, color = NULL, backgoundCol = NULL) {
   moduleServer(
     id,
     function(input, output, session) {
@@ -34,6 +34,9 @@ progressBar <- function(id, value = 100, title = NULL, subtitle = NULL,
 
       # set color
       if(is.null(color)) color <- c("#e91e63", "#673ab7")
+      if(is.null(backgoundCol)) backgoundCol <- "#f5f5f5"
+      # add gap in linear pb if two colors are not identical
+      border <- ifelse(value != 0 && value != 100 && color != backgoundCol, "2px solid #fff", "none")
 
       # progress_id
       pb_id <- sample(1:10000, 1)
@@ -92,9 +95,11 @@ progressBar <- function(id, value = 100, title = NULL, subtitle = NULL,
                       '
                     ),
                     div(class = "progress-linear-value",
-                      style = paste0("
-                        width:", progress_value, "%;
-                      ")
+                      style = paste0('
+                        width:', progress_value, '%;
+                        background-color:', backgoundCol, ';
+                        border-left:', border, ';
+                      ')
                     ),
                     if(display_pct) {
                       div(id=pct_id_name, class="progress-pct linear")
@@ -115,6 +120,7 @@ progressBar <- function(id, value = 100, title = NULL, subtitle = NULL,
                         '
                         height: ', 2 * r, 'px;
                         width: ', 2 * r, 'px;
+                        background-color:', backgoundCol, ';
                         '
                       ),
                       tagList(
