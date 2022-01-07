@@ -17,7 +17,6 @@ jobs:
     # This image seems to be based on rocker/r-ver which in turn is based on debian
     container: rocker/rstudio
     env:
-      CONDA_ENV_NAME: virtual_env
       # This should not be necessary for installing from public repo's however remotes::install_github() fails without it.
       GITHUB_PAT: ${{ secrets.REPO_PAT }}
 
@@ -26,7 +25,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y pip python3.8-venv libcurl4-openssl-dev
- 
+
       - uses: actions/checkout@v2
 
       - uses: r-lib/actions/setup-pandoc@v1
@@ -34,14 +33,14 @@ jobs:
       - name: Create and Activate Python Virtual Environment
         shell: bash
         run: |
-          python3 -m venv "${{ env.CONDA_ENV_NAME }}"
-          chmod 755 "${{ env.CONDA_ENV_NAME }}"/bin/activate
-          source "${{ env.CONDA_ENV_NAME }}"/bin/activate
-        
+          python3 -m venv .venv
+          chmod 755 .venv/bin/activate
+          source .venv/bin/activate
+
       - name: Install Python Dependencies
         shell: bash
         run: |
-          source "${{ env.CONDA_ENV_NAME }}"/bin/activate
+          source .venv/bin/activate
           # install 'poetry' and then use it to install 'schematic'
           pip3 install poetry
           git clone --single-branch --branch develop https://github.com/Sage-Bionetworks/schematic.git
@@ -55,20 +54,20 @@ jobs:
           # No such file or directory: 'tests/data/example.model.jsonld'
           mkdir -p ../tests/data/
           cp -R tests/data/ ../tests/
-        
+
       - name: Install R packages
         run: |
           R -f install-pkgs.R
-          
+
       - name: zip virtual env
         # ShinyApps has a limit of 7000 files, far exceeded by the many Python dependencies
         # that this app' has.  As a workaround we zip the virtual environment and later
         # unzip it in 'global.R'
         shell: bash
         run: |
-          zip -r "${{ env.CONDA_ENV_NAME }}".zip "${{ env.CONDA_ENV_NAME }}"
-          rm -r "${{ env.CONDA_ENV_NAME }}"
-  
+          zip -r .venv.zip .venv
+          rm -r .venv
+
       - name: Authorize and deploy app
         shell: Rscript {0}
         run: |
@@ -81,14 +80,13 @@ jobs:
           rsConnectUser <-"${{ secrets.RSCONNECT_USER }}"
           rsConnectToken <- "${{ secrets.RSCONNECT_TOKEN }}"
           rsConnectSecret <- "${{ secrets.RSCONNECT_SECRET }}"
-          
+
           # create config file
           config <- "CLIENT_ID: ${{ secrets.OAUTH_CLIENT_ID }}"
           config <- c(config, "CLIENT_SECRET: ${{ secrets.OAUTH_CLIENT_SECRET }}")
           appUrl<- sprintf("https://%s.shinyapps.io/%s", rsConnectUser, appName)
           config <- c(config, sprintf("APP_URL: %s", appUrl))
-          config <- c(config, "CONDA_NAME: ${{ env.CONDA_ENV_NAME }}")
-         
+
           configFileConn<-file("config.yaml")
           tryCatch(
              writeLines(config, configFileConn),
@@ -96,4 +94,3 @@ jobs:
           )
           rsconnect::setAccountInfo(rsConnectUser, rsConnectToken, rsConnectSecret)
           rsconnect::deployApp(appName = appName)
- 

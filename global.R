@@ -1,31 +1,25 @@
-library(yaml)
-
-oauth_client <- yaml.load_file("config.yaml")
-
+oauth_client <- yaml::yaml.load_file("config.yaml")
 client_id <- toString(oauth_client$CLIENT_ID)
 client_secret <- toString(oauth_client$CLIENT_SECRET)
-conda_name <- toString(oauth_client$CONDA_NAME)
 
-if (is.null(client_id) || nchar(client_id)==0) stop("config.yaml is missing CLIENT_ID")
-if (is.null(client_secret) || nchar(client_secret)==0) stop("config.yaml is missing CLIENT_SECRET")
-if (is.null(conda_name) || nchar(conda_name)==0) stop("config.yaml is missing CONDA_ENV_NAME")
+if (is.null(client_id) || nchar(client_id) == 0) stop("config.yaml is missing CLIENT_ID")
+if (is.null(client_secret) || nchar(client_secret) == 0) stop("config.yaml is missing CLIENT_SECRET")
+if (is.null(app_url) || nchar(app_url) == 0) stop("config.yaml is missing APP_URL")
 
 # ShinyAppys has a limit of 7000 files which this app' grossly exceeds
 # due to its Python dependencies.  To get around the limit we zip up
 # the virtual environment before deployment and unzip it here.
 #
-# unzip <conda_name>.zip
-utils::unzip(paste0(conda_name, ".zip"))
+# unzip virtual environment, named as ".venv.zip"
+utils::unzip(".venv.zip")
 #
 # We get a '126' error (non-executable) if we don't do this:
-system(sprintf("chmod -R +x %s", conda_name))
+system("chmod -R +x .venv")
 
-# Activate conda env
+# Activate virtual env
 # Don't necessarily have to set `RETICULATE_PYTHON` env variable
 Sys.unsetenv("RETICULATE_PYTHON")
-
-reticulate::use_virtualenv(file.path(getwd(),conda_name))
-
+reticulate::use_virtualenv(file.path(getwd(), ".venv"))
 
 suppressPackageStartupMessages({
   library(shiny)
@@ -57,14 +51,6 @@ has_auth_code <- function(params) {
   # flow.
   return(!is.null(params$code))
 }
-
-if (interactive()) {
-  # for local development
-  # change port number associated with your client, here
-  options(shiny.port = 8100)
-}
-
-if (is.null(app_url) || nchar(app_url)==0) stop("config.yaml is missing APP_URL")
 
 app <- oauth_app("shinysynapse",
   key = client_id,
