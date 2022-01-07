@@ -3,7 +3,7 @@ suppressPackageStartupMessages({
   library(reticulate)
 })
 
-oauth_client <- yaml::yaml.load_file("config.yaml")
+oauth_client <- yaml.load_file("config.yaml")
 
 client_id <- toString(oauth_client$CLIENT_ID)
 client_secret <- toString(oauth_client$CLIENT_SECRET)
@@ -31,7 +31,6 @@ reticulate::use_virtualenv(file.path(getwd(), ".venv"))
 suppressPackageStartupMessages({
   library(shiny)
   library(httr)
-  library(rjson)
   library(shinyjs)
   library(dplyr)
   library(tidyr)
@@ -40,9 +39,6 @@ suppressPackageStartupMessages({
   library(stringr)
   library(DT)
   library(jsonlite)
-  library(ggplot2)
-  library(purrr)
-  library(plotly)
   library(shinypop)
   library(waiter)
   library(readr)
