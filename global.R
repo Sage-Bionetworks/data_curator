@@ -18,8 +18,8 @@ if (is.null(app_url) || nchar(app_url) == 0) stop("config.yaml is missing APP_UR
 # the virtual environment before deployment and unzip it here.
 #
 # unzip virtual environment, named as ".venv.zip"
-utils::unzip(".venv.zip")
-#
+if (!file.exists(".venv")) utils::unzip(".venv.zip")
+
 # We get a '126' error (non-executable) if we don't do this:
 system("chmod -R +x .venv")
 

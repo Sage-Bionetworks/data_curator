@@ -65,8 +65,7 @@ jobs:
         # unzip it in 'global.R'
         shell: bash
         run: |
-          zip -r .venv.zip .venv
-          rm -r .venv
+          zip -rm .venv.zip .venv
 
       - name: Authorize and deploy app
         shell: Rscript {0}
