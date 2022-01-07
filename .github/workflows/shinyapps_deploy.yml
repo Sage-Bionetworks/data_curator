@@ -70,23 +70,23 @@ jobs:
       - name: Authorize and deploy app
         shell: Rscript {0}
         run: |
-          branch<-Sys.getenv("GITHUB_REF_NAME")
-          repo<-Sys.getenv("GITHUB_REPOSITORY")
-          appName<-strsplit(repo, "/")[[1]][2]
+          branch <- Sys.getenv("GITHUB_REF_NAME")
+          repo <- Sys.getenv("GITHUB_REPOSITORY")
+          appName <- strsplit(repo, "/")[[1]][2]
           if (!startsWith(branch, "release")) {
              appName <- paste(appName, "staging", sep="-")
           }
-          rsConnectUser <-"${{ secrets.RSCONNECT_USER }}"
+          rsConnectUser <- "${{ secrets.RSCONNECT_USER }}"
           rsConnectToken <- "${{ secrets.RSCONNECT_TOKEN }}"
           rsConnectSecret <- "${{ secrets.RSCONNECT_SECRET }}"
 
           # create config file
           config <- "CLIENT_ID: ${{ secrets.OAUTH_CLIENT_ID }}"
           config <- c(config, "CLIENT_SECRET: ${{ secrets.OAUTH_CLIENT_SECRET }}")
-          appUrl<- sprintf("https://%s.shinyapps.io/%s", rsConnectUser, appName)
+          appUrl <- sprintf("https://%s.shinyapps.io/%s", rsConnectUser, appName)
           config <- c(config, sprintf("APP_URL: %s", appUrl))
 
-          configFileConn<-file("config.yaml")
+          configFileConn <- file("config.yaml")
           tryCatch(
              writeLines(config, configFileConn),
              finally=close(configFileConn)
