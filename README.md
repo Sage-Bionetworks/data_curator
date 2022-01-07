@@ -18,11 +18,11 @@ Follow the steps below to make sure the _Data Curator App_ is fully setup to wor
 
 2.  Create and modify the configuration file:
 
+- `CLIENT_ID` and `CLIENT_SECRET`: [how to obtain OAuth Credential](https://github.com/Sage-Bionetworks/data_curator#Authentication)
+- `APP_URL`: the redirection url to your app
+
         cp example_config.yaml config.yaml
         chmod 400 config.yaml
-
-    - `CLIENT_ID` and `CLIENT_SECRET`: [how to obtain OAuth Credential](https://github.com/Sage-Bionetworks/data_curator#Authentication)
-    - `APP_URL`: the redirection url to your app
 
 3.  Create and activate a virtual environment within which you can install the package:
 
@@ -49,7 +49,7 @@ Follow the steps below to make sure the _Data Curator App_ is fully setup to wor
         poetry build
         pip install dist/schematicpy-1.0.0-py3-none-any.whl
 
-3.  Set up the `schematic` configuration. To do so, follow the instructions on the `schematic` repository [README](https://github.com/Sage-Bionetworks/schematic/tree/develop#12-installation-requirements-and-pre-requisites)
+3.  Set up the `schematic` configuration. To do so, follow the instructions on the [schematic's documentation](https://sage-schematic.readthedocs.io/en/develop/index.html#package-installation-and-setup)
 
 ### Data Model Configuration
 
