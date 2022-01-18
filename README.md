@@ -16,10 +16,7 @@ Follow the steps below to make sure the _Data Curator App_ is fully setup to wor
 
         git clone --single-branch --branch shiny-server-main https://github.com/Sage-Bionetworks/data_curator.git
 
-2.  Create and modify the configuration file:
-
-- `CLIENT_ID` and `CLIENT_SECRET`: [how to obtain OAuth Credential](https://github.com/Sage-Bionetworks/data_curator#Authentication)
-- `APP_URL`: the redirection url to your app
+2.  Create and modify the configuration file ([How to obtain OAuth Credential](https://github.com/Sage-Bionetworks/data_curator#Authentication)):
 
         cp example_config.yaml config.yaml
         chmod 400 config.yaml
@@ -29,7 +26,11 @@ Follow the steps below to make sure the _Data Curator App_ is fully setup to wor
         python -m venv .venv
         source .venv/bin/activate
 
-4.  Install required R pacakges dependencies.
+4.  Install required Python pacakges dependencies:
+
+        pip install -r requirements.txt
+
+5.  Install required R pacakges dependencies:
 
         R -f install-pkgs.R
 
@@ -66,7 +67,10 @@ Use the app configuration file `www/config.json` to adapt this app to your DCC.
 
 ## Authentication
 
-This utilizes a Synapse Authentication (OAuth) client (code motivated by [ShinyOAuthExample](https://github.com/brucehoff/ShinyOAuthExample) and [app.R](https://gist.github.com/jcheng5/44bd750764713b5a1df7d9daf5538aea). Each application is required to have its own OAuth client as these clients cannot be shared between one another. View instructions [here](https://docs.synapse.org/articles/using_synapse_as_an_oauth_server.html) to learn how to request a client. Once you obtain the `CLIENT_ID` and `CLIENT_SECRET` make sure to add it to the configuration yaml file.
+This utilizes a Synapse Authentication (OAuth) client (code motivated by [ShinyOAuthExample](https://github.com/brucehoff/ShinyOAuthExample) and [app.R](https://gist.github.com/jcheng5/44bd750764713b5a1df7d9daf5538aea). Each application is required to have its own OAuth client as these clients cannot be shared between one another. View instructions [here](https://docs.synapse.org/articles/using_synapse_as_an_oauth_server.html) to learn how to request a client. Once you obtain the client, make sure to add it to the configuration yaml file:
+
+- `CLIENT_ID` and `CLIENT_SECRET`
+- `APP_URL`: the redirection url to your app
 
 ---
 
