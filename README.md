@@ -44,7 +44,7 @@ Follow the steps below to make sure the _Data Curator App_ is fully setup to wor
 
         python -m pip install schematicpy
 
-    For development and test with the latest update from `schematic`, install the `schematic` via `poetry`:
+    For development and test with the latest update from `schematic`, install the `schematic` via [poetry]:
 
         cd schematic
         poetry build
@@ -88,3 +88,4 @@ Main contributors and developers:
 <!-- Links -->
 
 [schematic]: https://github.com/Sage-Bionetworks/schematic/tree/develop
+[poetry]: https://github.com/python-poetry/poetry
