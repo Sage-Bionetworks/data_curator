@@ -1,33 +1,38 @@
-cran <- c(
-"ellipsis",
-"shiny",
-"httr",
-"rjson",
-"yaml",
-"shinyjs",
-"dplyr",
-"shinythemes",
-"shinydashboard",
-"stringr",
-"DT",
-"jsonlite",
-"reticulate",
-"ggplot2",
-"purrr",
-"plotly",
-"shinydashboardPlus",
-"waiter",
-"readr",
-"sass",
-"remotes",
-"rsconnect",
-"png")
 
-gh <- "dreamRs/shinypop"
+cran <- c(
+  "ellipsis==0.3.2",
+  "shiny==1.7.1",
+  "httr==1.4.2",
+  "yaml==2.2.1",
+  "shinyjs==2.1.0",
+  "dplyr==1.0.7",
+  "shinythemes==1.2.0",
+  "shinydashboard==0.7.2",
+  "stringr==1.4.0",
+  "DT==0.20",
+  "jsonlite==1.7.3",
+  "reticulate==1.23",
+  "shinydashboardPlus==2.0.3",
+  "waiter==0.2.5",
+  "readr==2.1.1",
+  "sass==0.4.0",
+  "remotes==2.4.2",
+  "rsconnect==0.8.25",
+  "png==0.1.7"
+)
+gh <- c(
+  "dreamRs/shinypop"
+)
 
 # The binary package distributions from R Studio dramatically speed up installation time
 # For Ubuntu 18.04 (Bionic) it's https://packagemanager.rstudio.com/all/__linux__/bionic/latest
 # For Ubuntu 20.04 (Focal)  it's https://packagemanager.rstudio.com/all/__linux__/focal/latest
 options(repos = c(REPO_NAME = "https://packagemanager.rstudio.com/all/__linux__/bionic/latest", getOption("repos")))
-install.packages(cran)
+
+install.packages("remotes")
+invisible(
+  lapply(strsplit(cran, "=="), function(cran_pkg) {
+    remotes::install_version(cran_pkg[1], version = cran_pkg[2])
+  })
+)
 remotes::install_github(gh)

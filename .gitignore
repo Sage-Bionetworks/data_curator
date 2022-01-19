@@ -20,3 +20,4 @@ schematic/
 config.yaml
 .project
 .settings/**
+.venv
