@@ -18,7 +18,8 @@ cran <- c(
   "sass==0.4.0",
   "remotes==2.4.2",
   "rsconnect==0.8.25",
-  "png==0.1.7"
+  "png==0.1.7",
+  "tidyr==1.1.4"
 )
 gh <- c(
   "dreamRs/shinypop"
