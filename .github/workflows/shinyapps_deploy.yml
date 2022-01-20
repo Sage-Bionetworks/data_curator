@@ -62,7 +62,7 @@ jobs:
           # download data model to the correct location
           R -e '
             config <- yaml::yaml.load_file(".github/schematic_config.yml");
-            url  <- config$model$input$gh_repo;
+            url  <- config$model$input$download_url;
             path <- config$model$input$location;
             system(sprintf("mkdir -p %s", dirname(path)));
             system(sprintf("wget %s -O %s", url, path));
