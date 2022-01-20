@@ -23,6 +23,7 @@ manifest:
 
 model:
   input:
+    gh_repo: 'https://github.com/ncihtan/data-models' # path to github repo where stores JSON-LD data model
     location: 'data-models/HTAN.model.jsonld' # path to JSON-LD data model
     file_type: 'local' # only type "local" is supported currently
 
