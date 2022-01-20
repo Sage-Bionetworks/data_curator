@@ -35,7 +35,6 @@ jobs:
       - uses: r-lib/actions/setup-pandoc@v1
 
       - name: Create and Activate Python Virtual Environment
-        shell: bash
         run: |
           python3 -m venv .venv
           chmod 755 .venv/bin/activate
@@ -46,12 +45,10 @@ jobs:
           R -f install-pkgs.R
 
       - name: Install Python Packages Dependencies
-        shell: bash
         run: |
           pip3 install -r requirements.txt
 
       - name: Install Schematic
-        shell: bash
         run: |
           # use 'poetry' to install schematic from the develop branch 
           pip3 install poetry
@@ -61,7 +58,6 @@ jobs:
           pip3 install dist/schematicpy-1.0.0-py3-none-any.whl
 
       - name: Set Configurations for Schematic
-        shell: bash
         run: |
           # download data model to the correct location
           R -e '
@@ -82,7 +78,6 @@ jobs:
         # ShinyApps has a limit of 7000 files, far exceeded by the many Python dependencies
         # that this app' has.  As a workaround we zip the virtual environment and later
         # unzip it in 'global.R'
-        shell: bash
         run: |
           zip -rm .venv.zip .venv
 
@@ -93,7 +88,7 @@ jobs:
           repo <- Sys.getenv("GITHUB_REPOSITORY")
           appName <- strsplit(repo, "/")[[1]][2]
           if (!startsWith(branch, "release")) {
-             appName <- paste(appName, "staging", sep="-")
+            appName <- paste(appName, "staging", sep = "-")
           }
           rsConnectUser <- "${{ secrets.RSCONNECT_USER }}"
           rsConnectToken <- "${{ secrets.RSCONNECT_TOKEN }}"
@@ -107,8 +102,8 @@ jobs:
 
           configFileConn <- file("oauth_config.yml")
           tryCatch(
-             writeLines(config, configFileConn),
-             finally=close(configFileConn)
+            writeLines(config, configFileConn),
+            finally=close(configFileConn)
           )
           rsconnect::setAccountInfo(rsConnectUser, rsConnectToken, rsConnectSecret)
           rsconnect::deployApp(appName = appName)
