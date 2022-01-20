@@ -48,11 +48,13 @@ jobs:
       - name: Install Python Packages Dependencies
         shell: bash
         run: |
+          source .venv/bin/activate
           pip3 install -r requirements.txt
 
       - name: Install Schematic
         shell: bash
         run: |
+          source .venv/bin/activate
           # use 'poetry' to install schematic from the develop branch 
           pip3 install poetry
           git clone --single-branch --branch develop https://github.com/Sage-Bionetworks/schematic.git
@@ -63,6 +65,7 @@ jobs:
       - name: Set Configurations for Schematic
         shell: bash
         run: |
+          source .venv/bin/activate
           # download data model to the correct location
           R -e '
             config <- yaml::yaml.load_file(".github/schematic_config.yml");
