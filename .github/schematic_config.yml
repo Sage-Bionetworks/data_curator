@@ -1,3 +1,8 @@
+# During the github workflow to auto deploy the app
+# This config file will be used to overwrite the config.yml in the schematic folder
+#
+# Please modify the configuration values based on your project
+
 # Do not change the 'definitions' section unless you know what you're doing
 definitions:
   synapse_config: '.synapseConfig'
@@ -18,7 +23,7 @@ manifest:
 
 model:
   input:
-    location: 'data-models/example.model.jsonld' # path to JSON-LD data model
+    location: 'data-models/HTAN.model.jsonld' # path to JSON-LD data model
     file_type: 'local' # only type "local" is supported currently
 
 style:
