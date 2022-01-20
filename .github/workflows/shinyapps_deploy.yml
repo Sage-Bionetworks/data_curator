@@ -19,6 +19,10 @@ jobs:
     env:
       # This should not be necessary for installing from public repo's however remotes::install_github() fails without it.
       GITHUB_PAT: ${{ secrets.REPO_PAT }}
+      # Add configuration values to env variables for schematic
+      SCHEMATIC_SYNAPSE_CONFIG: ${{ secrets.SCHEMATIC_SYNAPSE_CONFIG }}
+      SCHEMATIC_SERVICE_ACCOUNT_CREDS: ${{ secrets.SCHEMATIC_SERVICE_ACCOUNT_CREDS }}
+      SCHEMATIC_TOKEN_PICKLE: ${{ secrets.SCHEMATIC_TOKEN_PICKLE }}
 
     steps:
       - name: Install System Dependencies
@@ -65,8 +69,14 @@ jobs:
             url  <- config$model$input$gh_repo;
             path <- config$model$input$location;
             system(sprintf("mkdir -p %s", dirname(path)));
-            system(sprintf("wget %s -O %s", url, path))
+            system(sprintf("wget %s -O %s", url, path));
           '
+          # overwrite the config.yml in schematic
+          mv -f .github/schematic_config.yml schematic/config.yml
+          # write out configuration files using github secrets
+          echo $SCHEMATIC_SYNAPSE_CONFIG > schematic/.synapseConfig
+          echo $SCHEMATIC_SERVICE_ACCOUNT_CREDS > schematic/schematic_service_account_creds.json
+          echo $SCHEMATIC_TOKEN_PICKLE > schematic/token.pickle
 
       - name: zip virtual env
         # ShinyApps has a limit of 7000 files, far exceeded by the many Python dependencies
@@ -95,7 +105,7 @@ jobs:
           appUrl <- sprintf("https://%s.shinyapps.io/%s", rsConnectUser, appName)
           config <- c(config, sprintf("APP_URL: %s", appUrl))
 
-          configFileConn <- file("config.yaml")
+          configFileConn <- file("oauth_config.yml")
           tryCatch(
              writeLines(config, configFileConn),
              finally=close(configFileConn)
