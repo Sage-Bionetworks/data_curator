@@ -11,7 +11,7 @@ definitions:
   service_acct_creds: 'schematic_service_account_creds.json'
 
 synapse:
-  master_fileview: 'syn23643253' # fileview of project with datasets on Synapse
+  master_fileview: 'syn20446927' # fileview of project with datasets on Synapse
   manifest_folder: 'manifests' # manifests will be downloaded to this folder
   manifest_filename: 'synapse_storage_manifest.csv' # name of the manifest file in the project dataset
   token_creds: 'syn23643259' # synapse ID of credentials.json file
