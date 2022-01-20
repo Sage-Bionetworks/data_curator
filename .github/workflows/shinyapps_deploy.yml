@@ -35,6 +35,7 @@ jobs:
       - uses: r-lib/actions/setup-pandoc@v1
 
       - name: Create and Activate Python Virtual Environment
+        shell: bash
         run: |
           python3 -m venv .venv
           chmod 755 .venv/bin/activate
@@ -45,10 +46,12 @@ jobs:
           R -f install-pkgs.R
 
       - name: Install Python Packages Dependencies
+        shell: bash
         run: |
           pip3 install -r requirements.txt
 
       - name: Install Schematic
+        shell: bash
         run: |
           # use 'poetry' to install schematic from the develop branch 
           pip3 install poetry
@@ -58,6 +61,7 @@ jobs:
           pip3 install dist/schematicpy-1.0.0-py3-none-any.whl
 
       - name: Set Configurations for Schematic
+        shell: bash
         run: |
           # download data model to the correct location
           R -e '
@@ -75,6 +79,7 @@ jobs:
           echo $SCHEMATIC_TOKEN_PICKLE > schematic/token.pickle
 
       - name: zip virtual env
+        shell: bash
         # ShinyApps has a limit of 7000 files, far exceeded by the many Python dependencies
         # that this app' has.  As a workaround we zip the virtual environment and later
         # unzip it in 'global.R'
