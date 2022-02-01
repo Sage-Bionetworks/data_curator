@@ -4,7 +4,7 @@
 CLIENT_ID: '<Your Client ID>'
 CLIENT_SECRET: '<Your Client Secret>'
 
-# for local testing, the default port 8100 is used: http://localhost:8100/
+# for local testing, the default port 8100 is used: http://127.0.0.1:8100/
 # change port based on your OAuth Client's redirect_uri
 APP_URL: '<Your APP URL>'
 # change the conda environment name here, this must be the last line

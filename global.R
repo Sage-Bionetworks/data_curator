@@ -37,7 +37,7 @@ client_secret <- toString(oauth_client$CLIENT_SECRET)
 if (interactive()) {
   # for local development
   options(shiny.port = 8100)
-  app_url <- "http://localhost:8100/"
+  app_url <- "http://127.0.0.1:8100/"
 } else {
   # deployed url
   app_url <- toString(oauth_client$APP_URL)
