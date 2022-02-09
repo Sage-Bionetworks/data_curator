@@ -13,6 +13,7 @@
       {"display_name": "Bulk WES Level 2", "schema_name": "BulkWESLevel2", "type": "assay"},
       {"display_name": "Bulk WES Level 3", "schema_name": "BulkWESLevel3", "type": "assay"},
       {"display_name": "Imaging Level 2", "schema_name": "ImagingLevel2", "type": "assay"},
+      {"display_name": "Imaging Level 3", "schema_name": "ImagingLevel3", "type": "assay"},
       {"display_name": "Clinical Tier 1: Demographics", "schema_name": "Demographics", "type": "clinical"},
       {"display_name": "Clinical Tier 1: Diagnosis", "schema_name": "Diagnosis", "type": "clinical"},
       {"display_name": "Clinical Tier 1: FamilyHistory", "schema_name": "FamilyHistory", "type": "clinical"},
