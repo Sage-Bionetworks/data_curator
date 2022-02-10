@@ -7,8 +7,8 @@ on:
   push:
     branches:
       - shiny-server-main
-      - switch-python-venv
-      - poetry
+      - switch-python-venv # tmp
+      - update-workflow-for-schematic-config # tmp
       - release*
 
 jobs:
@@ -37,33 +37,52 @@ jobs:
           chmod 755 .venv/bin/activate
           source .venv/bin/activate
 
-      - name: Install Python Dependencies
+      - name: Install R Packages Dependencies
+        run: |
+          R -f install-pkgs.R
+
+      - name: Install Python Packages Dependencies
         shell: bash
         run: |
           source .venv/bin/activate
-          # install 'poetry' and then use it to install 'schematic'
+          pip3 install -r requirements.txt
+
+      - name: Install Schematic
+        shell: bash
+        run: |
+          source .venv/bin/activate
+          # use 'poetry' to install schematic from the develop branch 
           pip3 install poetry
           git clone --single-branch --branch develop https://github.com/Sage-Bionetworks/schematic.git
           cd schematic
           poetry build
           pip3 install dist/schematicpy-1.0.0-py3-none-any.whl
-          # This was the old way: pip3 install -r requirements.txt
-          # However, per Anthony Williams, "poetry will install all of the dependencies necessary for the app to run"
-          #
-          # This is to fix the error we otherwise see when the app starts up:
-          # No such file or directory: 'tests/data/example.model.jsonld'
-          mkdir -p ../tests/data/
-          cp -R tests/data/ ../tests/
 
-      - name: Install R packages
+      - name: Set Configurations for Schematic
+        shell: bash
         run: |
-          R -f install-pkgs.R
+          source .venv/bin/activate
+          # download data model to the correct location
+          R -e '
+            config <- yaml::yaml.load_file(".github/schematic_config.yml");
+            url  <- config$model$input$download_url;
+            path <- config$model$input$location;
+            system(sprintf("mkdir -p %s", dirname(path)));
+            system(sprintf("wget %s -O %s", url, path));
+          '
+          # overwrite the config.yml in schematic
+          mv -f .github/schematic_config.yml schematic/config.yml
+          # write out configuration files using github secrets
+          echo "${{ secrets.SCHEMATIC_SYNAPSE_CONFIG }}" > schematic/.synapseConfig
+          echo "${{ secrets.SCHEMATIC_SERVICE_ACCT_CREDS }}" > schematic/schematic_service_account_creds.json
+          echo "${{ secrets.SCHEMATIC_CREDS_PATH }}" > schematic/credentials.json
+          echo "${{ secrets.SCHEMATIC_TOKEN_PICKLE }}" | base64 -d > schematic/token.pickle
 
       - name: zip virtual env
+        shell: bash
         # ShinyApps has a limit of 7000 files, far exceeded by the many Python dependencies
         # that this app' has.  As a workaround we zip the virtual environment and later
         # unzip it in 'global.R'
-        shell: bash
         run: |
           zip -rm .venv.zip .venv
 
@@ -74,7 +93,7 @@ jobs:
           repo <- Sys.getenv("GITHUB_REPOSITORY")
           appName <- strsplit(repo, "/")[[1]][2]
           if (!startsWith(branch, "release")) {
-             appName <- paste(appName, "staging", sep="-")
+            appName <- paste(appName, "staging", sep = "-")
           }
           rsConnectUser <- "${{ secrets.RSCONNECT_USER }}"
           rsConnectToken <- "${{ secrets.RSCONNECT_TOKEN }}"
@@ -86,10 +105,10 @@ jobs:
           appUrl <- sprintf("https://%s.shinyapps.io/%s", rsConnectUser, appName)
           config <- c(config, sprintf("APP_URL: %s", appUrl))
 
-          configFileConn <- file("config.yaml")
+          configFileConn <- file("oauth_config.yml")
           tryCatch(
-             writeLines(config, configFileConn),
-             finally=close(configFileConn)
+            writeLines(config, configFileConn),
+            finally=close(configFileConn)
           )
           rsconnect::setAccountInfo(rsConnectUser, rsConnectToken, rsConnectSecret)
           rsconnect::deployApp(appName = appName)

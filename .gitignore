@@ -17,7 +17,8 @@ schematic/
 **/schematic_service_account_creds.json
 **/token.pickle
 **/__pycache__
-config.yaml
+oauth_config.yml
 .project
 .settings/**
 .venv
+data-models/
