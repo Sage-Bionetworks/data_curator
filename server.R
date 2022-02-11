@@ -22,6 +22,8 @@ shinyServer(function(input, output, session) {
   token_response <- content(req, type = NULL)
   access_token <- token_response$access_token
 
+  session$userData$access_token <- access_token
+
   ######## session global variables ########
   source_python("functions/synapse_func_alias.py")
   source_python("functions/metadata_model.py")
@@ -54,20 +56,33 @@ shinyServer(function(input, output, session) {
   session$sendCustomMessage(type = "readCookie", message = list())
 
   # initial loading page
+  #
+  # TODO:  If we don't use cookies, then what event should trigger this?
+  #
   observeEvent(input$cookie, {
     # login and update session
-    syn_login(sessionToken = input$cookie, rememberMe = FALSE)
-  
+    #
+    # The original code pulled the auth token from a cookie, but it
+    # should actually come from session$userData.  The former is
+    # the Synapse login, only works when the Shiny app' is hosted
+    # in the synapse.org domain, and is unscoped.  The latter will
+    # work in any domain and is scoped to the access required by the
+    # Shiny app'
+    #
+    access_token <- session$userData$access_token
+
+    syn_login(authToken = access_token, rememberMe = FALSE)
+
     # updating syn storage
-    tryCatch(synStore_obj <<- synapse_driver(token = input$cookie), error = function(e) NULL)
-  
+    tryCatch(synStore_obj <<- synapse_driver(access_token = access_token), error = function(e) NULL)
+
     if (is.null(synStore_obj)) {
       message("'synapse_driver' fails, run 'synapse_driver' to see detailed error")
       dcWaiter("update", landing = TRUE, isPermission = FALSE)
     } else {
       projects_list <- synapse_driver$getStorageProjects(synStore_obj)
       datatype_list$projects <<- list2Vector(projects_list)
-    
+
       # updates project dropdown
       lapply(c("header_dropdown_", "dropdown_"), function(x) {
         lapply(c(1, 3), function(i) {
@@ -214,11 +229,14 @@ shinyServer(function(input, output, session) {
 
     # loading screen for template link generation
     dcWaiter("show", msg = "Generating link...")
-  
+
     manifest_url <-
       metadata_model$getModelManifest(paste0(config$community, " ", input$dropdown_template),
         template_schema_name(),
-        filenames = switch((template_type == "assay") + 1, NULL, as.list(names(datatype_list$files))),
+        filenames = switch((template_type == "assay") + 1,
+          NULL,
+          as.list(names(datatype_list$files))
+        ),
         datasetId = folder_synID()
       )
 
@@ -257,7 +275,7 @@ shinyServer(function(input, output, session) {
 
   ######## Validation Section #######
   observeEvent(input$btn_validate, {
-  
+
     # loading screen for validating metadata
     dcWaiter("show", msg = "Validating...")
 
@@ -295,9 +313,10 @@ shinyServer(function(input, output, session) {
       if (valRes$errorType == "Wrong Schema") {
         DTableServer("tbl_preview", data = inFile$data(), highlight = "full")
       } else {
-        DTableServer("tbl_preview",
+        DTableServer(
+          "tbl_preview",
           data = inFile$data(),
-          highlight = "partial", hightlight.col = valRes$errorDT$Column, hightlight.value = valRes$errorDT$Value
+          highlight = "partial", highlightValues = valRes$errorHighlight
         )
       }
 
@@ -382,7 +401,7 @@ shinyServer(function(input, output, session) {
         synStore_obj,
         "./tmp/synapse_storage_manifest.csv", folder_synID()
       )
-      manifest_path <-  tags$a(href = paste0("synapse.org/#!Synapse:", manifest_id), manifest_id, target = "_blank")
+      manifest_path <- tags$a(href = paste0("synapse.org/#!Synapse:", manifest_id), manifest_id, target = "_blank")
 
       # if no error
       if (startsWith(manifest_id, "syn") == TRUE) {
@@ -393,7 +412,6 @@ shinyServer(function(input, output, session) {
         sapply(clean_tags, FUN = hide)
         reset("inputFile-file")
         DTableServer("tbl_preview", data.frame(NULL))
-
       } else {
         dcWaiter("update", msg = HTML(paste0(
           "Uh oh, looks like something went wrong!",

@@ -1,0 +1,9 @@
+# This file needs to have chmod 400 permissions
+
+# oauth client id and secret required for the application.
+CLIENT_ID: '<Your Client ID>'
+CLIENT_SECRET: '<Your Client Secret>'
+
+# url of your deployed app
+# for local testing, change port based on your OAuth Client's redirect_uri, e.g. https://localhost:8100/
+APP_URL: '<Your APP URL>'

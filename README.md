@@ -16,24 +16,23 @@ Follow the steps below to make sure the _Data Curator App_ is fully setup to wor
 
         git clone --single-branch --branch shiny-server-main https://github.com/Sage-Bionetworks/data_curator.git
 
-2.  Create and modify the configuration file:
+2.  Create and modify the configuration file ([How to obtain OAuth Credential](https://github.com/Sage-Bionetworks/data_curator#Authentication)):
 
         cp example_config.yaml config.yaml
         chmod 400 config.yaml
 
-    - `CLIENT_ID` and `CLIENT_SECRET`: [how to obtain OAuth Credential](https://github.com/Sage-Bionetworks/data_curator#Authentication)
-    - `APP_URL`: the redirection url to your app
-    - `CONDA_NAME`: conda environment name
+3.  Create and activate a virtual environment within which you can install the package:
 
-3.  Create and activate the conda environment:
+        python -m venv .venv
+        source .venv/bin/activate
 
-        export CONDA_NAME=$(tail -n1 config.yaml | cut -f2 -d':' | tr -d \''"')
-        conda env create -f environment.yml -n $CONDA_NAME
-        conda activate $CONDA_NAME
+4.  Install required Python pacakges dependencies:
 
-4.  Install required R pacakges dependencies:
+        pip install -r requirements.txt
 
-        R -e "renv::restore()"
+5.  Install required R pacakges dependencies:
+
+        R -f install-pkgs.R
 
 ### Schematic Setup
 
@@ -41,17 +40,17 @@ Follow the steps below to make sure the _Data Curator App_ is fully setup to wor
 
         git clone --single-branch --branch develop https://github.com/Sage-Bionetworks/schematic.git
 
-2.  Install the latest release of the `schematic` via `pip`:
+2.  Install the latest release of the `schematic` via `pip`. IF NOT USING CONDA, install the devel version below:
 
         python -m pip install schematicpy
 
-    For development and test with the latest update from `schematic`, install the `schematic` via `poetry`:
+    For development and test with the latest update from `schematic`, install the `schematic` via [poetry]:
 
         cd schematic
         poetry build
-        pip install dist/schematicpy-*-py3-none-any.whl
+        pip install dist/schematicpy-1.0.0-py3-none-any.whl
 
-3.  Set up the `schematic` configuration. To do so, follow the instructions on the `schematic` repository [README](https://github.com/Sage-Bionetworks/schematic/tree/develop#12-installation-requirements-and-pre-requisites)
+3.  Set up the `schematic` configuration. To do so, follow the instructions on the [schematic's documentation](https://sage-schematic.readthedocs.io/en/develop/index.html#package-installation-and-setup)
 
 ### Data Model Configuration
 
@@ -68,7 +67,10 @@ Use the app configuration file `www/config.json` to adapt this app to your DCC.
 
 ## Authentication
 
-This utilizes a Synapse Authentication (OAuth) client (code motivated by [ShinyOAuthExample](https://github.com/brucehoff/ShinyOAuthExample) and [app.R](https://gist.github.com/jcheng5/44bd750764713b5a1df7d9daf5538aea). Each application is required to have its own OAuth client as these clients cannot be shared between one another. View instructions [here](https://docs.synapse.org/articles/using_synapse_as_an_oauth_server.html) to learn how to request a client. Once you obtain the `CLIENT_ID` and `CLIENT_SECRET` make sure to add it to the configuration yaml file.
+This utilizes a Synapse Authentication (OAuth) client (code motivated by [ShinyOAuthExample](https://github.com/brucehoff/ShinyOAuthExample) and [app.R](https://gist.github.com/jcheng5/44bd750764713b5a1df7d9daf5538aea). Each application is required to have its own OAuth client as these clients cannot be shared between one another. View instructions [here](https://docs.synapse.org/articles/using_synapse_as_an_oauth_server.html) to learn how to request a client. Once you obtain the client, make sure to add it to the configuration yaml file:
+
+- `CLIENT_ID` and `CLIENT_SECRET`
+- `APP_URL`: the redirection url to your app
 
 ---
 
@@ -86,3 +88,4 @@ Main contributors and developers:
 <!-- Links -->
 
 [schematic]: https://github.com/Sage-Bionetworks/schematic/tree/develop
+[poetry]: https://github.com/python-poetry/poetry
