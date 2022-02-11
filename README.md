@@ -18,8 +18,8 @@ Follow the steps below to make sure the _Data Curator App_ is fully setup to wor
 
 2.  Create and modify the configuration file ([How to obtain OAuth Credential](https://github.com/Sage-Bionetworks/data_curator#Authentication)):
 
-        cp example_config.yaml config.yaml
-        chmod 400 config.yaml
+        cp example_oauth_config.yml oauth_config.yml
+        chmod 400 oauth_config.yml
 
 3.  Create and activate a virtual environment within which you can install the package:
 
