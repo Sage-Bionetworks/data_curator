@@ -3,10 +3,13 @@
 
 name: shiny-deploy
 
+# TODO: remove `shiny-server-develop` when we use shinyapps.io as production site
+# also consider to change shiny-server-main to main since we will not host in shinyServer
 on:
   push:
     branches:
       - shiny-server-main
+      - shiny-server-develop # add develop for testing for now
       - release*
     paths-ignore:
       - .github/ISSUE_TEMPLATE/**
