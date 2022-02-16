@@ -7,9 +7,9 @@ on:
   push:
     branches:
       - shiny-server-main
-      - switch-python-venv # tmp
-      - update-workflow-for-schematic-config # tmp
       - release*
+    paths-ignore:
+      - .github/ISSUE_TEMPLATE/**
 
 jobs:
   shiny-deploy:
