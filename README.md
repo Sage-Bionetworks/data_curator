@@ -1,64 +1,91 @@
-# HTAN Data Curator App
-## Development Environment Setup
+# Data Curator App
 
-### Data Curator App Setup (frontend)
-Follow the steps below to make sure the _Data Curator App_ (frontend) is fully setup to work with the [schematic](https://github.com/Sage-Bionetworks/schematic/tree/main) (backend):
+## Introduction
 
-Navigate to the location where you want to setup the application (i.e., the _Shiny Server_). Clone the code on this github branch (_shiny-server-1.0.0.rc1_):
+The _Data Curator App_ is an R Shiny app that serves as the _frontend_ to the schematic Python package. It allows data contributors to easily annotate, validate and submit their metadata.
 
-    git clone --single-branch --branch shiny-server-1.0.0.rc1 https://github.com/Sage-Bionetworks/HTAN_data_curator.git
+---
 
-Create a conda environment in the cloned directory from the `environment.yml` file which has all the required package dependencies:
+## Get Started and Installation
 
-    conda env create -f environment.yml
+Follow the steps below to make sure the _Data Curator App_ is fully setup to work with the [schematic]:
 
-Here, our conda environment name `data_curator_env` is set from the `environment.yml` file .
+### Data Curator App Setup
 
-Activate the `data_curator_env` environment:
+1.  Clone this repo (front-end) with one single branch (i.e., _shiny-server-main_):
 
-    conda activate data_curator_env
-    
-_Note_:
-- You can change the name of your conda environment inside `environment.yml` or even use another environment, but please note that you will need to make changes accordingly in the `app.R` file line 16.
+        git clone --single-branch --branch shiny-server-main https://github.com/Sage-Bionetworks/data_curator.git
 
--------
+2.  Create and modify the configuration file ([How to obtain OAuth Credential](https://github.com/Sage-Bionetworks/data_curator#Authentication)):
 
-### Schematic Setup (backend)
+        cp example_oauth_config.yml oauth_config.yml
+        chmod 400 oauth_config.yml
 
-The next step is to install the latest release of the [schematic](https://github.com/Sage-Bionetworks/schematic/tree/main) (backend) as a folder `schematic` inside the `HTAN_data_curator` folder and tie it together with this frontend. 
+3.  Create and activate a virtual environment within which you can install the package:
 
-To do so carry out the following steps:
+        python -m venv .venv
+        source .venv/bin/activate
 
-1. Inside the `HTAN_data_curator` folder, clone the repo from this [location](https://github.com/Sage-Bionetworks/schematic/tree/main), by running the following command:
+4.  Install required Python pacakges dependencies:
 
-    `git clone --single-branch --branch main https://github.com/Sage-Bionetworks/schematic.git`
+        pip install -r requirements.txt
 
-This creates a folder named `schematic` inside the the `HTAN_data_curator folder`.
+5.  Install required R pacakges dependencies:
 
-2. Navigate into the created `schematic` directory. Install the backend (`schematic` package) within the conda virtual environment by running:
+        R -f install-pkgs.R
 
-    `pip install -e .`
+### Schematic Setup
 
-To verify that the backend is installed, do this: `pip list`
+1.  Clone the [schematic] (backend) as a folder `schematic` inside the `data_curator` folder:
 
-If you can find the `schematic` package in the list of packages installed it was successful.
+        git clone --single-branch --branch develop https://github.com/Sage-Bionetworks/schematic.git
 
-3. Obtain the `credentials.json` file in `schematic` to authenticate user access to Google API services which will be used to create the metadata templates. If you do not already have this file, make sure you are authorized (see _Notes_ below) and run the below command within `schematic` to download the HTAN credentials file `syn21088684` through the `synapseclient` (part of the backend):
+2.  Install the latest release of the `schematic` via `pip`. IF NOT USING CONDA, install the devel version below:
 
-    `synapse get syn21088684`
+        python -m pip install schematicpy
 
-4. Obtain the `token.pickle` file in `schematic` which is also necessary for authentication. If you do not already have this file run the `metadata_usage` example as follows inside `schematic`:
+    For development and test with the latest update from `schematic`, install the `schematic` via [poetry]:
 
-    `python examples/metadata_model.py`
+        cd schematic
+        poetry build
+        pip install dist/schematicpy-1.0.0-py3-none-any.whl
 
-This will prompt you with a URL on your console to Google's authorization process. Follow that and upon completion the `token.pickle` file will automatically be downloaded to the required location.
+3.  Set up the `schematic` configuration. To do so, follow the instructions on the [schematic's documentation](https://sage-schematic.readthedocs.io/en/develop/index.html#package-installation-and-setup)
 
-_Notes:_
+### Data Model Configuration
 
-- You can install the package by changing from anywhere else by changing the `.` to whatever the path is to the to where you have downloaded the package (`pip install -e /path/to/package`).
+Use the app configuration file `www/config.json` to adapt this app to your DCC.
 
-- `syn21088684` is the Synapse ID of the HTAN specific `credentials.json` file on Synapse that corresponds to the Google service account that creates HTAN templates.
+- `manifest schemas`: defines the list of schemas displayed under the "Choose a Metadata Template Type:" dropdown in the application.
+  - `display_name` : The display name for the dropdown. (e.g. _scRNA-seq Level 1_)
+  - `schema_name`: The name of the manifest in the JSON-LD schema (e.g. _ScRNA-seqLevel1_)
+  - `type`: The type of manifest. As currently configured in `app.R`, will only display manifests of type _assay_.
+- `main_fileview` : The Synapse ID of a fileview that is scoped to all files, folders, & projects in your community. (e.g. _syn20446927_)
+- `community` : the abbreviated name of the community or project. (e.g. _HTAN_)
 
-- You need to be authorized to download protected Synapse files such as credentials. Please contact milen.nikolov@sagebase.org for access to the HTAN credentials.
+---
 
-- If you want to test the backend you can run other things inside `schematic`, but in order to run the `examples/synapse_store.py` example, you need to configure your Synapse credentials in the `.synapseConfig` file (which can be found in the `schematic` directory), as described [here](https://github.com/Sage-Bionetworks/schematic/tree/main#configure-synapse-credentials).
+## Authentication
+
+This utilizes a Synapse Authentication (OAuth) client (code motivated by [ShinyOAuthExample](https://github.com/brucehoff/ShinyOAuthExample) and [app.R](https://gist.github.com/jcheng5/44bd750764713b5a1df7d9daf5538aea). Each application is required to have its own OAuth client as these clients cannot be shared between one another. View instructions [here](https://docs.synapse.org/articles/using_synapse_as_an_oauth_server.html) to learn how to request a client. Once you obtain the client, make sure to add it to the configuration yaml file:
+
+- `CLIENT_ID` and `CLIENT_SECRET`
+- `APP_URL`: the redirection url to your app
+
+---
+
+## Contributors
+
+Main contributors and developers:
+
+- [Rongrong Chai](https://github.com/rrchai)
+- [Xengie Doan](https://github.com/xdoan)
+- [Milen Nikolov](https://github.com/milen-sage)
+- [Sujay Patil](https://github.com/sujaypatil96)
+- [Robert Allaway](https://github.com/allaway)
+- [Bruno Grande](https://github.com/BrunoGrandePhD)
+
+<!-- Links -->
+
+[schematic]: https://github.com/Sage-Bionetworks/schematic/tree/develop
+[poetry]: https://github.com/python-poetry/poetry
