@@ -22,6 +22,8 @@ shinyServer(function(input, output, session) {
   token_response <- content(req, type = NULL)
   access_token <- token_response$access_token
 
+  session$userData$access_token <- access_token
+
   ######## session global variables ########
   source_python("functions/synapse_func_alias.py")
   source_python("functions/metadata_model.py")
@@ -36,13 +38,15 @@ shinyServer(function(input, output, session) {
 
   synStore_obj <- NULL # gets list of projects they have access to
   project_synID <- NULL # selected project synapse ID
-  folder_synID <- NULL # selected foler synapse ID
-  template_schema_name <- NULL # selected template schema name
+  folder_synID <- reactiveVal("") # selected foler synapse ID
+  template_schema_name <- reactiveVal(NULL) # selected template schema name
+  template_type <- NULL # type of selected template
 
+  isUpdateFolder <- reactiveVal(FALSE)
   datatype_list <- list(projects = NULL, folders = NULL, manifests = template_namedList, files = NULL)
 
   tabs_list <- c("tab_instructions", "tab_data", "tab_template", "tab_upload")
-  clean_tags <- c("div_download", "div_validate", NS("tbl_validate", "table"), "btn_val_gsheet", "btn_submit")
+  clean_tags <- c("div_template", "div_validate", NS("tbl_validate", "table"), "btn_val_gsheet", "btn_submit")
 
   # add box effects
   boxEffect(zoom = TRUE, float = TRUE)
@@ -51,42 +55,52 @@ shinyServer(function(input, output, session) {
   # synapse cookies
   session$sendCustomMessage(type = "readCookie", message = list())
 
-  # login page
+  # initial loading page
+  #
+  # TODO:  If we don't use cookies, then what event should trigger this?
+  #
   observeEvent(input$cookie, {
-    # login and update session; otherwise, notify to login to Synapse first
-    tryCatch(
-      {
-        syn_login(sessionToken = input$cookie, rememberMe = FALSE)
+    # login and update session
+    #
+    # The original code pulled the auth token from a cookie, but it
+    # should actually come from session$userData.  The former is
+    # the Synapse login, only works when the Shiny app' is hosted
+    # in the synapse.org domain, and is unscoped.  The latter will
+    # work in any domain and is scoped to the access required by the
+    # Shiny app'
+    #
+    access_token <- session$userData$access_token
 
-        # welcome message
-        # output$title <- renderUI({
-        #   titlePanel(h4(sprintf("Welcome, %s", syn_getUserProfile()$userName)))
-        # })
+    syn_login(authToken = access_token, rememberMe = FALSE)
 
-        # updating global vars with values for projects
-        synStore_obj <<- synapse_driver(token = input$cookie)
+    # updating syn storage
+    tryCatch(synStore_obj <<- synapse_driver(access_token = access_token), error = function(e) NULL)
 
-        # get_projects_list(synStore_obj)
-        projects_list <- synapse_driver$getStorageProjects(synStore_obj)
-        datatype_list$projects <<- list2Vector(projects_list)
+    if (is.null(synStore_obj)) {
+      message("'synapse_driver' fails, run 'synapse_driver' to see detailed error")
+      dcWaiter("update", landing = TRUE, isPermission = FALSE)
+    } else {
+      projects_list <- synapse_driver$getStorageProjects(synStore_obj)
+      datatype_list$projects <<- list2Vector(projects_list)
 
-        # updates project dropdown
-        lapply(c("header_dropdown_", "dropdown_"), function(x) {
-          lapply(c(1, 3), function(i) {
-            updateSelectInput(session, paste0(x, datatypes[i]),
-              choices = sort(names(datatype_list[[i]]))
-            )
-          })
+      # updates project dropdown
+      lapply(c("header_dropdown_", "dropdown_"), function(x) {
+        lapply(c(1, 3), function(i) {
+          updateSelectInput(session, paste0(x, datatypes[i]),
+            choices = sort(names(datatype_list[[i]]))
+          )
         })
+      })
 
+      user_name <- syn_getUserProfile()$userName
+
+      if (!syn_is_certified(user_name)) {
+        dcWaiter("update", landing = TRUE, isCertified = FALSE)
+      } else {
         # update waiter loading screen once login successful
-        dcWaiter("update", isLogin = TRUE, isPass = TRUE, usrName = syn_getUserProfile()$userName)
-      },
-      error = function(err) {
-        message(err) # write log error
-        dcWaiter("update", isLogin = TRUE, isPass = FALSE)
+        dcWaiter("update", landing = TRUE, userName = user_name)
       }
-    )
+    }
   })
 
 
