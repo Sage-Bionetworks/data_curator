@@ -21,7 +21,7 @@ Follow the steps below to make sure the _Data Curator App_ is fully setup to wor
         cp example_config.yaml config.yaml
         chmod 400 config.yaml
 
-    - `CLIENT_ID` and `CLIENT_SECRET`: [how to obtain OAuth Credential](https://github.com/Sage-Bionetworks/data_curator#Authentication)
+    - `CLIENT_ID` and `CLIENT_SECRET`: [how to obtain OAuth Credential](https://github.com/Sage-Bionetworks/data_curator#Authentication) 
     - `APP_URL`: the redirection url to your app
     - `CONDA_NAME`: conda environment name
 
@@ -34,6 +34,8 @@ Follow the steps below to make sure the _Data Curator App_ is fully setup to wor
 4.  Install required R pacakges dependencies:
 
         R -e "renv::restore()"
+        
+>Note: When installing multiple Data Curator Apps on your machine you can use the same OAuth client ID/secret and conda envirionment.
 
 ### Schematic Setup
 
