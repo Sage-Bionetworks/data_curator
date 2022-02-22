@@ -23,11 +23,9 @@ manifest:
 
 model:
   input:
-    location: 'NF.jsonld'
-    file_type: 'local'
-    validation_schema: 'data/validation_schemas/example_validation_schema.json'
-    log_location: 'data/json_schema_logs/json_schema_log.json'
-
+    download_url: 'https://raw.githubusercontent.com/nf-osi/nf-metadata-dictionary/v3.0.2/NF.jsonld' # url to download JSON-LD data model
+    location: 'NF.jsonld' # path to JSON-LD data model
+    file_type: 'local' # only type "local" is supported currently
 style:
   google_manifest:
     req_bg_color:
