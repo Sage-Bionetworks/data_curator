@@ -8,4 +8,3 @@
 }
 
 options(stringsAsFactors = FALSE)
-source("renv/activate.R")
