@@ -1,27 +1,50 @@
 suppressPackageStartupMessages({
+  library(yaml)
+  library(reticulate)
+})
+
+oauth_client <- yaml.load_file("oauth_config.yml")
+
+client_id <- toString(oauth_client$CLIENT_ID)
+client_secret <- toString(oauth_client$CLIENT_SECRET)
+app_url <- toString(oauth_client$APP_URL)
+
+if (is.null(client_id) || nchar(client_id) == 0) stop("oauth_config.yml is missing CLIENT_ID")
+if (is.null(client_secret) || nchar(client_secret) == 0) stop("oauth_config.yml is missing CLIENT_SECRET")
+if (is.null(app_url) || nchar(app_url) == 0) stop("oauth_config.yml is missing APP_URL")
+
+# ShinyAppys has a limit of 7000 files which this app' grossly exceeds
+# due to its Python dependencies.  To get around the limit we zip up
+# the virtual environment before deployment and unzip it here.
+#
+# unzip virtual environment, named as ".venv.zip"
+if (!file.exists(".venv")) utils::unzip(".venv.zip")
+
+# We get a '126' error (non-executable) if we don't do this:
+system("chmod -R +x .venv")
+
+# Activate virtual env
+# Don't necessarily have to set `RETICULATE_PYTHON` env variable
+Sys.unsetenv("RETICULATE_PYTHON")
+reticulate::use_virtualenv(file.path(getwd(), ".venv"))
+
+suppressPackageStartupMessages({
   library(shiny)
   library(httr)
-  library(rjson)
-  library(yaml)
   library(shinyjs)
   library(dplyr)
+  library(tidyr)
   library(shinythemes)
   library(shinydashboard)
   library(stringr)
   library(DT)
   library(jsonlite)
-  library(reticulate)
-  library(ggplot2)
-  library(purrr)
-  library(plotly)
   library(shinypop)
   library(waiter)
   library(readr)
   library(sass)
   library(shinydashboardPlus)
 })
-
-# APP_URL <- "https://shinypro.synapse.org/users/spatil/HTAN-oauth/"
 
 has_auth_code <- function(params) {
   # params is a list object containing the parsed URL parameters. Return TRUE if
@@ -31,19 +54,10 @@ has_auth_code <- function(params) {
   return(!is.null(params$code))
 }
 
-oauth_client <- yaml.load_file("config.yaml")
-
-client_id <- toString(oauth_client$client_id)
-client_secret <- oauth_client$client_secret
-APP_URL <- oauth_client$APP_URL
-if (is.null(client_id)) stop("config.yaml is missing client_id")
-if (is.null(client_secret)) stop("config.yaml is missing client_secret")
-if (is.null(APP_URL)) stop("config.yaml is missing client_secret")
-
 app <- oauth_app("shinysynapse",
   key = client_id,
   secret = client_secret,
-  redirect_uri = APP_URL
+  redirect_uri = app_url
 )
 
 # These are the user info details ('claims') requested from Synapse:
@@ -74,10 +88,6 @@ api <- oauth_endpoint(
 
 # The 'openid' scope is required by the protocol for retrieving user information.
 scope <- "openid view download modify"
-
-# Activate conda env
-# Don't necessarily have to set `RETICULATE_PYTHON` env variable
-reticulate::use_condaenv("data_curator_env_oauth")
 
 # Import functions/modules
 source_files <- list.files(c("functions", "modules"), pattern = "*\\.R$", recursive = TRUE, full.names = TRUE)
