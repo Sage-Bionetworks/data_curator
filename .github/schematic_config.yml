@@ -19,7 +19,8 @@ synapse:
   
 manifest:
   title: 'NF'
-  data_type: 'NF'
+  data_type: 
+    - 'NF'
 
 model:
   input:
