@@ -29,7 +29,7 @@
 
     // custom dropdown - leftUI
     // when the box open
-    .open>a { 
+    .open>a {
       background-color: $glass_grey !important;
 
       &:focus, &:hover {
@@ -44,11 +44,10 @@
     animation: fadeIn 100ms;
   
     ul.menu {
-
       padding: 0 5px !important;
 
       // reset all margin
-      & * {
+      * {
         margin: 0px;
       }
       
@@ -62,7 +61,19 @@
       .shiny-input-container{
         width: 250px;
         margin: 5px;
-        height: 34px; // remove extra space bottom
+        height: 34px; // match button height
+
+        .selectize-input {
+          height: 20px;
+        }
+
+        .item {
+          display: inline-block;
+          width: 80%;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
       }
     }
 

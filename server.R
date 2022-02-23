@@ -103,31 +103,9 @@ shinyServer(function(input, output, session) {
     }
   })
 
-
   ######## Arrow Button ########
   lapply(1:3, function(i) {
     switchTabServer(id = paste0("switchTab", i), tabId = "tabs", tab = reactive(input$tabs)(), tabList = tabs_list, parent = session)
-  })
-
-  ######## Update Folder List ########
-  lapply(c("header_dropdown_", "dropdown_"), function(x) {
-    observeEvent(ignoreInit = TRUE, input[[paste0(x, "project")]], {
-      # get synID of selected project
-      projectID <- datatype_list$projects[[input[[paste0(x, "project")]]]]
-
-      # gets folders per project
-      folder_df <- syn_tableQuery(sprintf("select name, id from %s where type = 'folder' and projectId = '%s'", config$main_fileview, projectID))$asDataFrame()
-      
-      folder_list <- setNames(as.list(folder_df$id), folder_df$name)
-
-      if (x == "dropdown_") {
-        project_synID <<- projectID
-        datatype_list$folders <<- folder_list
-      }
-
-      # updates foldernames
-      updateSelectInput(session, paste0(x, "folder"), choices = sort(names(folder_list)))
-    })
   })
 
   ######## Header Dropdown Button ########
@@ -141,16 +119,7 @@ shinyServer(function(input, output, session) {
     }
   })
 
-  lapply(datatypes, function(x) {
-    selector <- paste0("header_dropdown_", x)
-    observeEvent(input[[selector]], {
-      if (nchar(input[[selector]]) > 20) {
-        short <- paste0(substr(input[[selector]], 1, 20), " ...")
-        runjs(paste0("$('#header_content_", x, " .item').text('", short, "');"))
-      }
-    })
-  })
-
+  # sync header dropdown with main dropdown
   lapply(datatypes, function(x) {
     observeEvent(input[[paste0("dropdown_", x)]], {
       updateSelectInput(session, paste0("header_dropdown_", x),
@@ -170,90 +139,129 @@ shinyServer(function(input, output, session) {
   })
 
   observeEvent(input$update_confirm, {
-    if (input$update_confirm == TRUE) {
-      lapply(datatypes, function(x) {
-        updateSelectInput(session, paste0("dropdown_", x),
-          selected = input[[paste0("header_dropdown_", x)]]
-        )
-      })
-    }
+    req(input$update_confirm == TRUE)
+    isUpdateFolder(TRUE)
+    lapply(datatypes, function(x) {
+      updateSelectInput(session, paste0("dropdown_", x),
+        selected = input[[paste0("header_dropdown_", x)]]
+      )
+    })
+  })
+
+  ######## Update Folder List ########
+  lapply(c("header_dropdown_", "dropdown_"), function(x) {
+    observeEvent(ignoreInit = TRUE, input[[paste0(x, "project")]], {
+      # get synID of selected project
+      projectID <- datatype_list$projects[[input[[paste0(x, "project")]]]]
+
+      # gets folders per project
+      folder_list <- synapse_driver$getStorageDatasetsInProject(synStore_obj, projectID) %>% list2Vector()
+
+      # updates foldernames
+      updateSelectInput(session, paste0(x, "folder"), choices = sort(names(folder_list)))
+
+      if (x == "dropdown_") {
+        project_synID <<- projectID
+        datatype_list$folders <<- folder_list
+      }
+
+      if (isUpdateFolder()) {
+        # sync with header dropdown
+        updateSelectInput(session, "dropdown_folder", selected = input[["header_dropdown_folder"]])
+        isUpdateFolder(FALSE)
+      }
+    })
   })
 
   ######## Update Template ########
   # update selected schema template name
   observeEvent(input$dropdown_template, {
-    template_schema_name <<- template_namedList[match(input$dropdown_template, names(template_namedList))]
+    template_schema_name(template_namedList[match(input$dropdown_template, names(template_namedList))])
   })
 
-  # hide tags when users select new template
-  observeEvent(
-    {
-      input$dropdown_folder
-      input$dropdown_template
-    },
-    {
-      sapply(clean_tags, FUN = hide)
-    }
-  )
-
   ######## Template Google Sheet Link ########
-  observeEvent(input$btn_download, {
+  observeEvent(c(input$dropdown_folder, input$tabs), {
+    req(input$tabs %in% c("tab_template", "tab_upload"))
+    tmp_folder_synID <- datatype_list$folders[[input$dropdown_folder]]
+    req(tmp_folder_synID != folder_synID()) # if folder changes
+
+    # update selected folder ID
+    folder_synID(tmp_folder_synID)
+
+    if (input$tabs == "tab_template") {
+      dcWaiter("show", msg = paste0("Getting files in ", input$dropdown_folder, "..."))
+      # get file list in selected folder
+      file_list <- synapse_driver$getFilesInStorageDataset(
+        synStore_obj,
+        folder_synID()
+      )
+      datatype_list$files <<- list2Vector(file_list)
+      dcWaiter("hide")
+    }
+  })
+
+  # display warning message if folder is empty and data type is assay
+  observeEvent(c(folder_synID(), template_schema_name()), {
+
+    # hide tags when users select new template
+    sapply(clean_tags, FUN = hide)
+
+    req(input$tabs == "tab_template")
+    hide("div_template_warn")
+    template_type <<- config$manifest_schemas$type[match(template_schema_name(), template_namedList)]
+    req(length(datatype_list$files) == 0 & template_type == "assay")
+    warn_text <- paste0(
+      strong(sQuote(input$dropdown_folder)), " folder is empty,
+       please upload your data before generating manifest.",
+      "<br><br>", strong(sQuote(input$dropdown_template)),
+      " requires data files to be uploaded prior generating and submitting templates.",
+      "<br><br>", "Filling in a template before uploading your data,
+       may result in errors and delays in your data submission later."
+    )
+
+    nx_report_warning("Warning", HTML(warn_text))
+    output$text_template_warn <- renderUI(tagList(br(), span(class = "warn_msg", HTML(warn_text))))
+
+    show("div_template_warn")
+  })
+
+  observeEvent(input$btn_template, {
 
     # loading screen for template link generation
     dcWaiter("show", msg = "Generating link...")
 
-    # update selected folder ID
-    folder_synID <<- datatype_list$folders[[input$dropdown_folder]]
-
-    if (is.null(input$dropdown_template)) {
-      output$text_download <- renderUI({
-        tags$span(class = "error_msg", HTML("Please <b>select a template</b> from the 'Select your Dataset' tab !"))
-      })
-    } else {
-      # checks if a manifest already exists
-      existing_manifestID <- synapse_driver$getDatasetManifest(
-        synStore_obj,
-        folder_synID
+    manifest_url <-
+      metadata_model$getModelManifest(paste0(config$community, " ", input$dropdown_template),
+        template_schema_name(),
+        filenames = switch((template_type == "assay") + 1,
+          NULL,
+          as.list(names(datatype_list$files))
+        ),
+        datasetId = folder_synID()
       )
-      if (existing_manifestID == "") {
-        # get file list in selected folder
-        # don't put in the observation of folder dropdown
-        # it will crash if users switch folders too often
-        file_list <- synapse_driver$getFilesInStorageDataset(
-          synStore_obj,
-          folder_synID
-        )
-        datatype_list$files <<- list2Vector(file_list)
 
-        manifest_url <-
-          metadata_model$getModelManifest(paste0(config$community, " ", input$dropdown_template),
-            template_schema_name,
-            filenames = as.list(names(datatype_list$files)),
-            datasetId = folder_synID,
-            useAnnotations = T
-          )
-
-        # make sure not scalar if length of list is 1 in R
-        # add in the step to convert names later
-      } else {
-        # if the manifest already exists
-        manifest_entity <- syn_get(existing_manifestID)
-        manifest_url <- metadata_model$populateModelManifest(paste0(
-          config$community,
-          " ", input$dropdown_template
-        ), manifest_entity$path, template_schema_name)
-      }
-
-      output$text_download <- renderUI({
-        tags$a(href = manifest_url, manifest_url, target = "_blank") ### add link to data dictionary when we have it ###
-      })
-    }
+    # generate link
+    output$text_template <- renderUI(
+      tags$a(id = "template_link", href = manifest_url, list(icon("hand-point-right"), manifest_url), target = "_blank")
+    )
 
     dcWaiter("hide", sleep = 1)
+
+    nx_confirm(
+      inputId = "btn_template_confirm",
+      title = "Go to the template now?",
+      message = paste0("click 'Go' to edit your ", sQuote(input$dropdown_template), " template on the google sheet"),
+      button_ok = "Go",
+    )
+
     # display link
-    show("div_download") # TODO: add progress bar on (loading) screen
+    show("div_template") # TODO: add progress bar on (loading) screen
   })
 
+  observeEvent(input$btn_template_confirm, {
+    req(input$btn_template_confirm == TRUE)
+    runjs("$('#template_link')[0].click();")
+  })
 
   ######## Reads .csv File ########
   inFile <- csvInfileServer("inputFile", colsAsCharacters = TRUE, keepBlank = TRUE)
@@ -275,7 +283,7 @@ shinyServer(function(input, output, session) {
       silent = TRUE,
       annotation_status <- metadata_model$validateModelManifest(
         inFile$raw()$datapath,
-        template_schema_name
+        template_schema_name()
       )
     )
 
@@ -290,9 +298,11 @@ shinyServer(function(input, output, session) {
       # render empty if error is not "invaid value" type - ifelse() will not work
       if (valRes$errorType == "Invalid Value") {
         DTableServer("tbl_validate", valRes$errorDT,
+          rownames = FALSE, filter = "none",
+          caption = "View all the error(s) highlighted in the preview table above",
           options = list(
             pageLength = 50, scrollX = TRUE,
-            scrollY = min(50 * length(annotation_status), 400), lengthChange = FALSE,
+            scrollY = min(50 * nrow(valRes$errorDT), 400), lengthChange = FALSE,
             info = FALSE, searching = FALSE
           )
         )
@@ -303,9 +313,10 @@ shinyServer(function(input, output, session) {
       if (valRes$errorType == "Wrong Schema") {
         DTableServer("tbl_preview", data = inFile$data(), highlight = "full")
       } else {
-        DTableServer("tbl_preview",
+        DTableServer(
+          "tbl_preview",
           data = inFile$data(),
-          highlight = "partial", hightlight.col = valRes$errorDT$Column, hightlight.value = valRes$errorDT$Value
+          highlight = "partial", highlightValues = valRes$errorHighlight
         )
       }
 
@@ -334,7 +345,7 @@ shinyServer(function(input, output, session) {
     filled_manifest <- metadata_model$populateModelManifest(paste0(
       config$community,
       " ", input$dropdown_template
-    ), inFile$raw()$datapath, template_schema_name)
+    ), inFile$raw()$datapath, template_schema_name())
 
     # rerender and change button to link
     output$val_gsheet <- renderUI({
@@ -350,85 +361,85 @@ shinyServer(function(input, output, session) {
     # loading screen for submitting data
     dcWaiter("show", msg = "Submitting...")
 
+    dir.create("./tmp", showWarnings = FALSE)
+
     # reads file csv again
     submit_data <- csvInfileServer("inputFile")$data()
-    # IF an assay component selected (define assay components) note for future
+
+    # If an assay component selected (define assay components) note for future
     # the type to filter (eg assay) on could probably also be a config choice
     assay_schemas <- config$manifest_schemas$display_name[config$manifest_schemas$type == "assay"]
-    # iffolder_ID has not been updated yet
-    if (is.null(folder_synID)) folder_synID <<- datatype_list$folders[[input$dropdown_folder]]
-    # and adds entityID, saves it as synapse_storage_manifest.csv, then associates
-    # with synapse files
+    # if folder_ID has not been updated yet
+    if (folder_synID() == "") folder_synID(datatype_list$folders[[input$dropdown_folder]])
+
     if (input$dropdown_template %in% assay_schemas) {
       # make into a csv or table for assay components already has entityId
       if ("entityId" %in% colnames(submit_data)) {
         write.csv(submit_data,
-          file = "./files/synapse_storage_manifest.csv",
+          file = "./tmp/synapse_storage_manifest.csv",
           quote = TRUE, row.names = FALSE, na = ""
         )
       } else {
-        file_list <- synapse_driver$getFilesInStorageDataset(synStore_obj, folder_synID)
+        file_list <- synapse_driver$getFilesInStorageDataset(synStore_obj, folder_synID())
         datatype_list$files <<- list2Vector(file_list)
 
         # better filename checking is needed
-        files_df <- stack(datatype_list$files) # crash if no file existing
+        # TODO: crash if no file existing
+        files_df <- stack(datatype_list$files)
+        # adds entityID, saves it as synapse_storage_manifest.csv, then associates with synapse files
         colnames(files_df) <- c("entityId", "Filename")
         files_entity <- inner_join(submit_data, files_df, by = "Filename")
 
         write.csv(files_entity,
-          file = "./files/synapse_storage_manifest.csv",
+          file = "./tmp/synapse_storage_manifest.csv",
           quote = TRUE, row.names = FALSE, na = ""
         )
       }
 
       # associates metadata with data and returns manifest id
-      logjs("haha6")
       manifest_id <- synapse_driver$associateMetadataWithFiles(
         synStore_obj,
-        "./files/synapse_storage_manifest.csv", folder_synID,
+        "./tmp/synapse_storage_manifest.csv", folder_synID(),
         useSchemaLabel = FALSE
       )
-      logjs("haha7")
-      manifest_path <- paste0("synapse.org/#!Synapse:", manifest_id)
+      manifest_path <- tags$a(href = paste0("synapse.org/#!Synapse:", manifest_id), manifest_id, target = "_blank")
+
       # if no error
       if (startsWith(manifest_id, "syn") == TRUE) {
-        rm("./files/synapse_storage_manifest.csv")
         dcWaiter("hide")
-        nx_report_success("Success!", paste0("Manifest submitted to: ", manifest_path))
+        nx_report_success("Success!", HTML(paste0("Manifest submitted to: ", manifest_path)))
 
-        # clean up inputfile
+        # clean up old inputs/results
         sapply(clean_tags, FUN = hide)
+        reset("inputFile-file")
         DTableServer("tbl_preview", data.frame(NULL))
-        # TODO: input file not reset yet
-        # reset(c(clean_tags, "inputFile", "tbl_preview")) if reset works
       } else {
         dcWaiter("update", msg = HTML(paste0(
           "Uh oh, looks like something went wrong!",
           manifest_id,
           " is not a valid Synapse ID. Try again?"
         )), sleep = 3)
-        rm("/tmp/synapse_storage_manifest.csv")
       }
     } else {
       # if not assay type tempalte
       write.csv(submit_data,
-        file = "./files/synapse_storage_manifest.csv", quote = TRUE,
+        file = "./tmp/synapse_storage_manifest.csv", quote = TRUE,
         row.names = FALSE, na = ""
       )
 
       # associates metadata with data and returns manifest id
       manifest_id <- synapse_driver$associateMetadataWithFiles(
         synStore_obj,
-        "./files/synapse_storage_manifest.csv", folder_synID,
+        "./tmp/synapse_storage_manifest.csv", folder_synID(),
         useSchemaLabel = FALSE
+
       )
-      print(manifest_id)
-      manifest_path <- paste0("synapse.org/#!Synapse:", manifest_id)
+      manifest_path <- tags$a(href = paste0("synapse.org/#!Synapse:", manifest_id), manifest_id, target = "_blank")
 
       # if uploaded provided valid synID message
       if (startsWith(manifest_id, "syn") == TRUE) {
-        nx_report_success("Success!", paste0("Manifest submitted to: ", manifest_path))
-        rm("./files/synapse_storage_manifest.csv")
+        dcWaiter("hide")
+        nx_report_success("Success!", HTML(paste0("Manifest submitted to: ", manifest_path)))
 
         # clear inputs
         sapply(clean_tags, FUN = hide)
@@ -450,8 +461,9 @@ shinyServer(function(input, output, session) {
           "Uh oh, looks like something went wrong!",
           manifest_id, " is not a valid Synapse ID. Try again?"
         )), sleep = 3)
-        rm("/tmp/synapse_storage_manifest.csv")
       }
     }
+    # delete tmp manifest
+    unlink("./tmp/synapse_storage_manifest.csv")
   })
 })
