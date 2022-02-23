@@ -5,18 +5,18 @@
 
 # Do not change the 'definitions' section unless you know what you're doing
 definitions:
-  synapse_config: ".synapseConfig"
-  creds_path: "credentials.json"
-  token_pickle: "token.pickle"
-  service_acct_creds: "schematic_service_account_creds.json"
+  synapse_config: '.synapseConfig'
+  creds_path: 'credentials.json'
+  token_pickle: 'token.pickle'
+  service_acct_creds: 'schematic_service_account_creds.json'
 
 synapse:
-  master_fileview: 'syn16858331'
-  manifest_folder: 'manifests'
-  manifest_filename: 'data/manifests/synapse_storage_manifest.csv'
-  token_creds: 'syn21088684'
-  service_acct_creds: 'syn25171627'
-
+  master_fileview: 'syn16858331' # fileview of project with datasets on Synapse
+  manifest_folder: 'manifests' # manifests will be downloaded to this folder
+  manifest_filename: 'synapse_storage_manifest.csv' # name of the manifest file in the project dataset
+  token_creds: 'syn21088684' # synapse ID of credentials.json file
+  service_acct_creds: 'syn25171627' # synapse ID of service_account_creds.json file
+  
 manifest:
   title: 'NF'
   data_type: 'NF'
@@ -24,7 +24,7 @@ manifest:
 model:
   input:
     download_url: 'https://raw.githubusercontent.com/nf-osi/nf-metadata-dictionary/v3.0.2/NF.jsonld' # url to download JSON-LD data model
-    location: 'NF.jsonld' # path to JSON-LD data model
+    location: 'data-models/NF.jsonld' # path to JSON-LD data model
     file_type: 'local' # only type "local" is supported currently
 
 style:
