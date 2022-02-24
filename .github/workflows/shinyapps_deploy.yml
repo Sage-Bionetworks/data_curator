@@ -9,6 +9,7 @@ on:
   push:
     branches:
       - develop # add develop for testing for now
+    tags:
       - release*
     paths-ignore:
       - .github/ISSUE_TEMPLATE/**
