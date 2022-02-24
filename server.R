@@ -239,6 +239,19 @@ shinyServer(function(input, output, session) {
         ),
         datasetId = folder_synID()
       )
+    
+    #schematic rest api to generate manifest
+    # req <- httr::GET("http://localhost:3001/v1/manifest/generate",
+    #                  query = list(
+    #                    schema_url="https://raw.githubusercontent.com/ncihtan/data-models/main/HTAN.model.jsonld",
+    #                    title=input$dropdown_template,
+    #                    data_type=template_schema_name(),
+    #                    oauth="true",
+    #                    use_annotations="false",
+    #                    dataset_id=folder_synID()
+    #                  ))
+    # 
+    # manifest_url <- httr::content(req)
 
     # generate link
     output$text_template <- renderUI(
@@ -286,6 +299,16 @@ shinyServer(function(input, output, session) {
         template_schema_name()
       )
     )
+    
+    # schematic rest api to validate metadata
+    # req2 <- httr::POST("http://localhost:3001/v1/model/validate",
+    #                    query=list(
+    #                      schema_url="https://raw.githubusercontent.com/ncihtan/data-models/main/HTAN.model.jsonld",
+    #                      data_type=template_schema_name()),
+    #                    body=list(csv_file=upload_file("inFile$raw()$datapath"))
+    # )
+    # 
+    # annotation_status <- httr::content(req2)
 
     # validation messages
     valRes <- validationResult(annotation_status, input$dropdown_template, inFile$data())
