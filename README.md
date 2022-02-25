@@ -26,11 +26,7 @@ Follow the steps below to make sure the _Data Curator App_ is fully setup to wor
         python -m venv .venv
         source .venv/bin/activate
 
-4.  Install required Python pacakges dependencies:
-
-        pip install -r requirements.txt
-
-5.  Install required R pacakges dependencies:
+4.  Install required R pacakges dependencies:
 
         R -f install-pkgs.R
 
@@ -50,7 +46,9 @@ Follow the steps below to make sure the _Data Curator App_ is fully setup to wor
         poetry build
         pip install dist/schematicpy-1.0.0-py3-none-any.whl
 
-3.  Set up the `schematic` configuration. To do so, follow the instructions on the [schematic's documentation](https://sage-schematic.readthedocs.io/en/develop/index.html#package-installation-and-setup)
+3.  Create and modify the `schematic` configuration. To do so, follow the instructions on the [schematic's documentation](https://sage-schematic.readthedocs.io/en/develop/index.html#package-installation-and-setup)
+
+        cp example_schematic_config.yml schematic_config.yml 
 
 ### Data Model Configuration
 
