@@ -8,6 +8,6 @@ inputMModelLocation = CONFIG["model"]["input"]["location"]
 inputMModelLocationType = CONFIG["model"]["input"]["file_type"]
 
 manifest_title = CONFIG["manifest"]["title"]
-manifest_data_type = CONFIG["manifest"]["data_type"]
+manifest_data_type = CONFIG["manifest"]["data_type"][0]
 
 metadata_model = MetadataModel(inputMModelLocation, inputMModelLocationType)
