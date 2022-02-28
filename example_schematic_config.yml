@@ -22,7 +22,8 @@ manifest:
 
 model:
   input:
-    location: 'tests/data/example.model.jsonld'
+    download_url: https://raw.githubusercontent.com/Sage-Bionetworks/schematic/develop/tests/data/example.model.jsonld' # url to download JSON-LD data model
+    location: 'schematic/tests/data/example.model.jsonld' # path to JSON-LD data mode
     file_type: 'local'
 
 style:
