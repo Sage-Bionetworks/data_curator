@@ -8,9 +8,10 @@ name: shiny-deploy
 on:
   push:
     branches:
-      - shiny-server-main
-      - shiny-server-develop # add develop for testing for now
-      - release*
+      - main
+      - develop
+    tags:
+      - 'release-*.*.*'
     paths-ignore:
       - .github/ISSUE_TEMPLATE/**
 
