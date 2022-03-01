@@ -48,16 +48,15 @@ for (i in seq_along(secret_lists)) {
     # If you want to manually add to the secret:
     # 1. copy below code snippet and run it in the terminal
     # 2. copy content from 'token.pickle.b64' to your github secret
+    token_str <- base64enc::base64encode(secret_lists[i])
     system(
       sprintf(
         "
-        less %s | base64 --wrap=0 > token.pickle.b64;
-        gh secret set %s < token.pickle.b64;
+        gh secret set %s --body %s;
         ",
-        secret_lists[i], secret_names[i]
+        secret_names[i], token_str
       )
     )
-    unlink("token.pickle.b64")
   } else {
     system(
       sprintf(
