@@ -8,9 +8,8 @@ name: shiny-deploy
 on:
   push:
     branches:
-      - shiny-server-main
-      - shiny-server-develop
-      - update-setup
+      - main
+      - develop
     tags:
       - v*.*.*
     paths-ignore:
