@@ -14,8 +14,9 @@ on:
     tags:
       - v*.*.*
     paths-ignore:
-      - .github/ISSUE_TEMPLATE/**
-      - ./**/*.md
+      - '.github/ISSUE_TEMPLATE/**'
+      - '**/*.md'
+      - '**/.gitignore'
 
 jobs:
   shiny-deploy:
