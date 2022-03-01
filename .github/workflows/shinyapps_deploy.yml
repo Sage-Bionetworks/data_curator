@@ -15,7 +15,7 @@ on:
       - v*.*.*
     paths-ignore:
       - .github/ISSUE_TEMPLATE/**
-      - **/*.md
+      - ./**/*.md
 
 jobs:
   shiny-deploy:
