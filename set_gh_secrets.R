@@ -46,15 +46,15 @@ for (i in seq_along(secret_lists)) {
   if (secret_names[i] == "SCHEMATIC_TOKEN_PICKLE") {
     # token.pickle is a binary file
     # If you want to manually add to the secret:
-    # 1. copy below code snippet and run it in the terminal
-    # 2. copy content from 'token.pickle.b64' to your github secret
+    # 1. encode token.pickle in the terminal: base64 -w0 (linux) or base64 -b0 (macOS)
+    # 2. copy encoded character string to your github secret
     token_str <- base64enc::base64encode(secret_lists[i])
     system(
       sprintf(
         "
         gh secret set %s --body %s;
         ",
-        secret_names[i], token_str
+        secret_names[i], sQuote(token_str)
       )
     )
   } else {
