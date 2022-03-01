@@ -1,4 +1,4 @@
--from schematic.models.metadata import MetadataModel
+from schematic.models.metadata import MetadataModel
 from schematic import CONFIG
 
 

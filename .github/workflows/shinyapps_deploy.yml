@@ -9,11 +9,12 @@ on:
   push:
     branches:
       - shiny-server-main
-      - shiny-server-develop # add develop for testing for now
+      - shiny-server-develop
     tags:
-      - release*
+      - v*.*.*
     paths-ignore:
       - .github/ISSUE_TEMPLATE/**
+      - **/*.md
 
 jobs:
   shiny-deploy:
@@ -48,7 +49,6 @@ jobs:
       - name: Install Schematic
         shell: bash
         run: |
-          source .venv/bin/activate
           # use 'poetry' to install schematic from the develop branch 
           pip3 install poetry
           git clone --single-branch --branch develop https://github.com/Sage-Bionetworks/schematic.git
@@ -59,7 +59,6 @@ jobs:
       - name: Set Configurations for Schematic
         shell: bash
         run: |
-          source .venv/bin/activate
           # download data model to the correct location
           R -e '
             config <- yaml::yaml.load_file("schematic_config.yml");
@@ -85,10 +84,12 @@ jobs:
       - name: Authorize and deploy app
         shell: Rscript {0}
         run: |
-          branch <- Sys.getenv("GITHUB_REF_NAME")
+          # if there is a tag, 'refName' will be tag name
+          refName <- Sys.getenv("GITHUB_REF_NAME")
           repo <- Sys.getenv("GITHUB_REPOSITORY")
           appName <- strsplit(repo, "/")[[1]][2]
-          if (!startsWith(branch, "release")) {
+          # if tag is v*.*.*, deploy to prod, otherwise to staging
+          if (!grepl("v[0-9]+.[0-9]+.[0-9]+", refName)) {
             appName <- paste(appName, "staging", sep = "-")
           }
           rsConnectUser <- "${{ secrets.RSCONNECT_USER }}"

@@ -6,8 +6,8 @@
     )
   )
 }
-# # no needed if R >= 4.0.0
-# options(stringsAsFactors = FALSE)
+# no needed if R >= 4.0.0
+options(stringsAsFactors = FALSE)
 
 # for local development
 # change port number associated with your client, here

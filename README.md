@@ -46,9 +46,7 @@ Follow the steps below to make sure the _Data Curator App_ is fully setup to wor
         poetry build
         pip install dist/schematicpy-1.0.0-py3-none-any.whl
 
-3.  Create and modify the `schematic` configuration. To do so, follow the instructions on the [schematic's documentation](https://sage-schematic.readthedocs.io/en/develop/index.html#package-installation-and-setup)
-
-        cp example_schematic_config.yml schematic_config.yml 
+3.  Modify the `schematic_config.yml` to set up schematic configuration. To do so, follow the instructions on the [schematic's documentation](https://sage-schematic.readthedocs.io/en/develop/index.html#package-installation-and-setup)
 
 ### Data Model Configuration
 
