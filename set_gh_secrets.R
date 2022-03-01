@@ -42,13 +42,13 @@ secret_names <- toupper(paste0("schematic_", names(secret_lists)))
 
 # Add schematic secrets via gh CLI
 for (i in seq_along(secret_lists)) {
-  if (!file.exists(toString(secret_lists[i]))) stop(secret_lists[i], " not found")
+  if (!file.exists(toString(secret_lists[[i]]))) stop(secret_lists[[i]], " not found")
   if (secret_names[i] == "SCHEMATIC_TOKEN_PICKLE") {
     # token.pickle is a binary file
     # If you want to manually add to the secret:
     # 1. encode token.pickle in the terminal: base64 -w0 (linux) or base64 -b0 (macOS)
     # 2. copy encoded character string to your github secret
-    token_str <- base64enc::base64encode(secret_lists[i])
+    token_str <- base64enc::base64encode(secret_lists[[i]])
     system(
       sprintf(
         "
@@ -61,7 +61,7 @@ for (i in seq_along(secret_lists)) {
     system(
       sprintf(
         "gh secret set %s < %s",
-        secret_names[i], secret_lists[i]
+        secret_names[i], secret_lists[[i]]
       )
     )
   }
