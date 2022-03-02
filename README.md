@@ -12,9 +12,9 @@ Follow the steps below to make sure the _Data Curator App_ is fully setup to wor
 
 ### Data Curator App Setup
 
-1.  Clone this repo (front-end) with one single branch (i.e., _shiny-server-main_):
+1.  Clone this repo (front-end) with one single branch (i.e., _main_):
 
-        git clone --single-branch --branch shiny-server-main https://github.com/Sage-Bionetworks/data_curator.git
+        git clone --single-branch --branch main https://github.com/Sage-Bionetworks/data_curator.git
 
 2.  Create and modify the configuration file ([How to obtain OAuth Credential](https://github.com/Sage-Bionetworks/data_curator#Authentication)):
 
