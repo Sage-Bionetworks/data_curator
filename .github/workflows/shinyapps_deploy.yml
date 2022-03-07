@@ -77,18 +77,11 @@ jobs:
             system(sprintf("wget %s -O %s", url, path));
           '
           # write out configuration files using github secrets
-<<<<<<< HEAD
-          echo "${{ secrets.SCHEMATIC_SYNAPSE_CONFIG }}" > schematic/.synapseConfig
-          echo "${{ secrets.SCHEMATIC_SERVICE_ACCT_CREDS }}" > schematic/schematic_service_account_creds.json
-          echo "${{ secrets.SCHEMATIC_CREDS_PATH }}" > schematic/credentials.json
-          echo "${{ secrets.SCHEMATIC_TOKEN_PICKLE }}" | base64 -d > schematic/token.pickle
-=======
           echo "${{ secrets.SCHEMATIC_SYNAPSE_CONFIG }}" > .synapseConfig
           echo "${{ secrets.SCHEMATIC_SERVICE_ACCT_CREDS }}" > schematic_service_account_creds.json
           echo "${{ secrets.SCHEMATIC_CREDS_PATH }}" > credentials.json
           echo "${{ secrets.SCHEMATIC_TOKEN_PICKLE }}" | base64 -d > token.pickle
 
->>>>>>> 54455367ae91b843e09510bba93701d2274bf1ea
       - name: zip virtual env
         shell: bash
         # ShinyApps has a limit of 7000 files, far exceeded by the many Python dependencies
