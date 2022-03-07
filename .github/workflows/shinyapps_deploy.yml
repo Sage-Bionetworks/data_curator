@@ -10,7 +10,7 @@ on:
     branches:
       - main
       - develop
-     tags:
+    tags:
       - release*
     paths-ignore:
       - '.github/ISSUE_TEMPLATE/**'
