@@ -403,7 +403,9 @@ shinyServer(function(input, output, session) {
       manifest_id <- synapse_driver$associateMetadataWithFiles(
         synStore_obj,
         "./tmp/synapse_storage_manifest.csv", folder_synID(),
-        useSchemaLabel = FALSE
+        useSchemaLabel = FALSE,
+        hideBlanks = TRUE
+        
       )
       manifest_path <- tags$a(href = paste0("synapse.org/#!Synapse:", manifest_id), manifest_id, target = "_blank")
 
@@ -434,7 +436,8 @@ shinyServer(function(input, output, session) {
       manifest_id <- synapse_driver$associateMetadataWithFiles(
         synStore_obj,
         "./tmp/synapse_storage_manifest.csv", folder_synID(),
-        useSchemaLabel = FALSE
+        useSchemaLabel = FALSE, 
+        hideBlanks = TRUE
 
       )
       manifest_path <- tags$a(href = paste0("synapse.org/#!Synapse:", manifest_id), manifest_id, target = "_blank")
