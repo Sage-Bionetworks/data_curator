@@ -8,11 +8,14 @@ name: shiny-deploy
 on:
   push:
     branches:
-      - develop # add develop for testing for now
-    tags:
+      - main
+      - develop
+     tags:
       - release*
     paths-ignore:
-      - .github/ISSUE_TEMPLATE/**
+      - '.github/ISSUE_TEMPLATE/**'
+      - '**/*.md'
+      - '**/.gitignore'
 
 jobs:
   shiny-deploy:
@@ -41,14 +44,19 @@ jobs:
       - name: Install R Packages Dependencies
         run: |
           R -f install-pkgs.R
+<<<<<<< HEAD
       - name: Install Python Packages Dependencies
         shell: bash
         run: |
           source .venv/bin/activate
           pip3 install -r requirements.txt
+=======
+
+>>>>>>> 54455367ae91b843e09510bba93701d2274bf1ea
       - name: Install Schematic
         shell: bash
         run: |
+          # has to activate each bash step
           source .venv/bin/activate
           # use 'poetry' to install schematic from the develop branch 
           pip3 install poetry
@@ -62,19 +70,25 @@ jobs:
           source .venv/bin/activate
           # download data model to the correct location
           R -e '
-            config <- yaml::yaml.load_file(".github/schematic_config.yml");
+            config <- yaml::yaml.load_file("schematic_config.yml");
             url  <- config$model$input$download_url;
             path <- config$model$input$location;
             system(sprintf("mkdir -p %s", dirname(path)));
             system(sprintf("wget %s -O %s", url, path));
           '
-          # overwrite the config.yml in schematic
-          mv -f .github/schematic_config.yml schematic/config.yml
           # write out configuration files using github secrets
+<<<<<<< HEAD
           echo "${{ secrets.SCHEMATIC_SYNAPSE_CONFIG }}" > schematic/.synapseConfig
           echo "${{ secrets.SCHEMATIC_SERVICE_ACCT_CREDS }}" > schematic/schematic_service_account_creds.json
           echo "${{ secrets.SCHEMATIC_CREDS_PATH }}" > schematic/credentials.json
           echo "${{ secrets.SCHEMATIC_TOKEN_PICKLE }}" | base64 -d > schematic/token.pickle
+=======
+          echo "${{ secrets.SCHEMATIC_SYNAPSE_CONFIG }}" > .synapseConfig
+          echo "${{ secrets.SCHEMATIC_SERVICE_ACCT_CREDS }}" > schematic_service_account_creds.json
+          echo "${{ secrets.SCHEMATIC_CREDS_PATH }}" > credentials.json
+          echo "${{ secrets.SCHEMATIC_TOKEN_PICKLE }}" | base64 -d > token.pickle
+
+>>>>>>> 54455367ae91b843e09510bba93701d2274bf1ea
       - name: zip virtual env
         shell: bash
         # ShinyApps has a limit of 7000 files, far exceeded by the many Python dependencies
@@ -85,10 +99,12 @@ jobs:
       - name: Authorize and deploy app
         shell: Rscript {0}
         run: |
-          branch <- Sys.getenv("GITHUB_REF_NAME")
+          # if there is a tag, 'refName' will be tag name
+          refName <- Sys.getenv("GITHUB_REF_NAME")
           repo <- Sys.getenv("GITHUB_REPOSITORY")
           appName <- strsplit(repo, "/")[[1]][2]
-          if (!startsWith(branch, "release")) {
+          # if tag is v*.*.*, deploy to prod, otherwise to staging
+          if (!grepl("v[0-9]+.[0-9]+.[0-9]+", refName)) {
             appName <- paste(appName, "staging", sep = "-")
           }
           rsConnectUser <- "${{ secrets.RSCONNECT_USER }}"

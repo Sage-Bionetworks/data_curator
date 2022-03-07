@@ -28,11 +28,7 @@ Follow the steps below to run locally.
         python -m venv .venv
         source .venv/bin/activate
 
-4.  Install required Python pacakges dependencies:
-
-        pip install -r requirements.txt
-
-5.  Install required R pacakges dependencies:
+4.  Install required R pacakges dependencies:
 
         R -f install-pkgs.R
 
@@ -52,7 +48,7 @@ Follow the steps below to run locally.
         poetry build
         pip install dist/schematicpy-1.0.0-py3-none-any.whl
 
-3.  Set up the `schematic` configuration. To do so, follow the instructions on the [schematic's documentation](https://sage-schematic.readthedocs.io/en/develop/index.html#package-installation-and-setup)
+3.  Modify the `schematic_config.yml` to set up schematic configuration. To do so, follow the instructions on the [schematic's documentation](https://sage-schematic.readthedocs.io/en/develop/index.html#package-installation-and-setup)
 
 ### Data Model Configuration
 

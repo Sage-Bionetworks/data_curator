@@ -1,8 +1,3 @@
-# During the github workflow to auto deploy the app
-# This config file will be used to overwrite the config.yml in the schematic folder
-#
-# Please modify the configuration values based on your project
-
 # Do not change the 'definitions' section unless you know what you're doing
 definitions:
   synapse_config: '.synapseConfig'
@@ -11,11 +6,11 @@ definitions:
   service_acct_creds: 'schematic_service_account_creds.json'
 
 synapse:
-  master_fileview: 'syn16858331' # fileview of project with datasets on Synapse
-  manifest_folder: 'manifests' # manifests will be downloaded to this folder
-  manifest_filename: 'synapse_storage_manifest.csv' # name of the manifest file in the project dataset
-  token_creds: 'syn21088684' # synapse ID of credentials.json file
-  service_acct_creds: 'syn25171627' # synapse ID of service_account_creds.json file
+  master_fileview: 'syn16858331'
+  manifest_folder: 'manifests'
+  manifest_filename: 'synapse_storage_manifest.csv' 
+  token_creds: 'syn21088684'
+  service_acct_creds: 'syn25171627'
   
 manifest:
   title: 'NF'
@@ -26,8 +21,8 @@ model:
   input:
     download_url: 'https://raw.githubusercontent.com/nf-osi/nf-metadata-dictionary/v3.0.3/NF.jsonld' # url to download JSON-LD data model
     location: 'data-models/NF.jsonld' # path to JSON-LD data model
-    file_type: 'local' # only type "local" is supported currently
-
+    file_type: 'local' 
+    
 style:
   google_manifest:
     req_bg_color:
