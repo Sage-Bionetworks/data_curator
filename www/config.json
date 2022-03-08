@@ -4,6 +4,5 @@
       {"display_name": "Patient", "schema_name": "Patient", "type": "clinical"},
       {"display_name": "Biospecimen Tier 1 & 2", "schema_name": "Biospecimen", "type": "biospecimen"}
   ],
-  "main_fileview" : "syn23643253",
-  "community" : "HTAN"
+  "community" : "Example"
 }
