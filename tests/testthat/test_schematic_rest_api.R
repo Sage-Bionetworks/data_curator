@@ -1,4 +1,14 @@
-context("test schatic rest api wrappers")
+### TODO: Add a switch to turn off skip tests if schematic server isn't active.
+
+context("test schematic rest api wrappers")
+
+### Test that schematic server is online. Make sure schem_url matches the actual
+### schematic server URL https://github.com/Sage-Bionetworks/schematic/tree/develop/api
+schem_url <- "http://127.0.0.1:3001/"
+ping <- try(httr::GET(schem_url), silent = TRUE)
+if (inherits(ping, "try-error")){
+  stop(sprintf("schematic server URL unavailable (%s). Is it running locally?", schem_url)) #nolint
+}
 
 pass_csv <- system.file("testdata", "HTAN-Biospecimen-Tier-1-2-pass.csv",
                         package = "datacurator")
