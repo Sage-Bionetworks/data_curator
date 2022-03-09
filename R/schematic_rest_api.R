@@ -1,6 +1,5 @@
 #' schematic rest api to generate manifest
-#' 
-
+#'
 #' @param title Name of dataset 
 #' @param data_type Type of dataset 
 #' @param oauth true or false STRING passed to python
@@ -8,6 +7,7 @@
 #' @param dataset_id Synapse ID of existing manifest
 #' 
 #' @returns a URL to a google sheet
+#' @export
 manifest_generate <- function(url="http://localhost:3001/v1/manifest/generate",
                               schema_url="https://raw.githubusercontent.com/ncihtan/data-models/main/HTAN.model.jsonld", #nolint
                               title, data_type, oauth="true",
@@ -36,6 +36,7 @@ manifest_generate <- function(url="http://localhost:3001/v1/manifest/generate",
 #' @param csv_file Filepath of csv to validate
 #' 
 #' @returns An empty list() if sucessfully validated. Or a list of errors.
+#' @export
 manifest_validate <- function(url="http://localhost:3001/v1/model/validate",
                               schema_url="https://raw.githubusercontent.com/ncihtan/data-models/main/HTAN.model.jsonld", #nolint
                               data_type, csv_file) {
@@ -59,6 +60,9 @@ manifest_validate <- function(url="http://localhost:3001/v1/model/validate",
 #' @param dataset_id Synapse ID of existing manifest
 #' @param input_token Synapse login cookie, PAT, or API key.
 #' @param csv_file Filepath of csv to validate
+#' 
+#' @returns TRUE if successful upload or validate errors if not.
+#' @export
 model_submit <- function(url="http://localhost:3001/v1/model/submit",
                          schema_url="https://raw.githubusercontent.com/ncihtan/data-models/main/HTAN.model.jsonld", #notlint
                          data_type, dataset_id, input_token, csv_file) {

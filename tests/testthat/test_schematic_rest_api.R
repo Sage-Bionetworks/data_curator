@@ -1,7 +1,9 @@
 context("test schatic rest api wrappers")
 
-pass_csv <- file.path("inst", "testdata", "HTAN-Biospecimen-Tier-1-2-pass.csv")
-fail_csv <- file.path("inst", "testdata", "HTAN-Biospecimen-Tier-1-2-fail.csv")
+pass_csv <- system.file("testdata", "HTAN-Biospecimen-Tier-1-2-pass.csv",
+                        package = "datacurator")
+fail_csv <- system.file("testdata", "HTAN-Biospecimen-Tier-1-2-fail.csv",
+                        package = "datacurator")
 
 test_that("manifest_generate returns a URL if sucessful", {
   url <- manifest_generate(title="Test biospecimen", data_type="Biospecimen",
@@ -17,7 +19,7 @@ test_that("manifest validate passes and fails correctly", {
   expect_true(length(unlist(fail)) > 0L)
 })
 
-testthat("model submit successfully uploads to synapse", {
+test_that("model submit successfully uploads to synapse", {
   submit <- model_submit(data_type="Biospecimen", dataset_id="syn20977135",
                       input_token=Sys.getenv("SYNAPSE_PAT"), csv_file=pass_csv)
   expect_true(submit)
