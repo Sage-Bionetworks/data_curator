@@ -27,7 +27,7 @@ shinyServer(function(input, output, session) {
   ######## session global variables ########
   source_python("functions/synapse_func_alias.py")
   source_python("functions/metadata_model.py")
-  source("R/schematic_rest_api_funcs.R")
+  source("R/schematic_rest_api.R")
   # import module that contains SynapseStorage class
   synapse_driver <- import("schematic.store.synapse")$SynapseStorage
   # read config in
@@ -231,19 +231,19 @@ shinyServer(function(input, output, session) {
     # loading screen for template link generation
     dcWaiter("show", msg = "Generating link...")
 
-    manifest_url <-
-      metadata_model$getModelManifest(paste0(config$community, " ", input$dropdown_template),
-        template_schema_name(),
-        filenames = switch((template_type == "assay") + 1,
-          NULL,
-          as.list(names(datatype_list$files))
-        ),
-        datasetId = folder_synID()
-      )
+    # manifest_url <-
+    #   metadata_model$getModelManifest(paste0(config$community, " ", input$dropdown_template),
+    #     template_schema_name(),
+    #     filenames = switch((template_type == "assay") + 1,
+    #       NULL,
+    #       as.list(names(datatype_list$files))
+    #     ),
+    #     datasetId = folder_synID()
+    #   )
     
     #schematic rest api to generate manifest
-    # manifest_url <- manifest_generate(title = input$dropdown_template,
-    #                   data_type = template_schema_name(), dataset_id = synID())
+    manifest_url <- manifest_generate(title = input$dropdown_template,
+                      data_type = template_schema_name(), dataset_id = synID())
 
     # generate link
     output$text_template <- renderUI(
@@ -293,8 +293,8 @@ shinyServer(function(input, output, session) {
     )
     
     # schematic rest api to validate metadata
-    # annotation_status <- manifest_validate(data_type=template_schema_name(),
-    #                        csv_file=inFile$raw()$datapath)
+    annotation_status <- manifest_validate(data_type=template_schema_name(),
+                           csv_file=inFile$raw()$datapath)
 
     # validation messages
     valRes <- validationResult(annotation_status, input$dropdown_template, inFile$data())
