@@ -4,7 +4,7 @@ context("test schematic rest api wrappers")
 ### schematic server URL https://github.com/Sage-Bionetworks/schematic/tree/develop/api
 ### If not available, skip these tests.
 
-schem_url <- "http://127.0.0.1:3001/"
+schem_url <- "http://127.0.0.1:3002/"
 ping <- try(httr::GET(schem_url), silent = TRUE)
 skip_it <- function(skip=ping) {
   if (inherits(ping, "try-error")) skip(sprintf("schematic server URL unavailable (%s). Is it running locally?", schem_url)) #nolint
@@ -23,7 +23,7 @@ test_that("manifest_generate returns a URL if sucessful", {
   expect_true(grepl("^http", url))
 })
   
-test_that("manifest validate passes and fails correctly", {
+test_that("manifest_validate passes and fails correctly", {
   skip_it()
   
   pass <- manifest_validate(data_type="Biospecimen", csv_file=pass_csv)
@@ -33,7 +33,7 @@ test_that("manifest validate passes and fails correctly", {
   expect_true(length(unlist(fail)) > 0L)
 })
 
-test_that("model submit successfully uploads to synapse", {
+test_that("model_submit successfully uploads to synapse", {
   skip_it()
   
   submit <- model_submit(data_type="Biospecimen", dataset_id="syn20977135",
