@@ -27,6 +27,7 @@ shinyServer(function(input, output, session) {
   ######## session global variables ########
   source_python("functions/synapse_func_alias.py")
   source_python("functions/metadata_model.py")
+  source("functions/schematic_rest_api_funcs.R")
   # import module that contains SynapseStorage class
   synapse_driver <- import("schematic.store.synapse")$SynapseStorage
   # read config in
@@ -241,17 +242,8 @@ shinyServer(function(input, output, session) {
       )
     
     #schematic rest api to generate manifest
-    # req <- httr::GET("http://localhost:3001/v1/manifest/generate",
-    #                  query = list(
-    #                    schema_url="https://raw.githubusercontent.com/ncihtan/data-models/main/HTAN.model.jsonld",
-    #                    title=input$dropdown_template,
-    #                    data_type=template_schema_name(),
-    #                    oauth="true",
-    #                    use_annotations="false",
-    #                    dataset_id=folder_synID()
-    #                  ))
-    # 
-    # manifest_url <- httr::content(req)
+    # manifest_url <- manifest_generate(title = input$dropdown_template,
+    #                   data_type = template_schema_name(), dataset_id = synID())
 
     # generate link
     output$text_template <- renderUI(
@@ -301,14 +293,8 @@ shinyServer(function(input, output, session) {
     )
     
     # schematic rest api to validate metadata
-    # req2 <- httr::POST("http://localhost:3001/v1/model/validate",
-    #                    query=list(
-    #                      schema_url="https://raw.githubusercontent.com/ncihtan/data-models/main/HTAN.model.jsonld",
-    #                      data_type=template_schema_name()),
-    #                    body=list(csv_file=upload_file("inFile$raw()$datapath"))
-    # )
-    # 
-    # annotation_status <- httr::content(req2)
+    # annotation_status <- manifest_validate(data_type=template_schema_name(),
+    #                        csv_file=inFile$raw()$datapath)
 
     # validation messages
     valRes <- validationResult(annotation_status, input$dropdown_template, inFile$data())
@@ -421,52 +407,30 @@ shinyServer(function(input, output, session) {
       
       # schematic rest api to submit metadata
       # This validates AND submits the data to Synapse
-      # Returns TRUE if successful
-      # req3 <- httr::POST("http://localhost:3001/v1/model/submit",
-      #                    query=list(
-      #                      schema_url="https://raw.githubusercontent.com/ncihtan/data-models/main/HTAN.model.jsonld",
-      #                      data_type=template_schema_name(),
-      #                      dataset_id=folder_synID()),
-      #                    body=list(csv_file=upload_file("./tmp/synapse_storage_manifest.csv"))
-      # )
-      # 
-      # submit_results <- httr::content(req3)
-      #   if (isTRUE(submit_results)) {
-      #     dcWaiter("hide")
-      #     nx_report_success("Success!", HTML(paste0("Manifest submitted to: ", manifest_path)))
-      #     
-      #     # clean up old inputs/results
-      #     sapply(clean_tags, FUN = hide)
-      #     reset("inputFile-file")
-      #     DTableServer("tbl_preview", data.frame(NULL))
-      #   } else {
-      #     dcWaiter("update", msg = HTML(paste0(
-      #       "Uh oh, looks like something went wrong!",
-      #       manifest_id,
-      #       " is not a valid Synapse ID. Try again?"
-      #     )), sleep = 3)
-      #   }
-      # }
+      # Returns synapse table ID if successful
+      manifest_id <- model_validate(data_type=template_schema_name(),
+                              dataset_id=folder_synID(),
+                              input_token=access_token,
+                              csv_file="./tmp/synapse_storage_manifest.csv")
       
+      #> xml_text(xml_child(content(req3), "head/title"))
+      #[1] "jsonschema.exceptions.ValidationError: Manifest could not be validated under provided data model. Validation failed with the following errors: [[2, 'Wrong schema', \"'HTAN Parent ID' is a required property\", 'Wrong schema'], [2, 'Wrong schema', \"'Storage Method' is a required property\", 'Wrong schema'], [2, 'Wrong schema', \"'Protocol Link' is a required property\", 'Wrong schema'], [2, 'Wrong schema', \"'Acquisition Method Type' is a required property\", 'Wrong schema'], [2, 'Wrong schema', \"'Collection Days from Index' is a required property\", 'Wrong schema'], [2, 'Wrong schema', \"'Fixative Type' is a required property\", 'Wrong schema'], [2, 'Wrong schema', \"'HTAN Biospecimen ID' is a required property\", 'Wrong schema'], [2, 'Wrong schema', \"'Biospecimen Type' is a required property\", 'Wrong schema'], [2, 'Wrong schema', \"'Processing Days from Index' is a required property\", 'Wrong schema'], [2, 'Wrong schema', \"'Timepoint Label' is a required property\", 'Wrong schema'], [2, 'Wrong schema', \"'Site of Resection or Biopsy' is a required property\", 'Wrong schema']] // Werkzeug Debugger"
+      #
       ### TODO:
       # Handle validation error results
-      # associateMetadataWithFiles returns the synapse ID of uploaded table,
-      # but submit_manifest_route returns TRUE or validation errors.
-      # Need to update the `nx_report_success` message accordingly since there
-      # is no way to get the manifest syn ID with the REST API.
-
+      #
       # associates metadata with data and returns manifest id
-      manifest_id <- synapse_driver$associateMetadataWithFiles(
-        synStore_obj,
-        "./tmp/synapse_storage_manifest.csv", folder_synID()
-      )
+      # manifest_id <- synapse_driver$associateMetadataWithFiles(
+      #   synStore_obj,
+      #   "./tmp/synapse_storage_manifest.csv", folder_synID()
+      # )
       manifest_path <- tags$a(href = paste0("synapse.org/#!Synapse:", manifest_id), manifest_id, target = "_blank")
-      
+  
       # if no error
       if (startsWith(manifest_id, "syn") == TRUE) {
         dcWaiter("hide")
         nx_report_success("Success!", HTML(paste0("Manifest submitted to: ", manifest_path)))
-
+  
         # clean up old inputs/results
         sapply(clean_tags, FUN = hide)
         reset("inputFile-file")
@@ -486,12 +450,17 @@ shinyServer(function(input, output, session) {
       )
 
       # associates metadata with data and returns manifest id
-      manifest_id <- synapse_driver$associateMetadataWithFiles(
-        synStore_obj,
-        "./tmp/synapse_storage_manifest.csv", folder_synID()
-      )
+      # manifest_id <- synapse_driver$associateMetadataWithFiles(
+      #   synStore_obj,
+      #   "./tmp/synapse_storage_manifest.csv", folder_synID()
+      # )
+      
+      manifest_id <- model_validate(data_type=template_schema_name(),
+                                    dataset_id=folder_synID(),
+                                    input_token=access_token,
+                                    csv_file="./tmp/synapse_storage_manifest.csv")
       manifest_path <- tags$a(href = paste0("synapse.org/#!Synapse:", manifest_id), manifest_id, target = "_blank")
-
+      
       # if uploaded provided valid synID message
       if (startsWith(manifest_id, "syn") == TRUE) {
         dcWaiter("hide")
