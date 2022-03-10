@@ -85,6 +85,8 @@ jobs:
           echo "SYNAPSE_PAT='${{ secrets.SYNAPSE_PAT }}'" > .Renviron
           source .venv/bin/activate
           cd schematic
+          python3 pip uninstall markupsafe
+          python3 pip install markupsafe=2.0.1
           python3 run_api.py
 
       - name: Run tests
