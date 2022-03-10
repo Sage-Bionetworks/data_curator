@@ -1,10 +1,11 @@
 # Workflow derived from https://github.com/r-lib/actions/tree/master/examples
 # Need help debugging build failures? Start at https://github.com/r-lib/actions#where-to-find-help
 
+# This workflow creates an instance of data curator app with schematic, then
+# creates a flask server running schematic to test data curator's use of 
+# schematic's REST API endpoints.
 name: test-schematic-api
 
-# TODO: remove `shiny-server-develop` when we use shinyapps.io as production site
-# also consider to change shiny-server-main to main since we will not host in shinyServer
 on:
   push:
     branches:
@@ -13,7 +14,7 @@ on:
       - .github/ISSUE_TEMPLATE/**
 
 jobs:
-  shiny-deploy:
+  test-schematic-rest-api:
     runs-on: ubuntu-latest
     # This image seems to be based on rocker/r-ver which in turn is based on debian
     container: rocker/rstudio
@@ -85,8 +86,8 @@ jobs:
           echo "SYNAPSE_PAT='${{ secrets.SYNAPSE_PAT }}'" > .Renviron
           source .venv/bin/activate
           cd schematic
-          python3 pip uninstall markupsafe
-          python3 pip install markupsafe=2.0.1
+          pip3 uninstall markupsafe
+          pip3 install markupsafe=2.0.1
           python3 run_api.py
 
       - name: Run tests
