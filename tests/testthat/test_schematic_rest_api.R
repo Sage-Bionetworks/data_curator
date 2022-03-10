@@ -4,7 +4,7 @@ context("test schematic rest api wrappers")
 ### schematic server URL https://github.com/Sage-Bionetworks/schematic/tree/develop/api
 ### If not available, skip these tests.
 
-schem_url <- "http://127.0.0.1:3002/"
+schem_url <- "http://127.0.0.1:3001/"
 ping <- try(httr::GET(schem_url), silent = TRUE)
 skip_it <- function(skip=ping) {
   if (inherits(ping, "try-error")) skip(sprintf("schematic server URL unavailable (%s). Is it running locally?", schem_url)) #nolint
