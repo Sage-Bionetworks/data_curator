@@ -87,7 +87,7 @@ jobs:
           source .venv/bin/activate
           cd schematic
           pip3 uninstall -y markupsafe
-          pip3 install markupsafe=2.0.1
+          pip3 install markupsafe==2.0.1
           python3 run_api.py
 
       - name: Run tests
