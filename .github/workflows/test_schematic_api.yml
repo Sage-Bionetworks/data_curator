@@ -83,6 +83,7 @@ jobs:
         shell: bash
         run: |
           echo "SYNAPSE_PAT='${{ secrets.SYNAPSE_PAT }}'" > .Renviron
+          cd schematic
           python3 run_api.py
 
       - name: Run tests
