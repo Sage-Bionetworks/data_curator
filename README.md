@@ -56,8 +56,9 @@ Use the app configuration file `www/config.json` to adapt this app to your DCC.
   - `display_name` : The display name for the dropdown. (e.g. _scRNA-seq Level 1_)
   - `schema_name`: The name of the manifest in the JSON-LD schema (e.g. _ScRNA-seqLevel1_)
   - `type`: The type of manifest. As currently configured in `app.R`, will only display manifests of type _assay_.
-- `main_fileview` : The Synapse ID of a fileview that is scoped to all files, folders, & projects in your community. (e.g. _syn20446927_)
-- `community` : the abbreviated name of the community or project. (e.g. _HTAN_)
+- `community` (optional): The abbreviated name of the community or project. (e.g. _HTAN_)
+- `schema` (optional): The version of data model 
+- `schematic_service` (optional): The version of schematic service
 
 ---
 
@@ -70,16 +71,21 @@ This utilizes a Synapse Authentication (OAuth) client (code motivated by [ShinyO
 
 ---
 
+## Deployment
+To deploy the app to shinyapps.io, please follow the instructions in the [shinyapps_deploy.md](./shinyapps_deploy.md).
+
 ## Contributors
 
 Main contributors and developers:
 
 - [Rongrong Chai](https://github.com/rrchai)
-- [Xengie Doan](https://github.com/xdoan)
+- [Anthony Williams](https://github.com/afwillia)
 - [Milen Nikolov](https://github.com/milen-sage)
-- [Sujay Patil](https://github.com/sujaypatil96)
+- [Lauren Wolfe](https://github.com/lakikowolfe)
 - [Robert Allaway](https://github.com/allaway)
 - [Bruno Grande](https://github.com/BrunoGrandePhD)
+- [Xengie Doan](https://github.com/xdoan)
+- [Sujay Patil](https://github.com/sujaypatil96)
 
 <!-- Links -->
 
