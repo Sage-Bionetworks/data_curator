@@ -19,7 +19,8 @@ synapse:
 
 manifest:
   title: 'Patient Manifest' # title of metadata manifest file
-  data_type: 'Patient' # component or data type from the data model
+  data_type: # component or data type from the data model
+    - 'Patient' 
 
 model:
   input:
