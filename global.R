@@ -1,17 +1,45 @@
 suppressPackageStartupMessages({
-  # env
-  library(httr)
   library(yaml)
   library(reticulate)
-  library(jsonlite)
-  # shiny function
-  library(DT)
+})
+
+oauth_client <- yaml.load_file("oauth_config.yml")
+
+client_id <- toString(oauth_client$CLIENT_ID)
+client_secret <- toString(oauth_client$CLIENT_SECRET)
+app_url <- toString(oauth_client$APP_URL)
+
+if (is.null(client_id) || nchar(client_id) == 0) stop("oauth_config.yml is missing CLIENT_ID")
+if (is.null(client_secret) || nchar(client_secret) == 0) stop("oauth_config.yml is missing CLIENT_SECRET")
+if (is.null(app_url) || nchar(app_url) == 0) stop("oauth_config.yml is missing APP_URL")
+
+# ShinyAppys has a limit of 7000 files which this app' grossly exceeds
+# due to its Python dependencies.  To get around the limit we zip up
+# the virtual environment before deployment and unzip it here.
+#
+# unzip virtual environment, named as ".venv.zip"
+if (!file.exists(".venv")) utils::unzip(".venv.zip")
+
+# We get a '126' error (non-executable) if we don't do this:
+system("chmod -R +x .venv")
+
+# Activate virtual env
+# Don't necessarily have to set `RETICULATE_PYTHON` env variable
+Sys.unsetenv("RETICULATE_PYTHON")
+reticulate::use_virtualenv(file.path(getwd(), ".venv"), required = TRUE)
+
+suppressPackageStartupMessages({
   library(shiny)
+  library(httr)
   library(shinyjs)
   library(shinydashboard)
   library(shinydashboardPlus)
   library(sass)
   library(shinypop) # dreamRs/shinypop
+  library(stringr)
+  library(DT)
+  library(jsonlite)
+  library(shinypop)
   library(waiter)
   # tidyverse
   library(dplyr)
@@ -32,25 +60,6 @@ has_auth_code <- function(params) {
   # flow.
   return(!is.null(params$code))
 }
-
-oauth_client <- yaml.load_file("config.yaml")
-
-client_id <- toString(oauth_client$CLIENT_ID)
-client_secret <- toString(oauth_client$CLIENT_SECRET)
-
-if (interactive()) {
-  # for local development
-  # change port number associated with your client, here
-  options(shiny.port = 8100)
-}
-
-app_url <- toString(oauth_client$APP_URL)
-conda_name <- toString(oauth_client$CONDA_NAME)
-
-if (is.null(client_id)) stop("config.yaml is missing CLIENT_ID")
-if (is.null(client_secret)) stop("config.yaml is missing CLIENT_SECRET")
-if (is.null(app_url)) stop("config.yaml is missing APP_URL")
-if (is.null(conda_name)) stop("config.yaml is missing CONDA_ENV")
 
 app <- oauth_app("shinysynapse",
   key = client_id,
@@ -96,6 +105,7 @@ syn <- import("synapseclient")$Synapse()
 # import schematic modules
 source_python("functions/metadataModel.py")
 synapse_driver <- import("schematic.store.synapse")$SynapseStorage
+
 # Import functions/modules
 source_files <- list.files(c("functions", "modules"), pattern = "*\\.R$", recursive = TRUE, full.names = TRUE)
 sapply(source_files, FUN = source)
