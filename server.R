@@ -93,9 +93,11 @@ shinyServer(function(input, output, session) {
         })
       })
 
-      user_name <- syn_getUserProfile()$userName
+      #user_name <- syn_getUserProfile()$userName
+      user_name <- synapse_user_profile(auth=access_token)[["userName"]]
 
-      if (!syn_is_certified(user_name)) {
+      #if (!syn_is_certified(user_name)) {
+      if (!synapse_is_certified(auth = access_token)) {
         dcWaiter("update", landing = TRUE, isCertified = FALSE)
       } else {
         # update waiter loading screen once login successful
