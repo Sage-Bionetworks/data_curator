@@ -34,7 +34,7 @@ synapse_is_certified <- function(url="https://repo-prod.prod.sagebase.org/repo/v
   
   # Get user profile and ownerId
   user_profile <- synapse_user_profile(auth=auth)
-  if (!"ownerId" %in% names(user_profile)) stop("Invalid username")
+  if (!"ownerId" %in% names(user_profile)) return(FALSE)
   ownerid <- user_profile[["ownerId"]]
   url_req <- file.path(url, ownerid, endpoint)
   req <- httr::GET(url_req)

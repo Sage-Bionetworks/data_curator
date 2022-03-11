@@ -20,6 +20,6 @@ test_that("is_certified returns TRUE or FALSE", {
   
   expect_true(synapse_is_certified(auth=Sys.getenv("SYNAPSE_PAT")))
   expect_true(synapse_is_certified(auth=NULL))
-  expect_error(synapse_is_certified(auth="bad auth"), "Invalid username")
+  expect_false(synapse_is_certified(auth="bad auth"))
   
 })
