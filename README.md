@@ -12,9 +12,9 @@ Follow the steps below to make sure the _Data Curator App_ is fully setup to wor
 
 ### Data Curator App Setup
 
-1.  Clone this repo (front-end) with one single branch (i.e., _shiny-server-main_):
+1.  Clone this repo (front-end) with one single branch (i.e., _main_):
 
-        git clone --single-branch --branch shiny-server-main https://github.com/Sage-Bionetworks/data_curator.git
+        git clone --single-branch --branch main https://github.com/Sage-Bionetworks/data_curator.git
 
 2.  Create and modify the configuration file ([How to obtain OAuth Credential](https://github.com/Sage-Bionetworks/data_curator#Authentication)):
 
@@ -26,11 +26,7 @@ Follow the steps below to make sure the _Data Curator App_ is fully setup to wor
         python -m venv .venv
         source .venv/bin/activate
 
-4.  Install required Python pacakges dependencies:
-
-        pip install -r requirements.txt
-
-5.  Install required R pacakges dependencies:
+4.  Install required R pacakges dependencies:
 
         R -f install-pkgs.R
 
@@ -50,7 +46,7 @@ Follow the steps below to make sure the _Data Curator App_ is fully setup to wor
         poetry build
         pip install dist/schematicpy-1.0.0-py3-none-any.whl
 
-3.  Set up the `schematic` configuration. To do so, follow the instructions on the [schematic's documentation](https://sage-schematic.readthedocs.io/en/develop/index.html#package-installation-and-setup)
+3.  Modify the `schematic_config.yml` to set up schematic configuration. To do so, follow the instructions on the [schematic's documentation](https://sage-schematic.readthedocs.io/en/develop/index.html#package-installation-and-setup)
 
 ### Data Model Configuration
 

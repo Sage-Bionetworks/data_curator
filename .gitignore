@@ -18,6 +18,7 @@ schematic/
 **/token.pickle
 **/__pycache__
 oauth_config.yml
+schematic_config.yml
 .project
 .settings/**
 .venv
