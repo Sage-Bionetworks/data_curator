@@ -4,5 +4,7 @@
       {"display_name": "Patient", "schema_name": "Patient", "type": "clinical"},
       {"display_name": "Biospecimen Tier 1 & 2", "schema_name": "Biospecimen", "type": "biospecimen"}
   ],
-  "community" : "Example"
+  "community": "Example",
+  "schema": "v0.1.0",
+  "schematic_service": "v1"
 }
