@@ -3,3 +3,5 @@
 export(manifest_generate)
 export(manifest_validate)
 export(model_submit)
+export(synapse_is_certified)
+export(synapse_user_profile)
