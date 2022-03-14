@@ -12,9 +12,9 @@ Follow the steps below to make sure the _Data Curator App_ is fully setup to wor
 
 ### Data Curator App Setup
 
-1.  Clone this repo (front-end) with one single branch (i.e., _shiny-server-main_):
+1.  Clone this repo (front-end) with one single branch (i.e., _main_):
 
-        git clone --single-branch --branch shiny-server-main https://github.com/Sage-Bionetworks/data_curator.git
+        git clone --single-branch --branch main https://github.com/Sage-Bionetworks/data_curator.git
 
 2.  Create and modify the configuration file ([How to obtain OAuth Credential](https://github.com/Sage-Bionetworks/data_curator#Authentication)):
 
@@ -26,11 +26,7 @@ Follow the steps below to make sure the _Data Curator App_ is fully setup to wor
         python -m venv .venv
         source .venv/bin/activate
 
-4.  Install required Python pacakges dependencies:
-
-        pip install -r requirements.txt
-
-5.  Install required R pacakges dependencies:
+4.  Install required R pacakges dependencies:
 
         R -f install-pkgs.R
 
@@ -50,7 +46,7 @@ Follow the steps below to make sure the _Data Curator App_ is fully setup to wor
         poetry build
         pip install dist/schematicpy-1.0.0-py3-none-any.whl
 
-3.  Set up the `schematic` configuration. To do so, follow the instructions on the [schematic's documentation](https://sage-schematic.readthedocs.io/en/develop/index.html#package-installation-and-setup)
+3.  Modify the `schematic_config.yml` to set up schematic configuration. To do so, follow the instructions on the [schematic's documentation](https://sage-schematic.readthedocs.io/en/develop/index.html#package-installation-and-setup)
 
 ### Data Model Configuration
 
@@ -60,8 +56,9 @@ Use the app configuration file `www/config.json` to adapt this app to your DCC.
   - `display_name` : The display name for the dropdown. (e.g. _scRNA-seq Level 1_)
   - `schema_name`: The name of the manifest in the JSON-LD schema (e.g. _ScRNA-seqLevel1_)
   - `type`: The type of manifest. As currently configured in `app.R`, will only display manifests of type _assay_.
-- `main_fileview` : The Synapse ID of a fileview that is scoped to all files, folders, & projects in your community. (e.g. _syn20446927_)
-- `community` : the abbreviated name of the community or project. (e.g. _HTAN_)
+- `community` (optional): The abbreviated name of the community or project. (e.g. _HTAN_)
+- `schema` (optional): The version of data model 
+- `schematic_service` (optional): The version of schematic service
 
 ---
 
@@ -74,16 +71,21 @@ This utilizes a Synapse Authentication (OAuth) client (code motivated by [ShinyO
 
 ---
 
+## Deployment
+To deploy the app to shinyapps.io, please follow the instructions in the [shinyapps_deploy.md](./shinyapps_deploy.md).
+
 ## Contributors
 
 Main contributors and developers:
 
 - [Rongrong Chai](https://github.com/rrchai)
-- [Xengie Doan](https://github.com/xdoan)
+- [Anthony Williams](https://github.com/afwillia)
 - [Milen Nikolov](https://github.com/milen-sage)
-- [Sujay Patil](https://github.com/sujaypatil96)
+- [Lauren Wolfe](https://github.com/lakikowolfe)
 - [Robert Allaway](https://github.com/allaway)
 - [Bruno Grande](https://github.com/BrunoGrandePhD)
+- [Xengie Doan](https://github.com/xdoan)
+- [Sujay Patil](https://github.com/sujaypatil96)
 
 <!-- Links -->
 
