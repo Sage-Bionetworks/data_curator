@@ -81,20 +81,22 @@ getDatatypeRequirement <- function(datatype) {
 #' @param manifest output from \code{getManifests}.
 #' @return data frame contains required data types for network plot
 getManifestRequirements <- function(manifest) {
-
-  lapply(1:nrow(manifest), function(i) {
-
-    # get all required data types
-    out <- tryCatch(metadata_model$get_component_requirements(manifest$schema[i], as_graph = TRUE), error = function(err) list())
-    # convert to a named list, output (name: to, value: from)
-    out <- list2Vector(out)
-    # calculate how many misisng requirements each dataset
-    n_miss <- sum(!union(names(out), out) %in% manifest$schema)
-    # add data from dataset to its data type name
-    from <- c(paste0("f:", manifest$folder[i]), as.character(out))
-    to <- c(manifest$schema[i], names(out))
-    # output nodes data as data frame
-    data.frame(from = from, to = to, folder = c(manifest$folder[i]), folderSynId = c(manifest$folderSynId[i]), nMiss = c(n_miss))
-
-  }) %>% bind_rows()
+  
+  if (nrow(manifest) == 0) {
+    data.frame(from = NA, to = NA, folder = NA, folderSynId = NA, nMiss = NA)
+  } else {
+    lapply(1:nrow(manifest), function(i) {
+      # get all required data types
+      out <- tryCatch(metadata_model$get_component_requirements(manifest$schema[i], as_graph = TRUE), error = function(err) list())
+      # convert to a named list, output (name: to, value: from)
+      out <- list2Vector(out)
+      # calculate how many misisng requirements each dataset
+      n_miss <- sum(!union(names(out), out) %in% manifest$schema)
+      # add data from dataset to its data type name
+      from <- c(paste0("f:", manifest$folder[i]), as.character(out))
+      to <- c(manifest$schema[i], names(out))
+      # output nodes data as data frame
+      data.frame(from = from, to = to, folder = c(manifest$folder[i]), folderSynId = c(manifest$folderSynId[i]), nMiss = c(n_miss))
+      }) %>% bind_rows()
+    }
 }

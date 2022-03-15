@@ -5,7 +5,7 @@
 # using the session token.  https://www.synapse.org
 
 shinyServer(function(input, output, session) {
-  options(shiny.reactlog=TRUE) 
+  options(shiny.reactlog = TRUE)
   params <- parseQueryString(isolate(session$clientData$url_search))
   if (!has_auth_code(params)) {
     return()
@@ -32,7 +32,7 @@ shinyServer(function(input, output, session) {
   # mapping from display name to schema name
   template_namedList <- config$schema_name
   names(template_namedList) <- config$display_name
-  
+
   synStore_obj <- NULL # gets list of projects they have access to
   user_name <- NULL # user name
   project_synID <- NULL # selected project synapse ID
@@ -70,7 +70,7 @@ shinyServer(function(input, output, session) {
     #
     access_token <- session$userData$access_token
 
-    syn_login(authToken = access_token, rememberMe = FALSE)
+    syn$login(authToken = access_token, rememberMe = FALSE)
 
     # updating syn storage
     tryCatch(synStore_obj <<- synapse_driver(access_token = access_token), error = function(e) NULL)
@@ -180,22 +180,21 @@ shinyServer(function(input, output, session) {
 
   ######## Dashboard ########
   dashboard(
-    id = "dashboard", 
-    synStoreObj = synStore_obj, 
-    selectedProject = reactive(input$dropdown_project), 
-    folderList = data_list$folders, 
-    selectedDataType = template_schema_name, 
+    id = "dashboard",
+    synStoreObj = synStore_obj,
+    selectedProject = reactive(input$dropdown_project),
+    folderList = data_list$folders,
+    selectedDataType = template_schema_name,
     userName = user_name,
     disableIds = c("box_pick_project", "box_pick_manifest")
   )
 
   ######## Template Google Sheet Link ########
   observeEvent(c(input$dropdown_folder, input$tabs), {
-
     req(input$tabs %in% c("tab_template", "tab_upload"))
     tmp_folder_synID <- data_list$folders()[[input$dropdown_folder]]
     req(tmp_folder_synID != folder_synID()) # if folder changes
-    
+
     # update selected folder ID
     folder_synID(tmp_folder_synID)
 
@@ -244,7 +243,10 @@ shinyServer(function(input, output, session) {
     manifest_url <-
       metadata_model$getModelManifest(paste0(config$community, " ", input$dropdown_template),
         template_schema_name(),
-        filenames = switch((template_type == "assay") + 1, NULL, as.list(names(data_list$files))),
+        filenames = switch((template_type == "assay") + 1,
+          NULL,
+          as.list(names(data_list$files))
+        ),
         datasetId = folder_synID()
       )
 
@@ -286,7 +288,7 @@ shinyServer(function(input, output, session) {
 
     # loading screen for validating metadata
     dcWaiter("show", msg = "Validating...")
-  
+
     try(
       silent = TRUE,
       annotation_status <- metadata_model$validateModelManifest(

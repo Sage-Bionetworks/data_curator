@@ -32,20 +32,18 @@ suppressPackageStartupMessages({
   library(shiny)
   library(httr)
   library(shinyjs)
+  library(dplyr)
+  library(tidyr)
+  library(shinythemes)
   library(shinydashboard)
-  library(shinydashboardPlus)
-  library(sass)
-  library(shinypop) # dreamRs/shinypop
   library(stringr)
   library(DT)
   library(jsonlite)
   library(shinypop)
   library(waiter)
-  # tidyverse
-  library(dplyr)
   library(readr)
-  library(stringr)
-  library(tidyr)
+  library(sass)
+  library(shinydashboardPlus)
   # dashboard
   library(data.table)
   library(networkD3)
@@ -96,16 +94,11 @@ api <- oauth_endpoint(
 # The 'openid' scope is required by the protocol for retrieving user information.
 scope <- "openid view download modify"
 
-# Activate conda env
-# Don't necessarily have to set `RETICULATE_PYTHON` env variable
-reticulate::use_condaenv(conda_name, required = TRUE)
-
 # import synapse client
 syn <- import("synapseclient")$Synapse()
 # import schematic modules
 source_python("functions/metadataModel.py")
 synapse_driver <- import("schematic.store.synapse")$SynapseStorage
-
 # Import functions/modules
 source_files <- list.files(c("functions", "modules"), pattern = "*\\.R$", recursive = TRUE, full.names = TRUE)
 sapply(source_files, FUN = source)
