@@ -20,7 +20,7 @@ cran <- c(
   "png==0.1.7",
   "tidyr==1.1.4",
   "data.table==1.14.2",
-  "igraph",
+  "igraph==1.2.11",
   "networkD3==0.4",
   "data.tree==1.0.0",
   "r2d3==0.2.6"
