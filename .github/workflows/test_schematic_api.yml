@@ -43,12 +43,6 @@ jobs:
         run: |
           R -f install-pkgs.R
 
-      - name: Install Python Packages Dependencies
-        shell: bash
-        run: |
-          source .venv/bin/activate
-          pip3 install -r requirements.txt
-
       - name: Install Schematic
         shell: bash
         run: |
