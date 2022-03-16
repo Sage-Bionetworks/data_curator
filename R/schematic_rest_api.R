@@ -114,7 +114,7 @@ storage_project_datasets <- function(url="http://localhost:3001/v1/storage/proje
 #' @param syn_master_file_name Synapse storage manifest file name.
 #' @param input_token synapse PAT
 #'
-#'@export
+#' @export
 storage_projects <- function(url="http://localhost:3001/v1/storage/projects",
                              syn_master_file_view,
                              syn_master_file_name, input_token) {
@@ -130,6 +130,16 @@ storage_projects <- function(url="http://localhost:3001/v1/storage/projects",
 }
 
 #' /storage/dataset/files
+#'
+#' @param url URL to schematic API endpoint
+#' @param syn_master_file_view synapse ID of master file view.
+#' @param syn_master_file_name Synapse storage manifest file name.
+#' @param dataset_id synapse ID of a storage dataset.
+#' @param file_names a list of files with particular names (i.e. Sample_A.txt). If you leave it empty, it will return all dataset files under the dataset ID.
+#' @param full_path Boolean. If True return the full path as part of this filename; otherwise return just base filename
+#' @param input_token synapse PAT
+#'
+#' @export
 storage_dataset_files <- function(url="http://localhost:3001/v1/storage/dataset/files",
                                   syn_master_file_view,
                                   syn_master_file_name="synapse_storage_manifest.csv",
