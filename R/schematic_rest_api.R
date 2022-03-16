@@ -79,3 +79,72 @@ model_submit <- function(url="http://localhost:3001/v1/model/submit",
   manifest_id <- httr::content(req)
   manifest_id
 }
+
+#' Gets all datasets in folder under a given storage project that the current user has access to.
+#' 
+#' @param url URL to schematic API endpoint
+#' @param syn_master_file_view synapse ID of master file view.
+#' @param syn_master_file_name Synapse storage manifest file name.
+#' @param project_id synapse ID of a storage project.
+#' @param input_token synapse PAT
+#'
+#'@export
+storage_project_datasets <- function(url="http://localhost:3001/v1/storage/project/datasets",
+                                     syn_master_file_view,
+                                     syn_master_file_name,
+                                     project_id,
+                                     input_token) {
+  
+  req <- httr::GET(url,
+                    #add_headers(Authorization=paste0("Bearer ", pat)),
+                    query=list(
+                      syn_master_file_view=syn_master_file_view,
+                      syn_master_file_name="synapse_storage_manifest.csv",
+                      project_id=project_id,
+                      input_token=input_token)
+  )
+  
+  httr::content(req)
+}
+
+#' Get all storage projects the current user has access to
+#' 
+#' @param url URL to schematic API endpoint
+#' @param syn_master_file_view synapse ID of master file view.
+#' @param syn_master_file_name Synapse storage manifest file name.
+#' @param input_token synapse PAT
+#'
+#'@export
+storage_projects <- function(url="http://localhost:3001/v1/storage/projects",
+                             syn_master_file_view,
+                             syn_master_file_name, input_token) {
+  
+  req <- httr::GET(url,
+                   query = list(
+                     syn_master_file_view=syn_master_file_view,
+                     syn_master_file_name="synapse_storage_manifest.csv",
+                     input_token=input_token
+                   ))
+  
+  httr::content(req)
+}
+
+#' /storage/dataset/files
+storage_dataset_files <- function(url="http://localhost:3001/v1/storage/dataset/files",
+                                  syn_master_file_view,
+                                  syn_master_file_name="synapse_storage_manifest.csv",
+                                  dataset_id, file_names=list(),
+                                  full_path=FALSE, input_token) {
+  
+  req <- httr::GET(url,
+                   #add_headers(Authorization=paste0("Bearer ", pat)),
+                   query=list(
+                     syn_master_file_view=syn_master_file_view,
+                     syn_master_file_name="synapse_storage_manifest.csv",
+                     dataset_id=dataset_id,
+                     file_names=file_names,
+                     full_path=full_path,
+                     input_token=input_token))
+  req
+                   
+}
