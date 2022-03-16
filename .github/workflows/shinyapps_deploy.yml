@@ -56,6 +56,8 @@ jobs:
           cd schematic
           poetry build
           pip3 install dist/schematicpy-1.0.0-py3-none-any.whl
+          pip3 uninstall synapseclient
+          pip3 install synapseclient==2.5.0
       - name: Set Configurations for Schematic
         shell: bash
         run: |
