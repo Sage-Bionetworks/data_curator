@@ -15,8 +15,11 @@
     color: #fff;
     box-shadow: $primary_shadow;
 
-    .summary-icon {
-      color: #f7dc6f;
+    .summary-icon .fa-3x {
+      background: #fff;
+      padding: 15px;
+      border-radius: 50%;
+      box-shadow: 0 0 0 5px rgba($primary_col, 0.6);
     }
 
     .progress-group {

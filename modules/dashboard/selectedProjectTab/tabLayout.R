@@ -13,6 +13,15 @@ selectedProjectTabUI <- function(id) {
         column(
           3,
           fluidRow(
+            # column(12, class = "section-title", span("Placehold for a dropdown")),
+            # column(
+            #   12,
+            #   selectInput(
+            #     inputId = ns("test123"),
+            #     label = "placeholder",
+            #     choices = c(10, 50, 75, 90)
+            #   )
+            # ),
             column(12, class = "section-title", span("Each dataset progress")),
             column(12, align = "center", uiOutput(ns("complete-dataset-pb"))),
             column(12, align = "center", uiOutput(ns("incomplete-dataset-pb")))
@@ -71,7 +80,7 @@ selectedProjectTab <- function(id, userName, uploadData, reqData, selectedProjec
       setTabTitle("title", paste0("Completion of Requirements for Project: ", sQuote(selectedProject)))
 
       # rater system
-      completion_icon <- ifelse(progress_value > 89, "crown", "medal")
+      completion_icon <- ifelse(progress_value >= 90, "crown", "medal")
       completion_icon_col <- case_when(
         progress_value < 50 ~ "#A77044",
         progress_value >= 50 & progress_value < 75 ~ "#A7A7AD",
@@ -83,9 +92,20 @@ selectedProjectTab <- function(id, userName, uploadData, reqData, selectedProjec
         div(
           class = "summary-box", align = "center",
           div(
-            div(class = "summary-icon", icon("crown", "fa-2x")),
+            div(
+              class = "summary-icon",
+              icon(completion_icon, "fa-3x",
+                style = paste0(
+                  "color: ", completion_icon_col, ";
+                  border: 2.5px solid ", completion_icon_col, ";"
+                )
+              )
+            ),
             div(class = "summary-header", h3(paste0("Congratulations ", userName, "!"))),
-            div(class = "summary-body", paste0("you have made ", progress_value, "% progress"))
+            div(
+              class = "summary-body",
+              paste0("you have made ", progress_value, "% progress")
+            )
           ),
           progressBarUI(ns("progress-box"))
         )
