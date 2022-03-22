@@ -1,10 +1,10 @@
 dashboardUI <- function(id) {
-
   ns <- NS(id)
 
   tagList(
     # dashboard section
-    column(12, 
+    column(
+      12,
       div(
         id = ns("toggle-btn-container"),
         actionButton(ns("toggle-btn"), div(span(), p("Show Data Dashboard")), class = "scroll-down"),
@@ -22,14 +22,14 @@ dashboardUI <- function(id) {
         tabsetPanel(
           id = ns("tabs"),
           tabPanel(
-            "Selected Data Type",
+            "Selected Project",
             value = "db-tab1",
-            selectedDataTypeTabUI(ns("tab-selected-datatype"))
+            selectedProjectTabUI(ns("tab-selected-project"))
           ),
           tabPanel(
-            "Selected Project",
+            "Selected Data Type",
             value = "db-tab2",
-            selectedProjectTabUI(ns("tab-selected-project"))
+            selectedDataTypeTabUI(ns("tab-selected-datatype"))
           ),
           tabPanel(
             "Data Validation",
@@ -42,7 +42,7 @@ dashboardUI <- function(id) {
   )
 }
 
-dashboard <- function(id, synStoreObj, selectedProject, folderList, selectedDataType, userName, disableIds=NULL) {
+dashboard <- function(id, synStoreObj, selectedProject, folderList, selectedDataType, userName, disableIds = NULL) {
   moduleServer(
     id,
     function(input, output, session) {
@@ -72,13 +72,14 @@ dashboard <- function(id, synStoreObj, selectedProject, folderList, selectedData
         req(input$box$visible)
         # initiate partial loading screen for generating plot
         dcWaiter(
-          "show", id = ns("tab-container"), url ="www/img/logo.svg", custom_spinner = TRUE,
+          "show",
+          id = ns("tab-container"), url = "www/img/logo.svg", custom_spinner = TRUE,
           msg = "Loading, please wait...", style = "color: #000;", color = transparent(0.95)
         )
 
         # disable selection to prevent changes until all uploaded manifests are queried
         # make sure to use asis, otherwise it will add module's namespaces
-        lapply(disableIds, FUN = disable, asis = TRUE) 
+        lapply(disableIds, FUN = disable, asis = TRUE)
 
         # get all uploaded manifests for selected project
         all_manifests <- getManifests(synStoreObj, folderList())
@@ -87,14 +88,14 @@ dashboard <- function(id, synStoreObj, selectedProject, folderList, selectedData
 
         lapply(disableIds, FUN = enable, asis = TRUE)
       })
-      
+
       # get requirements for selected data type
       selected_datatype_requirement <- eventReactive(c(selectedDataType(), input$box$visible), {
         req(input$box$visible)
         getDatatypeRequirement(selectedDataType())
       })
 
-      # get requirements for all uploaded manifests 
+      # get requirements for all uploaded manifests
       uploaded_manifests_requirement <- eventReactive(uploaded_manifests(), {
         req(input$box$visible)
         getManifestRequirements(uploaded_manifests())
@@ -104,8 +105,10 @@ dashboard <- function(id, synStoreObj, selectedProject, folderList, selectedData
       observeEvent(c(uploaded_manifests(), selected_datatype_requirement(), input$dashboard$visible), {
         req(input$box$visible)
         selectedDataTypeTab(
-          "tab-selected-datatype", userName = userName,
-          uploaded_manifests(), selected_datatype_requirement(), selectedDataType(),
+          "tab-selected-datatype",
+          uploaded_manifests(),
+          selected_datatype_requirement(),
+          selectedDataType(),
           tabId = "tabs", validationTab = "db-tab3", parent = session
         )
       })
@@ -114,7 +117,13 @@ dashboard <- function(id, synStoreObj, selectedProject, folderList, selectedData
       # to reduce running time, selected template updates should not initiate this event
       observeEvent(c(uploaded_manifests_requirement(), input$box$visible), {
         req(input$box$visible)
-        selectedProjectTab("tab-selected-project", uploaded_manifests(), uploaded_manifests_requirement(), selectedProject())
+        selectedProjectTab(
+          "tab-selected-project",
+          userName,
+          uploaded_manifests(),
+          uploaded_manifests_requirement(),
+          selectedProject()
+        )
         # validation table for all uploaded data
         validationTab("tab-validation", uploaded_manifests(), selectedProject())
         # force switch tabs to solve tabs content not rendered initially

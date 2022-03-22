@@ -1,17 +1,15 @@
 #' get all uploaded manifests based on provided folder list
-#' 
+#'
 #' @param synStoreObj synapse storage object.
 #' @param datasets a list of folder syn Ids, named by folder names
 #' @return data frame that contains manifest essential information for dashboard
 getManifests <- function(synStoreObj, datasets) {
-
   all_files <- synStoreObj$storageFileviewTable
   all_files <- all_files[all_files$name == basename(synStoreObj$manifest), ]
 
   sapply(datasets, function(id) {
-
     manifest_id <- all_files[all_files$parentId == id, "id"]
-    
+
     # return empty tibble if no manifest or no component in the manifest
     df <- tibble()
 
@@ -46,42 +44,40 @@ getManifests <- function(synStoreObj, datasets) {
           folderSynId = as.character(id),
           isValid = ifelse(res$validationRes == "valid", TRUE, FALSE),
           errorType = res$errorType
-        ) %>% 
+        ) %>%
           filter(schema != "" & schema != "NaN")
       }
     }
-    
+
     return(df)
   }) %>% bind_rows()
 }
 
 
 #' create data frame of data type requirements for selected data type
-#' 
+#'
 #' @param datatype data type of selected template.
 #' @return list of requirements for \code{datatype} or string of \code{datatype} if no requirements found
 getDatatypeRequirement <- function(datatype) {
-
   requirement <- tryCatch(metadata_model$get_component_requirements(datatype, as_graph = TRUE), error = function(err) list())
 
   # get a list of requirements, otherwise output unamed vector of datatype name
   if (length(requirement) == 0) {
     # it will be used to detect whether output has name in network
     requirement <- as.character(datatype)
-   } else {
+  } else {
     requirement <- list2Vector(requirement)
-   }
+  }
 
   return(requirement)
 }
 
 
 #' create data frame of data type requirements for all manifests
-#' 
+#'
 #' @param manifest output from \code{getManifests}.
 #' @return data frame contains required data types for network plot
 getManifestRequirements <- function(manifest) {
-  
   if (nrow(manifest) == 0) {
     data.frame(from = NA, to = NA, folder = NA, folderSynId = NA, nMiss = NA)
   } else {
@@ -97,6 +93,6 @@ getManifestRequirements <- function(manifest) {
       to <- c(manifest$schema[i], names(out))
       # output nodes data as data frame
       data.frame(from = from, to = to, folder = c(manifest$folder[i]), folderSynId = c(manifest$folderSynId[i]), nMiss = c(n_miss))
-      }) %>% bind_rows()
-    }
+    }) %>% bind_rows()
+  }
 }
