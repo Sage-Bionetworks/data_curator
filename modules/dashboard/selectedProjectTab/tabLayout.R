@@ -80,7 +80,7 @@ selectedProjectTab <- function(id, userName, uploadData, reqData, selectedProjec
       setTabTitle("title", paste0("Completion of Requirements for Project: ", sQuote(selectedProject)))
 
       # rater system
-      completion_icon <- ifelse(progress_value > 89, "crown", "medal")
+      completion_icon <- ifelse(progress_value >= 90, "crown", "medal")
       completion_icon_col <- case_when(
         progress_value < 50 ~ "#A77044",
         progress_value >= 50 & progress_value < 75 ~ "#A7A7AD",
