@@ -38,5 +38,26 @@ test_that("model_submit successfully uploads to synapse", {
   
   submit <- model_submit(data_type="Biospecimen", dataset_id="syn20977135",
                       input_token=Sys.getenv("SYNAPSE_PAT"), csv_file=pass_csv)
-  expect_true(submit)
+  expect_true(grepl("^syn", submit))
+})
+
+test_that("storage_project_datasets returns available datasets", {
+  skip_it()
+  storage_project_datasets(syn_master_file_view="syn23643253",
+                           syn_master_file_name="synapse_storage_manifest.csv",
+                           project_id="syn26251192",
+                           input_token=Sys.getenv("SYNAPSE_PAT"))
+})
+
+test_that("storage_projects returns available projects", {
+  skip_it()
+  storage_projects(syn_master_file_view="syn23643253",
+                   syn_master_file_name="synapse_storage_manifest.csv",
+                   input_token=Sys.getenv("SYNAPSE_PAT"))
+})
+
+test_that("storage_dataset_files returns files", {
+  storage_dataset_files(syn_master_file_view = "syn23643253",
+                        dataset_id = "syn23643250",
+                        input_token=Sys.getenv("SYNAPSE_PAT"))
 })
