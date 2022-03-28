@@ -45,3 +45,22 @@ synapse_is_certified <- function(url="https://repo-prod.prod.sagebase.org/repo/v
 
 #content(GET(sprintf("https://repo-prod.prod.sagebase.org/repo/v1/user/%s/certifiedUserPassingRecord", "3438856")))
 #https://repo-prod.prod.sagebase.org/repo/v1/user
+
+#' @title GET Synapse Entity
+#' 
+#' @description Wrapper for https://rest-docs.synapse.org/rest/GET/entity/id.html
+#' 
+#' @param url URL of synapse REST API GET table entity endpoint
+#' @param id ID of synapse table
+#' @param auth Synapse PAT
+synapse_get <- function(url = "https://repo-prod.prod.sagebase.org/repo/v1/entity/",
+                        id, auth) {
+  
+  req_url <- file.path(url, id)
+  req <- httr::GET(req_url,
+             httr::add_headers(Authorization=paste0("Bearer ", auth)))
+  cont <- httr::content(req)
+  tibble::as_tibble(cont)
+  
+}
+
