@@ -26,7 +26,7 @@ system("chmod -R +x .venv")
 # Activate virtual env
 # Don't necessarily have to set `RETICULATE_PYTHON` env variable
 Sys.unsetenv("RETICULATE_PYTHON")
-reticulate::use_virtualenv(file.path(getwd(), ".venv"), required = TRUE)
+#reticulate::use_virtualenv(file.path(getwd(), ".venv"), required = TRUE)
 
 suppressPackageStartupMessages({
   library(shiny)

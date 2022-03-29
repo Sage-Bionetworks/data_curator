@@ -25,11 +25,11 @@ shinyServer(function(input, output, session) {
   session$userData$access_token <- access_token
 
   ######## session global variables ########
-  source_python("functions/synapse_func_alias.py")
-  source_python("functions/metadata_model.py")
+  #source_python("functions/synapse_func_alias.py")
+  #source_python("functions/metadata_model.py")
   source("R/schematic_rest_api.R")
   # import module that contains SynapseStorage class
-  synapse_driver <- import("schematic.store.synapse")$SynapseStorage
+  #synapse_driver <- import("schematic.store.synapse")$SynapseStorage
   # read config in
   config <- fromJSON("www/config.json")
   schematic_config <- yaml.load_file("schematic_config.yml")
@@ -74,15 +74,15 @@ shinyServer(function(input, output, session) {
     #
     access_token <- session$userData$access_token
 
-    syn_login(authToken = access_token, rememberMe = FALSE)
+    #syn_login(authToken = access_token, rememberMe = FALSE)
 
     # updating syn storage
-    tryCatch(synStore_obj <<- synapse_driver(access_token = access_token), error = function(e) NULL)
-
-    if (is.null(synStore_obj)) {
-      message("'synapse_driver' fails, run 'synapse_driver' to see detailed error")
-      dcWaiter("update", landing = TRUE, isPermission = FALSE)
-    } else {
+    #tryCatch(synStore_obj <<- synapse_driver(access_token = access_token), error = function(e) NULL)
+3
+#    if (is.null(synStore_obj)) {
+#      message("'synapse_driver' fails, run 'synapse_driver' to see detailed error")
+#      dcWaiter("update", landing = TRUE, isPermission = FALSE)
+#    } else {
       #projects_list <- synapse_driver$getStorageProjects(synStore_obj)
       projects_list <- storage_projects(asset_view = folder_synID(),
                                         input_token = access_token)
@@ -107,7 +107,7 @@ shinyServer(function(input, output, session) {
         # update waiter loading screen once login successful
         dcWaiter("update", landing = TRUE, userName = user_name)
       }
-    }
+#    }
   })
 
   ######## Arrow Button ########
