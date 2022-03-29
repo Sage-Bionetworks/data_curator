@@ -32,6 +32,7 @@ shinyServer(function(input, output, session) {
   synapse_driver <- import("schematic.store.synapse")$SynapseStorage
   # read config in
   config <- fromJSON("www/config.json")
+  schematic_config <- yaml.load_file("schematic_config.yml")
 
   # mapping from display name to schema name
   template_namedList <- config$manifest_schemas$schema_name
@@ -42,6 +43,7 @@ shinyServer(function(input, output, session) {
   folder_synID <- reactiveVal("") # selected foler synapse ID
   template_schema_name <- reactiveVal(NULL) # selected template schema name
   template_type <- NULL # type of selected template
+  master_fileview <- schematic_config$synapse$master_fileview
 
   isUpdateFolder <- reactiveVal(FALSE)
   datatype_list <- list(projects = NULL, folders = NULL, manifests = template_namedList, files = NULL)
@@ -81,7 +83,9 @@ shinyServer(function(input, output, session) {
       message("'synapse_driver' fails, run 'synapse_driver' to see detailed error")
       dcWaiter("update", landing = TRUE, isPermission = FALSE)
     } else {
-      projects_list <- synapse_driver$getStorageProjects(synStore_obj)
+      #projects_list <- synapse_driver$getStorageProjects(synStore_obj)
+      projects_list <- storage_projects(asset_view = folder_synID(),
+                                        input_token = access_token)
       datatype_list$projects <<- list2Vector(projects_list)
 
       # updates project dropdown
@@ -158,7 +162,10 @@ shinyServer(function(input, output, session) {
       projectID <- datatype_list$projects[[input[[paste0(x, "project")]]]]
 
       # gets folders per project
-      folder_list <- synapse_driver$getStorageDatasetsInProject(synStore_obj, projectID) %>% list2Vector()
+      #folder_list <- synapse_driver$getStorageDatasetsInProject(synStore_obj, projectID) %>% list2Vector()
+      folder_list <- storage_project_datasets(asset_view = folder_synID(),
+                                              project_id=projectID,
+                                              input_token=access_token) %>% list2Vector()
 
       # updates foldernames
       updateSelectInput(session, paste0(x, "folder"), choices = sort(names(folder_list)))
@@ -194,10 +201,17 @@ shinyServer(function(input, output, session) {
     if (input$tabs == "tab_template") {
       dcWaiter("show", msg = paste0("Getting files in ", input$dropdown_folder, "..."))
       # get file list in selected folder
-      file_list <- synapse_driver$getFilesInStorageDataset(
-        synStore_obj,
-        folder_synID()
-      )
+      # file_list <- synapse_driver$getFilesInStorageDataset(
+      #   synStore_obj,
+      #   folder_synID()
+      # )
+      file_list <- storage_dataset_files(asset_view = master_fileview,
+                            dataset_id = folder_synID(),
+                            input_token=access_token)
+      if (inherits(file_list, "xml_document")) {
+        err_msg <- xml2::xml_text(xml2::xml_child(file_list, "head/title"))
+        stop(sprintf("Storage/dataset/files request was unsuccessful. %s", err_msg))
+      }
       datatype_list$files <<- list2Vector(file_list)
       dcWaiter("hide")
     }
@@ -245,7 +259,7 @@ shinyServer(function(input, output, session) {
     
     #schematic rest api to generate manifest
     manifest_url <- manifest_generate(title = input$dropdown_template,
-                      data_type = template_schema_name(), dataset_id = synID())
+                      data_type = template_schema_name(), dataset_id = folder_synID())
 
     # generate link
     output$text_template <- renderUI(
@@ -286,13 +300,13 @@ shinyServer(function(input, output, session) {
     # loading screen for validating metadata
     dcWaiter("show", msg = "Validating...")
 
-    try(
-      silent = TRUE,
-      annotation_status <- metadata_model$validateModelManifest(
-        inFile$raw()$datapath,
-        template_schema_name()
-      )
-    )
+    # try(
+    #   silent = TRUE,
+    #   annotation_status <- metadata_model$validateModelManifest(
+    #     inFile$raw()$datapath,
+    #     template_schema_name()
+    #   )
+    # )
     
     # schematic rest api to validate metadata
     annotation_status <- manifest_validate(data_type=template_schema_name(),
@@ -352,11 +366,15 @@ shinyServer(function(input, output, session) {
   observeEvent(input$btn_val_gsheet, {
     # loading screen for Google link generation
     dcWaiter("show", msg = "Generating link...")
-
-    filled_manifest <- metadata_model$populateModelManifest(paste0(
-      config$community,
-      " ", input$dropdown_template
-    ), inFile$raw()$datapath, template_schema_name())
+    
+    # filled_manifest <- metadata_model$populateModelManifest(paste0(
+    #   config$community,
+    #   " ", input$dropdown_template
+    # ), inFile$raw()$datapath, template_schema_name())
+    filled_manifest <- manifest_generate(data_type=paste0(config$community,
+      " ", input$dropdown_template),
+      title=template_schema_name,
+      csv_file=inFile$raw()$datapath)
 
     # rerender and change button to link
     output$val_gsheet <- renderUI({
@@ -391,7 +409,10 @@ shinyServer(function(input, output, session) {
           quote = TRUE, row.names = FALSE, na = ""
         )
       } else {
-        file_list <- synapse_driver$getFilesInStorageDataset(synStore_obj, folder_synID())
+        #file_list <- synapse_driver$getFilesInStorageDataset(synStore_obj, folder_synID())
+        file_list <- storage_dataset_files(asset_view = project_synID,
+                                            dataset_id = folder_synID(),
+                                            input_token=access_token)
         datatype_list$files <<- list2Vector(file_list)
 
         # better filename checking is needed
