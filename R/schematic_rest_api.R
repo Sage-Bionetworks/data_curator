@@ -27,6 +27,29 @@ manifest_generate <- function(url="http://localhost:3001/v1/manifest/generate",
   manifest_url
 }
 
+#' Populate a manifest sheet
+#' 
+#' @param url URL to schematic API endpoint
+#' @param schema_url URL to a schema jsonld 
+#' @param data_type Type of dataset
+#' @param title Title of csv
+#' @param csv_file Filepath of csv to validate
+#' @export
+manifest_populate <- function(url="http://localhost:3001/v1/manifest/populate",
+                              schema_url="https://raw.githubusercontent.com/ncihtan/data-models/main/HTAN.model.jsonld", #notlint
+                              data_type, title, csv_file) {
+  
+  req <- httr::POST(url,
+                    query=list(
+                      schema_url=schema_url,
+                      data_type=data_type,
+                      title=title),
+                    body=list(csv_file=httr::upload_file(csv_file))
+  )
+  req
+  
+}
+
 
 #' schematic rest api to validate metadata
 #' 
@@ -90,16 +113,14 @@ model_submit <- function(url="http://localhost:3001/v1/model/submit",
 #'
 #'@export
 storage_project_datasets <- function(url="http://localhost:3001/v1/storage/project/datasets",
-                                     syn_master_file_view,
-                                     syn_master_file_name,
+                                     asset_view,
                                      project_id,
                                      input_token) {
   
   req <- httr::GET(url,
                     #add_headers(Authorization=paste0("Bearer ", pat)),
                     query=list(
-                      syn_master_file_view=syn_master_file_view,
-                      syn_master_file_name="synapse_storage_manifest.csv",
+                      asset_view=asset_view,
                       project_id=project_id,
                       input_token=input_token)
   )
@@ -116,13 +137,12 @@ storage_project_datasets <- function(url="http://localhost:3001/v1/storage/proje
 #'
 #' @export
 storage_projects <- function(url="http://localhost:3001/v1/storage/projects",
-                             syn_master_file_view,
-                             syn_master_file_name, input_token) {
+                             asset_view,
+                             input_token) {
   
   req <- httr::GET(url,
                    query = list(
-                     syn_master_file_view=syn_master_file_view,
-                     syn_master_file_name="synapse_storage_manifest.csv",
+                     asset_view=asset_view,
                      input_token=input_token
                    ))
   
@@ -141,20 +161,18 @@ storage_projects <- function(url="http://localhost:3001/v1/storage/projects",
 #'
 #' @export
 storage_dataset_files <- function(url="http://localhost:3001/v1/storage/dataset/files",
-                                  syn_master_file_view,
-                                  syn_master_file_name="synapse_storage_manifest.csv",
+                                  asset_view,
                                   dataset_id, file_names=list(),
                                   full_path=FALSE, input_token) {
   
   req <- httr::GET(url,
                    #add_headers(Authorization=paste0("Bearer ", pat)),
                    query=list(
-                     syn_master_file_view=syn_master_file_view,
-                     syn_master_file_name="synapse_storage_manifest.csv",
+                     asset_view=asset_view,
                      dataset_id=dataset_id,
                      file_names=file_names,
                      full_path=full_path,
                      input_token=input_token))
-  req
+  httr::content(req)
                    
 }
