@@ -20,7 +20,13 @@ test_that("manifest_generate returns a URL if sucessful", {
   
   url <- manifest_generate(title="Test biospecimen", data_type="Biospecimen",
                   dataset_id="syn20977135")
-  expect_true(grepl("^http", url))
+  expect_true(grepl("^https://docs.google", content(url)))
+})
+
+test_that("manifest_populate returns a google sheet link with records filled", {
+  skip_it()
+  req <- manifest_populate(data_type="Biospecimen", title="Example",
+                           csv_file = pass_csv)
 })
   
 test_that("manifest_validate passes and fails correctly", {
@@ -43,21 +49,19 @@ test_that("model_submit successfully uploads to synapse", {
 
 test_that("storage_project_datasets returns available datasets", {
   skip_it()
-  storage_project_datasets(syn_master_file_view="syn23643253",
-                           syn_master_file_name="synapse_storage_manifest.csv",
+  storage_project_datasets(asset_view="syn23643253",
                            project_id="syn26251192",
                            input_token=Sys.getenv("SYNAPSE_PAT"))
 })
 
 test_that("storage_projects returns available projects", {
   skip_it()
-  storage_projects(syn_master_file_view="syn23643253",
-                   syn_master_file_name="synapse_storage_manifest.csv",
+  storage_projects(asset_view="syn23643253",
                    input_token=Sys.getenv("SYNAPSE_PAT"))
 })
 
 test_that("storage_dataset_files returns files", {
-  storage_dataset_files(syn_master_file_view = "syn23643253",
+  storage_dataset_files(asset_view = "syn23643253",
                         dataset_id = "syn23643250",
                         input_token=Sys.getenv("SYNAPSE_PAT"))
 })
