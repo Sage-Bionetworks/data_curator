@@ -1,6 +1,7 @@
 suppressPackageStartupMessages({
   library(yaml)
   library(reticulate)
+  library(httr)
 })
 
 oauth_client <- yaml.load_file("oauth_config.yml")
@@ -12,6 +13,13 @@ app_url <- toString(oauth_client$APP_URL)
 if (is.null(client_id) || nchar(client_id) == 0) stop("oauth_config.yml is missing CLIENT_ID")
 if (is.null(client_secret) || nchar(client_secret) == 0) stop("oauth_config.yml is missing CLIENT_SECRET")
 if (is.null(app_url) || nchar(app_url) == 0) stop("oauth_config.yml is missing APP_URL")
+
+# update port if running app locally
+if (interactive()) {
+  port <- httr::parse_url(app_url)$port
+  if (is.null(port)) stop("running locally requires a TCP port that the application should listen on")
+  options(shiny.port = as.numeric(port))
+}
 
 # ShinyAppys has a limit of 7000 files which this app' grossly exceeds
 # due to its Python dependencies.  To get around the limit we zip up
@@ -27,10 +35,9 @@ system("chmod -R +x .venv")
 # Don't necessarily have to set `RETICULATE_PYTHON` env variable
 Sys.unsetenv("RETICULATE_PYTHON")
 reticulate::use_virtualenv(file.path(getwd(), ".venv"), required = TRUE)
-
+# if (interactive()) options(shiny.port = 8100)
 suppressPackageStartupMessages({
   library(shiny)
-  library(httr)
   library(shinyjs)
   library(dplyr)
   library(tidyr)
@@ -55,9 +62,9 @@ has_auth_code <- function(params) {
 }
 
 app <- oauth_app("shinysynapse",
-  key = client_id,
-  secret = client_secret,
-  redirect_uri = app_url
+                 key = client_id,
+                 secret = client_secret,
+                 redirect_uri = app_url
 )
 
 # These are the user info details ('claims') requested from Synapse:
