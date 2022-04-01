@@ -94,7 +94,7 @@ jobs:
           appName <- strsplit(repo, "/")[[1]][2]
           # if tag is v*.*.*, deploy to prod, otherwise to staging
           if (!grepl("v[0-9]+.[0-9]+.[0-9]+", refName)) {
-            appName <- paste(appName, "staging", sep = "-")
+            appName <- paste(appName, "staging", sep = "_")
           }
           rsConnectUser <- "${{ secrets.RSCONNECT_USER }}"
           rsConnectToken <- "${{ secrets.RSCONNECT_TOKEN }}"
