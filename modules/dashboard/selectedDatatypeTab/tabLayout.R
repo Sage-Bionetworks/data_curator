@@ -35,20 +35,23 @@ selectedDataTypeTab <- function(id, uploadData, reqData, selectedDataType, tabId
       all_req <- union(reqData, names(reqData))
       # get number of total requirements
       n_req <- length(all_req)
-
+      logjs(uploadData)
+      logjs(reqData)
+      logjs(selectedDataType)
       # render tab title
       setTabTitle("title", paste0("Completion of Requirements for Data Type: ", sQuote(selectedDataType)))
 
       # render check list of requirments for selected datatype
       dbCheckList("checklist", uploadData, reqData)
       # render network plot for requirements of selected datatype
-      dbNetwork("network", uploadData, reqData, selectedDataType)
+      # to fix
+      # dbNetwork("network", uploadData, reqData, selectedDataType)
 
       # redirect to validation tab of dashboard once the btn clicked
-      observeEvent(input$`view-btn`, {
-        req(input$`view-btn` != 0)
-        updateTabsetPanel(parent, tabId, selected = validationTab)
-      })
+      # observeEvent(input$`view-btn`, {
+      #   req(input$`view-btn` != 0)
+      #   updateTabsetPanel(parent, tabId, selected = validationTab)
+      # })
     }
   )
 }

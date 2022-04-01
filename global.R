@@ -1,36 +1,8 @@
 suppressPackageStartupMessages({
   library(yaml)
   library(reticulate)
-})
-
-oauth_client <- yaml.load_file("oauth_config.yml")
-
-client_id <- toString(oauth_client$CLIENT_ID)
-client_secret <- toString(oauth_client$CLIENT_SECRET)
-app_url <- toString(oauth_client$APP_URL)
-
-if (is.null(client_id) || nchar(client_id) == 0) stop("oauth_config.yml is missing CLIENT_ID")
-if (is.null(client_secret) || nchar(client_secret) == 0) stop("oauth_config.yml is missing CLIENT_SECRET")
-if (is.null(app_url) || nchar(app_url) == 0) stop("oauth_config.yml is missing APP_URL")
-
-# ShinyAppys has a limit of 7000 files which this app' grossly exceeds
-# due to its Python dependencies.  To get around the limit we zip up
-# the virtual environment before deployment and unzip it here.
-#
-# unzip virtual environment, named as ".venv.zip"
-if (!file.exists(".venv")) utils::unzip(".venv.zip")
-
-# We get a '126' error (non-executable) if we don't do this:
-system("chmod -R +x .venv")
-
-# Activate virtual env
-# Don't necessarily have to set `RETICULATE_PYTHON` env variable
-Sys.unsetenv("RETICULATE_PYTHON")
-reticulate::use_virtualenv(file.path(getwd(), ".venv"), required = TRUE)
-
-suppressPackageStartupMessages({
-  library(shiny)
   library(httr)
+  library(shiny)
   library(shinyjs)
   library(dplyr)
   library(tidyr)
@@ -50,6 +22,24 @@ suppressPackageStartupMessages({
   library(data.tree)
   library(r2d3)
 })
+
+## Set Up OAuth
+oauth_client <- yaml.load_file("oauth_config.yml")
+
+client_id <- toString(oauth_client$CLIENT_ID)
+client_secret <- toString(oauth_client$CLIENT_SECRET)
+app_url <- toString(oauth_client$APP_URL)
+
+if (is.null(client_id) || nchar(client_id) == 0) stop("oauth_config.yml is missing CLIENT_ID")
+if (is.null(client_secret) || nchar(client_secret) == 0) stop("oauth_config.yml is missing CLIENT_SECRET")
+if (is.null(app_url) || nchar(app_url) == 0) stop("oauth_config.yml is missing APP_URL")
+
+# update port if running app locally
+if (interactive()) {
+  port <- httr::parse_url(app_url)$port
+  if (is.null(port)) stop("running locally requires a TCP port that the application should listen on")
+  options(shiny.port = as.numeric(port))
+}
 
 has_auth_code <- function(params) {
   # params is a list object containing the parsed URL parameters. Return TRUE if
@@ -94,6 +84,21 @@ api <- oauth_endpoint(
 # The 'openid' scope is required by the protocol for retrieving user information.
 scope <- "openid view download modify"
 
+## Set Up Virtual Environment
+# ShinyAppys has a limit of 7000 files which this app' grossly exceeds
+# due to its Python dependencies.  To get around the limit we zip up
+# the virtual environment before deployment and unzip it here.
+
+# unzip virtual environment, named as ".venv.zip"
+if (!file.exists(".venv")) utils::unzip(".venv.zip")
+
+# We get a '126' error (non-executable) if we don't do this:
+system("chmod -R +x .venv")
+
+# Don't necessarily have to set `RETICULATE_PYTHON` env variable
+Sys.unsetenv("RETICULATE_PYTHON")
+reticulate::use_virtualenv(file.path(getwd(), ".venv"), required = TRUE)
+
 # import synapse client
 syn <- import("synapseclient")$Synapse()
 # import schematic modules
@@ -103,6 +108,5 @@ synapse_driver <- import("schematic.store.synapse")$SynapseStorage
 source_files <- list.files(c("functions", "modules"), pattern = "*\\.R$", recursive = TRUE, full.names = TRUE)
 sapply(source_files, FUN = source)
 
-# Global variables
+## Global variables
 dropdown_types <- c("project", "folder", "template")
-options(sass.cache = FALSE)

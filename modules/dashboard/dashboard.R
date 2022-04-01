@@ -104,6 +104,7 @@ dashboard <- function(id, synStoreObj, selectedProject, folderList, selectedData
       # render info/plots for selected datatype
       observeEvent(c(uploaded_manifests(), selected_datatype_requirement(), input$dashboard$visible), {
         req(input$box$visible)
+        logjs("I AM HERE 1")
         selectedDataTypeTab(
           "tab-selected-datatype",
           uploaded_manifests(),

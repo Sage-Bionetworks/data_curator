@@ -294,7 +294,7 @@ shinyServer(function(input, output, session) {
       annotation_status <- metadata_model$validateModelManifest(
         inFile$raw()$datapath,
         template_schema_name()
-      )
+      )[[1]]
     )
 
     # validation messages

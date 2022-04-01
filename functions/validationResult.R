@@ -62,10 +62,16 @@ validationResult <- function(valRes, template, inFile) {
 
       # create table to display errors for users
       error_table <- lapply(valRes, function(i) {
-        data.frame(Row = as.numeric(i[[1]]), Column = i[[2]], Value = i[[4]][[1]], Error = i[[3]])
-      }) %>% bind_rows() 
+        data.frame(
+          Row = as.numeric(i[[1]]),
+          Column = i[[2]],
+          Value = as.character(i[[4]][[1]]),
+          Error = i[[3]]
+        )
+      }) %>% bind_rows()
 
-      # create list for hightlight function; key: error_column, value: error_value
+      # create list for hightlight function
+      # key: error_column, value: error_value
       lapply(unique(error_table$Column), function(col) {
         highlight_values[[col]] <<- error_table$Value[error_table$Column == col]
       })
@@ -81,10 +87,9 @@ validationResult <- function(valRes, template, inFile) {
         ) %>%
         ungroup() %>%
         dplyr::select(Row, Column, Value, Error)
-    
+
       # sort rows based on input column names
       error_table <- error_table[order(match(error_table$Column, colnames(inFile))), ]
-
     } else {
       validation_res <- "valid"
       error_type <- "No Error"

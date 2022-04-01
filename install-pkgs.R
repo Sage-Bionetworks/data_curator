@@ -21,7 +21,7 @@ cran <- c(
   "tidyr==1.1.4",
   "data.table==1.14.2",
   "igraph==1.2.11",
-  "networkD3==0.4",
+  "networkD3==0.4", # double check if it works
   "data.tree==1.0.0",
   "r2d3==0.2.6"
 )
