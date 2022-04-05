@@ -19,7 +19,7 @@ manifest:
 
 model:
   input:
-    download_url: 'https://raw.githubusercontent.com/nf-osi/nf-metadata-dictionary/v3.0.3/NF.jsonld' # url to download JSON-LD data model
+    download_url: 'https://raw.githubusercontent.com/nf-osi/nf-metadata-dictionary/v3.1.0/NF.jsonld' # url to download JSON-LD data model
     location: 'data-models/NF.jsonld' # path to JSON-LD data model
     file_type: 'local' 
     
