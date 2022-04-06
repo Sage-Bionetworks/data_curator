@@ -20,7 +20,7 @@ test_that("manifest_generate returns a URL if sucessful", {
   
   url <- manifest_generate(title="Test biospecimen", data_type="Biospecimen",
                   dataset_id="syn20977135")
-  expect_true(grepl("^https://docs.google", content(url)))
+  expect_true(grepl("^https://docs.google", url))
 })
 
 test_that("manifest_populate returns a google sheet link with records filled", {
@@ -44,7 +44,7 @@ test_that("model_submit successfully uploads to synapse", {
   
   submit <- model_submit(data_type="Biospecimen", dataset_id="syn20977135",
                       input_token=Sys.getenv("SYNAPSE_PAT"), csv_file=pass_csv)
-  expect_true(grepl("^syn", submit))
+  expect_true(submit)
 })
 
 test_that("storage_project_datasets returns available datasets", {
