@@ -5,5 +5,6 @@ CLIENT_ID: '<Your Client ID>'
 CLIENT_SECRET: '<Your Client Secret>'
 
 # url of your deployed app
-# for local testing, change port based on your OAuth Client's redirect_uri, e.g. https://localhost:8100/
+# for local testing, you could your localhost with a TCP port app will listen on: e.g. http://127.0.0.1:8100/
+# ensure the url specified (as well as localhost) here has been verified in your client
 APP_URL: '<Your APP URL>'
