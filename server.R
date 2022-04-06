@@ -404,8 +404,8 @@ shinyServer(function(input, output, session) {
         synStore_obj,
         "./tmp/synapse_storage_manifest.csv", folder_synID(),
         useSchemaLabel = FALSE,
-        hideBlanks = TRUE
-        
+        hideBlanks = TRUE,
+        manifest_record_type = 'table'
       )
       manifest_path <- tags$a(href = paste0("synapse.org/#!Synapse:", manifest_id), manifest_id, target = "_blank")
 
