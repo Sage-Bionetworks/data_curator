@@ -405,7 +405,7 @@ shinyServer(function(input, output, session) {
         "./tmp/synapse_storage_manifest.csv", folder_synID(),
         useSchemaLabel = FALSE,
         hideBlanks = TRUE,
-        manifest_record_type = 'table'
+        manifest_record_type = 'entity' ## need to use components correctly to use "table" format
       )
       manifest_path <- tags$a(href = paste0("synapse.org/#!Synapse:", manifest_id), manifest_id, target = "_blank")
 
