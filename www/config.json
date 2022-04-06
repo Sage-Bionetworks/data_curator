@@ -14,5 +14,7 @@
     ],
   "main_fileview" : "syn16858331",
   "community" : "NF",
-  "admin_team_table" : "syn22279138"
+  "admin_team_table" : "syn22279138",
+  "schema": "v3.1.0",
+  "schematic_service": "v1"
 }
