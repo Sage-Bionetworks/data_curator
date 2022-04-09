@@ -6,7 +6,7 @@
 getManifests <- function(synStoreObj, datasets) {
   all_files <- synStoreObj$storageFileviewTable
   # only uses the file named as 'synapse_storage_manifest.csv'
-  all_files <- all_files[all_files$name == basename(synStoreObj$manifest), ]
+  all_files <- all_files[all_files$name == "synapse_storage_manifest.csv", ]
 
   sapply(datasets, function(id) {
     manifest_id <- all_files[all_files$parentId == id, "id"]
@@ -53,7 +53,6 @@ getManifests <- function(synStoreObj, datasets) {
     return(df)
   }) %>% bind_rows()
 }
-
 
 #' create data frame of data type requirements for selected data type
 #'

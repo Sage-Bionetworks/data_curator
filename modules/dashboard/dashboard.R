@@ -104,13 +104,11 @@ dashboard <- function(id, synStoreObj, selectedProject, folderList, selectedData
       # render info/plots for selected datatype
       observeEvent(c(uploaded_manifests(), selected_datatype_requirement(), input$dashboard$visible), {
         req(input$box$visible)
-        logjs("I AM HERE 1")
         selectedDataTypeTab(
           "tab-selected-datatype",
           uploaded_manifests(),
           selected_datatype_requirement(),
-          selectedDataType(),
-          tabId = "tabs", validationTab = "db-tab3", parent = session
+          selectedDataType()
         )
       })
 
@@ -123,7 +121,8 @@ dashboard <- function(id, synStoreObj, selectedProject, folderList, selectedData
           userName,
           uploaded_manifests(),
           uploaded_manifests_requirement(),
-          selectedProject()
+          selectedProject(),
+          tabId = "tabs", validationTab = "db-tab3", parent = session
         )
         # validation table for all uploaded data
         validationTab("tab-validation", uploaded_manifests(), selectedProject())

@@ -39,7 +39,7 @@ selectedProjectTabUI <- function(id) {
   )
 }
 
-selectedProjectTab <- function(id, userName, uploadData, reqData, selectedProject) {
+selectedProjectTab <- function(id, userName, uploadData, reqData, selectedProject, tabId, validationTab, parent) {
   moduleServer(
     id,
     function(input, output, session) {
@@ -154,6 +154,12 @@ selectedProjectTab <- function(id, userName, uploadData, reqData, selectedProjec
             span("Click to see the Out-of-Date manifests")
           )
         )
+      })
+
+      # redirect to validation tab of dashboard once the btn clicked
+      observeEvent(input$`view-btn`, {
+        req(input$`view-btn` != 0)
+        updateTabsetPanel(parent, tabId, selected = validationTab)
       })
 
       # render circular progress bar: total number of completed dataset / total number of datasets

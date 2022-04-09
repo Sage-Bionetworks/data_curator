@@ -91,6 +91,10 @@
           i {
             color: $error_col;
           }
+
+          h4 {
+            border-bottom: 0.6px solid $error_col;
+          }
         }
 
         &.outdated {
