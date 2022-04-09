@@ -46,7 +46,7 @@ getManifests <- function(synStoreObj, datasets) {
           isValid = ifelse(res$validationRes == "valid", TRUE, FALSE),
           errorType = res$errorType
         ) %>%
-          filter(schema != "" & schema != "NaN")
+          filter(schema != "" & schema != "NaN") # in case empty rows
       }
     }
 
@@ -76,7 +76,7 @@ getDatatypeRequirement <- function(datatype) {
 #' create data frame of data type requirements for all manifests
 #'
 #' @param manifest output from \code{getManifests}.
-#' @return data frame contains required data types for network plot
+#' @return data frame contains required data types for tree plot
 getManifestRequirements <- function(manifest) {
   if (nrow(manifest) == 0) {
     data.frame(from = NA, to = NA, folder = NA, folderSynId = NA, nMiss = NA)
