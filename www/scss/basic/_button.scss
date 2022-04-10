@@ -206,3 +206,9 @@
   background: $primary_col;
   border-radius: 40px;
 }
+
+// checkbox button
+// TODO: create custom one (hidden default styling)
+input[type='checkbox'] {
+  filter: hue-rotate(38deg) brightness(1.1);
+}

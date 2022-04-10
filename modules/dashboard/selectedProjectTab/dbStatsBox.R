@@ -12,16 +12,6 @@ dbStatsBox <- function(id, up.data, req.data, source.tab, target.tab, parent) {
     function(input, output, session) {
       ns <- session$ns
 
-      # number of total dataset
-      uniq_ds <- req.data %>% distinct(folderSynId, .keep_all = TRUE)
-      n_ds <- nrow(uniq_ds)
-      # number of completed dataset
-      n_completed <- sum(uniq_ds$nMiss == 0)
-      # number of incompleted dataset
-      n_miss <- sum(uniq_ds$nMiss > 0)
-      #
-      progress_value <- round(n_completed / n_ds * 100)
-
       # collect all required datatype including selected datatype
       all_req <- union(req.data$from, req.data$to)
       all_req <- all_req[!grepl("f:", all_req)]

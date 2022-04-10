@@ -17,6 +17,7 @@ suppressPackageStartupMessages({
   library(sass)
   library(shinydashboardPlus)
   # dashboard
+  library(purrr)
   library(data.table)
   library(networkD3)
   library(data.tree)
