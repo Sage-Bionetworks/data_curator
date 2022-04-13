@@ -51,9 +51,9 @@ has_auth_code <- function(params) {
 }
 
 app <- oauth_app("shinysynapse",
-                 key = client_id,
-                 secret = client_secret,
-                 redirect_uri = app_url
+  key = client_id,
+  secret = client_secret,
+  redirect_uri = app_url
 )
 
 # These are the user info details ('claims') requested from Synapse:

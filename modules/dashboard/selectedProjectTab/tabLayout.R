@@ -24,7 +24,7 @@ selectedProjectTabUI <- function(id) {
           width = 9, class = "tree-box",
           fluidRow(
             column(12, class = "section-title", span("Requirment Relationship Tree")),
-            column(12, align = "center", dbTreeUI(ns("requirement-tree")))
+            column(12, align = "center", uiOutput(ns("tree-container")))
           )
         )
       )
@@ -32,7 +32,7 @@ selectedProjectTabUI <- function(id) {
   )
 }
 
-selectedProjectTab <- function(id, userName, uploadData, reqData, selectedProject, tabId, validationTab, parent) {
+selectedProjectTab <- function(id, username, up.data, req.data, selected.project, source.tab, target.tab, parent.session) {
   moduleServer(
     id,
     function(input, output, session) {
@@ -40,37 +40,43 @@ selectedProjectTab <- function(id, userName, uploadData, reqData, selectedProjec
 
       ## Summary banner
       # render tab title
-      setTabTitle("title", paste0("Completion of Requirements for Project: ", sQuote(selectedProject)))
+      setTabTitle("title", paste0("Completion of Requirements for Project: ", sQuote(selected.project)))
       # render rator system
-      dbRater("summary", uploadData, reqData, userName)
+      dbRater("summary", up.data, req.data, username)
       # render summary stats boxes
-      dbStatsBox("stats", uploadData, reqData, tabId, validationTab, parent)
+      dbStatsBox("stats", up.data, req.data, source.tab, target.tab, parent.session)
 
       ## Evaluate submission
+      # get all uploaded data types
+      up_schema <- up.data$schema
       # collect all required datatype including selected datatype
-      all_req <- union(reqData$from, reqData$to)
+      all_req <- union(req.data$from, req.data$to)
       all_req <- all_req[!grepl("f:", all_req)]
-      # get all missing required datatypes
-      not_up <- setdiff(all_req, uploadData$schema)
+      # get all missing requirements
+      not_up_schema <- setdiff(all_req, up_schema)
 
       # render checkbox options for evaluation of submission
       updateCheckboxGroupInput(
         session,
         "checkbox-evaluate",
         label = "It looks like you are missing these data types:",
-        choices = as.list(not_up)
+        choices = as.list(not_up_schema)
       )
 
       ## Dataset progress bars
-      folder_list <- unique(reqData$folder)
+      folder_list <- unique(req.data$folder)
       ds_pb_values <- sapply(folder_list, function(f) {
-        tmp <- reqData[reqData$folder == f, ]
-        round(sum(tmp$to %in% uploadData$schema) / nrow(tmp) * 100, 0)
+        tmp <- req.data[req.data$folder == f, ]
+        round(sum(tmp$to %in% up_schema) / nrow(tmp) * 100, 0)
       }) %>% set_names(folder_list)
 
       # reorder based on completion progress
       folder_list <- folder_list[order(ds_pb_values)]
 
+      # change d3 tree height based on how many nodes
+      output$`tree-container` <- renderUI({
+        dbTreeUI(ns("requirement-tree"), n.nodes = length(folder_list))
+      })
 
       observeEvent(input$`checkbox-evaluate`, ignoreNULL = FALSE, {
         # clean the previous ui to avoid duplicate progress ids
@@ -90,23 +96,25 @@ selectedProjectTab <- function(id, userName, uploadData, reqData, selectedProjec
             )
           })
         } else {
-          evaluate_ds <- reqData$folderSynId[reqData$to %in% evaluate_datatypes]
-          inx <- which(reqData$folderSynId %in% evaluate_ds)
-          new_req <- reqData
-          new_req$nMiss[inx] <- new_req$nMiss[inx] - length(evaluate_datatypes)
+          # get which folder contains evaluated datatypes
+          evaluate_ds <- req.data$folderSynId[req.data$to %in% evaluate_datatypes]
+          inx <- which(req.data$folderSynId %in% evaluate_ds)
+          # substrate # of evaluated datatypes for nMiss
+          # note, it will not change the req.data outside of observeEvent
+          req.data$nMiss[inx] <- req.data$nMiss[inx] - length(evaluate_datatypes)
 
-          # update uploaded data frame
-          new_up_schema <- c(uploadData$schema, input$`checkbox-evaluate`)
+          # add evaluated datatypes to update uploaded data
+          up_schema <- c(up_schema, input$`checkbox-evaluate`)
 
-          # update progress values
+          # update progress value each dataset
           ds_pb_values <- sapply(folder_list, function(f) {
-            tmp <- reqData[new_req$folder == f, ]
-            round(sum(tmp$to %in% new_up_schema) / nrow(tmp) * 100, 0)
+            tmp <- req.data[req.data$folder == f, ]
+            round(sum(tmp$to %in% up_schema) / nrow(tmp) * 100, 0)
           })
 
           output$`evaluate-res` <- renderUI({
-            # update new total progress of datasets
-            uniq_ds <- new_req %>% distinct(folderSynId, .keep_all = TRUE)
+            # update new total progress
+            uniq_ds <- req.data %>% distinct(folderSynId, .keep_all = TRUE)
             # number of completed dataset
             n_completed <- sum(uniq_ds$nMiss == 0)
             new_progress <- round(n_completed / nrow(uniq_ds) * 100)
@@ -118,7 +126,7 @@ selectedProjectTab <- function(id, userName, uploadData, reqData, selectedProjec
           })
         }
 
-        # render (multiple) progress bar for each dataset
+        # render progress bar ui for each dataset
         output$`dataset-pb` <- renderUI({
           fluidRow(
             # !important: add ns to pb's id, otherwise pb server will not be able to find
@@ -134,6 +142,7 @@ selectedProjectTab <- function(id, userName, uploadData, reqData, selectedProjec
           )
         })
 
+        # assign values to progress bar server for each dataset
         lapply(folder_list, function(f) {
           progressBar(
             id = f,
@@ -145,10 +154,10 @@ selectedProjectTab <- function(id, userName, uploadData, reqData, selectedProjec
             subtitle = f
           )
         })
-      })
 
-      # render collasiple tree
-      dbTree("requirement-tree", uploadData, reqData, selectedProject)
+        # render collasiple tree
+        dbTree("requirement-tree", up_schema, req.data, selected.project)
+      })
     }
   )
 }

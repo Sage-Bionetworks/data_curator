@@ -26,7 +26,14 @@ getManifests <- function(synStoreObj, datasets) {
 
         # validate manifest, if no error, output is list()
         # TODO: check with backend - ValueError: c("LungCancerTier3", "BreastCancerTier3", "ScRNA-seqAssay", "MolecularTest", "NaN", "") ...
-        val_res <- tryCatch(metadata_model$validateModelManifest(manifest_path, manifest_component)[[1]], error = function(err) "Out of Date")
+        val_res <- tryCatch(
+          metadata_model$validateModelManifest(
+            manifest_path,
+            manifest_component,
+            restrict_rules = TRUE
+          )[[1]],
+          error = function(err) "Out of Date"
+        )
         # clean validation res from schematic
         if (is.list(val_res)) {
           res <- validationResult(val_res, manifest_component, manifest_df)
