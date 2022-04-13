@@ -86,7 +86,7 @@ selectedProjectTab <- function(id, username, up.data, req.data, selected.project
         evaluate_datatypes <- input$`checkbox-evaluate`
 
         if (is.null(evaluate_datatypes)) {
-          # reset progress values
+          # reset progress values if no evaluated data type selected
           ds_pb_values <- ds_pb_values
           output$`evaluate-res` <- renderUI({
             span(
@@ -96,13 +96,14 @@ selectedProjectTab <- function(id, username, up.data, req.data, selected.project
             )
           })
         } else {
-          # get which folder contains evaluated datatypes
-          evaluate_ds <- req.data$folderSynId[req.data$to %in% evaluate_datatypes]
-          inx <- which(req.data$folderSynId %in% evaluate_ds)
           # substrate # of evaluated datatypes for nMiss
           # note, it will not change the req.data outside of observeEvent
-          req.data$nMiss[inx] <- req.data$nMiss[inx] - length(evaluate_datatypes)
-
+          for (d in evaluate_datatypes) {
+            # get which folder contains evaluated datatypes
+            evaluate_ds <- unique(req.data$folderSynId[req.data$to == d])
+            loc <- which(req.data$folderSynId %in% evaluate_ds)
+            req.data$nMiss[loc] <- req.data$nMiss[loc] - 1
+          }
           # add evaluated datatypes to update uploaded data
           up_schema <- c(up_schema, input$`checkbox-evaluate`)
 
@@ -117,6 +118,8 @@ selectedProjectTab <- function(id, username, up.data, req.data, selected.project
             uniq_ds <- req.data %>% distinct(folderSynId, .keep_all = TRUE)
             # number of completed dataset
             n_completed <- sum(uniq_ds$nMiss == 0)
+            logjs(req.data)
+            logjs(uniq_ds)
             new_progress <- round(n_completed / nrow(uniq_ds) * 100)
             items <- paste0(sQuote(evaluate_datatypes), collapse = ", ")
             span(class = "warn_msg", HTML(paste0(
