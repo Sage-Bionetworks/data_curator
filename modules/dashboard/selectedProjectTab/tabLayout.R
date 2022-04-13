@@ -59,7 +59,10 @@ selectedProjectTab <- function(id, username, up.data, req.data, selected.project
       updateCheckboxGroupInput(
         session,
         "checkbox-evaluate",
-        label = "It looks like you are missing these data types:",
+        label = ifelse(length(not_up_schema) > 0,
+          "It looks like you are missing these data types:",
+          "It looks like you completed all requirements !!!"
+        ),
         choices = as.list(not_up_schema)
       )
 
@@ -88,13 +91,16 @@ selectedProjectTab <- function(id, username, up.data, req.data, selected.project
         if (is.null(evaluate_datatypes)) {
           # reset progress values if no evaluated data type selected
           ds_pb_values <- ds_pb_values
-          output$`evaluate-res` <- renderUI({
-            span(
-              class = "warn_msg",
-              "Trying to select one or all of above data types to evaulate
+
+          if (length(evaluate_datatypes) > 0) {
+            output$`evaluate-res` <- renderUI({
+              span(
+                class = "warn_msg",
+                "Trying to select one or all of above data types to evaulate
               how your progress is going to change"
-            )
-          })
+              )
+            })
+          }
         } else {
           # substrate # of evaluated datatypes for nMiss
           # note, it will not change the req.data outside of observeEvent
@@ -118,8 +124,6 @@ selectedProjectTab <- function(id, username, up.data, req.data, selected.project
             uniq_ds <- req.data %>% distinct(folderSynId, .keep_all = TRUE)
             # number of completed dataset
             n_completed <- sum(uniq_ds$nMiss == 0)
-            logjs(req.data)
-            logjs(uniq_ds)
             new_progress <- round(n_completed / nrow(uniq_ds) * 100)
             items <- paste0(sQuote(evaluate_datatypes), collapse = ", ")
             span(class = "warn_msg", HTML(paste0(
