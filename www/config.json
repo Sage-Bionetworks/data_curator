@@ -186,6 +186,7 @@
       "type": "assay"
     }
   ],
+
   "community": "HTAN",
   "schema": "v0.1.0",
   "schematic_service": "v1"
