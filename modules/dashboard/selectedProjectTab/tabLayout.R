@@ -7,31 +7,24 @@ selectedProjectTabUI <- function(id) {
       fluidRow(
         column(12,
           class = "banner-container",
-          column(6, uiOutput(ns("summary-box"))),
-          column(6, uiOutput(ns("stats-box")))
+          column(6, dbRaterUI(ns("summary"))),
+          column(6, dbStatsBoxUI(ns("stats")))
         ),
         column(
           3,
           fluidRow(
-            # column(12, class = "section-title", span("Placehold for a dropdown")),
-            # column(
-            #   12,
-            #   selectInput(
-            #     inputId = ns("test123"),
-            #     label = "placeholder",
-            #     choices = c(10, 50, 75, 90)
-            #   )
-            # ),
+            column(12, class = "section-title", span("Evaluate Submission")),
+            column(12, checkboxGroupInput(ns("checkbox-evaluate"), NULL)),
+            column(12, uiOutput(ns("evaluate-res"))),
             column(12, class = "section-title", span("Each dataset progress")),
-            column(12, align = "center", uiOutput(ns("complete-dataset-pb"))),
-            column(12, align = "center", uiOutput(ns("incomplete-dataset-pb")))
+            column(12, align = "center", uiOutput(ns("dataset-pb")))
           )
         ),
         column(
           width = 9, class = "tree-box",
           fluidRow(
             column(12, class = "section-title", span("Requirment Relationship Tree")),
-            column(12, align = "center", dbTreeUI(ns("requirement-tree")))
+            column(12, align = "center", uiOutput(ns("tree-container")))
           )
         )
       )
@@ -39,197 +32,139 @@ selectedProjectTabUI <- function(id) {
   )
 }
 
-selectedProjectTab <- function(id, userName, uploadData, reqData, selectedProject, tabId, validationTab, parent) {
+selectedProjectTab <- function(id, username, up.data, req.data, selected.project, source.tab, target.tab, parent.session) {
   moduleServer(
     id,
     function(input, output, session) {
       ns <- session$ns
 
-      # number of total dataset
-      uniq_ds <- reqData %>% distinct(folderSynId, .keep_all = TRUE)
-      n_ds <- nrow(uniq_ds)
-      # number of completed dataset
-      n_completed <- sum(uniq_ds$nMiss == 0)
-      # number of incompleted dataset
-      n_miss <- sum(uniq_ds$nMiss > 0)
-      #
-      progress_value <- round(n_completed / n_ds * 100)
-
-      # collect all required datatype including selected datatype
-      all_req <- union(reqData$from, reqData$to)
-      # get number of manifests are required but not yet uploaded
-      n_not_up <- length(setdiff(all_req, uploadData$schema))
-      # get number of manifests uploaded to synapse
-      n_up <- length(intersect(all_req, uploadData$schema))
-      # get number of manifests that are out of date
-      n_outdated <- sum(uploadData$errorType %in% c("Wrong Schema", "Out of Date"))
-
-      # unique folder names
-      folder_list <- sort(unique(uploadData$folder))
-
-      # set colors that can be used for dataset progress bars
-      # col_list <- c("#5B008C", "#B4007A", "#EA3360", "#FF794A", "#FFBB49",
-      #               "#004BC3", "#0076E2", "#009AE8", "#00BADA", "#00D8C3")
-      # progress values
-      ds_pb_values <- sapply(folder_list, function(f) {
-        tmp <- reqData[reqData$folder == f, ]
-        round(sum(tmp$to %in% uploadData$schema) / nrow(tmp) * 100, 0)
-      })
-
+      ## Summary banner
       # render tab title
-      setTabTitle("title", paste0("Completion of Requirements for Project: ", sQuote(selectedProject)))
-
-      # rater system
-      completion_icon <- ifelse(progress_value >= 90, "crown", "medal")
-      completion_icon_col <- case_when(
-        progress_value < 50 ~ "#A77044",
-        progress_value >= 50 & progress_value < 75 ~ "#A7A7AD",
-        progress_value >= 75 & progress_value < 90 ~ "#FEE101",
-        TRUE ~ "#F5BD02"
-      )
-      # render banner contents
-      output$`summary-box` <- renderUI({
-        div(
-          class = "summary-box", align = "center",
-          div(
-            div(
-              class = "summary-icon",
-              icon(completion_icon, "fa-3x",
-                style = paste0(
-                  "color: ", completion_icon_col, ";
-                  border: 2.5px solid ", completion_icon_col, ";"
-                )
-              )
-            ),
-            div(class = "summary-header", h3(paste0("Congratulations ", userName, "!"))),
-            div(
-              class = "summary-body",
-              paste0("you have made ", progress_value, "% progress")
-            )
-          ),
-          progressBarUI(ns("progress-box"))
-        )
-      })
-
+      setTabTitle("title", paste0("Completion of Requirements for Project: ", sQuote(selected.project)))
+      # render rator system
+      dbRater("summary", up.data, req.data, username)
       # render summary stats boxes
-      output$`stats-box` <- renderUI({
-        div(
-          class = "stats-box",
-          div(
-            class = "stats-item-container",
-            div(
-              class = "stats-item completed",
-              tagList(
-                icon("smile-wink", "fa-3x"),
-                div(
-                  class = "stat-text",
-                  h4("Completed"), span(n_up)
-                )
-              )
-            ),
-            div(
-              class = "stats-item missing",
-              tagList(
-                icon("frown", "fa-3x"),
-                div(
-                  class = "stat-text",
-                  h4("Missing"), span(n_not_up)
-                )
-              )
-            ),
-            div(
-              class = "stats-item outdated",
-              tagList(
-                icon("surprise", "fa-3x"),
-                div(
-                  class = "stat-text",
-                  h4("Out of Date"), span(n_outdated)
-                )
-              )
-            )
-          ),
-          div(
-            class = "stats-btn-container",
-            actionButton(ns("view-btn"), "View More", class = "btn-primary-color"),
-            span("Click to see the Out-of-Date manifests")
-          )
-        )
+      dbStatsBox("stats", up.data, req.data, source.tab, target.tab, parent.session)
+
+      ## Evaluate submission
+      # get all uploaded data types
+      up_schema <- up.data$schema
+      # collect all required datatype including selected datatype
+      all_req <- union(req.data$from, req.data$to)
+      all_req <- all_req[!grepl("f:", all_req)]
+      # get all missing requirements
+      not_up_schema <- setdiff(all_req, up_schema)
+
+      # render checkbox options for evaluation of submission
+      updateCheckboxGroupInput(
+        session,
+        "checkbox-evaluate",
+        label = ifelse(length(not_up_schema) > 0,
+          "It looks like you are missing these data types:",
+          "It looks like you completed all requirements !!!"
+        ),
+        choices = as.list(not_up_schema)
+      )
+
+      ## Dataset progress bars
+      folder_list <- unique(req.data$folder)
+      ds_pb_values <- sapply(folder_list, function(f) {
+        tmp <- req.data[req.data$folder == f, ]
+        round(sum(tmp$to %in% up_schema) / nrow(tmp) * 100, 0)
+      }) %>% set_names(folder_list)
+
+      # reorder based on completion progress
+      folder_list <- folder_list[order(ds_pb_values)]
+
+      # change d3 tree height based on how many nodes
+      output$`tree-container` <- renderUI({
+        dbTreeUI(ns("requirement-tree"), n.nodes = length(folder_list))
       })
 
-      # redirect to validation tab of dashboard once the btn clicked
-      observeEvent(input$`view-btn`, {
-        req(input$`view-btn` != 0)
-        updateTabsetPanel(parent, tabId, selected = validationTab)
-      })
+      observeEvent(input$`checkbox-evaluate`, ignoreNULL = FALSE, {
+        # clean the previous ui to avoid duplicate progress ids
+        output$`dataset-pb` <- renderUI(NULL)
 
-      # render circular progress bar: total number of completed dataset / total number of datasets
-      progressBar("progress-box", value = progress_value, circular = TRUE)
+        # update required data frame
+        evaluate_datatypes <- input$`checkbox-evaluate`
 
-      # render (multiple) progress bar for each dataset
-      output$`complete-dataset-pb` <- renderUI({
-        inx <- which(ds_pb_values != 100)
-        fluidRow(
-          # !important: add ns to pb's id, otherwise pb server will not be able to find
-          lapply(inx, function(i) {
-            column(
-              6,
-              progressBarUI(ns(folder_list[i])) %>%
-                addTooltip(HTML(paste0(folder_list[i], ": ", ds_pb_values[i], "%")), "top")
-            )
+        if (is.null(evaluate_datatypes)) {
+          # reset progress values if no evaluated data type selected
+          ds_pb_values <- ds_pb_values
+
+          if (length(evaluate_datatypes) > 0) {
+            output$`evaluate-res` <- renderUI({
+              span(
+                class = "warn_msg",
+                "Trying to select one or all of above data types to evaulate
+              how your progress is going to change"
+              )
+            })
+          }
+        } else {
+          # substrate # of evaluated datatypes for nMiss
+          # note, it will not change the req.data outside of observeEvent
+          for (d in evaluate_datatypes) {
+            # get which folder contains evaluated datatypes
+            evaluate_ds <- unique(req.data$folderSynId[req.data$to == d])
+            loc <- which(req.data$folderSynId %in% evaluate_ds)
+            req.data$nMiss[loc] <- req.data$nMiss[loc] - 1
+          }
+          # add evaluated datatypes to update uploaded data
+          up_schema <- c(up_schema, input$`checkbox-evaluate`)
+
+          # update progress value each dataset
+          ds_pb_values <- sapply(folder_list, function(f) {
+            tmp <- req.data[req.data$folder == f, ]
+            round(sum(tmp$to %in% up_schema) / nrow(tmp) * 100, 0)
           })
-        )
-      })
 
-      output$`incomplete-dataset-pb` <- renderUI({
-        inx <- which(ds_pb_values == 100)
-        fluidRow(
-          # !important: add ns to pb's id, otherwise pb server will not be able to find
-          lapply(inx, function(i) {
-            column(
-              6,
-              progressBarUI(ns(folder_list[i])) %>%
-                addTooltip(HTML(paste0(folder_list[i], ": ", ds_pb_values[i], "%")), "top")
-            )
+          output$`evaluate-res` <- renderUI({
+            # update new total progress
+            uniq_ds <- req.data %>% distinct(folderSynId, .keep_all = TRUE)
+            # number of completed dataset
+            n_completed <- sum(uniq_ds$nMiss == 0)
+            new_progress <- round(n_completed / nrow(uniq_ds) * 100)
+            items <- paste0(sQuote(evaluate_datatypes), collapse = ", ")
+            span(class = "warn_msg", HTML(paste0(
+              "By submitting: ", items, ", your total progress will become ",
+              strong(new_progress), "% !!!"
+            )))
           })
-        )
-      })
+        }
 
-      lapply(seq_along(folder_list), function(i) {
-        progressBar(
-          id = folder_list[i],
-          value = ds_pb_values[i],
-          display_pct = FALSE,
-          height = "10px",
-          color = "#28a745",
-          backgoundCol = "#e53935",
-          subtitle = folder_list[i]
-        )
-      })
-
-      # display stats below the progress
-      output$`dataset-stats` <- renderUI({
-        div(
-          class = "dataset-stats-container",
-          div(
-            class = "dataset-stats",
-            div(class = "dataset-stats-title", span("Dataset")),
-            div(class = "dataset-stats-number", span(n_ds))
-          ),
-          div(
-            class = "dataset-stats",
-            div(class = "dataset-stats-title", span("Completed")),
-            div(class = "dataset-stats-number", span(n_completed))
-          ),
-          div(
-            class = "dataset-stats",
-            div(class = "dataset-stats-title", span("Missing")),
-            div(class = "dataset-stats-number", span(n_miss))
+        # render progress bar ui for each dataset
+        output$`dataset-pb` <- renderUI({
+          fluidRow(
+            # !important: add ns to pb's id, otherwise pb server will not be able to find
+            lapply(folder_list, function(f) {
+              # currently, need to use attr on tag object to add tooltip
+              # runjs somehow not working in module?
+              column(
+                6,
+                progressBarUI(ns(f)) %>%
+                  addTooltip(paste0(f, ": ", ds_pb_values[f], "%"), "top")
+              )
+            })
           )
-        )
-      })
+        })
 
-      # render collasiple tree
-      dbTree("requirement-tree", uploadData, reqData, selectedProject)
+        # assign values to progress bar server for each dataset
+        lapply(folder_list, function(f) {
+          progressBar(
+            id = f,
+            value = ds_pb_values[f],
+            display_pct = FALSE,
+            height = "10px",
+            color = "#28a745",
+            backgoundCol = "#e53935",
+            subtitle = f
+          )
+        })
+
+        # render collasiple tree
+        dbTree("requirement-tree", up_schema, req.data, selected.project)
+      })
     }
   )
 }

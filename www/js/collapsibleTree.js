@@ -2,7 +2,6 @@
 svg.selectAll('g').remove();
 
 var treeData = data;
-// var legend = options.legend;
 
 var margin = { top: 10, right: 40, bottom: 10, left: 40 },
   width = width - margin.left - margin.right,
@@ -33,33 +32,6 @@ if (!data) {
     linkScale = 0.5,
     nodeDistanceScale = 1.8,
     root;
-  //   legend_y_col = 0,
-  //   legend_y_name = 0;
-
-  // legend['col'].forEach(function (col) {
-  //   svg
-  //     .append('circle')
-  //     .attr('r', 6)
-  //     .attr('cx', width - 150)
-  //     .attr('cy', 10 + legend_y_col)
-  //     .style('fill', '#fff')
-  //     .style('stroke', col)
-  //     .style('stroke-width', '5px');
-  //   // hardcode for now
-  //   legend_y_col += 25;
-  // });
-
-  // legend['name'].forEach(function (name) {
-  //   svg
-  //     .append('text')
-  //     .attr('x', width - 135)
-  //     .attr('y', 10 + legend_y_name)
-  //     .text(name)
-  //     .style('font-size', '1em')
-  //     .attr('alignment-baseline', 'middle');
-  //   // hardcode for now
-  //   legend_y_name += 25;
-  // });
 
   // declares a tree layout and assigns the size
   var treemap = d3.tree().size([height / nodeDistanceScale, width]);

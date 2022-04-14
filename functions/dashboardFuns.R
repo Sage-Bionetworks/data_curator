@@ -26,7 +26,14 @@ getManifests <- function(synStoreObj, datasets) {
 
         # validate manifest, if no error, output is list()
         # TODO: check with backend - ValueError: c("LungCancerTier3", "BreastCancerTier3", "ScRNA-seqAssay", "MolecularTest", "NaN", "") ...
-        val_res <- tryCatch(metadata_model$validateModelManifest(manifest_path, manifest_component)[[1]], error = function(err) "Out of Date")
+        val_res <- tryCatch(
+          metadata_model$validateModelManifest(
+            manifest_path,
+            manifest_component,
+            restrict_rules = TRUE
+          )[[1]],
+          error = function(err) "Out of Date"
+        )
         # clean validation res from schematic
         if (is.list(val_res)) {
           res <- validationResult(val_res, manifest_component, manifest_df)
@@ -46,7 +53,7 @@ getManifests <- function(synStoreObj, datasets) {
           isValid = ifelse(res$validationRes == "valid", TRUE, FALSE),
           errorType = res$errorType
         ) %>%
-          filter(schema != "" & schema != "NaN")
+          filter(schema != "" & schema != "NaN") # in case empty rows
       }
     }
 
@@ -76,7 +83,7 @@ getDatatypeRequirement <- function(datatype) {
 #' create data frame of data type requirements for all manifests
 #'
 #' @param manifest output from \code{getManifests}.
-#' @return data frame contains required data types for network plot
+#' @return data frame contains required data types for tree plot
 getManifestRequirements <- function(manifest) {
   if (nrow(manifest) == 0) {
     data.frame(from = NA, to = NA, folder = NA, folderSynId = NA, nMiss = NA)

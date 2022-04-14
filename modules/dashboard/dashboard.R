@@ -122,7 +122,7 @@ dashboard <- function(id, synStoreObj, selectedProject, folderList, selectedData
           uploaded_manifests(),
           uploaded_manifests_requirement(),
           selectedProject(),
-          tabId = "tabs", validationTab = "db-tab3", parent = session
+          source.tab = "tabs", target.tab = "db-tab3", parent.session = session
         )
         # validation table for all uploaded data
         validationTab("tab-validation", uploaded_manifests(), selectedProject())
