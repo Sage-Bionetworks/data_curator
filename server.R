@@ -404,7 +404,7 @@ shinyServer(function(input, output, session) {
         folder_synID(),
         manifest_record_type = template_type
       )
-      manifest_path <- tags$a(href = paste0("synapse.org/#!Synapse:", manifest_id), manifest_id, target = "_blank")
+      manifest_path <- tags$a(href = paste0("https://www.synapse.org/#!Synapse:", manifest_id), manifest_id, target = "_blank")
 
       # if no error
       if (startsWith(manifest_id, "syn") == TRUE) {
@@ -436,7 +436,7 @@ shinyServer(function(input, output, session) {
         folder_synID(),
         manifest_record_type = template_type
       )
-      manifest_path <- tags$a(href = paste0("synapse.org/#!Synapse:", manifest_id), manifest_id, target = "_blank")
+      manifest_path <- tags$a(href = paste0("https://www.synapse.org/#!Synapse:", manifest_id), manifest_id, target = "_blank")
 
       # if uploaded provided valid synID message
       if (startsWith(manifest_id, "syn") == TRUE) {
