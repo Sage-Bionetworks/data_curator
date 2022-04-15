@@ -442,7 +442,7 @@ shinyServer(function(input, output, session) {
       manifest_path <- tags$a(href = paste0("https://www.synapse.org/#!Synapse:", manifest_id), manifest_id, target = "_blank")
 
       # add log message
-      message(paste0("Manifest :", sQuote(manifest_id), "has been successfully uploaded"))
+      message(paste0("Manifest :", sQuote(manifest_id), " has been successfully uploaded"))
 
       # if uploaded provided valid synID message
       if (startsWith(manifest_id, "syn") == TRUE) {
