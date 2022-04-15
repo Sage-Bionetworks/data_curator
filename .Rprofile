@@ -3,12 +3,8 @@
     repos = c(
       CRAN = "https://cran.rstudio.com/",
       Sage = "http://ran.synapse.org"
-    )
+    ),
+    sass.cache = FALSE, # turn of styling caching 
+    stringsAsFactors = FALSE # no needed if R >= 4.0.0
   )
 }
-# no needed if R >= 4.0.0
-options(stringsAsFactors = FALSE)
-
-# for local development
-# change port number associated with your client, here
-if (interactive()) options(shiny.port = 8100)
