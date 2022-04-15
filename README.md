@@ -57,7 +57,7 @@ Use the app configuration file `www/config.json` to adapt this app to your DCC.
   - `schema_name`: The name of the manifest in the JSON-LD schema (e.g. _ScRNA-seqLevel1_)
   - `type`: The type of manifest. As currently configured in `app.R`, will only display manifests of type _assay_.
 - `community` (optional): The abbreviated name of the community or project. (e.g. _HTAN_)
-- `schema` (optional): The version of data model 
+- `schema` (optional): The version of data model
 - `schematic_service` (optional): The version of schematic service
 
 ---
@@ -72,6 +72,7 @@ This utilizes a Synapse Authentication (OAuth) client (code motivated by [ShinyO
 ---
 
 ## Deployment
+
 To deploy the app to shinyapps.io, please follow the instructions in the [shinyapps_deploy.md](./shinyapps_deploy.md).
 
 ## Contributors
