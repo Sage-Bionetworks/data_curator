@@ -406,6 +406,9 @@ shinyServer(function(input, output, session) {
       )
       manifest_path <- tags$a(href = paste0("https://www.synapse.org/#!Synapse:", manifest_id), manifest_id, target = "_blank")
 
+      # add log message
+      message(paste0("Manifest :", sQuote(manifest_id), " has been successfully uploaded"))
+
       # if no error
       if (startsWith(manifest_id, "syn") == TRUE) {
         dcWaiter("hide")
@@ -437,6 +440,9 @@ shinyServer(function(input, output, session) {
         manifest_record_type = template_type
       )
       manifest_path <- tags$a(href = paste0("https://www.synapse.org/#!Synapse:", manifest_id), manifest_id, target = "_blank")
+
+      # add log message
+      message(paste0("Manifest :", sQuote(manifest_id), "has been successfully uploaded"))
 
       # if uploaded provided valid synID message
       if (startsWith(manifest_id, "syn") == TRUE) {
