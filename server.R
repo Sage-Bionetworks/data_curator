@@ -179,6 +179,7 @@ shinyServer(function(input, output, session) {
   # update selected schema template name
   observeEvent(input$dropdown_template, {
     template_schema_name(template_namedList[match(input$dropdown_template, names(template_namedList))])
+    template_type <<- config$manifest_schemas$type[match(template_schema_name(), template_namedList)]
   })
 
   ######## Template Google Sheet Link ########
@@ -210,7 +211,7 @@ shinyServer(function(input, output, session) {
 
     req(input$tabs == "tab_template")
     hide("div_template_warn")
-    template_type <<- config$manifest_schemas$type[match(template_schema_name(), template_namedList)]
+
     req(length(datatype_list$files) == 0 & template_type == "assay")
     warn_text <- paste0(
       strong(sQuote(input$dropdown_folder)), " folder is empty,
@@ -402,12 +403,16 @@ shinyServer(function(input, output, session) {
       # associates metadata with data and returns manifest id
       manifest_id <- synapse_driver$associateMetadataWithFiles(
         synStore_obj,
-        "./tmp/synapse_storage_manifest.csv", folder_synID(),
+        "./tmp/synapse_storage_manifest.csv",
+        folder_synID(),
         useSchemaLabel = FALSE,
         hideBlanks = TRUE,
-        manifest_record_type = 'entity' ## need to use components correctly to use "table" format
+        manifest_record_type = "entity"
       )
-      manifest_path <- tags$a(href = paste0("synapse.org/#!Synapse:", manifest_id), manifest_id, target = "_blank")
+      manifest_path <- tags$a(href = paste0("https://www.synapse.org/#!Synapse:", manifest_id), manifest_id, target = "_blank")
+
+      # add log message
+      message(paste0("Manifest :", sQuote(manifest_id), " has been successfully uploaded"))
 
       # if no error
       if (startsWith(manifest_id, "syn") == TRUE) {
@@ -435,12 +440,16 @@ shinyServer(function(input, output, session) {
       # associates metadata with data and returns manifest id
       manifest_id <- synapse_driver$associateMetadataWithFiles(
         synStore_obj,
-        "./tmp/synapse_storage_manifest.csv", folder_synID(),
-        useSchemaLabel = FALSE, 
-        hideBlanks = TRUE
-
+        "./tmp/synapse_storage_manifest.csv",
+        folder_synID(),
+        useSchemaLabel = FALSE,
+        hideBlanks = TRUE,
+        manifest_record_type = "entity"
       )
-      manifest_path <- tags$a(href = paste0("synapse.org/#!Synapse:", manifest_id), manifest_id, target = "_blank")
+      manifest_path <- tags$a(href = paste0("https://www.synapse.org/#!Synapse:", manifest_id), manifest_id, target = "_blank")
+
+      # add log message
+      message(paste0("Manifest :", sQuote(manifest_id), " has been successfully uploaded"))
 
       # if uploaded provided valid synID message
       if (startsWith(manifest_id, "syn") == TRUE) {
