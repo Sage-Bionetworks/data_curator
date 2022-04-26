@@ -103,6 +103,31 @@ model_submit <- function(url="http://localhost:3001/v1/model/submit",
   manifest_id
 }
 
+#' Given a source model component (see https://w3id.org/biolink/vocab/category for definnition of component), return all components required by it.
+#' 
+#' @param schema_url Data Model URL
+#' @param source_component an attribute label indicating the source component. (i.e. Patient, Biospecimen, ScRNA-seqLevel1, ScRNA-seqLevel2)
+#' @param as_graph if False return component requirements as a list; if True return component requirements as a dependency graph (i.e. a DAG)
+#' 
+#' @returns A list of required components associated with the source component.
+#' @export
+model_component_requirements <- function(url="http://localhost:3001/v1/model/component-requirements",
+                                         schema_url="https://raw.githubusercontent.com/ncihtan/data-models/main/HTAN.model.jsonld",
+                                         source_component,
+                                         as_graph = FALSE) {
+  
+  req <- httr::GET(url,
+                   query =  list(
+                     schema_url = schema_url,
+                     source_component = source_component,
+                     as_graph = as_graph
+                   ))
+  
+  httr::content(req)
+  
+}
+  
+
 #' Gets all datasets in folder under a given storage project that the current user has access to.
 #' 
 #' @param url URL to schematic API endpoint
