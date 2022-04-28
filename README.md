@@ -56,7 +56,6 @@ Use the app configuration file `www/config.json` to adapt this app to your DCC.
   - `display_name` : The display name for the dropdown. (e.g. _scRNA-seq Level 1_)
   - `schema_name`: The name of the manifest in the JSON-LD schema (e.g. _ScRNA-seqLevel1_)
   - `type`: The type of manifest. As currently configured in `app.R`, will only display manifests of type _assay_.
-- `community` (optional): The abbreviated name of the community or project. (e.g. _HTAN_)
 - `schema` (optional): The version of data model
 - `schematic_service` (optional): The version of schematic service
 

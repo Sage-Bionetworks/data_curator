@@ -232,7 +232,7 @@ shinyServer(function(input, output, session) {
     dcWaiter("show", msg = "Generating link...")
 
     manifest_url <-
-      metadata_model$getModelManifest(paste0(config$community, " ", input$dropdown_template),
+      metadata_model$getModelManifest(paste0(manifest_title, " ", input$dropdown_template),
         template_schema_name(),
         filenames = switch((template_type == "assay") + 1,
           NULL,
@@ -344,7 +344,7 @@ shinyServer(function(input, output, session) {
     dcWaiter("show", msg = "Generating link...")
 
     filled_manifest <- metadata_model$populateModelManifest(paste0(
-      config$community,
+      manifest_title,
       " ", input$dropdown_template
     ), inFile$raw()$datapath, template_schema_name())
 

@@ -11,8 +11,6 @@ def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('-i', '--jsonld_path',
                         required=True, help='path to model jsonld file')
-    parser.add_argument('-n', '--dcc_name',
-                        default='example', help='name of DCC')
     parser.add_argument('-v1', '--service_version',
                         default='', help='version of schematic')
     parser.add_argument('-v2', '--schema_version',
@@ -51,7 +49,6 @@ def main():
 
     # write out the config.json including some versions
     config = {'manifest_schemas': schemas,
-              'community': args.dcc_name,
               'service_version': args.service_version,
               'schema_version': args.schema_version
               }
