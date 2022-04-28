@@ -55,7 +55,8 @@ jobs:
           source .venv/bin/activate
           # use 'poetry' to install schematic from the develop branch 
           pip3 install poetry
-          git clone --single-branch --branch develop https://github.com/Sage-Bionetworks/schematic.git
+          # git clone -b develop https://github.com/Sage-Bionetworks/schematic.git
+          git clone https://github.com/Sage-Bionetworks/schematic/commit/7f15d0e3f27360f09f81d9a720b912d54e8f8481
           cd schematic
           poetry build
           pip3 install dist/schematicpy-1.0.0-py3-none-any.whl
