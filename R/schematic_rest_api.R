@@ -112,8 +112,7 @@ model_submit <- function(url="http://localhost:3001/v1/model/submit",
 #' @returns A list of required components associated with the source component.
 #' @export
 model_component_requirements <- function(url="http://localhost:3001/v1/model/component-requirements",
-                                         schema_url="https://raw.githubusercontent.com/ncihtan/data-models/main/HTAN.model.jsonld",
-                                         source_component,
+                                         schema_url, source_component,
                                          as_graph = FALSE) {
   
   req <- httr::GET(url,
@@ -123,7 +122,14 @@ model_component_requirements <- function(url="http://localhost:3001/v1/model/com
                      as_graph = as_graph
                    ))
   
-  httr::content(req)
+  cont <- httr::content(req)
+  
+  if (inherits(cont, "xml_document")){
+    err_msg <- xml2::xml_text(xml2::xml_child(cont, "head/title"))
+    stop(sprintf("%s", err_msg))
+  }
+  
+  cont
   
 }
   
