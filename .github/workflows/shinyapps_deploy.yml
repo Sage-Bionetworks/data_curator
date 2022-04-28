@@ -47,6 +47,19 @@ jobs:
         run: |
           R -f install-pkgs.R
 
+      - name: Retrieve Data Model Information
+        run: |
+          R -e '
+            config <- yaml::yaml.load_file("schematic_config.yml");
+            repo <- strsplit(config$model$input$repo, "/")[[1]];
+            repo_name <- file.path(repo[1], repo[2]);
+            path <- config$model$input$location;
+            system(sprintf("echo 'MODEL_REPO_NAME=%s' >> $GITHUB_ENV", repo_name));
+            system(sprintf("echo 'MODEL_PATH=%s' >> $GITHUB_ENV", path));
+            system(sprintf("echo 'MODEL_REPO_BRANCH=%s' >> $GITHUB_ENV", repo[3]));'
+          # clone the data model
+          git clone -b ${{ env.MODEL_REPO_BRANCH }} https://github.com/${{ env.MODEL_REPO_NAME }}
+
       - name: Install Schematic
         shell: bash
         run: |
@@ -62,15 +75,6 @@ jobs:
       - name: Set Configurations for Schematic
         shell: bash
         run: |
-          source .venv/bin/activate
-          # download data model to the correct location
-          R -e '
-            config <- yaml::yaml.load_file("schematic_config.yml");
-            url  <- config$model$input$download_url;
-            path <- config$model$input$location;
-            system(sprintf("mkdir -p %s", dirname(path)));
-            system(sprintf("wget %s -O %s", url, path));
-          '
           # write out configuration files using github secrets
           echo "${{ secrets.SCHEMATIC_SYNAPSE_CONFIG }}" > .synapseConfig
           echo "${{ secrets.SCHEMATIC_SERVICE_ACCT_CREDS }}" > schematic_service_account_creds.json
