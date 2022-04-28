@@ -45,9 +45,9 @@ jobs:
           chmod 755 .venv/bin/activate
           source .venv/bin/activate
 
-      - name: Install R Packages Dependencies
-        run: |
-          R -f install-pkgs.R
+      # - name: Install R Packages Dependencies
+      #   run: |
+      #     R -f install-pkgs.R
 
       - name: Install Schematic
         shell: bash
@@ -94,9 +94,16 @@ jobs:
             https://api.github.com/repos/Sage-Bionetworks/schematic/releases/latest | \
             jq -r ".tag_name"
           ) >> $GITHUB_ENV
-
+          echo '${{ env.MODEL_REPO_NAME }}'
+          echo '${{ env.MODEL_REPO_BRANCH }}'
           # clone the data model
           git clone -b ${{ env.MODEL_REPO_BRANCH }} https://github.com/${{ env.MODEL_REPO_NAME }}
+
+      - name: test env
+        shell: bash
+        run: |
+          echo '${{ env.MODEL_REPO_NAME }}'
+          echo '${{ env.MODEL_REPO_BRANCH }}'
 
       - name: Create config.json
         shell: bash
