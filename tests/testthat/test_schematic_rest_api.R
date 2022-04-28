@@ -65,3 +65,17 @@ test_that("storage_dataset_files returns files", {
                         dataset_id = "syn23643250",
                         input_token=Sys.getenv("SYNAPSE_PAT"))
 })
+
+test_that("model_component_requirements returns list of required components", {
+  good <- model_component_requirements(url="http://localhost:3001/v1/model/component-requirements",
+                                           schema_url="https://raw.githubusercontent.com/ncihtan/data-models/main/HTAN.model.jsonld",
+                                           source_component="Patient",
+                                           as_graph = FALSE)
+  expect_equal(length(good), 8L)
+  
+  expect_error(model_component_requirements(url="http://localhost:3001/v1/model/component-requirements",
+                                       schema_url="https://aaaabad.url.jsonld",
+                                       source_component="Patient",
+                                       as_graph = FALSE))
+  
+})
