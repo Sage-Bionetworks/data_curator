@@ -22,7 +22,7 @@ manifest:
 
 model:
   input:
-    repo: 'Sage-Bionetworks/schematic/data-models/main' # repo of data model: {repo_owner}/{repo_name}/{repo_branch}
+    repo: 'Sage-Bionetworks/data-models/main' # repo of data model: {repo_owner}/{repo_name}/{repo_branch}
     location: 'data-models/example.model.jsonld' # path to JSON-LD data mode from root
     file_type: 'local'
 

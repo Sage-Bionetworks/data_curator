@@ -31,7 +31,8 @@ jobs:
       - name: Install System Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y pip python3.8-venv libcurl4-openssl-dev
+          sudo apt-get install -y pip python3.8-venv libcurl4-openssl-dev \
+            jq curl
 
       - uses: actions/checkout@v2
 
