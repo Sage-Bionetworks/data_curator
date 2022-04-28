@@ -287,7 +287,8 @@ shinyServer(function(input, output, session) {
       silent = TRUE,
       annotation_status <- metadata_model$validateModelManifest(
         inFile$raw()$datapath,
-        template_schema_name()
+        template_schema_name(),
+        restrict_rules = TRUE # set true to disable great expectation
       )
     )
 
