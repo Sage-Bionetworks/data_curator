@@ -7,9 +7,9 @@ validationResult <- function(anno.res, template, manifest) {
   error_type <- NULL
   highlight_values <- list()
 
-  # get erorrs only for now, [[2]] is warning  
+  # get erorrs only for now, [[2]] is warning
   errors <- anno.res[[1]]
-  
+
   if (!is.null(manifest) && !is.null(template) && nrow(manifest) != 0) {
     if (length(errors) != 0) {
       validation_res <- "invalid"
@@ -25,14 +25,6 @@ validationResult <- function(anno.res, template, manifest) {
         grepl(
           "Wrong schema",
           x[[2]]
-        )
-      }))
-      
-      # cross-manifest error index
-      inx_cm <- which(sapply(errors, function(x) {
-        grepl(
-          "the attribute .* in the source manifest",
-          x[[3]]
         )
       }))
 
@@ -63,11 +55,6 @@ validationResult <- function(anno.res, template, manifest) {
         error_msg <- "The submitted metadata does not contain all required column(s)."
         help_msg <- "Please check that you used the correct template in the <b>'Get Metadata Template'</b> tab and
 						ensure your metadata contains all required columns."
-      } else if (length(inx_cm) > 0) {
-        # cross-manifest errors: not pass the cross-manifest validation rules
-        error_type <- ""
-        error_msg <- ""
-        help_msg <- ""
       } else {
         error_type <- "Invalid Value"
         error_msg <- paste0(
@@ -79,7 +66,7 @@ validationResult <- function(anno.res, template, manifest) {
       # create table to display errors for users
       error_table <- lapply(errors, function(i) {
         data.frame(Row = as.numeric(i[[1]]), Column = i[[2]], Value = i[[4]][[1]], Error = i[[3]])
-      }) %>% bind_rows() 
+      }) %>% bind_rows()
 
       # create list for hightlight function; key: error_column, value: error_value
       lapply(unique(error_table$Column), function(col) {
@@ -97,10 +84,9 @@ validationResult <- function(anno.res, template, manifest) {
         ) %>%
         ungroup() %>%
         dplyr::select(Row, Column, Value, Error)
-    
+
       # sort rows based on input column names
       error_table <- error_table[order(match(error_table$Column, colnames(manifest))), ]
-
     } else {
       validation_res <- "valid"
       error_type <- "No Error"
