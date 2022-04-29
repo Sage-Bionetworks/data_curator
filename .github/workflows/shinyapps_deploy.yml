@@ -101,7 +101,7 @@ jobs:
       - name: Clone Data Model
         shell: bash
         run: |
-          git clone -b ${{ env.MODEL_REPO_BRANCH }} https://github.com/${{ env.MODEL_REPO_NAME }}
+          git clone -b ${{ env.MODEL_REPO_BRANCH }} https://github.com/${{ env.MODEL_REPO_NAME }}.git
 
       - name: Create config.json
         shell: bash
