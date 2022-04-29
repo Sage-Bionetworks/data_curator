@@ -80,7 +80,6 @@ jobs:
         run: |
           # retrieve data model repo information
           R -e '
-            install.packages("yaml");
             config <- yaml::yaml.load_file("schematic_config.yml");
             repo <- strsplit(config$model$input$repo, "/")[[1]];
             repo_name <- file.path(repo[1], repo[2]);
