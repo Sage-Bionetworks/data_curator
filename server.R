@@ -201,7 +201,7 @@ shinyServer(function(input, output, session) {
     }
   })
 
-  # display warning message if folder is empty and data type is assay
+  # display warning message if folder is empty and data type is file-based
   observeEvent(c(folder_synID(), template_schema_name()), {
 
     # hide tags when users select new template
@@ -210,7 +210,7 @@ shinyServer(function(input, output, session) {
     req(input$tabs == "tab_template")
     hide("div_template_warn")
 
-    req(length(datatype_list$files) == 0 & template_type == "assay")
+    req(length(datatype_list$files) == 0 & template_type == "file")
     warn_text <- paste0(
       strong(sQuote(input$dropdown_folder)), " folder is empty,
        please upload your data before generating manifest.",
@@ -234,7 +234,7 @@ shinyServer(function(input, output, session) {
     manifest_url <-
       metadata_model$getModelManifest(paste0(manifest_title, " ", input$dropdown_template),
         template_schema_name(),
-        filenames = switch((template_type == "assay") + 1,
+        filenames = switch((template_type == "file") + 1,
           NULL,
           as.list(names(datatype_list$files))
         ),
@@ -370,7 +370,7 @@ shinyServer(function(input, output, session) {
 
     # If an assay component selected (define assay components) note for future
     # the type to filter (eg assay) on could probably also be a config choice
-    assay_schemas <- config$manifest_schemas$display_name[config$manifest_schemas$type == "assay"]
+    assay_schemas <- config$manifest_schemas$display_name[config$manifest_schemas$type == "file"]
     # if folder_ID has not been updated yet
     if (folder_synID() == "") folder_synID(datatype_list$folders[[input$dropdown_folder]])
 
