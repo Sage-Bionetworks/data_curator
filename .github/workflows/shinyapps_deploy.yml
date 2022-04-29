@@ -106,7 +106,8 @@ jobs:
       - name: Create config.json
         shell: bash
         run: |
-          python functions/generate_config_json.py \
+          source .venv/bin/activate
+          python3 functions/generate_config_json.py \
             -i ${{ env.MODEL_PATH }} \
             -v1 v0.1.0 \
             -v2 ${{ env.SCHEMA_VERSION }} \
