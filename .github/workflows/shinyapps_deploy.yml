@@ -8,7 +8,7 @@ name: shiny-deploy
 on:
   push:
     branches:
-      - production
+      - main
       - develop
     tags:
       - release*
