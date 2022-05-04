@@ -1,3 +1,24 @@
+#' Download an existing manifest
+#' @param url URI of API endpoint
+#' @param input_token Synapse PAT
+#' @param asset_view ID of view listing all project data assets
+#' @param dataset_id the parent ID of the manifest
+#' @param as_json if True return the manifest in JSON format
+#' @returns a csv of the manifest
+#' @export
+manifest_download <- function(url="http://localhost:3001/v1/manifest/download",
+                              input_token, asset_view, dataset_id, as_json=TRUE){
+  req <- httr::GET(url,
+                   query = list(
+                     asset_view = asset_view,
+                     dataset_id = dataset_id,
+                     as_json = as_json,
+                     input_token = input_token
+                   ))
+  manifest <- httr::content(req, as = "text")
+  jsonlite::fromJSON(manifest)
+}
+
 #' schematic rest api to generate manifest
 #'
 #' @param title Name of dataset 
