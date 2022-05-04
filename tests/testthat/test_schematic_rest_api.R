@@ -79,3 +79,13 @@ test_that("model_component_requirements returns list of required components", {
                                        as_graph = FALSE))
   
 })
+
+test_that("manifest_download returns a csv.", {
+  skip_it()
+  csv <- manifest_download(input_token=Sys.getenv("SYNAPSE_PAT"),
+                           asset_view="syn28559058",
+                           dataset_id="syn28268700")
+  exp <- setNames(c("BulkRNA-seqAssay", "CSV/TSV", "Sample_A", "GRCm38", NA, 2022L, "syn28278954"),
+    c("Component", "File Format", "Filename", "Genome Build", "Genome FASTA", "Sample ID", "entityId"))
+  expect_equal(unlist(csv), exp)
+})
