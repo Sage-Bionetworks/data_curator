@@ -184,7 +184,16 @@
       "display_name": "SRRS Imaging Level 2",
       "schema_name": "SRRSImagingLevel2",
       "type": "assay"
-    }
+    },
+    {
+      "display_name": "RPPA Level 2",
+      "schema_name": "RPPALevel2",
+      "type": "assay"
+    },
+      "display_name": "HTAN RPPA Antibody Table",
+      "schema_name": "HTANRPPAAntibodyTable",
+      "type": "record"
+    } 
   ],
 
   "community": "HTAN",
