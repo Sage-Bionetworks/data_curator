@@ -89,3 +89,8 @@ test_that("manifest_download returns a csv.", {
     c("Component", "File Format", "Filename", "Genome Build", "Genome FASTA", "Sample ID", "entityId"))
   expect_equal(unlist(csv), exp)
 })
+
+test_that("get_asset_view_table returns asset view table", {
+  get_asset_view_table(input_token = Sys.getenv("SYNAPSE_PAT"),
+                       asset_view="syn23643253")
+})
