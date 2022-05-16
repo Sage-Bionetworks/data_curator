@@ -228,3 +228,25 @@ storage_dataset_files <- function(url="http://localhost:3001/v1/storage/dataset/
   httr::content(req)
                    
 }
+
+#' /storage/asset/table
+#' 
+#' @param url URL to schematic API endpoint
+#' @param input_token synapse PAT
+#' @param asset_view Synapse ID of asset view
+#' @export
+get_asset_view_table <- function(url="http://localhost:3001/v1/storage/assets/tables",
+                                 input_token, asset_view) {
+  
+  req <- httr::GET(url,
+                   query=list(
+                     asset_view=asset_view,
+                     input_token=input_token))
+  
+  if (httr::http_status(req)$category == "Success") {
+    csv <- readr::read_csv(httr::content(req))
+    return(csv)
+  } else stop("File could not be downloaded from Synapse.")
+  
+}
+
