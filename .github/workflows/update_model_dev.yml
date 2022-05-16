@@ -1,0 +1,49 @@
+name: Update source model for dev
+
+# Update model download_url in `schematic_config.yml`
+# to point to new source URL in `develop` branch. 
+on:
+  # Note: can also run this workflow manually from the Actions tab
+  workflow_dispatch:
+    inputs:
+      source:
+        description: 'URL of new source'     
+        required: true
+
+env:
+  SOURCE_URL: ${{ github.event.inputs.source }}
+
+jobs:
+  update-model:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Check out development branch under $GITHUB_WORKSPACE
+      - uses: actions/checkout@v3
+        with:
+          ref: develop
+          
+      # Check steps matter more for rare occasions of manual input
+      # vs. programmatic dispatches
+      - name: Check that source link works
+        run: wget $SOURCE_URL -O model.json
+
+      # Check format as can be easy to not grab the actual raw.github URL
+      - name: Check is JSON
+        run: cat model.json | python -m simplejson.tool > validated.json
+        
+      - name: Update config
+        uses: mikefarah/yq@master
+        with:
+          cmd: yq -i '.model.input.download_url = strenv(SOURCE_URL)' schematic_config.yml
+        
+      - name: Commit files
+        run: |
+          git config user.email "nf-osi@sagebionetworks.org"
+          git config user.name "nf-osi[bot]"
+          git commit -m "Update model source in config" -a
+    
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          branch: ${{ github.ref }}
