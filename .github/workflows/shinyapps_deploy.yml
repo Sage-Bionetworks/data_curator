@@ -56,7 +56,7 @@ jobs:
           git clone --single-branch --branch list-comma-patch https://github.com/Sage-Bionetworks/schematic.git
           cd schematic
           # pin to a specific commit
-          git checkout a9f269783841ed83759cdf49d5c54a73d32cb17f 
+          # git checkout a9f269783841ed83759cdf49d5c54a73d32cb17f 
           poetry build
           pip3 install dist/schematicpy-1.0.0-py3-none-any.whl
       - name: Set Configurations for Schematic
