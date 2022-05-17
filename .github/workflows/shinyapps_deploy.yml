@@ -10,6 +10,7 @@ on:
     branches:
       - main
       - develop
+      - feat-UI-dashboard
     tags:
       - v*.*.*
     paths-ignore:
@@ -95,6 +96,8 @@ jobs:
           # if tag is v*.*.*, deploy to prod, otherwise to staging
           if (!grepl("v[0-9]+.[0-9]+.[0-9]+", refName)) {
             appName <- paste(appName, "staging", sep = "-")
+          } else if (refName == 'feat-UI-dashboard') {
+            appName <- paste(appName, "demo", sep = "-")
           }
           rsConnectUser <- "${{ secrets.RSCONNECT_USER }}"
           rsConnectToken <- "${{ secrets.RSCONNECT_TOKEN }}"
