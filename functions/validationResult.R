@@ -1,4 +1,4 @@
-validationResult <- function(valRes, template, inFile) {
+validationResult <- function(anno.res, template, manifest) {
   validation_res <- NULL
   error_msg <- NULL
   help_msg <- NULL
@@ -7,18 +7,21 @@ validationResult <- function(valRes, template, inFile) {
   error_type <- NULL
   highlight_values <- list()
 
-  if (!is.null(inFile) && !is.null(template) && length(inFile) != 0) {
-    if (length(valRes) != 0) {
+  # get erorrs only for now, [[2]] is warning
+  errors <- anno.res[[1]]
+
+  if (!is.null(manifest) && !is.null(template) && nrow(manifest) != 0) {
+    if (length(errors) != 0) {
       validation_res <- "invalid"
       # mismatched template index
-      inx_mt <- which(sapply(valRes, function(x) {
+      inx_mt <- which(sapply(errors, function(x) {
         grepl(
           "Component value provided is: .*, whereas the Template Type is: .*",
           x[[3]]
         )
       }))
       # missing column index
-      inx_ws <- which(sapply(valRes, function(x) {
+      inx_ws <- which(sapply(errors, function(x) {
         grepl(
           "Wrong schema",
           x[[2]]
@@ -29,7 +32,7 @@ validationResult <- function(valRes, template, inFile) {
         # mismatched error(s): selected template mismatched with validating template
         error_type <- "Mismatched Template"
         # get all mismatched components
-        error_values <- sapply(valRes[inx_mt], function(x) x[[4]][[1]]) %>%
+        error_values <- sapply(errors[inx_mt], function(x) x[[4]][[1]]) %>%
           unique()
 
         # error messages for mismatch
@@ -55,19 +58,14 @@ validationResult <- function(valRes, template, inFile) {
       } else {
         error_type <- "Invalid Value"
         error_msg <- paste0(
-          "The submitted metadata have ", length(valRes),
+          "The submitted metadata have ", length(errors),
           " errors."
         )
       }
 
       # create table to display errors for users
-      error_table <- lapply(valRes, function(i) {
-        data.frame(
-          Row = as.numeric(i[[1]]),
-          Column = i[[2]],
-          Value = as.character(i[[4]][[1]]),
-          Error = i[[3]]
-        )
+      error_table <- lapply(errors, function(i) {
+        data.frame(Row = as.numeric(i[[1]]), Column = i[[2]], Value = i[[4]][[1]], Error = i[[3]])
       }) %>% bind_rows()
 
       # create list for hightlight function
@@ -89,7 +87,7 @@ validationResult <- function(valRes, template, inFile) {
         dplyr::select(Row, Column, Value, Error)
 
       # sort rows based on input column names
-      error_table <- error_table[order(match(error_table$Column, colnames(inFile))), ]
+      error_table <- error_table[order(match(error_table$Column, colnames(manifest))), ]
     } else {
       validation_res <- "valid"
       error_type <- "No Error"

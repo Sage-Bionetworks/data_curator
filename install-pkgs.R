@@ -11,10 +11,10 @@ cran <- c(
   "DT==0.20",
   "jsonlite==1.7.3",
   "reticulate==1.23",
-  "shinydashboardPlus==2.0.3",
+  # "shinydashboardPlus==2.0.3",
   "waiter==0.2.5",
   "readr==2.1.1",
-  "sass==0.4.0",
+  "sass==0.4.1",
   "remotes==2.4.2",
   "rsconnect==0.8.25",
   "png==0.1.7",
@@ -26,7 +26,11 @@ cran <- c(
   "r2d3==0.2.6"
 )
 gh <- c(
-  "dreamRs/shinypop"
+  "dreamRs/shinypop",
+  # switch back to use cran install 'shinydashboardPlus'
+  # once they make a release to fix icons
+  # https://github.com/RinteRface/shinydashboardPlus
+  "RinteRface/shinydashboardPlus"
 )
 
 # The binary package distributions from R Studio dramatically speed up installation time

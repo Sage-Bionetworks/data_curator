@@ -175,7 +175,8 @@ shinyServer(function(input, output, session) {
   ######## Update Template ########
   # update selected schema template name
   observeEvent(input$dropdown_template, {
-    template_schema_name(config$schema_name[match(input$dropdown_template, config$display_name)])
+    template_schema_name(template_namedList[match(input$dropdown_template, names(template_namedList))])
+    template_type <<- config$manifest_schemas$type[match(template_schema_name(), template_namedList)]
   })
 
   ######## Dashboard ########
@@ -218,8 +219,7 @@ shinyServer(function(input, output, session) {
 
     req(input$tabs == "tab_template")
     hide("div_template_warn")
-    template_type <<- config$type[match(template_schema_name(), config$schema_name)]
-    req(length(data_list$files) == 0 & template_type == "assay")
+    req(length(datatype_list$files) == 0 & template_type == "assay")
     warn_text <- paste0(
       strong(sQuote(input$dropdown_folder)), " folder is empty,
        please upload your data before generating manifest.",
@@ -293,7 +293,8 @@ shinyServer(function(input, output, session) {
       silent = TRUE,
       annotation_status <- metadata_model$validateModelManifest(
         inFile$raw()$datapath,
-        template_schema_name()
+        template_schema_name(),
+        restrict_rules = TRUE # set true to disable great expectation
       )
     )
 
@@ -409,9 +410,14 @@ shinyServer(function(input, output, session) {
       # associates metadata with data and returns manifest id
       manifest_id <- synapse_driver$associateMetadataWithFiles(
         synStore_obj,
-        "./tmp/synapse_storage_manifest.csv", folder_synID()
+        "./tmp/synapse_storage_manifest.csv",
+        folder_synID(),
+        manifest_record_type = "entity"
       )
-      manifest_path <- tags$a(href = paste0("synapse.org/#!Synapse:", manifest_id), manifest_id, target = "_blank")
+      manifest_path <- tags$a(href = paste0("https://www.synapse.org/#!Synapse:", manifest_id), manifest_id, target = "_blank")
+
+      # add log message
+      message(paste0("Manifest :", sQuote(manifest_id), " has been successfully uploaded"))
 
       # if no error
       if (startsWith(manifest_id, "syn") == TRUE) {
@@ -439,9 +445,14 @@ shinyServer(function(input, output, session) {
       # associates metadata with data and returns manifest id
       manifest_id <- synapse_driver$associateMetadataWithFiles(
         synStore_obj,
-        "./tmp/synapse_storage_manifest.csv", folder_synID()
+        "./tmp/synapse_storage_manifest.csv",
+        folder_synID(),
+        manifest_record_type = "entity"
       )
-      manifest_path <- tags$a(href = paste0("synapse.org/#!Synapse:", manifest_id), manifest_id, target = "_blank")
+      manifest_path <- tags$a(href = paste0("https://www.synapse.org/#!Synapse:", manifest_id), manifest_id, target = "_blank")
+
+      # add log message
+      message(paste0("Manifest :", sQuote(manifest_id), " has been successfully uploaded"))
 
       # if uploaded provided valid synID message
       if (startsWith(manifest_id, "syn") == TRUE) {
