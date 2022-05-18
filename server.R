@@ -219,7 +219,7 @@ shinyServer(function(input, output, session) {
 
     req(input$tabs == "tab_template")
     hide("div_template_warn")
-    req(length(datatype_list$files) == 0 & template_type == "assay")
+    req(length(data_list$files) == 0 & template_type == "assay")
     warn_text <- paste0(
       strong(sQuote(input$dropdown_folder)), " folder is empty,
        please upload your data before generating manifest.",
