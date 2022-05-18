@@ -176,7 +176,7 @@ shinyServer(function(input, output, session) {
   # update selected schema template name
   observeEvent(input$dropdown_template, {
     template_schema_name(template_namedList[match(input$dropdown_template, names(template_namedList))])
-    template_type <<- config$manifest_schemas$type[match(template_schema_name(), template_namedList)]
+    template_type <<- config$type[match(template_schema_name(), template_namedList)]
   })
 
   ######## Dashboard ########
