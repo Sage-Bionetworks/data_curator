@@ -4,25 +4,21 @@ definitions:
   creds_path: 'credentials.json'
   token_pickle: 'token.pickle'
   service_acct_creds: 'schematic_service_account_creds.json'
-
 synapse:
   master_fileview: 'syn16858331'
   manifest_folder: 'manifests'
-  manifest_basename: 'synapse_storage_manifest' 
+  manifest_basename: 'synapse_storage_manifest'
   token_creds: 'syn21088684'
   service_acct_creds: 'syn25171627'
-  
 manifest:
   title: 'NF'
-  data_type: 
+  data_type:
     - 'NF'
-
 model:
   input:
-    download_url: 'https://raw.githubusercontent.com/nf-osi/nf-metadata-dictionary/v5.0.0/NF.jsonld' # url to download JSON-LD data model
+    download_url: 'https://raw.githubusercontent.com/nf-osi/nf-metadata-dictionary/v5.0.2/NF.jsonld' # url to download JSON-LD data model
     location: 'data-models/NF.jsonld' # path to JSON-LD data model
-    file_type: 'local' 
-    
+    file_type: 'local'
 style:
   google_manifest:
     req_bg_color:
