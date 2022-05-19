@@ -1,6 +1,6 @@
 ## Schema Configuration
 
-In the app, the required schemas is configured in the file `www/config.json`, which is used to adapt the dropdown data types list in the app.
+In the app, the required schemas is configured in the file `www/config.json`, which is used to adapt the dropdown data types list in the app. Below are the steps to generate `config.json` locally using an example data model. Please remember to use your own data model's repo.
 
 1.  Create a repo for your data model using this [template](https://github.com/Sage-Bionetworks/data-models)
 
@@ -23,6 +23,6 @@ In the app, the required schemas is configured in the file `www/config.json`, wh
     - `manifest schemas`: defines the list of schemas displayed under the "Choose a Metadata Template Type:" dropdown in the application.
       - `display_name` : The display name for the dropdown. (e.g. _scRNA-seq Level 1_)
       - `schema_name`: The name of the manifest in the JSON-LD schema (e.g. _ScRNA-seqLevel1_)
-      - `type`: The type of manifest, either _file (file-based manifest ...)_ or _record (record-based manifest ...)_.
-    - `service_version`: The version of schematic service (empty string is accepted)
-    - `schema_version`: The version of data model (empty string is accepted)
+      - `type`: The type of manifest, either _file_ or _record_.
+    - `service_version`: The version of schematic service (Default is empty string if no value provided)
+    - `schema_version`: The version of data model (Default is empty string if no value provided)

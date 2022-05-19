@@ -1,8 +1,6 @@
 
 import argparse
 import json
-import re
-from functools import reduce
 from schematic.schemas.generator import SchemaGenerator
 
 
@@ -16,7 +14,7 @@ def get_args():
     parser.add_argument('-v2', '--schema_version',
                         default='', help='version of data model')
     parser.add_argument('-o', '--out_dir',
-                        default='.', help='directory to save result')
+                        default='www', help='directory to save result')
     return parser.parse_args()
 
 
