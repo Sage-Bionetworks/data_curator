@@ -23,6 +23,6 @@ In the app, the required schemas is configured in the file `www/config.json`, wh
     - `manifest schemas`: defines the list of schemas displayed under the "Choose a Metadata Template Type:" dropdown in the application.
       - `display_name` : The display name for the dropdown. (e.g. _scRNA-seq Level 1_)
       - `schema_name`: The name of the manifest in the JSON-LD schema (e.g. _ScRNA-seqLevel1_)
-      - `type`: The type of manifest, either _file_ or _record_. (simple explanation for manifest types)
+      - `type`: The type of manifest, either _file (file-based manifest ...)_ or _record (record-based manifest ...)_.
     - `service_version`: The version of schematic service (empty string is accepted)
     - `schema_version`: The version of data model (empty string is accepted)

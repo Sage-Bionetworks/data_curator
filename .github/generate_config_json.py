@@ -20,14 +20,6 @@ def get_args():
     return parser.parse_args()
 
 
-def unCamel(x):
-    """Split camel-case string by ' ' delimiter."""
-    new = reduce(lambda a, b: a + (
-        (b.upper() == b and (len(a) and a[-1].upper() != a[-1]))
-        and (' ' + b) or b), x, '')
-    return new
-
-
 def main():
     args = get_args()
     schemas = []
@@ -36,15 +28,19 @@ def main():
     sg = SchemaGenerator(path_to_json_ld=args.jsonld_path)
     component_digraph = sg.se.get_digraph_by_edge_type('requiresComponent')
     components = component_digraph.nodes()
+    # get display names for required data types
+    mm_graph = sg.se.get_nx_schema()
+    display_names = sg.get_nodes_display_names(components, mm_graph)
 
     # save display_name, schema_name, assay type to list
-    for schema in components:
-        cp = any(re.findall(r'clinical|biospecimen', schema, re.IGNORECASE))
-        assay_type = 'record' if cp else 'file'
+    for index, component in enumerate(components):
+        # get component's dependencies
+        deps = sg.get_node_dependencies(component)
+        schema_type = 'file' if 'Filename' in deps else 'record'
         schemas.append({
-            'display_name': unCamel(schema),
-            'schema_name': schema,
-            'type': assay_type
+            'display_name': display_names[index],
+            'schema_name': component,
+            'type': schema_type
         })
 
     # write out the config.json including some versions
