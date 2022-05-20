@@ -30,11 +30,7 @@ shinyServer(function(input, output, session) {
   # import module that contains SynapseStorage class
   synapse_driver <- import("schematic.store.synapse")$SynapseStorage
   # read config in
-  config <- fromJSON("www/config.json")
-
-  # mapping from display name to schema name
-  template_namedList <- config$manifest_schemas$schema_name
-  names(template_namedList) <- config$manifest_schemas$display_name
+  config <- fromJSON("www/config.json")$manifest_schemas
 
   synStore_obj <- NULL # gets list of projects they have access to
   project_synID <- NULL # selected project synapse ID
@@ -43,7 +39,7 @@ shinyServer(function(input, output, session) {
   template_type <- NULL # type of selected template
 
   isUpdateFolder <- reactiveVal(FALSE)
-  datatype_list <- list(projects = NULL, folders = NULL, manifests = template_namedList, files = NULL)
+  datatype_list <- list(projects = NULL, folders = NULL, manifests = config$schema_name, files = NULL)
 
   tabs_list <- c("tab_instructions", "tab_data", "tab_template", "tab_upload")
   clean_tags <- c("div_template", "div_validate", NS("tbl_validate", "table"), "btn_val_gsheet", "btn_submit")
@@ -176,8 +172,8 @@ shinyServer(function(input, output, session) {
   ######## Update Template ########
   # update selected schema template name
   observeEvent(input$dropdown_template, {
-    template_schema_name(template_namedList[match(input$dropdown_template, names(template_namedList))])
-    template_type <<- config$manifest_schemas$type[match(template_schema_name(), template_namedList)]
+    template_schema_name(config$schema_name[match(input$dropdown_template, config$display_name)])
+    template_type <<- config$type[match(template_schema_name(), config$schema_name)]
   })
 
   ######## Template Google Sheet Link ########
@@ -370,7 +366,7 @@ shinyServer(function(input, output, session) {
 
     # If an assay component selected (define assay components) note for future
     # the type to filter (eg assay) on could probably also be a config choice
-    assay_schemas <- config$manifest_schemas$display_name[config$manifest_schemas$type == "file"]
+    assay_schemas <- config$display_name[config$type == "file"]
     # if folder_ID has not been updated yet
     if (folder_synID() == "") folder_synID(datatype_list$folders[[input$dropdown_folder]])
 
