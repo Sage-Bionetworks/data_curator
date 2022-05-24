@@ -3,19 +3,19 @@
 
 name: shiny-deploy
 
-# TODO: remove `shiny-server-develop` when we use shinyapps.io as production site
-# also consider to change shiny-server-main to main since we will not host in shinyServer
 on:
   push:
     branches:
       - main
       - develop
+      - feature-auto-generate-config
     tags:
       - v*.*.*
     paths-ignore:
       - '.github/ISSUE_TEMPLATE/**'
       - '**/*.md'
       - '**/.gitignore'
+  workflow_dispatch:
 
 jobs:
   shiny-deploy:
@@ -72,6 +72,11 @@ jobs:
           echo "${{ secrets.SCHEMATIC_TOKEN_PICKLE }}" | base64 -d > token.pickle
 
           # TODO: retrieve version of schematic service once API is implemented   
+          echo 'SERVICE_VERSION='$(
+            curl -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/Sage-Bionetworks/schematic/releases/latest | \
+            jq -r ".tag_name"
+          ) >> $GITHUB_ENV
 
       - name: Set Configurations for Data Model
         run: |
@@ -84,20 +89,17 @@ jobs:
             system(sprintf("echo 'MODEL_REPO_NAME=%s' >> $GITHUB_ENV", repo_name));
             system(sprintf("echo 'MODEL_PATH=%s' >> $GITHUB_ENV", path));
             system(sprintf("echo 'MODEL_REPO_BRANCH=%s' >> $GITHUB_ENV", repo[3]));'
-          
-          # retrieve versions for data model
-          echo 'SCHEMA_VERSION='$(
-            curl -H "Accept: application/vnd.github.v3+json" \
-            https://api.github.com/repos/Sage-Bionetworks/schematic/releases/latest | \
-            jq -r ".tag_name"
-          ) >> $GITHUB_ENV
-          echo '${{ env.MODEL_REPO_NAME }}'
-          echo '${{ env.MODEL_REPO_BRANCH }}'
 
       - name: Clone Data Model
         shell: bash
         run: |
           git clone -b ${{ env.MODEL_REPO_BRANCH }} https://github.com/${{ env.MODEL_REPO_NAME }}.git
+          # retrieve versions for data model
+          echo 'SCHEMA_VERSION='$(
+            curl -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/${{ env.MODEL_REPO_NAME }}/releases/latest | \
+            jq -r ".tag_name"
+          ) >> $GITHUB_ENV
 
       - name: Create config.json
         shell: bash
@@ -105,7 +107,7 @@ jobs:
           source .venv/bin/activate
           python3 .github/generate_config_json.py \
             -i ${{ env.MODEL_PATH }} \
-            -v1 v0.1.0 \
+            -v1 ${{ env.SERVICE_VERSION }} \
             -v2 ${{ env.SCHEMA_VERSION }} \
             -o www
 
