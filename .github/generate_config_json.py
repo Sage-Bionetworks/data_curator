@@ -1,8 +1,7 @@
-
 import argparse
 import json
+import re
 from schematic.schemas.generator import SchemaGenerator
-
 
 def get_args():
     """Set up command-line interface and get arguments."""
@@ -17,6 +16,12 @@ def get_args():
                         default='www', help='directory to save result')
     return parser.parse_args()
 
+def _validate_version(version):
+    """Clean up versions."""
+    if bool(re.match('v[0-9]+.[0-9]+.[0-9]+', version)):
+        return version
+    else:
+        return ''
 
 def main():
     args = get_args()
@@ -41,10 +46,13 @@ def main():
             'type': schema_type
         })
 
+    service_version = _validate_version(args.service_version)
+    schema_version = _validate_version(args.schema_version)
+    
     # write out the config.json including some versions
     config = {'manifest_schemas': schemas,
-              'service_version': args.service_version,
-              'schema_version': args.schema_version
+              'service_version': service_version,
+              'schema_version': schema_version
               }
     with open(f'{args.out_dir}/config.json', 'w') as o:
         o.write(json.dumps(config, indent=2, separators=(',', ': ')))
