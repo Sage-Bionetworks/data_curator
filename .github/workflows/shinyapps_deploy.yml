@@ -106,7 +106,7 @@ jobs:
         run: |
           source .venv/bin/activate
           python3 .github/generate_config_json.py \
-            -i ${{ env.MODEL_PATH }} \
+            -js ${{ env.MODEL_PATH }} \
             -v1 ${{ env.SERVICE_VERSION }} \
             -v2 ${{ env.SCHEMA_VERSION }} \
             -o www

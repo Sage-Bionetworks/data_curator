@@ -39,7 +39,7 @@ shinyServer(function(input, output, session) {
   template_type <- NULL # type of selected template
 
   isUpdateFolder <- reactiveVal(FALSE)
-  datatype_list <- list(projects = NULL, folders = NULL, manifests = config$schema_name, files = NULL)
+  datatype_list <- list(projects = NULL, folders = NULL, files = NULL)
 
   tabs_list <- c("tab_instructions", "tab_data", "tab_template", "tab_upload")
   clean_tags <- c("div_template", "div_validate", NS("tbl_validate", "table"), "btn_val_gsheet", "btn_submit")
@@ -81,11 +81,14 @@ shinyServer(function(input, output, session) {
 
       # updates project dropdown
       lapply(c("header_dropdown_", "dropdown_"), function(x) {
-        lapply(c(1, 3), function(i) {
-          updateSelectInput(session, paste0(x, datatypes[i]),
-            choices = sort(names(datatype_list[[i]]))
-          )
-        })
+        # update project dropdowns
+        updateSelectInput(session, paste0(x, datatypes[1]),
+          choices = sort(names(datatype_list$projects))
+        )
+        # update datatype dropdowns
+        updateSelectInput(session, paste0(x, datatypes[3]),
+          choices = sort(config$display_name)
+        )
       })
 
       user_name <- syn_getUserProfile()$userName

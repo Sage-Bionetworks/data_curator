@@ -6,7 +6,7 @@ from schematic.schemas.generator import SchemaGenerator
 def get_args():
     """Set up command-line interface and get arguments."""
     parser = argparse.ArgumentParser()
-    parser.add_argument('-i', '--jsonld_path',
+    parser.add_argument('-js', '--jsonld_path',
                         required=True, help='path to model jsonld file')
     parser.add_argument('-v1', '--service_version',
                         default='', help='version of schematic')
