@@ -41,11 +41,11 @@ ui <- shinydashboardPlus::dashboardPage(
     tags$li(
       class = "dropdown", id = "HTAN_logo",
       tags$a(
-        href = "https://humantumoratlas.org/",
+        href = "https://includedcc.org/",
         target = "_blank",
         tags$img(
-          height = "40px", alt = "HTAN LOGO",
-          src = "img/HTAN_text_logo.png"
+          height = "40px", alt = "INCLUDE LOGO",
+          src = "img/INCLUDE DCC Logo-01.png"
         )
       )
     )
@@ -79,7 +79,7 @@ ui <- shinydashboardPlus::dashboardPage(
       tags$a(
         id = "sidebar_footer", `data-toggle` = "tab",
         tags$div(icon("heart")),
-        tags$footer(HTML('Supported by the Human Tumor Atlas Network <br/>
+        tags$footer(HTML('Supported by the INCLUDE Data Coordinating Center <br/>
                   (U24-CA233243-01)<br/>
                   Powered by <i class="far fa-heart"></i> and Sage Bionetworks'))
       )
