@@ -9,6 +9,9 @@ client_id <- toString(oauth_client$CLIENT_ID)
 client_secret <- toString(oauth_client$CLIENT_SECRET)
 app_url <- toString(oauth_client$APP_URL)
 
+schematic_config <- yaml::yaml.load_file("schematic_config.yml")
+api_uri <- paste(schematic_config$api$host, schematic_config$api$port, sep = ":")
+
 if (is.null(client_id) || nchar(client_id) == 0) stop("oauth_config.yml is missing CLIENT_ID")
 if (is.null(client_secret) || nchar(client_secret) == 0) stop("oauth_config.yml is missing CLIENT_SECRET")
 if (is.null(app_url) || nchar(app_url) == 0) stop("oauth_config.yml is missing APP_URL")

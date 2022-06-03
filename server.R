@@ -84,7 +84,8 @@ shinyServer(function(input, output, session) {
 #      dcWaiter("update", landing = TRUE, isPermission = FALSE)
 #    } else {
       #projects_list <- synapse_driver$getStorageProjects(synStore_obj)
-      projects_list <- storage_projects(asset_view = folder_synID(),
+      projects_list <- storage_projects(url=file.path(api_uri, "v1/storage/projects"),
+                                        asset_view = folder_synID(),
                                         input_token = access_token)
       datatype_list$projects <<- list2Vector(projects_list)
 
@@ -163,7 +164,8 @@ shinyServer(function(input, output, session) {
 
       # gets folders per project
       #folder_list <- synapse_driver$getStorageDatasetsInProject(synStore_obj, projectID) %>% list2Vector()
-      folder_list <- storage_project_datasets(asset_view = folder_synID(),
+      folder_list <- storage_project_datasets(url=file.path(api_uri, "v1/storage/project/datasets"),
+                                              asset_view = folder_synID(),
                                               project_id=projectID,
                                               input_token=access_token) %>% list2Vector()
 
@@ -205,7 +207,8 @@ shinyServer(function(input, output, session) {
       #   synStore_obj,
       #   folder_synID()
       # )
-      file_list <- storage_dataset_files(asset_view = master_fileview,
+      file_list <- storage_dataset_files(url=file.path(api_uri, "v1/storage/dataset/files"),
+                                         asset_view = master_fileview,
                             dataset_id = folder_synID(),
                             input_token=access_token)
       if (inherits(file_list, "xml_document")) {
@@ -258,7 +261,8 @@ shinyServer(function(input, output, session) {
     #   )
     
     #schematic rest api to generate manifest
-    manifest_url <- manifest_generate(title = input$dropdown_template,
+    manifest_url <- manifest_generate(url=file.path(api_uri, "v1/manifest/generate"),
+                                      title = input$dropdown_template,
                       data_type = template_schema_name(), dataset_id = folder_synID())
 
     # generate link
@@ -309,7 +313,8 @@ shinyServer(function(input, output, session) {
     # )
     
     # schematic rest api to validate metadata
-    annotation_status <- manifest_validate(data_type=template_schema_name(),
+    annotation_status <- manifest_validate(url=file.path(api_uri, "v1/model/validate"),
+                                           data_type=template_schema_name(),
                            csv_file=inFile$raw()$datapath)
 
     # validation messages
@@ -371,7 +376,8 @@ shinyServer(function(input, output, session) {
     #   config$community,
     #   " ", input$dropdown_template
     # ), inFile$raw()$datapath, template_schema_name())
-    filled_manifest <- manifest_generate(data_type=paste0(config$community,
+    filled_manifest <- manifest_generate(url=file.path(api_uri, "v1/manifest/generate"),
+                                         data_type=paste0(config$community,
       " ", input$dropdown_template),
       title=template_schema_name,
       csv_file=inFile$raw()$datapath)
@@ -410,7 +416,8 @@ shinyServer(function(input, output, session) {
         )
       } else {
         #file_list <- synapse_driver$getFilesInStorageDataset(synStore_obj, folder_synID())
-        file_list <- storage_dataset_files(asset_view = project_synID,
+        file_list <- storage_dataset_files(url=file.path(api_uri, "v1/storage/dataset/files"),
+                                           asset_view = project_synID,
                                             dataset_id = folder_synID(),
                                             input_token=access_token)
         datatype_list$files <<- list2Vector(file_list)
@@ -431,7 +438,8 @@ shinyServer(function(input, output, session) {
       # schematic rest api to submit metadata
       # This validates AND submits the data to Synapse
       # Returns synapse table ID if successful
-      manifest_id <- model_validate(data_type=template_schema_name(),
+      manifest_id <- model_validate(url=file.path(api_uri, "v1/model/validate"),
+                                    data_type=template_schema_name(),
                               dataset_id=folder_synID(),
                               input_token=access_token,
                               csv_file="./tmp/synapse_storage_manifest.csv")
@@ -478,7 +486,8 @@ shinyServer(function(input, output, session) {
       #   "./tmp/synapse_storage_manifest.csv", folder_synID()
       # )
       
-      manifest_id <- model_validate(data_type=template_schema_name(),
+      manifest_id <- model_validate(url=file.path(api_uri, "v1/model/validate"),
+                                    data_type=template_schema_name(),
                                     dataset_id=folder_synID(),
                                     input_token=access_token,
                                     csv_file="./tmp/synapse_storage_manifest.csv")
