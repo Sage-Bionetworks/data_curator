@@ -39,13 +39,13 @@ ui <- shinydashboardPlus::dashboardPage(
       )
     ),
     tags$li(
-      class = "dropdown", id = "HTAN_logo",
+      class = "dropdown", id = "cckp_logo",
       tags$a(
-        href = "https://humantumoratlas.org/",
+        href = "https://cancercomplexity.synapse.org/",
         target = "_blank",
         tags$img(
-          height = "40px", alt = "HTAN LOGO",
-          src = "img/HTAN_text_logo.png"
+          height = "40px", alt = "CCKP LOGO",
+          src = "img/cckp_logo.png"
         )
       )
     )
