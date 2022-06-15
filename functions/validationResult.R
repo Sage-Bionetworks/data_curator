@@ -3,14 +3,17 @@ validationResult <- function(anno.res, template, manifest) {
   error_msg <- NULL
   help_msg <- NULL
   out_msg <- NULL
+  warning_msg <- NULL
   error_table <- NULL
   error_type <- NULL
   highlight_values <- list()
 
   # get erorrs only for now, [[2]] is warning
   errors <- anno.res[[1]]
+  warns <- anno.res[[2]]
 
   if (!is.null(manifest) && !is.null(template) && nrow(manifest) != 0) {
+    # format the errors
     if (length(errors) != 0) {
       validation_res <- "invalid"
       # mismatched template index
@@ -25,14 +28,6 @@ validationResult <- function(anno.res, template, manifest) {
         grepl(
           "Wrong schema",
           x[[2]]
-        )
-      }))
-
-      # cross-validation error index
-      inx_cv <- which(sapply(errors, function(x) {
-        grepl(
-          "placeholder",
-          x[[3]]
         )
       }))
 
@@ -63,11 +58,6 @@ validationResult <- function(anno.res, template, manifest) {
         error_msg <- "The submitted metadata does not contain all required column(s)."
         help_msg <- "Please check that you used the correct template in the <b>'Get Metadata Template'</b> tab and
 						ensure your metadata contains all required columns."
-      } else if (length(inx_cv) > 0) {
-        # cross-manifest errors: not pass the cross-manifest validation rules
-        error_type <- ""
-        error_msg <- ""
-        help_msg <- ""
       } else {
         error_type <- "Invalid Value"
         error_msg <- paste0(
@@ -105,16 +95,30 @@ validationResult <- function(anno.res, template, manifest) {
       error_type <- "No Error"
     }
 
+    # format the warnings
+    if (length(warns) != 0) {
+      # add warning values to highlight
+      lapply(warns, function(warn) {
+        # extract the single quoted values from the warning string like "['value1', 'value2', ...]"
+        warn_values <- gsub("^[^']*'|'\\],?$", "", strsplit(warn[4], "'(?=,)", perl = TRUE)[[1]])
+        # append the values in case the column has multiple warnings or already has errors
+        highlight_values[[warn[2]]] <<- append(highlight_values[[warn[2]]], warn_values)
+        warning_msg <<- append(warning_msg, warn[3])
+      })
+    }
+
     # combine all error messages into one, add an extra empty line to bottom
     out_msg <- paste0(c(
       paste0("Your metadata is <b>", validation_res, "</b> !!!"),
       error_msg, help_msg
     ), collapse = "<br><br>")
+    out_msg2 <- paste0(warning_msg, collapse = "<br>")
   }
 
   return(list(
     validationRes = validation_res,
     outMsg = out_msg,
+    outMsg2 = out_msg2,
     errorDT = error_table,
     errorHighlight = highlight_values,
     errorType = error_type
