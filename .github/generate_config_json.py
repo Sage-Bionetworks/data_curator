@@ -1,7 +1,9 @@
 import argparse
 import json
 import re
+import requests
 from schematic.schemas.generator import SchemaGenerator
+
 
 def get_args():
     """Set up command-line interface and get arguments."""
@@ -16,12 +18,24 @@ def get_args():
                         default='www', help='directory to save result')
     return parser.parse_args()
 
+
+def _get_versions(repo_name, branch=None):
+    """Get release versions of github repo if exists, otherwise, return branch name"""
+    response = requests.get(
+        f'https://api.github.com/repos/{repo_name}/releases/latest')
+    if branch is None and response.status_code == 200:
+        return response.json()["tag_name"]
+    else:
+        return branch
+
+
 def _validate_version(version):
     """Clean up versions."""
     if bool(re.match('v[0-9]+.[0-9]+.[0-9]+', version)):
         return version
     else:
         return ''
+
 
 def main():
     args = get_args()
@@ -48,7 +62,7 @@ def main():
 
     service_version = _validate_version(args.service_version)
     schema_version = _validate_version(args.schema_version)
-    
+
     # write out the config.json including some versions
     config = {'manifest_schemas': schemas,
               'service_version': service_version,

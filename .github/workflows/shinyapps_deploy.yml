@@ -5,17 +5,20 @@ name: shiny-deploy
 
 on:
   push:
-    branches:
-      - main
-      - develop
-      - feature-auto-generate-config
-    tags:
-      - v*.*.*
+    branches: [main, develop, feature-auto-generate-config]
+    tags: 'v[0-9]+.[0-9]+.[0-9]+'
     paths-ignore:
       - '.github/ISSUE_TEMPLATE/**'
       - '**/*.md'
       - '**/.gitignore'
   workflow_dispatch:
+    inputs:
+      service_branch:
+        description: 'Schematic Service Branch'    
+        default: 'develop'
+      schema_branch:
+        description: 'Schema Branch'    
+        default: 'main'
 
 jobs:
   shiny-deploy:
@@ -25,6 +28,8 @@ jobs:
     env:
       # This should not be necessary for installing from public repo's however remotes::install_github() fails without it.
       GITHUB_PAT: ${{ secrets.REPO_PAT }}
+      SERVICE_BRANCH: 'develop'
+      SCHEMA_BRANCH: 'main'
 
     steps:
       - name: Install System Dependencies
@@ -48,6 +53,29 @@ jobs:
         run: |
           R -f install-pkgs.R
 
+      - name: Determine Deployment Environment Variables (manual)
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          echo 'SERVICE_BRANCH=${{ github.event.inputs.service_branch }}' >> $GITHUB_ENV
+          echo 'SCHEMA_BRANCH=${{ github.event.inputs.schema_branch }}' >> $GITHUB_ENV
+          echo 'APP_URL=staging' >> $GITHUB_ENV
+    
+      - name: Determine Deployment Environment Variables (pull request)
+        if: github.event_name == 'pull_request'
+        run: echo 'APP_URL=testing1' >> $GITHUB_ENV
+
+      - name: Determine Deployment Environment Variables (push)
+        if: github.event_name == 'push'
+        shell: bash
+        run: |
+          # REF_TYPE will be either heads (branch) or tags
+          REF_TYPE="$(echo $GITHUB_REF | cut -d'/' -f 2)"
+          if [ $REF_TYPE == 'tags' ]; then
+            echo 'APP_URL=production' >> $GITHUB_ENV
+          else
+            echo 'APP_URL=staging' >> $GITHUB_ENV
+          fi
+
       - name: Install Schematic
         shell: bash
         run: |
@@ -55,49 +83,29 @@ jobs:
           source .venv/bin/activate
           # use 'poetry' to install schematic from the develop branch 
           pip3 install poetry
-          git clone --single-branch --branch develop https://github.com/Sage-Bionetworks/schematic.git
+          git clone --single-branch --branch ${{ env.SERVICE_BRANCH }} https://github.com/Sage-Bionetworks/schematic.git
           cd schematic
           poetry build
           pip3 install dist/schematicpy-1.0.0-py3-none-any.whl
 
-      - name: Set Configurations for Schematic
+      - name: Set Configurations
         shell: bash
         run: |
-          # write out configuration files using github secrets
+          echo "${{ secrets.SCHEMATIC_SYNAPSE_CONFIG }}" > config.yml
           echo "${{ secrets.SCHEMATIC_SYNAPSE_CONFIG }}" > .synapseConfig
           echo "${{ secrets.SCHEMATIC_SERVICE_ACCT_CREDS }}" > schematic_service_account_creds.json
           echo "${{ secrets.SCHEMATIC_CREDS_PATH }}" > credentials.json
           echo "${{ secrets.SCHEMATIC_TOKEN_PICKLE }}" | base64 -d > token.pickle
-
-          # TODO: retrieve version of schematic service once API is implemented   
-          echo 'SERVICE_VERSION='$(
-            curl -H "Accept: application/vnd.github.v3+json" \
-            https://api.github.com/repos/Sage-Bionetworks/schematic/releases/latest | \
-            jq -r ".tag_name"
-          ) >> $GITHUB_ENV
-
-      - name: Set Configurations for Data Model
-        run: |
           # retrieve data model repo information
           R -e '
-            config <- yaml::yaml.load_file("schematic_config.yml");
-            repo <- strsplit(config$model$input$repo, "/")[[1]];
-            repo_name <- file.path(repo[1], repo[2]);
-            path <- config$model$input$location;
-            system(sprintf("echo 'MODEL_REPO_NAME=%s' >> $GITHUB_ENV", repo_name));
-            system(sprintf("echo 'MODEL_PATH=%s' >> $GITHUB_ENV", path));
-            system("echo 'MODEL_REPO_BRANCH=main' >> $GITHUB_ENV");'
+            config <- yaml::yaml.load_file("config.yml");
+            system(sprintf("echo 'MODEL_REPO=%s' >> $GITHUB_ENV", config$model$input$repo));
+            system(sprintf("echo 'MODEL_PATH=%s' >> $GITHUB_ENV", config$model$input$location));
 
       - name: Clone Data Model
         shell: bash
         run: |
-          git clone -b ${{ env.MODEL_REPO_BRANCH }} https://github.com/${{ env.MODEL_REPO_NAME }}.git
-          # retrieve versions for data model
-          echo 'SCHEMA_VERSION='$(
-            curl -H "Accept: application/vnd.github.v3+json" \
-            https://api.github.com/repos/${{ env.MODEL_REPO_NAME }}/releases/latest | \
-            jq -r ".tag_name"
-          ) >> $GITHUB_ENV
+          git clone --single-branch --branch ${{ env.SCHEMA_BRANCH }} https://github.com/${{ env.SCHEMA_REPO }}.git
 
       - name: Create config.json
         shell: bash

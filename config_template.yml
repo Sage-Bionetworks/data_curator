@@ -6,25 +6,33 @@ definitions:
   service_acct_creds: "schematic_service_account_creds.json"
 
 synapse:
-  master_fileview: 'syn27210848'
+  master_fileview: 'syn23643253'
   manifest_folder: 'manifests'
   manifest_basename: 'synapse_storage_manifest'
   token_creds: 'syn23643259'
   service_acct_creds: 'syn25171627'
 
 manifest:
-  # if making many manifests, just include name prefix
-  title: 'example'
-  # to make all manifests enter only 'all manifests'
-  data_type: 
+  title: 'example' # if making many manifests, just include name prefix
+  data_type:  # to make all manifests enter only 'all manifests'
     - 'Biospecimen'
     - 'Patient'
 
 model:
   input:
-    download_url: 'https://raw.githubusercontent.com/mc2-center/data-models/main/csbc.model.jsonld' # url to download JSON-LD data model
-    location: 'schematic/tests/data/example.model.jsonld' # path to JSON-LD data mode
+    repo: 'Sage-Bionetworks/data-models' # repo of data model: {repo_owner}/{repo_name}
+    location: 'data-models/example.model.jsonld' # path to JSON-LD data mode from root
     file_type: 'local'
+
+app:
+  oauth:
+    client_id: '100126'
+    client_secrets: 'vw34nFSl1fpGaBC1iqpIuPxCnOg5xf99DC9FwWxqCOQ'
+    url:  'http://127.0.0.1:8100'
+  versions:
+    app_version: "v22.03.01",
+    service_version: "v0.1.0",
+    schema_version: "v0.1.0"
 
 style:
   google_manifest:
