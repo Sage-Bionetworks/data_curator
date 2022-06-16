@@ -61,6 +61,11 @@
       "type": "assay"
     },
     {
+      "display_name": "Imaging Level 1",
+      "schema_name": "ImagingLevel1",
+      "type": "assay"
+    },
+    {
       "display_name": "Imaging Level 2",
       "schema_name": "ImagingLevel2",
       "type": "assay"
@@ -73,6 +78,11 @@
     {
       "display_name": "Imaging Level 3 Image",
       "schema_name": "ImagingLevel3Image",
+      "type": "assay"
+    },
+    {
+      "display_name": "Imaging Level 4",
+      "schema_name": "ImagingLevel4",
       "type": "assay"
     },
     {
