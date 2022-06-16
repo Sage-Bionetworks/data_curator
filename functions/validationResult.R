@@ -1,9 +1,9 @@
 validationResult <- function(anno.res, template, manifest) {
   validation_res <- NULL
   error_msg <- NULL
-  help_msg <- NULL
-  out_msg <- NULL
+  error_help_msg <- NULL
   warning_msg <- NULL
+  error_help_msg <- NULL
   error_table <- NULL
   error_type <- NULL
   highlight_values <- list()
@@ -15,7 +15,7 @@ validationResult <- function(anno.res, template, manifest) {
   if (!is.null(manifest) && !is.null(template) && nrow(manifest) != 0) {
     # format the errors
     if (length(errors) != 0) {
-      validation_res <- "invalid"
+      result <- "invalid"
       # mismatched template index
       inx_mt <- which(sapply(errors, function(x) {
         grepl(
@@ -47,7 +47,7 @@ validationResult <- function(anno.res, template, manifest) {
           mismatch_c, "</b> >> in the Component column, but requested validation for << <b>",
           template, "</b> >>."
         )
-        help_msg <- paste0(
+        error_help_msg <- paste0(
           "Please check that you have selected the correct template in the <b>Select your Dataset</b> tab and
 									ensure your metadata contains <b>only</b> one template, e.g. ",
           template, "."
@@ -56,7 +56,7 @@ validationResult <- function(anno.res, template, manifest) {
         # wrong schema error(s): validating metadata miss any required columns
         error_type <- "Wrong Schema"
         error_msg <- "The submitted metadata does not contain all required column(s)."
-        help_msg <- "Please check that you used the correct template in the <b>'Get Metadata Template'</b> tab and
+        error_help_msg <- "Please check that you used the correct template in the <b>'Get Metadata Template'</b> tab and
 						ensure your metadata contains all required columns."
       } else {
         error_type <- "Invalid Value"
@@ -64,6 +64,7 @@ validationResult <- function(anno.res, template, manifest) {
           "The submitted metadata have ", length(errors),
           " errors."
         )
+        error_help_msg <- "View all the error(s) highlighted in the preview table above"
       }
 
       # create table to display errors for users
@@ -91,7 +92,7 @@ validationResult <- function(anno.res, template, manifest) {
       # sort rows based on input column names
       error_table <- error_table[order(match(error_table$Column, colnames(manifest))), ]
     } else {
-      validation_res <- "valid"
+      result <- "valid"
       error_type <- "No Error"
     }
 
@@ -105,20 +106,22 @@ validationResult <- function(anno.res, template, manifest) {
         highlight_values[[warn[2]]] <<- append(highlight_values[[warn[2]]], warn_values)
         warning_msg <<- append(warning_msg, warn[3])
       })
+      warning_help_msg <- "warning helper message"
     }
 
     # combine all error messages into one, add an extra empty line to bottom
-    out_msg <- paste0(c(
-      paste0("Your metadata is <b>", validation_res, "</b> !!!"),
-      error_msg, help_msg
-    ), collapse = "<br><br>")
-    out_msg2 <- paste0(warning_msg, collapse = "<br>")
+    # out_msg <- paste0(c(
+    #   paste0("Your metadata is <b>", validation_res, "</b> !!!"),
+    #   error_msg, help_msg
+    # ), collapse = "<br><br>")
   }
 
   return(list(
-    validationRes = validation_res,
-    outMsg = out_msg,
-    outMsg2 = out_msg2,
+    result = result,
+    error_msg = error_msg,
+    error_help_msg = error_help_msg,
+    warning_msg = warning_msg,
+    warning_help_msg = warning_help_msg,
     errorDT = error_table,
     errorHighlight = highlight_values,
     errorType = error_type
