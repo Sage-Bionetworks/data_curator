@@ -99,15 +99,28 @@ validationResult <- function(anno.res, template, manifest) {
     # format the warnings
     if (length(warns) != 0) {
       # add warning values to highlight
-      lapply(warns, function(warn) {
-        # extract the single quoted values from the warning string like "['value1', 'value2', ...]"
-        warn_values <- gsub("^[^']*'|'\\],?$", "", strsplit(warn[4], "'(?=,)", perl = TRUE)[[1]])
+      # return which warning needed to highlight entire column
+      columns <- sapply(warns, function(warn) {
+        # matchExactOne (set) will output NULL for values
+        # similar warnings in the same column should be concatenated from backend, like "['value1', 'value2', ...]"
+        # extract the single quoted values from the warning string
+        if (!is.null(warn[4])) warn_values <- gsub("^[^']*'|'\\],?$", "", strsplit(warn[4], "'(?=,)", perl = TRUE)[[1]])
         # append the values in case the column has multiple warnings or already has errors
         highlight_values[[warn[2]]] <<- append(highlight_values[[warn[2]]], warn_values)
         warning_msg <<- append(warning_msg, warn[3])
+
+        # if matchExactOne (set) warning exist, return column name
+        if (is.null(warn[4])) {
+          return(warn[2])
+        } else {
+          return(NULL)
+        }
       })
+      highlight_values[[columns]] <- NULL
       warning_help_msg <- "warning helper message"
     }
+
+
 
     # combine all error messages into one, add an extra empty line to bottom
     # out_msg <- paste0(c(
