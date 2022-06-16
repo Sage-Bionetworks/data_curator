@@ -66,8 +66,13 @@
       "type": "assay"
     },
     {
-      "display_name": "Imaging Level 3",
-      "schema_name": "ImagingLevel3",
+      "display_name": "Imaging Level 3 Segmentation",
+      "schema_name": "ImagingLevel3Segmentation",
+      "type": "assay"
+    },
+    {
+      "display_name": "Imaging Level 3 Image",
+      "schema_name": "ImagingLevel3Image",
       "type": "assay"
     },
     {
