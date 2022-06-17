@@ -289,28 +289,18 @@ shinyServer(function(input, output, session) {
         project_scope = list(project_synID)
       )
     )
-
+    # annotation_status <- metadata_model$validateModelManifest(
+    #   "~/Downloads/htan/invalid-value.csv",
+    #   "ScRNA-seqLevel1",
+    #   restrict_rules = TRUE, # set true to disable great expectation
+    #   project_scope = list("syn22124336")
+    # )
     # validation messages
     valRes <- validationResult(annotation_status, input$dropdown_template, inFile$data())
     ValidationMsgServer("text_validate", valRes, input$dropdown_template, inFile$data())
 
     # if there is a file uploaded
-    if (!is.null(valRes$validationRes)) {
-
-      # output error messages as data table if it is invalid value type
-      # render empty if error is not "invaid value" type - ifelse() will not work
-      # if (valRes$errorType == "Invalid Value") {
-      #   DTableServer("tbl_validate", valRes$errorDT,
-      #     rownames = FALSE, filter = "none",
-      #     caption = "View all the error(s) highlighted in the preview table above",
-      #     options = list(
-      #       pageLength = 50, scrollX = TRUE,
-      #       scrollY = min(50 * nrow(valRes$errorDT), 400), lengthChange = FALSE,
-      #       info = FALSE, searching = FALSE
-      #     )
-      #   )
-      #   show(NS("tbl_validate", "table"))
-      # }
+    if (!is.null(valRes$result)) {
 
       # highlight invalue cells in preview table
       if (valRes$errorType == "Wrong Schema") {
@@ -323,7 +313,7 @@ shinyServer(function(input, output, session) {
         )
       }
 
-      if (valRes$validationRes == "valid") {
+      if (valRes$result == "valid") {
         # show submit button
         output$submit <- renderUI(actionButton("btn_submit", "Submit to Synapse", class = "btn-primary-color"))
         dcWaiter("update", msg = paste0(valRes$errorType, " Found !!! "), spin = spin_inner_circles(), sleep = 2.5)

@@ -39,7 +39,7 @@ DTableServer <- function(id, data,
           for (col in names(highlightValues)) {
             values <- highlightValues[[col]]
             # if NULL is provided for values, it will highlight entire columns
-            if (is.null(values)) style <- "yellow" else style <- styleEqual(values, rep("yellow", length(values)))
+            if ("ht_entire_column" %in% values) style <- "yellow" else style <- styleEqual(values, rep("yellow", length(values)))
             df <- df %>% formatStyle(col, backgroundColor = style)
           }
         }

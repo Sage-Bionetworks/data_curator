@@ -70,7 +70,6 @@
 }
 
 #div_download,
-// #div_validate,
 #div_val_gsheet {
   font-size: 18px;
   background-color: white;
@@ -81,7 +80,10 @@
 // validation error/warning messages
 .validation-card {
   box-shadow: $simple_shadow;
-  margin: 12px 0;
+  margin: 24px 0 12px;
+  max-height: 224px;
+  overflow-x: hidden;
+  overflow-y: scroll;
 
   .validation-card-header {
     display: flex;
@@ -105,14 +107,13 @@
     }
   }
 
-  .validation-card-content {
-    max-height: 224px;
-    overflow-y: scroll;
+  .validation-card-help-msg {
+    padding: 10px 8px 5px;
   }
 
   .validation-card-msg {
-    margin: 10px 0;
-    padding: 6px 0;
+    margin: 18px 0;
+    padding: 10px;
     box-shadow: $simple_shadow;
 
     &.error {
