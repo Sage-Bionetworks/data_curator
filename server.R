@@ -201,7 +201,7 @@ shinyServer(function(input, output, session) {
     }
   })
 
-  # display warning message if folder is empty and data type is assay
+  # display warning message if folder is empty and data type is file-based
   observeEvent(c(folder_synID(), template_schema_name()), {
 
     # hide tags when users select new template
@@ -210,7 +210,7 @@ shinyServer(function(input, output, session) {
     req(input$tabs == "tab_template")
     hide("div_template_warn")
 
-    req(length(datatype_list$files) == 0 & template_type == "assay")
+    req(length(datatype_list$files) == 0 & template_type == "file")
     warn_text <- paste0(
       strong(sQuote(input$dropdown_folder)), " folder is empty,
        please upload your data before generating manifest.",
@@ -234,7 +234,7 @@ shinyServer(function(input, output, session) {
     manifest_url <-
       metadata_model$getModelManifest(paste0(config$community, " ", input$dropdown_template),
         template_schema_name(),
-        filenames = switch((template_type == "assay") + 1,
+        filenames = switch((template_type == "file") + 1,
           NULL,
           as.list(names(datatype_list$files))
         ),
@@ -368,14 +368,14 @@ shinyServer(function(input, output, session) {
     # reads file csv again
     submit_data <- csvInfileServer("inputFile")$data()
 
-    # If an assay component selected (define assay components) note for future
-    # the type to filter (eg assay) on could probably also be a config choice
-    assay_schemas <- config$manifest_schemas$display_name[config$manifest_schemas$type == "assay"]
+    # If a file-based component selected (define file-based components) note for future
+    # the type to filter (eg file-based) on could probably also be a config choice
+    display_names <- config$manifest_schemas$display_name[config$manifest_schemas$type == "file"]
     # if folder_ID has not been updated yet
     if (folder_synID() == "") folder_synID(datatype_list$folders[[input$dropdown_folder]])
 
-    if (input$dropdown_template %in% assay_schemas) {
-      # make into a csv or table for assay components already has entityId
+    if (input$dropdown_template %in% display_names) {
+      # make into a csv or table for file-based components already has entityId
       if ("entityId" %in% colnames(submit_data)) {
         write.csv(submit_data,
           file = "./tmp/synapse_storage_manifest.csv",
@@ -403,7 +403,7 @@ shinyServer(function(input, output, session) {
         synStore_obj,
         "./tmp/synapse_storage_manifest.csv",
         folder_synID(),
-        manifest_record_type = "entity"
+        manifest_record_type = "table"
       )
       manifest_path <- tags$a(href = paste0("https://www.synapse.org/#!Synapse:", manifest_id), manifest_id, target = "_blank")
 
@@ -427,7 +427,7 @@ shinyServer(function(input, output, session) {
         )), sleep = 3)
       }
     } else {
-      # if not assay type tempalte
+      # if not file-based type template
       write.csv(submit_data,
         file = "./tmp/synapse_storage_manifest.csv", quote = TRUE,
         row.names = FALSE, na = ""
@@ -438,7 +438,7 @@ shinyServer(function(input, output, session) {
         synStore_obj,
         "./tmp/synapse_storage_manifest.csv",
         folder_synID(),
-        manifest_record_type = "entity"
+        manifest_record_type = "table"
       )
       manifest_path <- tags$a(href = paste0("https://www.synapse.org/#!Synapse:", manifest_id), manifest_id, target = "_blank")
 

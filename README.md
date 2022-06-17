@@ -55,7 +55,7 @@ Use the app configuration file `www/config.json` to adapt this app to your DCC.
 - `manifest schemas`: defines the list of schemas displayed under the "Choose a Metadata Template Type:" dropdown in the application.
   - `display_name` : The display name for the dropdown. (e.g. _scRNA-seq Level 1_)
   - `schema_name`: The name of the manifest in the JSON-LD schema (e.g. _ScRNA-seqLevel1_)
-  - `type`: The type of manifest. As currently configured in `app.R`, will only display manifests of type _assay_.
+  - `type`: The type of manifest. Either _file (e.g. scRNAseq-level1)_ or _record (e.g. biosepcimen and clinical data)_.
 - `community` (optional): The abbreviated name of the community or project. (e.g. _HTAN_)
 - `schema` (optional): The version of data model
 - `schematic_service` (optional): The version of schematic service
