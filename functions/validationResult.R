@@ -28,6 +28,14 @@ validationResult <- function(anno.res, template, manifest) {
         )
       }))
 
+      # cross-validation error index
+      inx_cv <- which(sapply(errors, function(x) {
+        grepl(
+          "placeholder",
+          x[[3]]
+        )
+      }))
+
       if (length(inx_mt) > 0) {
         # mismatched error(s): selected template mismatched with validating template
         error_type <- "Mismatched Template"
@@ -55,6 +63,11 @@ validationResult <- function(anno.res, template, manifest) {
         error_msg <- "The submitted metadata does not contain all required column(s)."
         help_msg <- "Please check that you used the correct template in the <b>'Get Metadata Template'</b> tab and
 						ensure your metadata contains all required columns."
+      } else if (length(inx_cv) > 0) {
+        # cross-manifest errors: not pass the cross-manifest validation rules
+        error_type <- ""
+        error_msg <- ""
+        help_msg <- ""
       } else {
         error_type <- "Invalid Value"
         error_msg <- paste0(
