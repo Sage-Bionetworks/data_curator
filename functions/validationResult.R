@@ -65,7 +65,7 @@ validationResult <- function(anno.res, template, manifest) {
 
       # create table to display errors for users
       error_table <- lapply(errors, function(i) {
-        data.frame(Row = as.numeric(i[[1]]), Column = i[[2]], Value = i[[4]][[1]], Error = i[[3]])
+        data.frame(Row = as.numeric(i[[1]]), Column = as.character(i[[2]]), Value = i[[4]][[1]], Error = i[[3]])
       }) %>% bind_rows()
 
       # create list for hightlight function; key: error_column, value: error_value
