@@ -1,5 +1,5 @@
 validationResult <- function(anno.res, template, manifest) {
-  validation_res <- NULL
+  result <- "invalid"
   error_msg <- NULL
   error_help_msg <- NULL
   warning_msg <- NULL
@@ -8,14 +8,17 @@ validationResult <- function(anno.res, template, manifest) {
   error_type <- NULL
   highlight_values <- list()
 
-  # get erorrs only for now, [[2]] is warning
-  errors <- anno.res[[1]]
-  warns <- anno.res[[2]]
+  if (!is.null(anno.res)) {
+    errors <- anno.res[[1]]
+    warns <- anno.res[[2]]
+  } else {
+    # in case there are some errors we haven't captured
+    error_msg <- "Something went wrong while validating your manifest. Please contact administrator."
+  }
 
-  if (!is.null(manifest) && !is.null(template) && nrow(manifest) != 0) {
+  if (!is.null(manifest) && nrow(manifest) != 0) {
     # format the errors
     if (length(errors) != 0) {
-      result <- "invalid"
       # mismatched template index
       inx_mt <- which(sapply(errors, function(x) {
         grepl(
@@ -97,33 +100,36 @@ validationResult <- function(anno.res, template, manifest) {
     if (length(warns) != 0) {
       # add warning values to highlight
       # return which warning needed to highlight entire column
-      is_ht_col <- sapply(warns, function(warn) {
+      lapply(warns, function(warn) {
         # matchExactOne (set) will output NULL for values
         # similar warnings in the same column should be concatenated from backend, like "['value1', 'value2', ...]"
         # extract the single quoted values from the warning string
-        if (!is.null(warn[4])) {
-          warn_values <- gsub("^[^']*'|'\\],?$", "", strsplit(warn[4], "'(?=,)", perl = TRUE)[[1]])
+        if (!is.null(warn[[4]])) {
+          warn_values <- gsub("^[^']*'|'\\],?$", "", strsplit(warn[[4]], "'(?=,)", perl = TRUE)[[1]])
         } else {
           # if matchExactOne (set) warning exist, highlight entire column
           warn_values <- "ht_entire_column"
         }
         # append the values in case the column has multiple warnings or already has errors
-        highlight_values[[warn[2]]] <<- append(highlight_values[[warn[2]]], warn_values)
-        warning_msg <<- append(warning_msg, warn[3])
+        highlight_values[[warn[[2]]]] <<- append(highlight_values[[warn[[2]]]], warn_values)
+        warning_msg <<- append(warning_msg, warn[[3]])
       })
 
       warning_help_msg <- "View all the warning(s) highlighted in the preview table above"
     }
+  } else {
+    # if no uploaded manifest or empty manifest
+    error_type <- "Empty File"
+    error_msg <- "Please <b>upload</b> a filled template !"
   }
 
   return(list(
     result = result,
     error_msg = error_msg,
     error_help_msg = error_help_msg,
+    error_type = error_type,
     warning_msg = warning_msg,
     warning_help_msg = warning_help_msg,
-    errorDT = error_table,
-    errorHighlight = highlight_values,
-    errorType = error_type
+    preview_highlight = highlight_values
   ))
 }
