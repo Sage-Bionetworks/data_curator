@@ -1,19 +1,18 @@
 {
   "manifest_schemas": [
-      {"display_name": "Tool View", "schema_name": "ToolView", "type": "record"},
-      {"display_name": "Publication View", "schema_name": "PublicationView", "type": "record"},
-      {"display_name": "Dataset View", "schema_name": "DatasetView", "type": "record"},
-      {"display_name": "Person View", "schema_name": "PersonView", "type": "record"},
-      {"display_name": "Consortium", "schema_name": "Consortium", "type": "record"},
-      {"display_name": "Consortium Grant", "schema_name": "ConsortiumGrant", "type": "record"},
-      {"display_name": "Grant", "schema_name": "Grant", "type": "record"},
-      {"display_name": "Project", "schema_name": "Project", "type": "record"},
-      {"display_name": "Theme", "schema_name": "Theme", "type": "record"},
-      {"display_name": "ThemeGrant", "schema_name": "ThemeGrant", "type": "record"},
-      {"display_name": "Institution", "schema_name": "Institution", "type": "record"},
-      {"display_name": "InstitutionGrant", "schema_name": "InstitutionGrant", "type": "record"}
+    {
+      "display_name": "Bulk RNA-seq Assay",
+      "schema_name": "BulkRNA-seqAssay",
+      "type": "file"
+    },
+    { "display_name": "Patient", "schema_name": "Patient", "type": "record" },
+    {
+      "display_name": "Biospecimen Tier 1 & 2",
+      "schema_name": "Biospecimen",
+      "type": "record"
+    }
   ],
-  "community": "MC2",
+  "community": "Example",
   "schema": "v0.1.0",
   "schematic_service": "v1"
 }

@@ -91,10 +91,10 @@ jobs:
           # if there is a tag, 'refName' will be tag name
           refName <- Sys.getenv("GITHUB_REF_NAME")
           repo <- Sys.getenv("GITHUB_REPOSITORY")
-          appName <- paste("csbc", strsplit(repo, "/")[[1]][2], sep = "_")
+          appName <- strsplit(repo, "/")[[1]][2]
           # if tag is v*.*.*, deploy to prod, otherwise to staging
           if (!grepl("v[0-9]+.[0-9]+.[0-9]+", refName)) {
-            appName <- paste(appName, "staging", sep = "_")
+            appName <- paste(appName, "staging", sep = "-")
           }
           rsConnectUser <- "${{ secrets.RSCONNECT_USER }}"
           rsConnectToken <- "${{ secrets.RSCONNECT_TOKEN }}"
