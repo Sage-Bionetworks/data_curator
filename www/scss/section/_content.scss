@@ -70,10 +70,63 @@
 }
 
 #div_download,
-#div_validate,
 #div_val_gsheet {
   font-size: 18px;
   background-color: white;
   margin: 10px 0;
   padding: 10px 0;
+}
+
+// validation error/warning messages
+.validation-card {
+  box-shadow: $simple_shadow;
+  margin: 24px 0 12px;
+  max-height: 224px;
+  overflow-x: hidden;
+  overflow-y: scroll;
+
+  .validation-card-header {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    font-weight: 600;
+
+    i {
+      font-size: 2em;
+      margin-right: 10px;
+    }
+
+    &.error {
+      background-color: rgba(pink, 0.8);
+      color: $error_col;
+    }
+
+    &.warning {
+      background-color: rgba(peachpuff, 0.8);
+      color: $warning_col;
+    }
+  }
+
+  .validation-card-help-msg {
+    padding: 10px 8px 5px;
+  }
+
+  .validation-card-msg {
+    margin: 18px 0;
+    padding: 10px;
+    box-shadow: $simple_shadow;
+
+    &.error {
+      border-left: 4px solid $error_col;
+    }
+
+    &.warning {
+      border-left: 4px solid $warning_col;
+    }
+
+    span {
+      position: relative;
+      left: 6px;
+    }
+  }
 }

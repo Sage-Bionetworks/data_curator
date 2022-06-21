@@ -3,7 +3,7 @@
 #' @param synStoreObj synapse storage object.
 #' @param datasets a list of folder syn Ids, named by folder names
 #' @return data frame that contains manifest essential information for dashboard
-getManifests <- function(synStoreObj, datasets) {
+getManifests <- function(synStoreObj, datasets, selectedProject) {
   all_files <- synStoreObj$storageFileviewTable
   # only uses the file named as 'synapse_storage_manifest.csv'
   all_files <- all_files[all_files$name == "synapse_storage_manifest.csv", ]
@@ -19,40 +19,37 @@ getManifests <- function(synStoreObj, datasets) {
       # extract manifest essential information for dashboard
       manifest_path <- manifest["path"]
       manifest_df <- data.table::fread(manifest_path)
-      mofified_user <- syn$getUserProfile(manifest["properties"]["modifiedBy"])["userName"]
+      modified_user <- syn$getUserProfile(manifest["properties"]["modifiedBy"])["userName"]
 
       if ("Component" %in% colnames(manifest_df) & nrow(manifest_df) > 0) {
         manifest_component <- manifest_df[["Component"]][1]
 
         # validate manifest, if no error, output is list()
         # TODO: check with backend - ValueError: c("LungCancerTier3", "BreastCancerTier3", "ScRNA-seqAssay", "MolecularTest", "NaN", "") ...
-        val_res <- tryCatch(
+        annotation_status <- tryCatch(
           metadata_model$validateModelManifest(
             manifest_path,
             manifest_component,
-            restrict_rules = TRUE
+            restrict_rules = TRUE,
+            project_scope = list(selectedProject)
           ),
-          error = function(err) "Out of Date"
+          error = function(err) NULL
         )
-
         # clean validation res from schematic
-        if (is.list(val_res)) {
-          res <- validationResult(val_res, manifest_component, manifest_df)
-        } else {
-          res <- list(validationRes = "invalid", errorType = val_res)
-        }
+        res <- validationResult(annotation_status, manifest_component, manifest_df)
 
         df <- tibble(
           synID = manifest["properties"]["id"],
           schema = manifest_component,
           createdOn = as.Date(manifest["properties"]["createdOn"]),
           modifiedOn = as.Date(manifest["properties"]["modifiedOn"]),
-          modifiedUser = paste0("@", mofified_user),
+          modifiedUser = paste0("@", modified_user),
           path = manifest_path,
           folder = names(datasets)[which(datasets == id)],
           folderSynId = as.character(id),
-          isValid = ifelse(res$validationRes == "valid", TRUE, FALSE),
-          errorType = res$errorType
+          result = res$result,
+          errorType = res$error_type,
+          warnMsg = ifelse(is.null(res$warning_msg), "Valid", res$warning_msg)
         ) %>%
           filter(schema != "" & schema != "NaN") # in case empty rows
       }

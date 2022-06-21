@@ -27,11 +27,12 @@ shinyServer(function(input, output, session) {
 
   ######## session global variables ########
   # read config in
-  config <- as.data.frame(jsonlite::fromJSON("www/config.json")[[1]])
-
+  config_file <- jsonlite::fromJSON("www/config.json")
+  config_schemas <- as.data.frame(config_file[[1]])
+  config_project <- config_file[-1]
   # mapping from display name to schema name
-  template_namedList <- config$schema_name
-  names(template_namedList) <- config$display_name
+  template_namedList <- config_schemas$schema_name
+  names(template_namedList) <- config_schemas$display_name
 
   synStore_obj <- NULL # gets list of projects they have access to
   user_name <- NULL # user name
@@ -176,7 +177,7 @@ shinyServer(function(input, output, session) {
   # update selected schema template name
   observeEvent(input$dropdown_template, {
     template_schema_name(template_namedList[match(input$dropdown_template, names(template_namedList))])
-    template_type <<- config$type[match(template_schema_name(), template_namedList)]
+    template_type <<- config_schemas$type[match(template_schema_name(), template_namedList)]
   })
 
   ######## Dashboard ########
@@ -187,6 +188,7 @@ shinyServer(function(input, output, session) {
     folderList = data_list$folders,
     selectedDataType = template_schema_name,
     userName = user_name,
+    config = config_project,
     disableIds = c("box_pick_project", "box_pick_manifest")
   )
 
@@ -219,7 +221,7 @@ shinyServer(function(input, output, session) {
 
     req(input$tabs == "tab_template")
     hide("div_template_warn")
-    req(length(datatype_list$files) == 0 & template_type == "file")
+    req(length(data_list$files) == 0 & template_type == "file")
     warn_text <- paste0(
       strong(sQuote(input$dropdown_folder)), " folder is empty,
        please upload your data before generating manifest.",
@@ -241,7 +243,7 @@ shinyServer(function(input, output, session) {
     dcWaiter("show", msg = "Generating link...")
 
     manifest_url <-
-      metadata_model$getModelManifest(paste0(config$community, " ", input$dropdown_template),
+      metadata_model$getModelManifest(paste0(config_project$community, " ", input$dropdown_template),
         template_schema_name(),
         filenames = switch((template_type == "file") + 1,
           NULL,
@@ -289,57 +291,44 @@ shinyServer(function(input, output, session) {
     # loading screen for validating metadata
     dcWaiter("show", msg = "Validating...")
 
-    try(
-      silent = TRUE,
-      annotation_status <- metadata_model$validateModelManifest(
-        inFile$raw()$datapath,
-        template_schema_name(),
-        restrict_rules = TRUE # set true to disable great expectation
+    annotation_status <-
+      tryCatch(
+        metadata_model$validateModelManifest(
+          inFile$raw()$datapath,
+          template_schema_name(),
+          restrict_rules = TRUE, # set true to disable great expectation
+          project_scope = list(project_synID)
+        ),
+        error = function(e) NULL
       )
-    )
 
     # validation messages
-    valRes <- validationResult(annotation_status, input$dropdown_template, inFile$data())
-    ValidationMsgServer("text_validate", valRes, input$dropdown_template, inFile$data())
+    validation_res <- validationResult(annotation_status, input$dropdown_template, inFile$data())
+    ValidationMsgServer("text_validate", validation_res)
 
     # if there is a file uploaded
-    if (!is.null(valRes$validationRes)) {
-
-      # output error messages as data table if it is invalid value type
-      # render empty if error is not "invaid value" type - ifelse() will not work
-      if (valRes$errorType == "Invalid Value") {
-        DTableServer("tbl_validate", valRes$errorDT,
-          rownames = FALSE,
-          caption = "View all the error(s) highlighted in the preview table above",
-          options = list(
-            pageLength = 50, scrollX = TRUE,
-            scrollY = min(50 * nrow(valRes$errorDT), 400), lengthChange = FALSE,
-            info = FALSE, searching = FALSE
-          )
-        )
-        show(NS("tbl_validate", "table"))
-      }
+    if (!is.null(validation_res$result)) {
 
       # highlight invalue cells in preview table
-      if (valRes$errorType == "Wrong Schema") {
+      if (validation_res$error_type == "Wrong Schema") {
         DTableServer("tbl_preview", data = inFile$data(), highlight = "full")
       } else {
         DTableServer(
           "tbl_preview",
           data = inFile$data(),
-          highlight = "partial", highlightValues = valRes$errorHighlight
+          highlight = "partial", highlightValues = validation_res$preview_highlight
         )
       }
 
-      if (valRes$validationRes == "valid") {
+      if (validation_res$result == "valid") {
         # show submit button
         output$submit <- renderUI(actionButton("btn_submit", "Submit to Synapse", class = "btn-primary-color"))
-        dcWaiter("update", msg = paste0(valRes$errorType, " Found !!! "), spin = spin_inner_circles(), sleep = 2.5)
+        dcWaiter("update", msg = paste0(validation_res$error_type, " Found !!! "), spin = spin_inner_circles(), sleep = 2.5)
       } else {
         output$val_gsheet <- renderUI(
           actionButton("btn_val_gsheet", "  Generate Google Sheet Link", icon = icon("table"), class = "btn-primary-color")
         )
-        dcWaiter("update", msg = paste0(valRes$errorType, " Found !!! "), spin = spin_pulsar(), sleep = 2.5)
+        dcWaiter("update", msg = paste0(validation_res$error_type, " Found !!! "), spin = spin_pulsar(), sleep = 2.5)
       }
     } else {
       dcWaiter("hide")
@@ -354,7 +343,7 @@ shinyServer(function(input, output, session) {
     dcWaiter("show", msg = "Generating link...")
 
     filled_manifest <- metadata_model$populateModelManifest(paste0(
-      config$community,
+      config_project$community,
       " ", input$dropdown_template
     ), inFile$raw()$datapath, template_schema_name())
 
@@ -379,7 +368,7 @@ shinyServer(function(input, output, session) {
 
     # If a file-based component selected (define file-based components) note for future
     # the type to filter (eg file-based) on could probably also be a config choice
-    display_names <- config$manifest_schemas$display_name[config$manifest_schemas$type == "file"]
+    display_names <- config_schemas$manifest_schemas$display_name[config_schemas$manifest_schemas$type == "file"]
     # if folder_ID has not been updated yet
     if (folder_synID() == "") folder_synID(data_list$folders()[[input$dropdown_folder]])
 
