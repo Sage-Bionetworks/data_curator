@@ -4,7 +4,7 @@ context("test schematic rest api wrappers")
 ### schematic server URL https://github.com/Sage-Bionetworks/schematic/tree/develop/api
 ### If not available, skip these tests.
 
-schem_url <- "http://127.0.0.1:3001/"
+schem_url <- "http://0.0.0.0:3001/"
 ping <- try(httr::GET(schem_url), silent = TRUE)
 skip_it <- function(skip=ping) {
   if (inherits(ping, "try-error")) skip(sprintf("schematic server URL unavailable (%s). Is it running locally?", schem_url)) #nolint
@@ -91,6 +91,8 @@ test_that("manifest_download returns a csv.", {
 })
 
 test_that("get_asset_view_table returns asset view table", {
-  get_asset_view_table(input_token = Sys.getenv("SYNAPSE_PAT"),
+  av <- get_asset_view_table(input_token = Sys.getenv("SYNAPSE_PAT"),
                        asset_view="syn23643253")
+  storage_tbl <- subset(av, av$name == "synapse_storage_manifest.csv")
+  expect_true(inherits(av, "data.frame"), "name" %in% names(av))
 })
