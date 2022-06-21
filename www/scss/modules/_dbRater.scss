@@ -1,0 +1,31 @@
+.dbRater-box {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-evenly;
+  background-color: rgba(96, 92, 168, 0.6);
+  color: #fff;
+  padding: 24px 8px;
+  box-shadow: $primary_shadow;
+  border-radius: 8px;
+  min-height: 200px;
+
+  .fa-medal {
+    padding: 10px;
+    border-radius: 50%;
+    background-color: #fff;
+    outline: 3px solid #d6af36;
+  }
+
+  .progress-group {
+    margin: 16px 0;
+
+    .progress-circular-inner {
+      background-color: rgba(96, 92, 168, 0.6);
+
+      .progress-pct {
+        color: #fff;
+      }
+    }
+  }
+}

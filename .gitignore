@@ -15,6 +15,7 @@ schematic/
 **/token.pickle
 **/.synapseConfig
 **/__pycache__
+files/*
 oauth_config.yml
 schematic_config.yml
 .project
