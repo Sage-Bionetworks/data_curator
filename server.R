@@ -25,11 +25,8 @@ shinyServer(function(input, output, session) {
   session$userData$access_token <- access_token
 
   ######## session global variables ########
-  #source_python("functions/synapse_func_alias.py")
-  #source_python("functions/metadata_model.py")
   source("R/schematic_rest_api.R")
   # import module that contains SynapseStorage class
-  #synapse_driver <- import("schematic.store.synapse")$SynapseStorage
   # read config in
   config <- fromJSON("www/config.json")
   schematic_config <- yaml.load_file("schematic_config.yml")
@@ -74,20 +71,11 @@ shinyServer(function(input, output, session) {
     #
     access_token <- session$userData$access_token
 
-    #syn_login(authToken = access_token, rememberMe = FALSE)
-
     # updating syn storage
-    #tryCatch(synStore_obj <<- synapse_driver(access_token = access_token), error = function(e) NULL)
-3
-#    if (is.null(synStore_obj)) {
-#      message("'synapse_driver' fails, run 'synapse_driver' to see detailed error")
-#      dcWaiter("update", landing = TRUE, isPermission = FALSE)
-#    } else {
-      #projects_list <- synapse_driver$getStorageProjects(synStore_obj)
-      projects_list <- storage_projects(url=file.path(api_uri, "v1/storage/projects"),
+    projects_list <- storage_projects(url=file.path(api_uri, "v1/storage/projects"),
                                         asset_view = folder_synID(),
                                         input_token = access_token)
-      datatype_list$projects <<- list2Vector(projects_list)
+    datatype_list$projects <<- list2Vector(projects_list)
 
       # updates project dropdown
       lapply(c("header_dropdown_", "dropdown_"), function(x) {
@@ -98,17 +86,14 @@ shinyServer(function(input, output, session) {
         })
       })
 
-      #user_name <- syn_getUserProfile()$userName
       user_name <- synapse_user_profile(auth=access_token)[["userName"]]
 
-      #if (!syn_is_certified(user_name)) {
       if (!synapse_is_certified(auth = access_token)) {
         dcWaiter("update", landing = TRUE, isCertified = FALSE)
       } else {
         # update waiter loading screen once login successful
         dcWaiter("update", landing = TRUE, userName = user_name)
       }
-#    }
   })
 
   ######## Arrow Button ########
@@ -163,7 +148,6 @@ shinyServer(function(input, output, session) {
       projectID <- datatype_list$projects[[input[[paste0(x, "project")]]]]
 
       # gets folders per project
-      #folder_list <- synapse_driver$getStorageDatasetsInProject(synStore_obj, projectID) %>% list2Vector()
       folder_list <- storage_project_datasets(url=file.path(api_uri, "v1/storage/project/datasets"),
                                               asset_view = folder_synID(),
                                               project_id=projectID,
@@ -203,10 +187,6 @@ shinyServer(function(input, output, session) {
     if (input$tabs == "tab_template") {
       dcWaiter("show", msg = paste0("Getting files in ", input$dropdown_folder, "..."))
       # get file list in selected folder
-      # file_list <- synapse_driver$getFilesInStorageDataset(
-      #   synStore_obj,
-      #   folder_synID()
-      # )
       file_list <- storage_dataset_files(url=file.path(api_uri, "v1/storage/dataset/files"),
                                          asset_view = master_fileview,
                             dataset_id = folder_synID(),
@@ -249,16 +229,6 @@ shinyServer(function(input, output, session) {
 
     # loading screen for template link generation
     dcWaiter("show", msg = "Generating link...")
-
-    # manifest_url <-
-    #   metadata_model$getModelManifest(paste0(config$community, " ", input$dropdown_template),
-    #     template_schema_name(),
-    #     filenames = switch((template_type == "assay") + 1,
-    #       NULL,
-    #       as.list(names(datatype_list$files))
-    #     ),
-    #     datasetId = folder_synID()
-    #   )
     
     #schematic rest api to generate manifest
     manifest_url <- manifest_generate(url=file.path(api_uri, "v1/manifest/generate"),
@@ -304,14 +274,6 @@ shinyServer(function(input, output, session) {
     # loading screen for validating metadata
     dcWaiter("show", msg = "Validating...")
 
-    # try(
-    #   silent = TRUE,
-    #   annotation_status <- metadata_model$validateModelManifest(
-    #     inFile$raw()$datapath,
-    #     template_schema_name()
-    #   )
-    # )
-    
     # schematic rest api to validate metadata
     annotation_status <- manifest_validate(url=file.path(api_uri, "v1/model/validate"),
                                            data_type=template_schema_name(),
@@ -372,10 +334,6 @@ shinyServer(function(input, output, session) {
     # loading screen for Google link generation
     dcWaiter("show", msg = "Generating link...")
     
-    # filled_manifest <- metadata_model$populateModelManifest(paste0(
-    #   config$community,
-    #   " ", input$dropdown_template
-    # ), inFile$raw()$datapath, template_schema_name())
     filled_manifest <- manifest_generate(url=file.path(api_uri, "v1/manifest/generate"),
                                          data_type=paste0(config$community,
       " ", input$dropdown_template),
@@ -415,7 +373,6 @@ shinyServer(function(input, output, session) {
           quote = TRUE, row.names = FALSE, na = ""
         )
       } else {
-        #file_list <- synapse_driver$getFilesInStorageDataset(synStore_obj, folder_synID())
         file_list <- storage_dataset_files(url=file.path(api_uri, "v1/storage/dataset/files"),
                                            asset_view = project_synID,
                                             dataset_id = folder_synID(),
@@ -451,10 +408,6 @@ shinyServer(function(input, output, session) {
       # Handle validation error results
       #
       # associates metadata with data and returns manifest id
-      # manifest_id <- synapse_driver$associateMetadataWithFiles(
-      #   synStore_obj,
-      #   "./tmp/synapse_storage_manifest.csv", folder_synID()
-      # )
       manifest_path <- tags$a(href = paste0("synapse.org/#!Synapse:", manifest_id), manifest_id, target = "_blank")
   
       # if no error
@@ -481,11 +434,6 @@ shinyServer(function(input, output, session) {
       )
 
       # associates metadata with data and returns manifest id
-      # manifest_id <- synapse_driver$associateMetadataWithFiles(
-      #   synStore_obj,
-      #   "./tmp/synapse_storage_manifest.csv", folder_synID()
-      # )
-      
       manifest_id <- model_validate(url=file.path(api_uri, "v1/model/validate"),
                                     data_type=template_schema_name(),
                                     dataset_id=folder_synID(),
