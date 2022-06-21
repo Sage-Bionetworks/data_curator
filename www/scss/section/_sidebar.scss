@@ -15,14 +15,13 @@
 
 		//icon color
 		.fa {
-			color: $sidebar_pink;
+			color: $sidebar_blue;
 			transition: 100ms;
 		}
 
 		// add background img - synapse logo
 		&:before {
 			content: '';
-			background-image: url('https://www.synapse.org/images/logo.svg');
 			background-repeat: no-repeat;
 			position: absolute;
 			height: 260px;
