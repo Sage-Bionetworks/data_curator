@@ -173,6 +173,7 @@ shinyServer(function(input, output, session) {
   # update selected schema template name
   observeEvent(input$dropdown_template, {
     template_schema_name(template_namedList[match(input$dropdown_template, names(template_namedList))])
+    template_type <<- config$manifest_schemas$type[match(template_schema_name(), template_namedList)]
   })
 
   ######## Template Google Sheet Link ########
@@ -200,7 +201,7 @@ shinyServer(function(input, output, session) {
     }
   })
 
-  # display warning message if folder is empty and data type is assay
+  # display warning message if folder is empty and data type is file-based
   observeEvent(c(folder_synID(), template_schema_name()), {
 
     # hide tags when users select new template
@@ -208,8 +209,8 @@ shinyServer(function(input, output, session) {
 
     req(input$tabs == "tab_template")
     hide("div_template_warn")
-    template_type <<- config$manifest_schemas$type[match(template_schema_name(), template_namedList)]
-    req(length(datatype_list$files) == 0 & template_type == "assay")
+
+    req(length(datatype_list$files) == 0 & template_type == "file")
     warn_text <- paste0(
       strong(sQuote(input$dropdown_folder)), " folder is empty,
        please upload your data before generating manifest.",
@@ -280,47 +281,32 @@ shinyServer(function(input, output, session) {
                            csv_file=inFile$raw()$datapath)
 
     # validation messages
-    valRes <- validationResult(annotation_status, input$dropdown_template, inFile$data())
-    ValidationMsgServer("text_validate", valRes, input$dropdown_template, inFile$data())
+    validation_res <- validationResult(annotation_status, input$dropdown_template, inFile$data())
+    ValidationMsgServer("text_validate", validation_res)
 
     # if there is a file uploaded
-    if (!is.null(valRes$validationRes)) {
-
-      # output error messages as data table if it is invalid value type
-      # render empty if error is not "invaid value" type - ifelse() will not work
-      if (valRes$errorType == "Invalid Value") {
-        DTableServer("tbl_validate", valRes$errorDT,
-          rownames = FALSE, filter = "none",
-          caption = "View all the error(s) highlighted in the preview table above",
-          options = list(
-            pageLength = 50, scrollX = TRUE,
-            scrollY = min(50 * nrow(valRes$errorDT), 400), lengthChange = FALSE,
-            info = FALSE, searching = FALSE
-          )
-        )
-        show(NS("tbl_validate", "table"))
-      }
+    if (!is.null(validation_res$result)) {
 
       # highlight invalue cells in preview table
-      if (valRes$errorType == "Wrong Schema") {
+      if (validation_res$error_type == "Wrong Schema") {
         DTableServer("tbl_preview", data = inFile$data(), highlight = "full")
       } else {
         DTableServer(
           "tbl_preview",
           data = inFile$data(),
-          highlight = "partial", highlightValues = valRes$errorHighlight
+          highlight = "partial", highlightValues = validation_res$preview_highlight
         )
       }
 
-      if (valRes$validationRes == "valid") {
+      if (validation_res$result == "valid") {
         # show submit button
         output$submit <- renderUI(actionButton("btn_submit", "Submit to Synapse", class = "btn-primary-color"))
-        dcWaiter("update", msg = paste0(valRes$errorType, " Found !!! "), spin = spin_inner_circles(), sleep = 2.5)
+        dcWaiter("update", msg = paste0(validation_res$error_type, " Found !!! "), spin = spin_inner_circles(), sleep = 2.5)
       } else {
         output$val_gsheet <- renderUI(
           actionButton("btn_val_gsheet", "  Generate Google Sheet Link", icon = icon("table"), class = "btn-primary-color")
         )
-        dcWaiter("update", msg = paste0(valRes$errorType, " Found !!! "), spin = spin_pulsar(), sleep = 2.5)
+        dcWaiter("update", msg = paste0(validation_res$error_type, " Found !!! "), spin = spin_pulsar(), sleep = 2.5)
       }
     } else {
       dcWaiter("hide")
@@ -359,14 +345,14 @@ shinyServer(function(input, output, session) {
     # reads file csv again
     submit_data <- csvInfileServer("inputFile")$data()
 
-    # If an assay component selected (define assay components) note for future
-    # the type to filter (eg assay) on could probably also be a config choice
-    assay_schemas <- config$manifest_schemas$display_name[config$manifest_schemas$type == "assay"]
+    # If a file-based component selected (define file-based components) note for future
+    # the type to filter (eg file-based) on could probably also be a config choice
+    display_names <- config$manifest_schemas$display_name[config$manifest_schemas$type == "file"]
     # if folder_ID has not been updated yet
     if (folder_synID() == "") folder_synID(datatype_list$folders[[input$dropdown_folder]])
 
-    if (input$dropdown_template %in% assay_schemas) {
-      # make into a csv or table for assay components already has entityId
+    if (input$dropdown_template %in% display_names) {
+      # make into a csv or table for file-based components already has entityId
       if ("entityId" %in% colnames(submit_data)) {
         write.csv(submit_data,
           file = "./tmp/synapse_storage_manifest.csv",
@@ -427,7 +413,7 @@ shinyServer(function(input, output, session) {
         )), sleep = 3)
       }
     } else {
-      # if not assay type tempalte
+      # if not file-based type template
       write.csv(submit_data,
         file = "./tmp/synapse_storage_manifest.csv", quote = TRUE,
         row.names = FALSE, na = ""

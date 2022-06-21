@@ -82,20 +82,6 @@ scope <- "openid view download modify"
 schematic_config <- yaml::yaml.load_file("schematic_config.yml")
 api_uri <- paste(schematic_config$api$host, schematic_config$api$port, sep = ":")
 
-## Set Up Virtual Environment
-# ShinyAppys has a limit of 7000 files which this app' grossly exceeds
-# due to its Python dependencies.  To get around the limit we zip up
-# the virtual environment before deployment and unzip it here.
-# unzip virtual environment, named as ".venv.zip"
-if (!file.exists(".venv")) utils::unzip(".venv.zip")
-
-# We get a '126' error (non-executable) if we don't do this:
-system("chmod -R +x .venv")
-
-# Don't necessarily have to set `RETICULATE_PYTHON` env variable
-Sys.unsetenv("RETICULATE_PYTHON")
-#reticulate::use_virtualenv(file.path(getwd(), ".venv"), required = TRUE)
-
 ## Import functions/modules
 source_files <- list.files(c("functions", "modules"), pattern = "*\\.R$", recursive = TRUE, full.names = TRUE)
 sapply(source_files, FUN = source)
