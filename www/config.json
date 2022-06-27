@@ -1,16 +1,22 @@
 {
   "manifest_schemas": [
-      {"display_name": "Genomics Assay", "schema_name": "GenomicsAssayTemplate", "type": "assay"},
+      {"display_name": "Whole Genome Sequencing Assay", "schema_name": "WGSTemplate", "type": "assay"},
+      {"display_name": "Whole Exome Sequencing Assay", "schema_name": "WESTemplate", "type": "assay"},
+      {"display_name": "RNA Sequencing Assay", "schema_name": "RNASeqTemplate", "type": "assay"},
+      {"display_name": "Single-cell RNA Sequencing Assay", "schema_name": "ScRNASeqTemplate", "type": "assay"},
+      {"display_name": "Epigenetics Assay", "schema_name": "EpigeneticsAssayTemplate", "type": "assay"},
       {"display_name": "PDX Genomics Assay", "schema_name": "PdxGenomicsAssayTemplate", "type": "assay"},
+      {"display_name": "Other Genomics Assay", "schema_name": "GenomicsAssayTemplate", "type": "assay"},
       {"display_name": "Imaging Assay", "schema_name": "ImagingAssayTemplate", "type": "assay"},
       {"display_name": "MRI Assay", "schema_name": "MRIAssayTemplate", "type": "assay"},
-      {"display_name": "Epigenetics Assay", "schema_name": "EpigeneticsAssayTemplate", "type": "assay"},
       {"display_name": "Pharmacokinetics Assay", "schema_name": "PharmacokineticsAssayTemplate", "type": "assay"},
       {"display_name": "Proteomics Assay", "schema_name": "ProteomicsAssayTemplate", "type": "assay"},
       {"display_name": "Plate-Based Reporter Assay", "schema_name": "PlateBasedReporterAssayTemplate", "type": "assay"},
       {"display_name": "Update Milestone Report Values", "schema_name": "UpdateMilestoneReportTemplate", "type": "assay"},
-      {"display_name": "Patient Metadata (not for annotation)", "schema_name": "PatientTimepointsTemplate", "type": "assay"},
-      {"display_name": "Clinical Assay Template", "schema_name": "ClinicalAssayTemplate", "type": "assay"}
+      {"display_name": "Clinical Assay Template", "schema_name": "ClinicalAssayTemplate", "type": "assay"},
+      {"display_name": "Processed/Aligned Sequencing Reads", "schema_name": "ProcessedAlignedReadsTemplate", "type": "assay"},
+      {"display_name": "Processed Variant Calls", "schema_name": "ProcessedVariantCallsTemplate", "type": "assay"},
+      {"display_name": "Processed Expression Data", "schema_name": "ProcessedExpressionTemplate", "type": "assay"}
     ],
   "main_fileview" : "syn16858331",
   "community" : "NF",
