@@ -63,7 +63,7 @@
     {
       "display_name": "Imaging Level 1",
       "schema_name": "ImagingLevel1",
-      "type": "assay"
+      "type": "file"
     },
     {
       "display_name": "Imaging Level 2",
@@ -73,12 +73,17 @@
     {
       "display_name": "Imaging Level 3 Segmentation",
       "schema_name": "ImagingLevel3Segmentation",
-      "type": "assay"
+      "type": "file"
     },
     {
       "display_name": "Imaging Level 3 Image",
       "schema_name": "ImagingLevel3Image",
-      "type": "assay"
+      "type": "file"
+    },
+{
+      "display_name": "Imaging Level 3 Channels",
+      "schema_name": "ImagingLevel3Channels",
+      "type": "record"
     },
     {
       "display_name": "Imaging Level 4",
@@ -213,6 +218,6 @@
   ],
 
   "community": "HTAN",
-  "schema": "v22.06.1",
+  "schema": "v22.07.1",
   "schematic_service": "v1"
 }
