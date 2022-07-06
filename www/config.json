@@ -61,14 +61,29 @@
       "type": "file"
     },
     {
+      "display_name": "Imaging Level 1",
+      "schema_name": "ImagingLevel1",
+      "type": "assay"
+    },
+    {
       "display_name": "Imaging Level 2",
       "schema_name": "ImagingLevel2",
       "type": "file"
     },
     {
-      "display_name": "Imaging Level 3",
-      "schema_name": "ImagingLevel3",
-      "type": "file"
+      "display_name": "Imaging Level 3 Segmentation",
+      "schema_name": "ImagingLevel3Segmentation",
+      "type": "assay"
+    },
+    {
+      "display_name": "Imaging Level 3 Image",
+      "schema_name": "ImagingLevel3Image",
+      "type": "assay"
+    },
+    {
+      "display_name": "Imaging Level 4",
+      "schema_name": "ImagingLevel4",
+      "type": "assay"
     },
     {
       "display_name": "Clinical Tier 1: Demographics",
@@ -198,6 +213,6 @@
   ],
 
   "community": "HTAN",
-  "schema": "v22.05.1",
+  "schema": "v22.06.1",
   "schematic_service": "v1"
 }
