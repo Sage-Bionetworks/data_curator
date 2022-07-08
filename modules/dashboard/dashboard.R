@@ -82,7 +82,11 @@ dashboard <- function(id, synStoreObj, selectedProject, folderList, selectedData
         lapply(disableIds, FUN = disable, asis = TRUE)
 
         # get all uploaded manifests for selected project
-        all_manifests <- getManifests(synStoreObj, folderList(), selectedProject())
+        all_manifests <- get_manifests(
+          syn.store = synStoreObj,
+          datasets = folderList(),
+          project.scope = list(as.character(selectedProject()))
+        )
         # update reactive value
         uploaded_manifests(all_manifests)
 
@@ -92,13 +96,13 @@ dashboard <- function(id, synStoreObj, selectedProject, folderList, selectedData
       # get requirements for selected data type
       selected_datatype_requirement <- eventReactive(c(selectedDataType(), input$box$visible), {
         req(input$box$visible)
-        getDatatypeRequirement(selectedDataType())
+        get_requirement(selectedDataType())
       })
 
       # get requirements for all uploaded manifests
       uploaded_manifests_requirement <- eventReactive(uploaded_manifests(), {
         req(input$box$visible)
-        getManifestRequirements(uploaded_manifests())
+        get_all_requirements(uploaded_manifests())
       })
 
       # render info/plots for selected datatype
@@ -121,11 +125,11 @@ dashboard <- function(id, synStoreObj, selectedProject, folderList, selectedData
           userName,
           uploaded_manifests(),
           uploaded_manifests_requirement(),
-          selectedProject(),
+          names(selectedProject()),
           source.tab = "tabs", target.tab = "db-tab3", parent.session = session
         )
         # validation table for all uploaded data
-        validationTab("tab-validation", uploaded_manifests(), selectedProject(), config)
+        validationTab("tab-validation", uploaded_manifests(), names(selectedProject()), config)
         # force switch tabs to solve tabs content not rendered initially
         if (input$`toggle-btn` == 1) {
           updateTabsetPanel(session, "tabs", selected = "db-tab2")

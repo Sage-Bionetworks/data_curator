@@ -80,6 +80,7 @@
   }
 }
 
+// used in dashboard toggle
 @keyframes move-down {
   0% {
     transform: translate(0, 0);
@@ -99,7 +100,6 @@
 
 // waiter spin for custom image
 // adpat from synapse web client
-
 @-webkit-keyframes spin {
   0% {
     -moz-transform: rotate(0deg);

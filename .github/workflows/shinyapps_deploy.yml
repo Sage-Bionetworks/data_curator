@@ -17,8 +17,6 @@ on:
       - '.github/ISSUE_TEMPLATE/**'
       - '**/*.md'
       - '**/.gitignore'
-  pull_request:
-    branches: main
 
 jobs:
   shiny-deploy:

@@ -184,7 +184,7 @@ shinyServer(function(input, output, session) {
   dashboard(
     id = "dashboard",
     synStoreObj = synStore_obj,
-    selectedProject = reactive(input$dropdown_project),
+    selectedProject = reactive(project_synID),
     folderList = data_list$folders,
     selectedDataType = template_schema_name,
     userName = user_name,
