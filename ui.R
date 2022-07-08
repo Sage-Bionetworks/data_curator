@@ -39,13 +39,13 @@ ui <- shinydashboardPlus::dashboardPage(
       )
     ),
     tags$li(
-      class = "dropdown", id = "cckp_logo",
+      class = "dropdown", id = "HTAN_logo",
       tags$a(
-        href = "https://cancercomplexity.synapse.org/",
+        href = "https://humantumoratlas.org/",
         target = "_blank",
         tags$img(
-          height = "40px", alt = "CCKP LOGO",
-          src = "img/cckp_logo.png"
+          height = "40px", alt = "HTAN LOGO",
+          src = "img/HTAN_text_logo.png"
         )
       )
     )
@@ -79,7 +79,7 @@ ui <- shinydashboardPlus::dashboardPage(
       tags$a(
         id = "sidebar_footer", `data-toggle` = "tab",
         tags$div(icon("heart")),
-        tags$footer(HTML('Supported by the NCI at the NIH<br/>
+        tags$footer(HTML('Supported by the Human Tumor Atlas Network <br/>
                   (U24-CA233243-01)<br/>
                   Powered by <i class="far fa-heart"></i> and Sage Bionetworks'))
       )

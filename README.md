@@ -1,4 +1,4 @@
-# Data Curator App for CSBC
+# Data Curator App
 
 ## Introduction
 
