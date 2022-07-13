@@ -9,7 +9,7 @@ on:
   push:
     branches:
       - main
-      - develop
+      - develop*
     tags:
       - v*.*.*
     paths-ignore:
@@ -52,9 +52,14 @@ jobs:
         run: |
           # has to activate each bash step
           source .venv/bin/activate
-          # use 'poetry' to install schematic from the develop branch 
+          # use 'poetry' to install schematic from the corresponding branch 
           pip3 install poetry
-          git clone --single-branch --branch develop https://github.com/Sage-Bionetworks/schematic.git
+          SCHEM_BRANCH=develop
+          if [[ $GITHUB_REF_NAME == v*.*.* ]]; then
+            SCHEM_BRANCH=main
+          fi
+          echo Installing $SCHEM_BRANCH branch of schematic
+          git clone --single-branch --branch $SCHEM_BRANCH https://github.com/Sage-Bionetworks/schematic.git
           cd schematic
           poetry build
           pip3 install dist/schematicpy-1.0.0-py3-none-any.whl
