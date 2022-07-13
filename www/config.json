@@ -1,8 +1,16 @@
 {
   "manifest_schemas": [
-      {"display_name": "Bulk RNA-seq Assay", "schema_name": "BulkRNA-seqAssay", "type": "assay"},
-      {"display_name": "Patient", "schema_name": "Patient", "type": "clinical"},
-      {"display_name": "Biospecimen Tier 1 & 2", "schema_name": "Biospecimen", "type": "biospecimen"}
+    {
+      "display_name": "Bulk RNA-seq Assay",
+      "schema_name": "BulkRNA-seqAssay",
+      "type": "file"
+    },
+    { "display_name": "Patient", "schema_name": "Patient", "type": "record" },
+    {
+      "display_name": "Biospecimen Tier 1 & 2",
+      "schema_name": "Biospecimen",
+      "type": "record"
+    }
   ],
   "community": "Example",
   "schema": "v0.1.0",
