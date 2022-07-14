@@ -3,8 +3,8 @@
 #'
 #' @param id id name of this module
 #' @param height height in px of network container, 500px by default
-#' @param uploadData output from \code{getManifests}
-#' @param reqData output from \code{getDatatypeRequirement}
+#' @param uploadData output from \code{get_manifests}
+#' @param reqData output from \code{get_requirement}
 #' @param selectedDataType the selected data type/schema name of template dropdown
 #' @return reactive network and progress bar
 dbNetworkUI <- function(id, height = 500) {

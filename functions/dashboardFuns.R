@@ -87,11 +87,11 @@ get_requirement <- function(datatype) {
 #'
 #' @param manifest output from \code{get_manifests}.
 #' @return data frame contains required data types for tree plot
-get_all_requirements <- function(manifest, ncores = 5) {
+get_all_requirements <- function(manifest) {
   if (nrow(manifest) == 0) {
     return(data.frame(from = NA, to = NA, folder = NA, folderSynId = NA, nMiss = NA))
   } else {
-    parallel::mclapply(1:nrow(manifest), function(i) {
+    lapply(1:nrow(manifest), function(i) {
       # get all required data types
       out <- tryCatch(
         metadata_model$get_component_requirements(manifest$schema[i], as_graph = TRUE),
@@ -114,6 +114,6 @@ get_all_requirements <- function(manifest, ncores = 5) {
         folderSynId = c(manifest$folderSynId[i]),
         nMiss = c(n_miss)
       )
-    }, mc.cores = ncores) %>% bind_rows()
+    }) %>% bind_rows()
   }
 }
