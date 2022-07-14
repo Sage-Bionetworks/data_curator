@@ -6,17 +6,18 @@
 #' @return data frame that contains manifest essential information for dashboard
 get_manifests <- function(syn.store, datasets, project.scope, ncores = 1) {
   stopifnot(is.list(project.scope))
+  options(warn = 1)
   # get table of all manifests information
   all_files <- syn.store$storageFileviewTable
   all_files <- all_files[all_files$name == "synapse_storage_manifest.csv", ]
 
-  parallel::mclapply(datasets, function(id) {
+  dd <- parallel::mclapply(datasets, function(id) {
     # get manifest synapse id in each dataset folder
     # will a folder has multiple manifests? if so, need to iterate each manifest
     manifest_id <- all_files[all_files$parentId == id, "id"]
 
     # return empty tibble if no manifest or no component in the manifest
-    df <- tibble()
+    df <- data.frame()
 
     if (length(manifest_id) > 0) {
       manifest <- syn$get(manifest_id)
@@ -41,7 +42,7 @@ get_manifests <- function(syn.store, datasets, project.scope, ncores = 1) {
         # clean validation res from schematic
         res <- validationResult(annotation_status, manifest_component, manifest_df)
 
-        df <- tibble(
+        df <- data.frame(
           synID = manifest["properties"]["id"],
           schema = manifest_component,
           createdOn = as.Date(manifest["properties"]["createdOn"]),
@@ -53,12 +54,14 @@ get_manifests <- function(syn.store, datasets, project.scope, ncores = 1) {
           result = res$result,
           errorType = res$error_type,
           warnMsg = ifelse(is.null(res$warning_msg), "Valid", res$warning_msg)
-        ) %>%
-          filter(schema != "", schema != "NaN") # in case invalid manifest
+        )
       }
     }
     return(df)
-  }, mc.cores = ncores) %>% bind_rows()
+  }, mc.cores = ncores) %>%
+    bind_rows() %>%
+    filter(schema != "" | schema != "NaN")
+  return(dd) # in case invalid manifest
 }
 
 #' create data frame of data type requirements for selected data type

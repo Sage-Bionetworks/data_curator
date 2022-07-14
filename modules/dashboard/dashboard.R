@@ -81,6 +81,7 @@ dashboard <- function(id, synStoreObj, selectedProject, folderList, selectedData
         # make sure to use asis, otherwise it will add module's namespaces
         lapply(disableIds, FUN = disable, asis = TRUE)
 
+        t0 <- Sys.time()
         # get all uploaded manifests for selected project
         all_manifests <- get_manifests(
           syn.store = synStoreObj,
@@ -88,6 +89,9 @@ dashboard <- function(id, synStoreObj, selectedProject, folderList, selectedData
           project.scope = list(as.character(selectedProject())),
           ncores = ncores
         )
+        print(Sys.time() - t0)
+        print(all_manifests)
+
         # update reactive value
         uploaded_manifests(all_manifests)
 
