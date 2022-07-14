@@ -4,13 +4,13 @@
 #' @param datasets a list of folder syn Ids, named by folder names
 #' @param project.scope list of project ids used for cross-manifest validation
 #' @return data frame that contains manifest essential information for dashboard
-get_manifests <- function(syn.store, datasets, project.scope) {
+get_manifests <- function(syn.store, datasets, project.scope, ncores = 1) {
   stopifnot(is.list(project.scope))
   # get table of all manifests information
   all_files <- syn.store$storageFileviewTable
   all_files <- all_files[all_files$name == "synapse_storage_manifest.csv", ]
 
-  lapply(datasets, function(id) {
+  parallel::mclapply(datasets, function(id) {
     # get manifest synapse id in each dataset folder
     # will a folder has multiple manifests? if so, need to iterate each manifest
     manifest_id <- all_files[all_files$parentId == id, "id"]
@@ -58,7 +58,7 @@ get_manifests <- function(syn.store, datasets, project.scope) {
       }
     }
     return(df)
-  }) %>% bind_rows()
+  }, mc.cores = ncores) %>% bind_rows()
 }
 
 #' create data frame of data type requirements for selected data type
@@ -87,11 +87,11 @@ get_requirement <- function(datatype) {
 #'
 #' @param manifest output from \code{get_manifests}.
 #' @return data frame contains required data types for tree plot
-get_all_requirements <- function(manifest) {
+get_all_requirements <- function(manifest, ncores = 1) {
   if (nrow(manifest) == 0) {
     return(data.frame(from = NA, to = NA, folder = NA, folderSynId = NA, nMiss = NA))
   } else {
-    lapply(1:nrow(manifest), function(i) {
+    parallel::mclapply(1:nrow(manifest), function(i) {
       # get all required data types
       out <- tryCatch(
         metadata_model$get_component_requirements(manifest$schema[i], as_graph = TRUE),
@@ -114,6 +114,6 @@ get_all_requirements <- function(manifest) {
         folderSynId = c(manifest$folderSynId[i]),
         nMiss = c(n_miss)
       )
-    }) %>% bind_rows()
+    }, mc.cores = ncores) %>% bind_rows()
   }
 }

@@ -42,7 +42,7 @@ dashboardUI <- function(id) {
   )
 }
 
-dashboard <- function(id, synStoreObj, selectedProject, folderList, selectedDataType, userName, config, disableIds = NULL) {
+dashboard <- function(id, synStoreObj, selectedProject, folderList, selectedDataType, userName, config, disableIds = NULL, ncores = 1) {
   moduleServer(
     id,
     function(input, output, session) {
@@ -85,7 +85,8 @@ dashboard <- function(id, synStoreObj, selectedProject, folderList, selectedData
         all_manifests <- get_manifests(
           syn.store = synStoreObj,
           datasets = folderList(),
-          project.scope = list(as.character(selectedProject()))
+          project.scope = list(as.character(selectedProject())),
+          ncores = ncores
         )
         # update reactive value
         uploaded_manifests(all_manifests)
@@ -102,7 +103,7 @@ dashboard <- function(id, synStoreObj, selectedProject, folderList, selectedData
       # get requirements for all uploaded manifests
       uploaded_manifests_requirement <- eventReactive(uploaded_manifests(), {
         req(input$box$visible)
-        get_all_requirements(uploaded_manifests())
+        get_all_requirements(uploaded_manifests(), ncores = ncores)
       })
 
       # render info/plots for selected datatype

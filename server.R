@@ -189,7 +189,8 @@ shinyServer(function(input, output, session) {
     selectedDataType = template_schema_name,
     userName = user_name,
     config = config_project,
-    disableIds = c("box_pick_project", "box_pick_manifest")
+    disableIds = c("box_pick_project", "box_pick_manifest"),
+    ncores = ncores
   )
 
   ######## Template Google Sheet Link ########
