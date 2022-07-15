@@ -3,82 +3,87 @@
     {
       "display_name": "scRNA-seq Level 1",
       "schema_name": "ScRNA-seqLevel1",
-      "type": "assay"
+      "type": "file"
     },
     {
       "display_name": "scRNA-seq Level 2",
       "schema_name": "ScRNA-seqLevel2",
-      "type": "assay"
+      "type": "file"
     },
     {
       "display_name": "scRNA-seq Level 3",
       "schema_name": "ScRNA-seqLevel3",
-      "type": "assay"
+      "type": "file"
     },
     {
       "display_name": "scRNA-seq Level 4",
       "schema_name": "ScRNA-seqLevel4",
-      "type": "assay"
+      "type": "file"
     },
     {
       "display_name": "scATAC-seq Level 1",
       "schema_name": "ScATAC-seqLevel1",
-      "type": "assay"
+      "type": "file"
     },
     {
       "display_name": "scATAC-seq Level 4",
       "schema_name": "ScATAC-seqLevel4",
-      "type": "assay"
+      "type": "file"
     },
     {
       "display_name": "Bulk RNA-seq Level 1",
       "schema_name": "BulkRNA-seqLevel1",
-      "type": "assay"
+      "type": "file"
     },
     {
       "display_name": "Bulk RNA-seq Level 2",
       "schema_name": "BulkRNA-seqLevel2",
-      "type": "assay"
+      "type": "file"
     },
     {
       "display_name": "Bulk RNA-seq Level 3",
       "schema_name": "BulkRNA-seqLevel3",
-      "type": "assay"
+      "type": "file"
     },
     {
       "display_name": "Bulk WES Level 1",
       "schema_name": "BulkWESLevel1",
-      "type": "assay"
+      "type": "file"
     },
     {
       "display_name": "Bulk WES Level 2",
       "schema_name": "BulkWESLevel2",
-      "type": "assay"
+      "type": "file"
     },
     {
       "display_name": "Bulk WES Level 3",
       "schema_name": "BulkWESLevel3",
-      "type": "assay"
+      "type": "file"
     },
     {
       "display_name": "Imaging Level 1",
       "schema_name": "ImagingLevel1",
-      "type": "assay"
+      "type": "file"
     },
     {
       "display_name": "Imaging Level 2",
       "schema_name": "ImagingLevel2",
-      "type": "assay"
+      "type": "file"
     },
     {
       "display_name": "Imaging Level 3 Segmentation",
       "schema_name": "ImagingLevel3Segmentation",
-      "type": "assay"
+      "type": "file"
     },
     {
       "display_name": "Imaging Level 3 Image",
       "schema_name": "ImagingLevel3Image",
-      "type": "assay"
+      "type": "file"
+    },
+{
+      "display_name": "Imaging Level 3 Channels",
+      "schema_name": "ImagingLevel3Channels",
+      "type": "record"
     },
     {
       "display_name": "Imaging Level 4",
@@ -88,118 +93,128 @@
     {
       "display_name": "Clinical Tier 1: Demographics",
       "schema_name": "Demographics",
-      "type": "clinical"
+      "type": "record"
     },
     {
       "display_name": "Clinical Tier 1: Diagnosis",
       "schema_name": "Diagnosis",
-      "type": "clinical"
+      "type": "record"
     },
     {
       "display_name": "Clinical Tier 1: FamilyHistory",
       "schema_name": "FamilyHistory",
-      "type": "clinical"
+      "type": "record"
     },
     {
       "display_name": "Clinical Tier 1: Exposure",
       "schema_name": "Exposure",
-      "type": "clinical"
+      "type": "record"
     },
     {
       "display_name": "Clinical Tier 1: FollowUp",
       "schema_name": "FollowUp",
-      "type": "clinical"
+      "type": "record"
     },
     {
       "display_name": "Clinical Tier 1: Molecular Test",
       "schema_name": "MolecularTest",
-      "type": "clinical"
+      "type": "record"
     },
     {
       "display_name": "Clinical Tier 1: Therapy",
       "schema_name": "Therapy",
-      "type": "clinical"
+      "type": "record"
     },
     {
       "display_name": "Clinical Tier 2",
       "schema_name": "ClinicalDataTier2",
-      "type": "clinical"
+      "type": "record"
     },
     {
       "display_name": "Clinical Tier 3: Acute Lymphoblastic Leukemia",
       "schema_name": "AcuteLymphoblasticLeukemiaTier3",
-      "type": "clinical"
+      "type": "record"
     },
     {
       "display_name": "Clinical Tier 3: Breast Precancer and Cancer ",
       "schema_name": "BreastCancerTier3",
-      "type": "clinical"
+      "type": "record"
     },
     {
       "display_name": "Clinical Tier 3: Colorectal Precancer and Cancer",
       "schema_name": "ColorectalCancerTier3",
-      "type": "clinical"
+      "type": "record"
     },
     {
       "display_name": "Clinical Tier 3: Lung Precancer and Cancer",
       "schema_name": "LungCancerTier3",
-      "type": "clinical"
+      "type": "record"
     },
     {
       "display_name": "Clinical Tier 3: Neuroblastoma and Glioma",
       "schema_name": "BrainCancerTier3",
-      "type": "clinical"
+      "type": "record"
     },
     {
       "display_name": "Clinical Tier 3: Melanoma",
       "schema_name": "MelanomaTier3",
-      "type": "clinical"
+      "type": "record"
     },
     {
       "display_name": "Clinical Tier 3: Ovarian Precancer and Cancer ",
       "schema_name": "OvarianCancerTier3",
-      "type": "clinical"
+      "type": "record"
     },
     {
       "display_name": "Clinical Tier 3: Pancreatic Precancer and Cancer",
       "schema_name": "PancreaticCancerTier3",
-      "type": "clinical"
+      "type": "record"
     },
     {
       "display_name": "Clinical Tier 3: Prostate Precancer and Cancer",
       "schema_name": "ProstateCancerTier3",
-      "type": "clinical"
+      "type": "record"
     },
     {
       "display_name": "Clinical Tier 3: Sarcoma",
       "schema_name": "SarcomaTier3",
-      "type": "clinical"
+      "type": "record"
     },
     {
       "display_name": "Biospecimen Tier 1 & 2",
       "schema_name": "Biospecimen",
-      "type": "biospecimen"
+      "type": "record"
     },
     {
       "display_name": "Other Assay (Minimal Metadata)",
       "schema_name": "OtherAssay",
-      "type": "assay"
+      "type": "file"
     },
     {
       "display_name": "SRRS Biospecimen Tier 1 & 2",
       "schema_name": "SRRSBiospecimen",
-      "type": "biospecimen"
+      "type": "record"
     },
     {
       "display_name": "SRRS Clinical Tier 2",
       "schema_name": "SRRSClinicalDataTier2",
-      "type": "clinical"
+      "type": "record"
     },
     {
       "display_name": "SRRS Imaging Level 2",
       "schema_name": "SRRSImagingLevel2",
-      "type": "assay"
-    }
+      "type": "file"
+    },
+    {
+      "display_name": "RPPA Level 2",
+      "schema_name": "RPPALevel2",
+      "type": "file"
+    },
+    {
+      "display_name": "HTAN RPPA Antibody Table",
+      "schema_name": "HTANRPPAAntibodyTable",
+      "type": "record"
+    } 
   ],
 
   "community": "HTAN",
