@@ -59,7 +59,7 @@ selectedProjectTab <- function(id, username, metadata, nodes, project.name, pare
       updateCheckboxGroupInput(
         session,
         "checkbox-evaluate",
-        label = ifelse(length(not_uploaded) > 0,
+        label = if_else(length(not_uploaded) > 0,
           "It looks like you are missing these data types:",
           "It looks like you completed all requirements !!!"
         ),

@@ -9,8 +9,8 @@ progressBar <- function(id, value = 100, title = NULL, subtitle = NULL,
   moduleServer(
     id,
     function(input, output, session) {
-      if (is.null(width)) width <- ifelse(circular, "160px", "100%")
-      if (is.null(height)) height <- ifelse(circular, "160px", "20px")
+      if (is.null(width)) width <- if_else(circular, "160px", "100%")
+      if (is.null(height)) height <- if_else(circular, "160px", "20px")
       if (circular) {
         r <- as.numeric(r)
         C <- 2 * pi * (r - 10) # svg circle r
@@ -34,12 +34,12 @@ progressBar <- function(id, value = 100, title = NULL, subtitle = NULL,
       if (is.null(color)) color <- c("#e91e63", "#673ab7")
       if (is.null(backgoundCol)) backgoundCol <- "#f5f5f5"
       # add gap in linear pb if two colors are not identical
-      border <- ifelse(value != 0 && value != 100 && color != backgoundCol, "2px solid #fff", "none")
+      border <- if_else(value != 0 && value != 100 && color != backgoundCol, "2px solid #fff", "none")
 
       # progress_id
       pb_id <- sample(1:10000, 1)
       # set id name for animation
-      pct_id_name <- ifelse(circular, paste0("circular-pct-", pb_id), paste0("linear-pct-", pb_id))
+      pct_id_name <- if_else(circular, paste0("circular-pct-", pb_id), paste0("linear-pct-", pb_id))
       unique_var_name <- gsub("-", "_", pct_id_name)
 
       output$progress <- renderUI({

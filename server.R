@@ -195,7 +195,8 @@ shinyServer(function(input, output, session) {
     syn.store = synStore_obj,
     project.scope = selected$project,
     schema = selected$schema,
-    disable.ids = c("box_pick_project", "box_pick_manifest")
+    disable.ids = c("box_pick_project", "box_pick_manifest"),
+    ncores = ncores
   )
 
   ######## Template Google Sheet Link ########

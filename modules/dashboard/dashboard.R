@@ -49,8 +49,9 @@ dashboardUI <- function(id) {
 #' @param project.scope selected project syn ID named with project name
 #' @param schema selected schema name
 #' @param disable_ids selector ids to be disable during the process of dashboard
+#' @param ncores number of cpu to run parallelization
 #'
-dashboard <- function(id, syn.store, project.scope, schema, disable.ids = NULL) {
+dashboard <- function(id, syn.store, project.scope, schema, disable.ids = NULL, ncores = 1) {
   moduleServer(
     id,
     function(input, output, session) {
@@ -73,7 +74,7 @@ dashboard <- function(id, syn.store, project.scope, schema, disable.ids = NULL) 
         hide("toggle-btn-container")
         shinydashboardPlus::updateBox("box", action = "restore")
       })
-
+      t0 <- reactiveVal(NULL)
       # retrieving data progress for dashboard should not be executed until dashboard visiable
       # get all uploaded manifests once the project/folder changed
       observeEvent(c(project.scope(), input$box$visible), {
@@ -96,7 +97,8 @@ dashboard <- function(id, syn.store, project.scope, schema, disable.ids = NULL) 
         # get all uploaded manifests for selected project
         metadata <- get_dataset_metadata(
           syn.store = syn.store,
-          datasets = folder_list
+          datasets = folder_list,
+          ncores = ncores
         )
 
         metadata <- validate_metadata(metadata, project.scope = list(project.scope()))
@@ -113,7 +115,7 @@ dashboard <- function(id, syn.store, project.scope, schema, disable.ids = NULL) 
       # get requirements for all uploaded manifests
       uploaded_manifests_requirement <- eventReactive(uploaded_manifests(), {
         req(input$box$visible)
-        get_metadata_nodes(uploaded_manifests())
+        get_metadata_nodes(uploaded_manifests(), ncores = ncores)
       })
 
       # render info/plots for selected datatype

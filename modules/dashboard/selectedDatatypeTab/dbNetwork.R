@@ -32,11 +32,11 @@ dbNetwork <- function(id, metadata, nodes, selectedDataType) {
         } else {
           links <- data.frame(
             source = nodes, target = names(nodes),
-            value = ifelse(nodes == selectedDataType, 5, 1) # make selected datatype node bigger than others
+            value = if_else(nodes == selectedDataType, 5, 1) # make selected datatype node bigger than others
           )
           nodes_df <- data.frame(
             name = c(selectedDataType, names(nodes)),
-            group = c("Selected", ifelse(links$target %in% metadata$Component, "Completed", "Missing")),
+            group = c("Selected", if_else(links$target %in% metadata$Component, "Completed", "Missing")),
             size = c(20)
           )
         }
@@ -52,7 +52,7 @@ dbNetwork <- function(id, metadata, nodes, selectedDataType) {
         forceNetwork(
           Links = links, Nodes = nodes_df, Source = "IDsource", Target = "IDtarget",
           Group = "group", Value = "value", NodeID = "name", Nodesize = "size",
-          linkColour = ifelse(links$IDsource == 5, "#694489", "black"),
+          linkColour = if_else(links$IDsource == 5, "#694489", "black"),
           colourScale = JS(cols), legend = TRUE, linkDistance = 40,
           zoom = FALSE, bounded = TRUE, arrows = TRUE,
           opacity = 0.9, fontSize = 16, charge = -500

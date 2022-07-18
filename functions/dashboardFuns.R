@@ -2,8 +2,9 @@
 #'
 #' @param syn.store synapse storage object
 #' @param datasets a list of folder syn Ids, named by folder names
+#' @param ncores number of cpu to run parallelization
 #' @return data frame that contains manifest essential information for dashboard
-get_dataset_metadata <- function(syn.store, datasets) {
+get_dataset_metadata <- function(syn.store, datasets, ncores = 1) {
   # TODO: if the component could be retrieve directly from storage object:
   # remove codes to download all manifests
   # get data for all manifests within the specified datasets
@@ -11,6 +12,7 @@ get_dataset_metadata <- function(syn.store, datasets) {
     filter(name == "synapse_storage_manifest.csv" & parentId %in% datasets)
 
   manifest_info <- list()
+  modified_user <- list()
   # return empty tibble if no manifest or no component in the manifest
   metadata <- NULL
 
@@ -21,13 +23,17 @@ get_dataset_metadata <- function(syn.store, datasets) {
     if (length(manifest_ids) > 0) {
       # in case, multiple manifests exist in the same dataset
       for (id in manifest_ids) {
-        manifest_info <<- append(manifest_info, syn$get(id))
+        info <- syn$get(id)
+        manifest_info <<- append(manifest_info, info)
+        user <- syn$getUserProfile(info["properties"]["modifiedBy"])["userName"]
+        modified_user <<- append(modified_user, user)
       }
     }
   })
 
   if (length(manifest_info) > 0) {
-    metadata <- lapply(manifest_info, function(info) {
+    metadata <- parallel::mclapply(seq_along(manifest_info), function(i) {
+      info <- manifest_info[[i]]
       # extract manifest essential information for dashboard
       manifest_path <- info["path"]
       manifest_df <- data.table::fread(manifest_path)
@@ -36,18 +42,17 @@ get_dataset_metadata <- function(syn.store, datasets) {
       manifest_component <- ifelse("Component" %in% colnames(manifest_df) & nrow(manifest_df) > 0,
         manifest_df$Component[1], NA_character_
       )
-      modified_user <- syn$getUserProfile(info["properties"]["modifiedBy"])["userName"]
       metadata <- data.frame(
         SynapseID = info["properties"]["id"],
         Component = manifest_component,
         CreatedOn = as.Date(info["properties"]["createdOn"]),
         ModifiedOn = as.Date(info["properties"]["modifiedOn"]),
-        ModifiedUser = paste0("@", modified_user),
+        ModifiedUser = paste0("@", modified_user[[i]]),
         Path = manifest_path,
         Folder = names(datasets)[which(datasets == info["properties"]["parentId"])],
         FolderSynId = info["properties"]["parentId"]
       )
-    }) %>% bind_rows()
+    }, mc.cores = ncores) %>% bind_rows()
   }
 
   return(metadata)
@@ -88,7 +93,6 @@ validate_metadata <- function(metadata, project.scope) {
     cbind(metadata, .) # expand metadata with validation results
 }
 
-
 #' create a list of requirements for selected data type
 #'
 #' @param schema data type of selected data type or template.
@@ -113,11 +117,11 @@ get_schema_nodes <- function(schema) {
 #'
 #' @param metadata output from \code{get_dataset_metadata}.
 #' @return data frame of nodes contains source and target used for tree plot
-get_metadata_nodes <- function(metadata) {
+get_metadata_nodes <- function(metadata, ncores = 1) {
   if (nrow(metadata) == 0) {
     return(data.frame(from = NA, to = NA, folder = NA, folderSynId = NA, nMiss = NA))
   } else {
-    lapply(1:nrow(metadata), function(i) {
+    parallel::mclapply(1:nrow(metadata), function(i) {
       manifest <- metadata[i, ]
       # get all required data types
       nodes <- tryCatch(
@@ -139,6 +143,6 @@ get_metadata_nodes <- function(metadata) {
         folder_id = c(manifest$FolderSynId),
         n_miss = c(n_miss)
       )
-    }) %>% bind_rows()
+    }, mc.cores = ncores) %>% bind_rows()
   }
 }
