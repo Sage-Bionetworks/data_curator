@@ -23,9 +23,9 @@ manifest:
 model:
   input:
     # Uncomment line below for staging
-    #download_url: 'https://raw.githubusercontent.com/ncihtan/data-models/main/HTAN.model.jsonld'
+    download_url: 'https://raw.githubusercontent.com/ncihtan/data-models/main/HTAN.model.jsonld'
     # Update line below for prod
-    download_url: 'https://raw.githubusercontent.com/ncihtan/data-models/v22.07.1/HTAN.model.jsonld'
+    #download_url: 'https://raw.githubusercontent.com/ncihtan/data-models/v22.07.1/HTAN.model.jsonld'
     location: 'data-models/HTAN.model.jsonld'
     file_type: 'local'
 
