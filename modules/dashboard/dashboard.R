@@ -102,7 +102,6 @@ dashboard <- function(id, syn.store, project.scope, schema, disable.ids = NULL) 
         metadata <- validate_metadata(metadata, project.scope = list(project.scope()))
         # update reactive value
         uploaded_manifests(metadata)
-        lapply(disable.ids, FUN = enable, asis = TRUE)
       })
 
       # get requirements for selected data type
@@ -148,6 +147,8 @@ dashboard <- function(id, syn.store, project.scope, schema, disable.ids = NULL) 
           updateTabsetPanel(session, "tabs", selected = "db-tab2")
           updateTabsetPanel(session, "tabs", selected = "db-tab1")
         }
+
+        lapply(disable.ids, FUN = enable, asis = TRUE)
         # update and hide the partial loading screen
         dcWaiter(id = ns("tab-container"), "hide")
       })

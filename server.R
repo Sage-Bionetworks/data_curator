@@ -201,7 +201,6 @@ shinyServer(function(input, output, session) {
   ######## Template Google Sheet Link ########
   observeEvent(c(input$dropdown_folder, input$tabs), {
     if (input$tabs == "tab_template") {
-
       tmp_folder_id <- data_list$folders()[[input$dropdown_folder]]
       # update selected folder ID if folder changes
       req(tmp_folder_id != selected$folder())
