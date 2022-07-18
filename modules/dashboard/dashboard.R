@@ -94,7 +94,6 @@ dashboard <- function(id, syn.store, project.scope, schema, disable.ids = NULL, 
         folder_list <- synapse_driver$getStorageDatasetsInProject(syn.store, project.scope())
         folder_list <- list2Vector(folder_list)
 
-        t0(Sys.time())
         # get all uploaded manifests for selected project
         metadata <- get_dataset_metadata(
           syn.store = syn.store,
@@ -116,9 +115,7 @@ dashboard <- function(id, syn.store, project.scope, schema, disable.ids = NULL, 
       # get requirements for all uploaded manifests
       uploaded_manifests_requirement <- eventReactive(uploaded_manifests(), {
         req(input$box$visible)
-        xx <- get_metadata_nodes(uploaded_manifests(), ncores = ncores)
-        print(Sys.time() - t0())
-        return(xx)
+        get_metadata_nodes(uploaded_manifests(), ncores = ncores)
       })
 
       # render info/plots for selected datatype

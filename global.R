@@ -114,4 +114,3 @@ sapply(source_files, FUN = source)
 dropdown_types <- c("project", "folder", "template")
 # set up cores used for parallelization
 ncores <- parallel::detectCores()
-print(ncores)
