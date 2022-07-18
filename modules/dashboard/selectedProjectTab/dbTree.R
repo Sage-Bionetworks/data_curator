@@ -38,46 +38,47 @@ dbTreeUI <- function(id, n.nodes = NULL) {
   )
 }
 
-dbTree <- function(id, up.schema, req.data, selected.project) {
+dbTree <- function(id, metadata, nodes, project.name) {
   moduleServer(
     id,
     function(input, output, session) {
       ns <- session$ns
       tree_list <- NULL
 
-      if (length(up.schema) != 0) {
+      if (length(metadata$Component) != 0) {
 
         # get folder list
-        folder_list <- sort(unique(req.data$folder))
+        folder_list <- sort(unique(nodes$folder))
         # change d3 tree height based on how many nodes
         height <- paste0(36 * length(folder_list), "px")
         # remove project name in children to trim long names
-        pattern <- paste0(str_replace(selected.project, " ", "_"), "_")
+        pattern <- paste0(str_replace(project.name, " ", "_"), "_")
         # get dataset contains any missing requirement children
-        incompleted_ds <- req.data %>%
-          distinct(folderSynId, .keep_all = TRUE) %>%
-          filter(nMiss > 0)
-        # make nodes data from project to datasets
+        incompleted_ds <- nodes %>%
+          distinct(folder_id, .keep_all = TRUE) %>%
+          filter(n_miss > 0)
+
+        # make nodes data frame: from project to dataset to required data type
         project_to_dataset <- data.frame(
-          from = c(selected.project),
+          from = c(project.name),
           to = paste0("f:", folder_list),
-          node_opacity = c(0),
-          node_color = ifelse(folder_list %in% incompleted_ds$folder, "#FF794A", "#A287AF")
+          font_opacity = c(0),
+          node_color = if_else(folder_list %in% incompleted_ds$folder, "#FF794A", "#A287AF")
         )
         # make nodes data from datasets to their requirements
-        dataset_to_req <- req.data %>%
+        dataset_to_req <- nodes %>%
           mutate(
-            node_opacity = if_else(req.data$to %in% req.data$from, 0, 1),
-            node_color = if_else(req.data$to %in% up.schema, "#28a745", "#E53935")
+            font_opacity = if_else(nodes$to %in% nodes$from, 0, 1),
+            node_color = if_else(nodes$to %in% metadata$Component, "#28a745", "#E53935")
           ) %>%
-          select(from, to, node_opacity, node_color)
+          select(from, to, font_opacity, node_color)
         tree_df <- rbind(project_to_dataset, dataset_to_req) %>%
           mutate_at(1:2, ~ gsub(pattern, "", .)) %>%
           distinct() # remove duplicated rows to save conversion time
         # convert to tree list using `data.tree`
         tree_list <- data.tree::FromDataFrameNetwork(tree_df)
         # tree_list$Set(group = ifelse(tree_list$Get("name") %in% c(upData$folder, upData$schema), "upload", "not_load"))
-        tree_list$node_opacity <- 1
+        tree_list$font_opacity <- 1
         tree_list$node_color <- "#694489"
         tree_list <- as.list(tree_list, mode = "explicit", unname = TRUE)
       }

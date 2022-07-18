@@ -107,7 +107,7 @@ if (!data) {
           .duration(duration)
           .ease(d3.easeLinear)
           .style('opacity', function (d) {
-            return d.data.node_opacity;
+            return d.data.font_opacity;
           });
       });
 
@@ -131,7 +131,7 @@ if (!data) {
       })
       .style('font', '0.8em sans-serif')
       .style('opacity', function (d) {
-        return d.data.node_opacity;
+        return d.data.font_opacity;
       })
       .style('fill', function (d) {
         return d.data.node_color;

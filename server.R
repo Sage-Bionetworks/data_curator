@@ -34,18 +34,25 @@ shinyServer(function(input, output, session) {
   template_namedList <- config_schemas$schema_name
   names(template_namedList) <- config_schemas$display_name
 
-  synStore_obj <- NULL # gets list of projects they have access to
-  user_name <- NULL # user name
-  project_synID <- NULL # selected project synapse ID
-  folder_synID <- reactiveVal("") # selected folder synapse ID
-  template_schema_name <- reactiveVal(NULL) # selected template schema name
-  template_type <- NULL # type of selected template
+  # data available to the user
+  synStore_obj <- NULL # synapse storage object contains fileview data
+  data_list <- list(
+    projects = reactiveVal(NULL), folders = reactiveVal(NULL),
+    schemas = reactiveVal(template_namedList), files = reactiveVal(NULL)
+  )
+  # synapse ID of selected data
+  selected <- list(
+    project = reactiveVal(NULL), folder = reactiveVal(""),
+    schema = reactiveVal(NULL), schema_type = reactiveVal(NULL)
+  )
 
   isUpdateFolder <- reactiveVal(FALSE)
-  data_list <- list(projects = NULL, folders = reactiveVal(NULL), manifests = template_namedList, files = NULL)
 
   tabs_list <- c("tab_instructions", "tab_data", "tab_template", "tab_upload")
-  clean_tags <- c("div_template", "div_validate", NS("tbl_validate", "table"), "btn_val_gsheet", "btn_submit")
+  clean_tags <- c(
+    "div_template", "div_template_warn",
+    "div_validate", NS("tbl_validate", "table"), "btn_val_gsheet", "btn_submit"
+  )
 
   # add box effects
   boxEffect(zoom = FALSE, float = TRUE)
@@ -81,18 +88,18 @@ shinyServer(function(input, output, session) {
       dcWaiter("update", landing = TRUE, isPermission = FALSE)
     } else {
       projects_list <- synapse_driver$getStorageProjects(synStore_obj)
-      data_list$projects <<- list2Vector(projects_list)
+      data_list$projects(list2Vector(projects_list))
 
       # updates project dropdown
       lapply(c("header_dropdown_", "dropdown_"), function(x) {
         lapply(c(1, 3), function(i) {
           updateSelectInput(session, paste0(x, dropdown_types[i]),
-            choices = sort(names(data_list[[i]]))
+            choices = sort(names(data_list[[i]]()))
           )
         })
       })
 
-      user_name <<- syn$getUserProfile()$userName
+      user_name <- syn$getUserProfile()$userName
 
       if (!syn$is_certified(user_name)) {
         dcWaiter("update", landing = TRUE, isCertified = FALSE)
@@ -152,16 +159,16 @@ shinyServer(function(input, output, session) {
   lapply(c("header_dropdown_", "dropdown_"), function(x) {
     observeEvent(ignoreInit = TRUE, input[[paste0(x, "project")]], {
       # get synID of selected project
-      projectID <- data_list$projects[input[[paste0(x, "project")]]]
+      project_id <- data_list$projects()[input[[paste0(x, "project")]]]
 
       # gets folders per project
-      folder_list <- synapse_driver$getStorageDatasetsInProject(synStore_obj, projectID) %>% list2Vector()
+      folder_list <- synapse_driver$getStorageDatasetsInProject(synStore_obj, project_id) %>% list2Vector()
 
-      # updates foldernames
+      # update folder names
       updateSelectInput(session, paste0(x, "folder"), choices = sort(names(folder_list)))
 
       if (x == "dropdown_") {
-        project_synID <<- projectID
+        selected$project(project_id)
         data_list$folders(folder_list)
       }
 
@@ -176,66 +183,65 @@ shinyServer(function(input, output, session) {
   ######## Update Template ########
   # update selected schema template name
   observeEvent(input$dropdown_template, {
-    template_schema_name(template_namedList[match(input$dropdown_template, names(template_namedList))])
-    template_type <<- config_schemas$type[match(template_schema_name(), template_namedList)]
+    # update reactive selected values for schema
+    selected$schema(data_list$schemas()[input$dropdown_template])
+    schema_type <- config_schemas$type[which(config_schemas$display_name == input$dropdown_template)]
+    selected$schema_type(schema_type)
   })
 
   ######## Dashboard ########
   dashboard(
     id = "dashboard",
-    synStoreObj = synStore_obj,
-    selectedProject = reactive(project_synID),
-    folderList = data_list$folders,
-    selectedDataType = template_schema_name,
-    userName = user_name,
-    config = config_project,
-    disableIds = c("box_pick_project", "box_pick_manifest"),
+    syn.store = synStore_obj,
+    project.scope = selected$project,
+    schema = selected$schema,
+    disable.ids = c("box_pick_project", "box_pick_manifest"),
     ncores = ncores
   )
 
   ######## Template Google Sheet Link ########
   observeEvent(c(input$dropdown_folder, input$tabs), {
-    req(input$tabs %in% c("tab_template", "tab_upload"))
-    tmp_folder_synID <- data_list$folders()[[input$dropdown_folder]]
-    req(tmp_folder_synID != folder_synID()) # if folder changes
-
-    # update selected folder ID
-    folder_synID(tmp_folder_synID)
-
     if (input$tabs == "tab_template") {
+      tmp_folder_id <- data_list$folders()[[input$dropdown_folder]]
+      # update selected folder ID if folder changes
+      req(tmp_folder_id != selected$folder())
+      selected$folder(tmp_folder_id)
+
       dcWaiter("show", msg = paste0("Getting files in ", input$dropdown_folder, "..."))
       # get file list in selected folder
       file_list <- synapse_driver$getFilesInStorageDataset(
         synStore_obj,
-        folder_synID()
+        selected$folder()
       )
-      data_list$files <<- list2Vector(file_list)
+      # update files list in the folder
+      data_list$files(list2Vector(file_list))
       dcWaiter("hide")
     }
   })
 
   # display warning message if folder is empty and data type is file-based
-  observeEvent(c(folder_synID(), template_schema_name()), {
+  observeEvent(c(selected$folder(), selected$schema()), {
 
     # hide tags when users select new template
     sapply(clean_tags, FUN = hide)
 
-    req(input$tabs == "tab_template")
-    hide("div_template_warn")
-    req(length(data_list$files) == 0 & template_type == "file")
-    warn_text <- paste0(
-      strong(sQuote(input$dropdown_folder)), " folder is empty,
-       please upload your data before generating manifest.",
-      "<br><br>", strong(sQuote(input$dropdown_template)),
-      " requires data files to be uploaded prior generating and submitting templates.",
-      "<br><br>", "Filling in a template before uploading your data,
-       may result in errors and delays in your data submission later."
-    )
+    # only show below warning in template tab
+    if (input$tabs == "tab_template") {
+      req(length(data_list$files) == 0 & selected$schema_type() == "file")
+      warn_text <- paste0(
+        strong(sQuote(input$dropdown_folder)), " folder is empty,
+        please upload your data before generating manifest.",
+        "<br><br>", strong(sQuote(input$dropdown_template)),
+        " requires data files to be uploaded prior generating and submitting templates.",
+        "<br><br>", "Filling in a template before uploading your data,
+        may result in errors and delays in your data submission later."
+      )
 
-    nx_report_warning("Warning", HTML(warn_text))
-    output$text_template_warn <- renderUI(tagList(br(), span(class = "warn_msg", HTML(warn_text))))
+      nx_report_warning("Warning", HTML(warn_text))
+      output$text_template_warn <- renderUI(tagList(br(), span(class = "warn_msg", HTML(warn_text))))
 
-    show("div_template_warn")
+      show("div_template_warn")
+    }
   })
 
   observeEvent(input$btn_template, {
@@ -245,12 +251,12 @@ shinyServer(function(input, output, session) {
 
     manifest_url <-
       metadata_model$getModelManifest(paste0(config_project$community, " ", input$dropdown_template),
-        template_schema_name(),
-        filenames = switch((template_type == "file") + 1,
+        selected$schema(),
+        filenames = switch((selected$schema_type() == "file") + 1,
           NULL,
-          as.list(names(data_list$files))
+          as.list(names(data_list$files()))
         ),
-        datasetId = folder_synID()
+        datasetId = selected$folder()
       )
 
     # generate link
@@ -281,7 +287,7 @@ shinyServer(function(input, output, session) {
 
   observeEvent(inFile$data(), {
     # hide the validation section when upload a new file
-    sapply(clean_tags[-1], FUN = hide)
+    sapply(clean_tags[-c(1:2)], FUN = hide)
     # renders in DT for preview
     DTableServer("tbl_preview", inFile$data(), filter = "top")
   })
@@ -296,9 +302,9 @@ shinyServer(function(input, output, session) {
       tryCatch(
         metadata_model$validateModelManifest(
           inFile$raw()$datapath,
-          template_schema_name(),
+          selected$schema(),
           restrict_rules = TRUE, # set true to disable great expectation
-          project_scope = list(project_synID)
+          project_scope = list(selected$project())
         ),
         error = function(e) NULL
       )
@@ -346,7 +352,7 @@ shinyServer(function(input, output, session) {
     filled_manifest <- metadata_model$populateModelManifest(paste0(
       config_project$community,
       " ", input$dropdown_template
-    ), inFile$raw()$datapath, template_schema_name())
+    ), inFile$raw()$datapath, selected$schema())
 
     # rerender and change button to link
     output$val_gsheet <- renderUI({
@@ -371,7 +377,7 @@ shinyServer(function(input, output, session) {
     # the type to filter (eg file-based) on could probably also be a config choice
     display_names <- config_schemas$manifest_schemas$display_name[config_schemas$manifest_schemas$type == "file"]
     # if folder_ID has not been updated yet
-    if (folder_synID() == "") folder_synID(data_list$folders()[[input$dropdown_folder]])
+    if (is.null(selected$folder())) selected$folder(data_list$folders()[[input$dropdown_folder]])
 
     if (input$dropdown_template %in% display_names) {
       # make into a csv or table for file-based components already has entityId
@@ -381,12 +387,12 @@ shinyServer(function(input, output, session) {
           quote = TRUE, row.names = FALSE, na = ""
         )
       } else {
-        file_list <- synapse_driver$getFilesInStorageDataset(synStore_obj, folder_synID())
-        data_list$files <<- list2Vector(file_list)
+        file_list <- synapse_driver$getFilesInStorageDataset(synStore_obj, selected$folder())
+        data_list$files(list2Vector(file_list))
 
         # better filename checking is needed
         # TODO: crash if no file existing
-        files_df <- stack(data_list$files)
+        files_df <- stack(data_list$files())
         # adds entityID, saves it as synapse_storage_manifest.csv, then associates with synapse files
         colnames(files_df) <- c("entityId", "Filename")
         files_entity <- inner_join(submit_data, files_df, by = "Filename")
@@ -401,7 +407,7 @@ shinyServer(function(input, output, session) {
       manifest_id <- synapse_driver$associateMetadataWithFiles(
         synStore_obj,
         "./tmp/synapse_storage_manifest.csv",
-        folder_synID(),
+        selected$folder(),
         manifest_record_type = "table"
       )
       manifest_path <- tags$a(href = paste0("https://www.synapse.org/#!Synapse:", manifest_id), manifest_id, target = "_blank")
@@ -436,7 +442,7 @@ shinyServer(function(input, output, session) {
       manifest_id <- synapse_driver$associateMetadataWithFiles(
         synStore_obj,
         "./tmp/synapse_storage_manifest.csv",
-        folder_synID(),
+        selected$folder(),
         manifest_record_type = "table"
       )
       manifest_path <- tags$a(href = paste0("https://www.synapse.org/#!Synapse:", manifest_id), manifest_id, target = "_blank")

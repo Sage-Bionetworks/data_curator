@@ -4,7 +4,7 @@ dbValidationTableUI <- function(id) {
   DT::DTOutput(ns("validation-table"))
 }
 
-dbValidationTable <- function(id, data, columns = "Validation", config) {
+dbValidationTable <- function(id, data, columns = "Validation") {
   moduleServer(
     id,
     function(input, output, session) {
@@ -13,21 +13,12 @@ dbValidationTable <- function(id, data, columns = "Validation", config) {
           need(nrow(data) != 0, "It seems like you do not have uploaded files !!!")
         )
 
-        datatable(
+        DT::datatable(
           data,
-          caption = tags$caption(HTML(
-            paste0(
-              "Invalid Results: <b>", sum(data[[columns]] == "Fail"), "</b>", "<br>",
-              "Schema Version: <code>", unique(config$schema), "</code> ",
-              tags$a(icon("github"), style = "color:#000;", href = "https://github.com/Sage-Bionetworks/schematic", target = "_blank"),
-              "</b>", "<br><br>",
-              "Click on the data type name to download your existing data."
-            )
-          )),
           escape = FALSE,
-          options = list(dom = "t", scrollX = TRUE, columnDefs = list(list(className = "dt-center", targets = "_all")))
+          options = list(scrollX = TRUE, columnDefs = list(list(className = "dt-center", targets = "_all")))
         ) %>%
-          formatStyle(columns, backgroundColor = styleEqual(c("Pass", "Fail"), c("#82E0AA", "#F7DC6F")))
+          formatStyle(columns, backgroundColor = styleEqual(c("Pass", "Warning", "Fail"), c("#82E0AA", "#F7DC6F", "#ffcccb")))
       })
     }
   )

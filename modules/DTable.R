@@ -47,7 +47,7 @@ DTableServer <- function(id, data, escape = TRUE,
           }
         }
       }
-      
+
       if (cell_border) {
         df <- df %>% formatStyle(1:ncol(data), border = "1px solid #ddd")
       }
