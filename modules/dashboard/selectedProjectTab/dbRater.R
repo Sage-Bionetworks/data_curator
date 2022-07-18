@@ -6,19 +6,19 @@ dbRaterUI <- function(id) {
   )
 }
 
-dbRater <- function(id, up.data, req.data, user.name) {
+dbRater <- function(id, metadata, nodes, username) {
   moduleServer(
     id,
     function(input, output, session) {
       ns <- session$ns
 
       # number of total dataset
-      uniq_ds <- req.data %>% distinct(folderSynId, .keep_all = TRUE)
+      uniq_ds <- nodes %>% distinct(folder_id, .keep_all = TRUE)
       n_ds <- nrow(uniq_ds)
       # number of completed dataset
-      n_completed <- sum(uniq_ds$nMiss == 0)
+      n_completed <- sum(uniq_ds$n_miss == 0)
       # number of incompleted dataset
-      n_miss <- sum(uniq_ds$nMiss > 0)
+      n_miss <- sum(uniq_ds$n_miss > 0)
       # completion progress percentage: complete datasets / total datasets
       progress_value <- round(n_completed / n_ds * 100)
 
@@ -45,7 +45,7 @@ dbRater <- function(id, up.data, req.data, user.name) {
                 )
               )
             ),
-            div(class = "dbRater-header", h3(paste0("Congratulations ", user.name, "!"))),
+            div(class = "dbRater-header", h3(paste0("Congratulations ", username, "!"))),
             div(
               class = "dbRater-body",
               paste0("you have made ", progress_value, "% progress")

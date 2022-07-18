@@ -11,39 +11,39 @@ validationTabUI <- function(id) {
   )
 }
 
-validationTab <- function(id, uploadData, selectedProject, config) {
+validationTab <- function(id, metadata, project.name) {
   moduleServer(
     id,
     function(input, output, session) {
       ns <- session$ns
 
       # render tab title
-      setTabTitle("title", paste0("Validation of Uploaded Data for Project: ", sQuote(selectedProject)))
+      setTabTitle("title", paste0("Validation of Uploaded Data for Project: ", sQuote(project.name)))
 
       # change wrong schema to out-of-date type
       schema_status <- case_when(
-        uploadData$errorType == "Wrong Schema" ~ "Out of Date",
-        uploadData$errorType == "No Error" ~ "Valid",
-        TRUE ~ uploadData$errorType
+        metadata$ErrorType == "Wrong Schema" ~ "Out of Date",
+        metadata$ErrorType == "No Error" ~ "Valid",
+        TRUE ~ metadata$ErrorType
       )
       # process validation result
       validation_df <- tibble(
         `Data Type` = paste0(
           '<a href="https://www.synapse.org/#!Synapse:',
-          uploadData$synID, '" target="_blank">', uploadData$schema, "</a>"
+          metadata$SynID, '" target="_blank">', metadata$Component, "</a>"
         ),
-        Dataset = uploadData$folder,
-        Validation = ifelse(uploadData$result == "valid" & uploadData$warnMsg == "Valid", "Pass", "Fail"),
+        Dataset = metadata$Folder,
+        Validation = ifelse(metadata$Result == "valid" & metadata$WarnMsg == "Valid", "Pass", "Fail"),
         # change wrong schema to out-of-date type
         `Schema Check` = schema_status,
-        `Internal Links Check` = uploadData$warnMsg,
-        `Created On` = uploadData$createdOn,
-        `Last Modified` = uploadData$modifiedOn,
-        `User Modified` = uploadData$modifiedUser
+        `Internal Links Check` = metadata$WarnMsg,
+        `Created On` = metadata$CreatedOn,
+        `Last Modified` = metadata$ModifiedOn,
+        `User Modified` = metadata$ModifiedUser
       ) %>% arrange(Validation)
 
       # render the validation result table
-      dbValidationTable("validation-table", validation_df, config = config)
+      dbValidationTable("validation-table", validation_df)
     }
   )
 }

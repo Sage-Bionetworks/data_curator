@@ -3,54 +3,54 @@
 #'
 #' @param id id name of this module
 #' @param height height in px of network container, 500px by default
-#' @param uploadData output from \code{get_manifests}
-#' @param reqData output from \code{get_requirement}
+#' @param metadata output from \code{get_dataset_metadata}
+#' @param nodes output from \code{get_schema_nodes_df}
 #' @param selectedDataType the selected data type/schema name of template dropdown
 #' @return reactive network and progress bar
 dbNetworkUI <- function(id, height = 500) {
   ns <- NS(id)
   tagList(
-    helpText(align = "center", "Usage: mouse over nodes to see the data types, drag nodes to change layout"),
+    helpText(align = "center", "Usage: mouse over nodes_df to see the data types, drag nodes_df to change layout"),
     uiOutput(ns("instruction")),
     forceNetworkOutput(ns("network"), height = height),
     helpText(align = "center", HTML(paste0("A ", icon("long-arrow-alt-right"), " B: Data type A requires Data type B")))
   )
 }
 
-dbNetwork <- function(id, uploadData, reqData, selectedDataType) {
+dbNetwork <- function(id, metadata, nodes, selectedDataType) {
   moduleServer(
     id,
     function(input, output, session) {
       output$network <- renderForceNetwork({
 
         # create input data for network function, forceNetwork
-        if (is.null(names(reqData))) {
-          # if reqData is a single string of datatype without name, aka no requirements
+        if (is.null(names(nodes))) {
+          # if nodes is a single string of datatype without name, aka no requirements
           # still create data frame for network to prevent breaking the app
-          links <- data.frame(source = reqData, target = reqData, value = 5)
-          nodes <- data.frame(name = selectedDataType, group = "Selected", size = c(20))
+          links <- data.frame(source = nodes, target = nodes, value = 5)
+          nodes_df <- data.frame(name = selectedDataType, group = "Selected", size = c(20))
         } else {
           links <- data.frame(
-            source = reqData, target = names(reqData),
-            value = ifelse(reqData == selectedDataType, 5, 1) # make selected datatype node bigger than others
+            source = nodes, target = names(nodes),
+            value = ifelse(nodes == selectedDataType, 5, 1) # make selected datatype node bigger than others
           )
-          nodes <- data.frame(
-            name = c(selectedDataType, names(reqData)),
-            group = c("Selected", ifelse(links$target %in% uploadData$schema, "Completed", "Missing")),
+          nodes_df <- data.frame(
+            name = c(selectedDataType, names(nodes)),
+            group = c("Selected", ifelse(links$target %in% metadata$Component, "Completed", "Missing")),
             size = c(20)
           )
         }
 
         # convert to numbers starting from 0
-        links$IDsource <- match(links$source, nodes$name) - 1
-        links$IDtarget <- match(links$target, nodes$name) - 1
+        links$IDsource <- match(links$source, nodes_df$name) - 1
+        links$IDtarget <- match(links$target, nodes_df$name) - 1
         # assign colors to groups
         cols <- 'd3.scaleOrdinal()
                 .domain(["Selected", "Completed", "Missing"])
                 .range(["#694489", "#28a745", "#E53935"]);'
         # render network
         forceNetwork(
-          Links = links, Nodes = nodes, Source = "IDsource", Target = "IDtarget",
+          Links = links, Nodes = nodes_df, Source = "IDsource", Target = "IDtarget",
           Group = "group", Value = "value", NodeID = "name", Nodesize = "size",
           linkColour = ifelse(links$IDsource == 5, "#694489", "black"),
           colourScale = JS(cols), legend = TRUE, linkDistance = 40,

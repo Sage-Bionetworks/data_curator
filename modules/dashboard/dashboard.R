@@ -42,7 +42,15 @@ dashboardUI <- function(id) {
   )
 }
 
-dashboard <- function(id, synStoreObj, selectedProject, folderList, selectedDataType, userName, config, disableIds = NULL) {
+#' Dashboard Module - Server
+#'
+#' @param id id of dashboard module
+#' @param syn.store synapse storage object
+#' @param project.scope selected project syn ID named with project name
+#' @param schema selected schema name
+#' @param disable_ids selector ids to be disable during the process of dashboard
+#' @return data frame that contains manifest essential information for dashboard
+dashboard <- function(id, syn.store, project.scope, schema, disable.ids = NULL) {
   moduleServer(
     id,
     function(input, output, session) {
@@ -68,7 +76,7 @@ dashboard <- function(id, synStoreObj, selectedProject, folderList, selectedData
 
       # retrieving data progress for dashboard should not be executed until dashboard visiable
       # get all uploaded manifests once the project/folder changed
-      observeEvent(c(folderList(), input$box$visible), {
+      observeEvent(c(project.scope(), input$box$visible), {
         req(input$box$visible)
         # initiate partial loading screen for generating plot
         dcWaiter(
@@ -79,30 +87,35 @@ dashboard <- function(id, synStoreObj, selectedProject, folderList, selectedData
 
         # disable selection to prevent changes until all uploaded manifests are queried
         # make sure to use asis, otherwise it will add module's namespaces
-        lapply(disableIds, FUN = disable, asis = TRUE)
+        lapply(disable.ids, FUN = disable, asis = TRUE)
+
+        # get all datasets from selected project
+        folder_list <- synapse_driver$getStorageDatasetsInProject(syn.store, project.scope())
+        folder_list <- list2Vector(folder_list)
 
         # get all uploaded manifests for selected project
-        all_manifests <- get_manifests(
-          syn.store = synStoreObj,
-          datasets = folderList(),
-          project.scope = list(as.character(selectedProject()))
+        metadata <- get_dataset_metadata(
+          syn.store = syn.store,
+          datasets = folder_list
         )
-        # update reactive value
-        uploaded_manifests(all_manifests)
 
-        lapply(disableIds, FUN = enable, asis = TRUE)
+        metadata <- validate_metadata(metadata, project.scope = list(project.scope()))
+        # update reactive value
+        uploaded_manifests(metadata)
+
+        lapply(disable.ids, FUN = enable, asis = TRUE)
       })
 
       # get requirements for selected data type
-      selected_datatype_requirement <- eventReactive(c(selectedDataType(), input$box$visible), {
+      selected_datatype_requirement <- eventReactive(c(schema(), input$box$visible), {
         req(input$box$visible)
-        get_requirement(selectedDataType())
+        get_schema_nodes(schema())
       })
 
       # get requirements for all uploaded manifests
       uploaded_manifests_requirement <- eventReactive(uploaded_manifests(), {
         req(input$box$visible)
-        get_all_requirements(uploaded_manifests())
+        get_metadata_nodes(uploaded_manifests())
       })
 
       # render info/plots for selected datatype
@@ -112,7 +125,7 @@ dashboard <- function(id, synStoreObj, selectedProject, folderList, selectedData
           "tab-selected-datatype",
           uploaded_manifests(),
           selected_datatype_requirement(),
-          selectedDataType()
+          schema()
         )
       })
 
@@ -120,16 +133,17 @@ dashboard <- function(id, synStoreObj, selectedProject, folderList, selectedData
       # to reduce running time, selected template updates should not initiate this event
       observeEvent(c(uploaded_manifests_requirement(), input$box$visible), {
         req(input$box$visible)
+        user_name <- syn$getUserProfile()$userName
         selectedProjectTab(
           "tab-selected-project",
-          userName,
+          user_name,
           uploaded_manifests(),
           uploaded_manifests_requirement(),
-          names(selectedProject()),
-          source.tab = "tabs", target.tab = "db-tab3", parent.session = session
+          names(project.scope()),
+          parent.session = session
         )
         # validation table for all uploaded data
-        validationTab("tab-validation", uploaded_manifests(), names(selectedProject()), config)
+        validationTab("tab-validation", uploaded_manifests(), names(project.scope()))
         # force switch tabs to solve tabs content not rendered initially
         if (input$`toggle-btn` == 1) {
           updateTabsetPanel(session, "tabs", selected = "db-tab2")
