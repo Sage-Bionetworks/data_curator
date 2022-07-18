@@ -33,7 +33,7 @@ get_dataset_metadata <- function(syn.store, datasets) {
       manifest_df <- data.table::fread(manifest_path)
       # keep all manifests used for validation, even if it has invalid component value
       # if manifest doesn't have "Component" column, or empty, return NA for component
-      manifest_component <- if_else("Component" %in% colnames(manifest_df) & nrow(manifest_df) > 0,
+      manifest_component <- ifelse("Component" %in% colnames(manifest_df) & nrow(manifest_df) > 0,
         manifest_df$Component[1], NA_character_
       )
       modified_user <- syn$getUserProfile(info["properties"]["modifiedBy"])["userName"]
@@ -81,7 +81,7 @@ validate_metadata <- function(metadata, project.scope) {
     data.frame(
       Result = clean_res$result,
       ErrorType = clean_res$error_type,
-      WarnMsg = if_else(is.null(clean_res$warning_msg), "Valid", clean_res$warning_msg)
+      WarnMsg = if_else(length(clean_res$warning_msg) == 0, "Valid", clean_res$warning_msg)
     )
   }) %>%
     bind_rows() %>%

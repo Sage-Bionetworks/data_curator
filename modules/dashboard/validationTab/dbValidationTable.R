@@ -13,12 +13,12 @@ dbValidationTable <- function(id, data, columns = "Validation") {
           need(nrow(data) != 0, "It seems like you do not have uploaded files !!!")
         )
 
-        datatable(
+        DT::datatable(
           data,
           escape = FALSE,
-          options = list(dom = "t", scrollX = TRUE, columnDefs = list(list(className = "dt-center", targets = "_all")))
+          options = list(scrollX = TRUE, columnDefs = list(list(className = "dt-center", targets = "_all")))
         ) %>%
-          formatStyle(columns, backgroundColor = styleEqual(c("Pass", "Fail"), c("#82E0AA", "#F7DC6F")))
+          formatStyle(columns, backgroundColor = styleEqual(c("Pass", "Warning", "Fail"), c("#82E0AA", "#F7DC6F", "#ffcccb")))
       })
     }
   )

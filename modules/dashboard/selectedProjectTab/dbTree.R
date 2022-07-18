@@ -57,27 +57,28 @@ dbTree <- function(id, metadata, nodes, project.name) {
         incompleted_ds <- nodes %>%
           distinct(folder_id, .keep_all = TRUE) %>%
           filter(n_miss > 0)
+
         # make nodes data frame: from project to dataset to required data type
         project_to_dataset <- data.frame(
           from = c(project.name),
           to = paste0("f:", folder_list),
-          node_opacity = c(0),
+          font_opacity = c(0),
           node_color = ifelse(folder_list %in% incompleted_ds$folder, "#FF794A", "#A287AF")
         )
         # make nodes data from datasets to their requirements
         dataset_to_req <- nodes %>%
           mutate(
-            node_opacity = if_else(nodes$to %in% nodes$from, 0, 1),
-            node_color = if_else(nodes$to %in% metadata, "#28a745", "#E53935")
+            font_opacity = if_else(nodes$to %in% nodes$from, 0, 1),
+            node_color = if_else(nodes$to %in% metadata$Component, "#28a745", "#E53935")
           ) %>%
-          select(from, to, node_opacity, node_color)
+          select(from, to, font_opacity, node_color)
         tree_df <- rbind(project_to_dataset, dataset_to_req) %>%
           mutate_at(1:2, ~ gsub(pattern, "", .)) %>%
           distinct() # remove duplicated rows to save conversion time
         # convert to tree list using `data.tree`
         tree_list <- data.tree::FromDataFrameNetwork(tree_df)
         # tree_list$Set(group = ifelse(tree_list$Get("name") %in% c(upData$folder, upData$schema), "upload", "not_load"))
-        tree_list$node_opacity <- 1
+        tree_list$font_opacity <- 1
         tree_list$node_color <- "#694489"
         tree_list <- as.list(tree_list, mode = "explicit", unname = TRUE)
       }

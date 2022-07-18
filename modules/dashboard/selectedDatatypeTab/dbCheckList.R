@@ -53,7 +53,7 @@ dbCheckList <- function(id, metadata, nodes) {
                             lapply(dups_inx, function(i) {
                               tags$a(metadata$Folder[i],
                                 target = "_blank",
-                                href = paste0("https://www.synapse.org/#!Synapse:", metadata$SynID[i])
+                                href = paste0("https://www.synapse.org/#!Synapse:", metadata$SynapseID[i])
                               )
                             })
                           )

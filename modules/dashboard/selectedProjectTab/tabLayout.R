@@ -44,7 +44,7 @@ selectedProjectTab <- function(id, username, metadata, nodes, project.name, pare
       # render rator system
       dbRater("summary", metadata, nodes, username)
       # render summary stats boxes
-      dbStatsBox("stats", metadata, nodes, parent.session)
+      dbStatsBox("stats", metadata, nodes, parent.session = parent.session)
 
       ## Evaluate submission
       # get all uploaded data types

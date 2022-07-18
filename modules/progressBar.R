@@ -1,16 +1,14 @@
 progressBarUI <- function(id) {
-  
   ns <- NS(id)
   uiOutput(ns("progress"))
 }
 
-progressBar <- function(id, value = 100, title = NULL, subtitle = NULL, 
+progressBar <- function(id, value = 100, title = NULL, subtitle = NULL,
                         display_pct = TRUE, width = NULL, height = NULL, r = 80,
                         circular = FALSE, color = NULL, backgoundCol = NULL) {
   moduleServer(
     id,
     function(input, output, session) {
-      
       if (is.null(width)) width <- ifelse(circular, "160px", "100%")
       if (is.null(height)) height <- ifelse(circular, "160px", "20px")
       if (circular) {
@@ -33,8 +31,8 @@ progressBar <- function(id, value = 100, title = NULL, subtitle = NULL,
       dt <- 20
 
       # set color
-      if(is.null(color)) color <- c("#e91e63", "#673ab7")
-      if(is.null(backgoundCol)) backgoundCol <- "#f5f5f5"
+      if (is.null(color)) color <- c("#e91e63", "#673ab7")
+      if (is.null(backgoundCol)) backgoundCol <- "#f5f5f5"
       # add gap in linear pb if two colors are not identical
       border <- ifelse(value != 0 && value != 100 && color != backgoundCol, "2px solid #fff", "none")
 
@@ -48,118 +46,125 @@ progressBar <- function(id, value = 100, title = NULL, subtitle = NULL,
         tagList(
           if (circular) {
             tags$script(HTML(paste0(
-              '
-              var ', unique_var_name, '_Num = document.getElementById("', pct_id_name, '");
-              var ', unique_var_name, '_Counter = 0;
-              ', unique_var_name, '_Num.innerHTML = "0%";
+              "
+              var ", unique_var_name, '_Num = document.getElementById("', pct_id_name, '");
+              var ', unique_var_name, "_Counter = 0;
+              ", unique_var_name, '_Num.innerHTML = "0%";
               setInterval(() => {
-                if (', unique_var_name, '_Counter == ', value, ') {
+                if (', unique_var_name, "_Counter == ", value, ") {
                   clearInterval();
                 } else {
-                  ', unique_var_name, '_Counter += 1;
-                  ', unique_var_name, '_Num.innerHTML = ', unique_var_name, '_Counter + "%";
+                  ", unique_var_name, "_Counter += 1;
+                  ", unique_var_name, "_Num.innerHTML = ", unique_var_name, '_Counter + "%";
                 }
-              }, ', dt, ');
-              '
+              }, ', dt, ");
+              "
             )))
           },
           # TODO: add animation for linear progress bar
           if (circular) {
             tags$style(paste0(
-              '
-              @keyframes circularSlide-', pb_id, ' {
+              "
+              @keyframes circularSlide-", pb_id, " {
                 100% {
-                  stroke-dashoffset: ',  progress_value, ';
+                  stroke-dashoffset: ", progress_value, ";
                 }
               };
-              '
+              "
             ))
           },
-          div(class="progress-group",
+          div(
+            class = "progress-group",
             tagList(
               if (!circular) {
                 tagList(
-                  div(class="progress-title-container",
+                  div(
+                    class = "progress-title-container",
                     tagList(
                       if (!is.null(title)) span(title, class = "progress-title"),
                       if (!is.null(subtitle)) span(subtitle, class = "progress-subtitle")
                     )
                   ),
-                  div(class = "progress-linear",
+                  div(
+                    class = "progress-linear",
                     style = paste0(
-                      '
-                      height: ', height, ';
-                      width: ', width, ';
+                      "
+                      height: ", height, ";
+                      width: ", width, ";
                       background-image: linear-gradient(
-                        to right, ', color[1], ', ', tail(color, 1), ');
-                      '
+                        to right, ", color[1], ", ", tail(color, 1), ");
+                      "
                     ),
-                    div(class = "progress-linear-value",
-                      style = paste0('
-                        width:', progress_value, '%;
-                        background-color:', backgoundCol, ';
-                        border-left:', border, ';
-                      ')
+                    div(
+                      class = "progress-linear-value",
+                      style = paste0("
+                        width:", progress_value, "%;
+                        background-color:", backgoundCol, ";
+                        border-left:", border, ";
+                      ")
                     ),
-                    if(display_pct) {
-                      div(id=pct_id_name, class="progress-pct linear")
+                    if (display_pct) {
+                      div(id = pct_id_name, class = "progress-pct linear")
                     }
                   )
-              )
+                )
               } else {
-                div(class="progress-circular",
+                div(
+                  class = "progress-circular",
                   tagList(
-                    div(class="progress-title-container",
+                    div(
+                      class = "progress-title-container",
                       tagList(
                         if (!is.null(title)) span(title, class = "progress-title"),
                         if (!is.null(subtitle)) span(subtitle, class = "progress-subtitle")
                       )
                     ),
-                    div(class="progress-circular-outer",
+                    div(
+                      class = "progress-circular-outer",
                       style = paste0(
-                        '
-                        height: ', 2 * r, 'px;
-                        width: ', 2 * r, 'px;
-                        background-color:', backgoundCol, ';
-                        '
+                        "
+                        height: ", 2 * r, "px;
+                        width: ", 2 * r, "px;
+                        background-color:", backgoundCol, ";
+                        "
                       ),
                       tagList(
-                        div(class="progress-circular-inner",
+                        div(
+                          class = "progress-circular-inner",
                           style = paste0(
-                            '
-                            height: ', 2 * r - 40  , 'px;
-                            width: ', 2 * r - 40, 'px;
-                            '
+                            "
+                            height: ", 2 * r - 40, "px;
+                            width: ", 2 * r - 40, "px;
+                            "
                           ),
-                          if(display_pct) div(id=pct_id_name, class="progress-pct circular")
+                          if (display_pct) div(id = pct_id_name, class = "progress-pct circular")
                         ),
                         div(HTML(paste0(
                           '
                           <svg xmlns="http://www.w3.org/2000/svg" version="1.1" id = "progress-svg-', pb_id, '"
-                            width=', 2 * r, ' height=', 2 * r, '>
+                            width=', 2 * r, " height=", 2 * r, '>
                             <defs>
                                 <linearGradient id="GradientColor-', pb_id, '">
                                   <stop offset="0%" stop-color=', color[1], ' />
                                   <stop offset="100%" stop-color=', tail(color, 1), ' />
                                 </linearGradient>
                             </defs>
-                            <circle cx="', r , '" 
-                                    cy="', r, '" 
-                                    r="', r - 10, '" 
-                                    stroke="url(#GradientColor-', pb_id, ')" 
-                                    stroke-linecap="round" 
-                                    stroke-dasharray="', C , '"
+                            <circle cx="', r, '"
+                                    cy="', r, '"
+                                    r="', r - 10, '"
+                                    stroke="url(#GradientColor-', pb_id, ')"
+                                    stroke-linecap="round"
+                                    stroke-dasharray="', C, '"
                                     stroke-dashoffset="', C, '"
-                                    style="animation: circularSlide-', pb_id, ' ', value * dt, 'ms linear forwards;" />
+                                    style="animation: circularSlide-', pb_id, " ", value * dt, 'ms linear forwards;" />
                           </svg>
                           '
-                          ))
-                        )
+                        )))
                       )
                     )
-                  )  
+                  )
                 )
-              }   
+              }
             )
           )
         )

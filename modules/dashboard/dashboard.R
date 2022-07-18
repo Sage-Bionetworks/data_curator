@@ -49,7 +49,7 @@ dashboardUI <- function(id) {
 #' @param project.scope selected project syn ID named with project name
 #' @param schema selected schema name
 #' @param disable_ids selector ids to be disable during the process of dashboard
-#' @return data frame that contains manifest essential information for dashboard
+#'
 dashboard <- function(id, syn.store, project.scope, schema, disable.ids = NULL) {
   moduleServer(
     id,
@@ -102,7 +102,6 @@ dashboard <- function(id, syn.store, project.scope, schema, disable.ids = NULL) 
         metadata <- validate_metadata(metadata, project.scope = list(project.scope()))
         # update reactive value
         uploaded_manifests(metadata)
-
         lapply(disable.ids, FUN = enable, asis = TRUE)
       })
 

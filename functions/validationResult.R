@@ -1,4 +1,4 @@
-validationResult <- function(anno.res, template, manifest=NULL, dashboard = FALSE) {
+validationResult <- function(anno.res, template, manifest = NULL, dashboard = FALSE) {
   result <- "invalid"
   error_msg <- NULL
   error_help_msg <- NULL
@@ -77,7 +77,9 @@ validationResult <- function(anno.res, template, manifest=NULL, dashboard = FALS
       error_type <- "Invalid Value"
       # create table to display errors for users
       error_table <- lapply(errors, function(i) {
-        data.frame(Row = as.numeric(i[[1]]), Column = i[[2]], Value = i[[4]][[1]], Error = i[[3]])
+        data.frame(Row = i[[1]], Column = i[[2]], Value = i[[4]][[1]], Error = i[[3]]) %>%
+          # change all columns to character to avoid mismatched types
+          mutate(across(everything(), as.character))
       }) %>% bind_rows()
 
       # create list for hightlight function; key: error_column, value: error_value
