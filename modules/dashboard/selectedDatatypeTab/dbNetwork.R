@@ -56,7 +56,7 @@ dbNetwork <- function(id, metadata, nodes, schema) {
         forceNetwork(
           Links = links, Nodes = nodes_df, Source = "IDsource", Target = "IDtarget",
           Group = "group", Value = "value", NodeID = "name", Nodesize = "size",
-          linkColour = ifelse(links$IDsource == 5, "#694489", "black"),
+          linkColour = if_else(links$IDsource == 5, "#694489", "black"),
           colourScale = JS(cols), legend = TRUE, linkDistance = 40,
           zoom = FALSE, bounded = TRUE, arrows = TRUE,
           opacity = 0.9, fontSize = 16, charge = -500

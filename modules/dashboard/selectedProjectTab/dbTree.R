@@ -63,7 +63,7 @@ dbTree <- function(id, metadata, nodes, project.name) {
           from = c(project.name),
           to = paste0("f:", folder_list),
           font_opacity = c(0),
-          node_color = ifelse(folder_list %in% incompleted_ds$folder, "#FF794A", "#A287AF")
+          node_color = if_else(folder_list %in% incompleted_ds$folder, "#FF794A", "#A287AF")
         )
         # make nodes data from datasets to their requirements
         dataset_to_req <- nodes %>%
