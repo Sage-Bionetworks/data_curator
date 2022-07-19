@@ -25,7 +25,7 @@ selectedDataTypeTabUI <- function(id) {
   )
 }
 
-selectedDataTypeTab <- function(id, metadata, nodes, selectedDataType) {
+selectedDataTypeTab <- function(id, metadata, nodes, schema) {
   moduleServer(
     id,
     function(input, output, session) {
@@ -35,14 +35,15 @@ selectedDataTypeTab <- function(id, metadata, nodes, selectedDataType) {
       all_req <- union(nodes, names(nodes))
       # get number of total requirements
       n_req <- length(all_req)
-
+      # remove manifests with invalid component name
+      metadata <- drop_na(metadata, "Component")
       # render tab title
-      setTabTitle("title", paste0("Completion of Requirements for Data Type: ", sQuote(selectedDataType)))
+      setTabTitle("title", paste0("Completion of Requirements for Data Type: ", sQuote(schema)))
 
       # render check list of requirments for selected datatype
       dbCheckList("checklist", metadata, nodes)
       # render network plot for requirements of selected datatype
-      dbNetwork("network", metadata, nodes, selectedDataType)
+      dbNetwork("network", metadata, nodes, schema)
     }
   )
 }

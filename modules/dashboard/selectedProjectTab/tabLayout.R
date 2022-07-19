@@ -41,6 +41,7 @@ selectedProjectTab <- function(id, username, metadata, nodes, project.name, pare
       ## Summary banner
       # render tab title
       setTabTitle("title", paste0("Completion of Requirements for Project: ", sQuote(project.name)))
+
       # render rator system
       dbRater("summary", metadata, nodes, username)
       # render summary stats boxes
@@ -163,7 +164,7 @@ selectedProjectTab <- function(id, username, metadata, nodes, project.name, pare
         })
 
         # render collasiple tree
-        dbTree("requirement-tree", metadata, nodes, project.name)
+        dbTree("requirement-tree", drop_na(metadata, "Component"), nodes, project.name)
       })
     }
   )

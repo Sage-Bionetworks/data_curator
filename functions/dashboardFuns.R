@@ -117,6 +117,7 @@ get_metadata_nodes <- function(metadata) {
   if (nrow(metadata) == 0) {
     return(data.frame(from = NA, to = NA, folder = NA, folderSynId = NA, nMiss = NA))
   } else {
+    metadata <- drop_na(metadata, "Component")
     lapply(1:nrow(metadata), function(i) {
       manifest <- metadata[i, ]
       # get all required data types
