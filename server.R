@@ -368,7 +368,7 @@ shinyServer(function(input, output, session) {
     # loading screen for submitting data
     dcWaiter("show", msg = "Submitting...")
 
-    dir.create("./tmp", showWarnings = FALSE)
+    dir.create("./manifests", showWarnings = FALSE)
 
     # reads file csv again
     submit_data <- csvInfileServer("inputFile")$data()
@@ -383,7 +383,7 @@ shinyServer(function(input, output, session) {
       # make into a csv or table for file-based components already has entityId
       if ("entityId" %in% colnames(submit_data)) {
         write.csv(submit_data,
-          file = "./tmp/synapse_storage_manifest.csv",
+          file = "./manifests/synapse_storage_manifest.csv",
           quote = TRUE, row.names = FALSE, na = ""
         )
       } else {
@@ -398,7 +398,7 @@ shinyServer(function(input, output, session) {
         files_entity <- inner_join(submit_data, files_df, by = "Filename")
 
         write.csv(files_entity,
-          file = "./tmp/synapse_storage_manifest.csv",
+          file = "./manifests/synapse_storage_manifest.csv",
           quote = TRUE, row.names = FALSE, na = ""
         )
       }
@@ -406,7 +406,7 @@ shinyServer(function(input, output, session) {
       # associates metadata with data and returns manifest id
       manifest_id <- synapse_driver$associateMetadataWithFiles(
         synStore_obj,
-        "./tmp/synapse_storage_manifest.csv",
+        "./manifests/synapse_storage_manifest.csv",
         selected$folder(),
         manifest_record_type = "table"
       )
@@ -434,14 +434,14 @@ shinyServer(function(input, output, session) {
     } else {
       # if not file-based type template
       write.csv(submit_data,
-        file = "./tmp/synapse_storage_manifest.csv", quote = TRUE,
+        file = "./manifests/synapse_storage_manifest.csv", quote = TRUE,
         row.names = FALSE, na = ""
       )
 
       # associates metadata with data and returns manifest id
       manifest_id <- synapse_driver$associateMetadataWithFiles(
         synStore_obj,
-        "./tmp/synapse_storage_manifest.csv",
+        "./manifests/synapse_storage_manifest.csv",
         selected$folder(),
         manifest_record_type = "table"
       )
@@ -477,7 +477,7 @@ shinyServer(function(input, output, session) {
         )), sleep = 3)
       }
     }
-    # delete tmp manifest
-    unlink("./tmp/synapse_storage_manifest.csv")
+    # delete tmp manifest folder
+    unlink("./manifests/synapse_storage_manifest.csv")
   })
 })
