@@ -16,6 +16,7 @@ on:
       - '.github/ISSUE_TEMPLATE/**'
       - '**/*.md'
       - '**/.gitignore'
+  workflow_dispatch:
 
 jobs:
   shiny-deploy:
