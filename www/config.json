@@ -216,8 +216,8 @@
       "type": "record"
     },
     {
-      "display_name": "Publication",
-      "schema_name": "Publication",
+      "display_name": "Publication Manifest",
+      "schema_name": "PublicationManifest",
       "type": "record"
     } 
   ],
