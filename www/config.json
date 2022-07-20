@@ -214,6 +214,11 @@
       "display_name": "HTAN RPPA Antibody Table",
       "schema_name": "HTANRPPAAntibodyTable",
       "type": "record"
+    },
+    {
+      "display_name": "Publication",
+      "schema_name": "Publication",
+      "type": "record"
     } 
   ],
 
