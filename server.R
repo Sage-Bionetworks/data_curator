@@ -36,7 +36,7 @@ shinyServer(function(input, output, session) {
   template_namedList <- config$manifest_schemas$schema_name
   names(template_namedList) <- config$manifest_schemas$display_name
 
-  synStore_obj <- NULL # gets list of projects they have access to
+  syn_store <- NULL # gets list of projects they have access to
   project_synID <- NULL # selected project synapse ID
   folder_synID <- reactiveVal("") # selected foler synapse ID
   template_schema_name <- reactiveVal(NULL) # selected template schema name
@@ -74,13 +74,13 @@ shinyServer(function(input, output, session) {
     syn_login(authToken = access_token, rememberMe = FALSE)
 
     # updating syn storage
-    tryCatch(synStore_obj <<- synapse_driver(access_token = access_token), error = function(e) NULL)
+    tryCatch(syn_store <<- synapse_driver(access_token = access_token), error = function(e) NULL)
 
-    if (is.null(synStore_obj)) {
+    if (is.null(syn_store)) {
       message("'synapse_driver' fails, run 'synapse_driver' to see detailed error")
       dcWaiter("update", landing = TRUE, isPermission = FALSE)
     } else {
-      projects_list <- synapse_driver$getStorageProjects(synStore_obj)
+      projects_list <- synapse_driver$getStorageProjects(syn_store)
       datatype_list$projects <<- list2Vector(projects_list)
 
       # updates project dropdown
@@ -155,7 +155,7 @@ shinyServer(function(input, output, session) {
       projectID <- datatype_list$projects[[input[[paste0(x, "project")]]]]
 
       # gets folders per project
-      folder_list <- synapse_driver$getStorageDatasetsInProject(synStore_obj, projectID) %>% list2Vector()
+      folder_list <- synapse_driver$getStorageDatasetsInProject(syn_store, projectID) %>% list2Vector()
 
       # updates foldernames
       updateSelectInput(session, paste0(x, "folder"), choices = sort(names(folder_list)))
@@ -193,7 +193,7 @@ shinyServer(function(input, output, session) {
       dcWaiter("show", msg = paste0("Getting files in ", input$dropdown_folder, "..."))
       # get file list in selected folder
       file_list <- synapse_driver$getFilesInStorageDataset(
-        synStore_obj,
+        syn_store,
         folder_synID()
       )
       datatype_list$files <<- list2Vector(file_list)
@@ -369,7 +369,7 @@ shinyServer(function(input, output, session) {
           quote = TRUE, row.names = FALSE, na = ""
         )
       } else {
-        file_list <- synapse_driver$getFilesInStorageDataset(synStore_obj, folder_synID())
+        file_list <- synapse_driver$getFilesInStorageDataset(syn_store, folder_synID())
         datatype_list$files <<- list2Vector(file_list)
 
         # better filename checking is needed
@@ -387,7 +387,7 @@ shinyServer(function(input, output, session) {
 
       # associates metadata with data and returns manifest id
       manifest_id <- synapse_driver$associateMetadataWithFiles(
-        self = synStore_obj,
+        self = syn_store,
         metadataManifestPath = "./tmp/synapse_storage_manifest.csv",
         datasetId = folder_synID(),
         manifest_record_type = "table"
@@ -422,7 +422,7 @@ shinyServer(function(input, output, session) {
 
       # associates metadata with data and returns manifest id
       manifest_id <- synapse_driver$associateMetadataWithFiles(
-        self = synStore_obj,
+        self = syn_store,
         metadataManifestPath = "./tmp/synapse_storage_manifest.csv",
         datasetId = folder_synID(),
         manifest_record_type = "table"
