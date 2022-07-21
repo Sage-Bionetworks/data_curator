@@ -13,7 +13,7 @@ validationResult <- function(anno.res, template, manifest) {
     return(list(
       result = "invalid",
       error_type = "Empty File",
-      error_msg = "Please <b>upload</b> a filled template !"
+      error_msg = "Please <b>upload</b> a filled in template !"
     ))
   }
 
@@ -22,7 +22,8 @@ validationResult <- function(anno.res, template, manifest) {
     return(list(
       result = "invalid",
       error_type = "Out of Date",
-      error_msg = "Something went wrong while validating your manifest. Please contact administrator."
+      error_msg = "Something went wrong while validating your manifest.",
+      error_help_msg = "Please contact DCC staff for assistance."
     ))
   }
 
