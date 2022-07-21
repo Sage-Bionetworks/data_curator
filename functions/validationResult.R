@@ -8,21 +8,21 @@ validationResult <- function(anno.res, template, manifest) {
   error_type <- NULL
   highlight_values <- list()
 
-  # in case there are some errors we haven't captured
-  if (is.null(anno.res)) {
-    return(list(
-      result = "invalid",
-      error_type = "Out of Date",
-      error_msg = "Something went wrong while validating your manifest. Please contact administrator."
-    ))
-  }
-
   # if no uploaded manifest or empty manifest
   if (is.null(manifest) || nrow(manifest) == 0) {
     return(list(
       result = "invalid",
       error_type = "Empty File",
       error_msg = "Please <b>upload</b> a filled template !"
+    ))
+  }
+
+  # in case there are some errors we haven't captured
+  if (is.null(anno.res)) {
+    return(list(
+      result = "invalid",
+      error_type = "Out of Date",
+      error_msg = "Something went wrong while validating your manifest. Please contact administrator."
     ))
   }
 
