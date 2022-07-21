@@ -229,8 +229,9 @@ shinyServer(function(input, output, session) {
     dcWaiter("show", msg = "Generating link...")
 
     manifest_url <-
-      metadata_model$getModelManifest(paste0(config$community, " ", input$dropdown_template),
-        template_schema_name(),
+      metadata_model$getModelManifest(
+        title = paste0(config$community, " ", input$dropdown_template),
+        rootNode = template_schema_name(),
         filenames = switch((template_type == "file") + 1,
           NULL,
           as.list(names(datatype_list$files))
@@ -280,8 +281,8 @@ shinyServer(function(input, output, session) {
     annotation_status <-
       tryCatch(
         metadata_model$validateModelManifest(
-          inFile$raw()$datapath,
-          template_schema_name(),
+          manifestPath = inFile$raw()$datapath,
+          rootNode = template_schema_name(),
           restrict_rules = TRUE, # set true to disable great expectation
           project_scope = list(project_synID)
         ),
@@ -328,10 +329,11 @@ shinyServer(function(input, output, session) {
     # loading screen for Google link generation
     dcWaiter("show", msg = "Generating link...")
 
-    filled_manifest <- metadata_model$populateModelManifest(paste0(
-      config$community,
-      " ", input$dropdown_template
-    ), inFile$raw()$datapath, template_schema_name())
+    filled_manifest <- metadata_model$populateModelManifest(
+      title = paste0(config$community, " ", input$dropdown_template),
+      manifestPath = inFile$raw()$datapath,
+      rootNode = template_schema_name()
+    )
 
     # rerender and change button to link
     output$val_gsheet <- renderUI({
