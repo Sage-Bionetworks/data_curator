@@ -8,21 +8,22 @@ validationResult <- function(anno.res, template, manifest) {
   error_type <- NULL
   highlight_values <- list()
 
-  # in case there are some errors we haven't captured
-  if (is.null(anno.res)) {
-    return(list(
-      result = "invalid",
-      error_type = "Out of Date",
-      error_msg = "Something went wrong while validating your manifest. Please contact administrator."
-    ))
-  }
-
   # if no uploaded manifest or empty manifest
   if (is.null(manifest) || nrow(manifest) == 0) {
     return(list(
       result = "invalid",
       error_type = "Empty File",
-      error_msg = "Please <b>upload</b> a filled template !"
+      error_msg = "Please <b>upload</b> a filled in template !"
+    ))
+  }
+
+  # in case there are some errors we haven't captured
+  if (is.null(anno.res)) {
+    return(list(
+      result = "invalid",
+      error_type = "Out of Date",
+      error_msg = "Something went wrong while validating your manifest.",
+      error_help_msg = "Please contact DCC staff for assistance."
     ))
   }
 
@@ -76,9 +77,11 @@ validationResult <- function(anno.res, template, manifest) {
     } else {
       error_type <- "Invalid Value"
       # create table to display errors for users
-      error_table <- lapply(errors, function(i) {
-        data.frame(Row = as.numeric(i[[1]]), Column = i[[2]], Value = i[[4]][[1]], Error = i[[3]])
-      }) %>% bind_rows()
+      error_table <- purrr::map_dfr(
+        errors,
+        ~ tibble(Row = .x[[1]], Column = .x[[2]], Value = .x[[4]][[1]], Error = .x[[3]]) %>%
+          mutate(across(everything(), as.character)) # avoid mismatched types
+      )
 
       # create list for hightlight function; key: error_column, value: error_value
       lapply(unique(error_table$Column), function(col) {
