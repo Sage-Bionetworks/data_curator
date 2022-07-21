@@ -80,7 +80,7 @@ shinyServer(function(input, output, session) {
       message("'synapse_driver' fails, run 'synapse_driver' to see detailed error")
       dcWaiter("update", landing = TRUE, isPermission = FALSE)
     } else {
-      projects_list <- synapse_driver$getStorageProjects(syn_store)
+      projects_list <- syn_store$getStorageProjects()
       datatype_list$projects <<- list2Vector(projects_list)
 
       # updates project dropdown
@@ -155,7 +155,7 @@ shinyServer(function(input, output, session) {
       projectID <- datatype_list$projects[[input[[paste0(x, "project")]]]]
 
       # gets folders per project
-      folder_list <- synapse_driver$getStorageDatasetsInProject(syn_store, projectID) %>% list2Vector()
+      folder_list <- syn_store$getStorageDatasetsInProject(projectID) %>% list2Vector()
 
       # updates foldernames
       updateSelectInput(session, paste0(x, "folder"), choices = sort(names(folder_list)))
@@ -192,10 +192,7 @@ shinyServer(function(input, output, session) {
     if (input$tabs == "tab_template") {
       dcWaiter("show", msg = paste0("Getting files in ", input$dropdown_folder, "..."))
       # get file list in selected folder
-      file_list <- synapse_driver$getFilesInStorageDataset(
-        syn_store,
-        folder_synID()
-      )
+      file_list <- syn_store$getFilesInStorageDataset(folder_synID())
       datatype_list$files <<- list2Vector(file_list)
       dcWaiter("hide")
     }
@@ -369,7 +366,7 @@ shinyServer(function(input, output, session) {
           quote = TRUE, row.names = FALSE, na = ""
         )
       } else {
-        file_list <- synapse_driver$getFilesInStorageDataset(syn_store, folder_synID())
+        file_list <- syn_store$getFilesInStorageDataset(folder_synID())
         datatype_list$files <<- list2Vector(file_list)
 
         # better filename checking is needed
@@ -386,8 +383,7 @@ shinyServer(function(input, output, session) {
       }
 
       # associates metadata with data and returns manifest id
-      manifest_id <- synapse_driver$associateMetadataWithFiles(
-        self = syn_store,
+      manifest_id <- syn_store$associateMetadataWithFiles(
         metadataManifestPath = "./tmp/synapse_storage_manifest.csv",
         datasetId = folder_synID(),
         manifest_record_type = "table"
@@ -421,8 +417,7 @@ shinyServer(function(input, output, session) {
       )
 
       # associates metadata with data and returns manifest id
-      manifest_id <- synapse_driver$associateMetadataWithFiles(
-        self = syn_store,
+      manifest_id <- syn_store$associateMetadataWithFiles(
         metadataManifestPath = "./tmp/synapse_storage_manifest.csv",
         datasetId = folder_synID(),
         manifest_record_type = "table"
