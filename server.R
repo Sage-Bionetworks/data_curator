@@ -386,6 +386,7 @@ shinyServer(function(input, output, session) {
 
       # associates metadata with data and returns manifest id
       manifest_id <- syn_store$associateMetadataWithFiles(
+        schemaGenerator = schema_generator,
         metadataManifestPath = "./tmp/synapse_storage_manifest.csv",
         datasetId = folder_synID(),
         manifest_record_type = "table"
@@ -420,6 +421,7 @@ shinyServer(function(input, output, session) {
 
       # associates metadata with data and returns manifest id
       manifest_id <- syn_store$associateMetadataWithFiles(
+        schemaGenerator = schema_generator,
         metadataManifestPath = "./tmp/synapse_storage_manifest.csv",
         datasetId = folder_synID(),
         manifest_record_type = "table"
