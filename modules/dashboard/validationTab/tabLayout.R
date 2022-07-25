@@ -45,7 +45,7 @@ validationTab <- function(id, metadata, project.name) {
         `Created On` = metadata$CreatedOn,
         `Last Modified` = metadata$ModifiedOn,
         `User Modified` = metadata$ModifiedUser
-      ) %>% arrange(Validation, Dataset, `Data Type`)
+      ) %>% arrange(Validation, `Data Type`, Dataset)
 
       # render the validation result table
       dbValidationTable("validation-table", validation_df)
