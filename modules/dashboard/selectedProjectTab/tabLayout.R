@@ -93,7 +93,7 @@ selectedProjectTab <- function(id, username, metadata, nodes, project.name, pare
           # reset progress values if no evaluated data type selected
           ds_pb_values <- ds_pb_values
 
-          if (length(evaluate_datatypes) > 0) {
+          if (length(not_uploaded) > 0) {
             output$`evaluate-res` <- renderUI({
               span(
                 class = "warn_msg",
@@ -164,7 +164,7 @@ selectedProjectTab <- function(id, username, metadata, nodes, project.name, pare
         })
 
         # render collasiple tree
-        dbTree("requirement-tree", drop_na(metadata, "Component"), nodes, project.name)
+        dbTree("requirement-tree", na.omit(uploaded), nodes, project.name)
       })
     }
   )

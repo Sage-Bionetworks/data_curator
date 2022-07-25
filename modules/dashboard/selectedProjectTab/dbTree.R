@@ -38,14 +38,14 @@ dbTreeUI <- function(id, n.nodes = NULL) {
   )
 }
 
-dbTree <- function(id, metadata, nodes, project.name) {
+dbTree <- function(id, upload.data, nodes, project.name) {
   moduleServer(
     id,
     function(input, output, session) {
       ns <- session$ns
       tree_list <- NULL
 
-      if (length(metadata$Component) != 0) {
+      if (length(upload.data) != 0) {
 
         # get folder list
         folder_list <- sort(unique(nodes$folder))
@@ -69,7 +69,7 @@ dbTree <- function(id, metadata, nodes, project.name) {
         dataset_to_req <- nodes %>%
           mutate(
             font_opacity = if_else(nodes$to %in% nodes$from, 0, 1),
-            node_color = if_else(nodes$to %in% metadata$Component, "#28a745", "#E53935")
+            node_color = if_else(nodes$to %in% upload.data, "#28a745", "#E53935")
           ) %>%
           select(from, to, font_opacity, node_color)
         tree_df <- rbind(project_to_dataset, dataset_to_req) %>%
