@@ -7,6 +7,7 @@
       {"display_name": "Epigenetics Assay", "schema_name": "EpigeneticsAssayTemplate", "type": "assay"},
       {"display_name": "PDX Genomics Assay", "schema_name": "PdxGenomicsAssayTemplate", "type": "assay"},
       {"display_name": "Other Genomics Assay", "schema_name": "GenomicsAssayTemplate", "type": "assay"},
+      {"display_name": "Other Genomics Assay (Extended)", "schema_name": "GenomicsAssayTemplateExtended", "type": "assay"},
       {"display_name": "Imaging Assay", "schema_name": "ImagingAssayTemplate", "type": "assay"},
       {"display_name": "MRI Assay", "schema_name": "MRIAssayTemplate", "type": "assay"},
       {"display_name": "Pharmacokinetics Assay", "schema_name": "PharmacokineticsAssayTemplate", "type": "assay"},
