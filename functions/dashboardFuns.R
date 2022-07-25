@@ -13,8 +13,8 @@ get_dataset_metadata <- function(syn.store, datasets, ncores = 1) {
 
   manifest_info <- list()
   modified_user <- list()
-  # return empty tibble if no manifest or no component in the manifest
-  metadata <- NULL
+  # return empty data frame if no manifest or no component in the manifest
+  metadata <- data.frame()
 
   lapply(file_view$parentId, function(dataset) {
     # get manifest's synapse id(s) in each dataset folder
