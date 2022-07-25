@@ -103,6 +103,7 @@ jobs:
             release_type <- "release"
           } else if (refName == "main") { release_type <- "staging"
           } else release_type <- "testing"
+          message(sprintf("Deploying to %s instance.", release_type))
           repo <- Sys.getenv("GITHUB_REPOSITORY")
           appName <- strsplit(repo, "/")[[1]][2]
           appName <- paste(appName, release_type, sep = "-")
