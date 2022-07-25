@@ -61,7 +61,7 @@ jobs:
           else
             pip3 install poetry
             echo Installing develop branch of schematic from github
-            git clone --single-branch --branch $SCHEM_BRANCH https://github.com/Sage-Bionetworks/schematic.git
+            git clone --single-branch --branch develop https://github.com/Sage-Bionetworks/schematic.git
             cd schematic
             poetry build
             pip3 install dist/schematicpy-1.0.0-py3-none-any.whl
