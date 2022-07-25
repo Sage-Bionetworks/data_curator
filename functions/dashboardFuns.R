@@ -67,7 +67,13 @@ getManifests <- function(synStoreObj, datasets) {
 #' @param datatype data type of selected template.
 #' @return list of requirements for \code{datatype} or string of \code{datatype} if no requirements found
 getDatatypeRequirement <- function(datatype) {
-  requirement <- tryCatch(metadata_model$get_component_requirements(datatype, as_graph = TRUE), error = function(err) list())
+  #requirement <- tryCatch(metadata_model$get_component_requirements(datatype, as_graph = TRUE), error = function(err) list())
+  requirement <- tryCatch(model_component_requirements(
+    url=file.path(api_uri, "v1/model/component-requirements"),
+    schema_url,
+    source_component = datatype,
+    as_graph = TRUE
+  ), error = function(err) list())
   
   # get a list of requirements, otherwise output unamed vector of datatype name
   if (length(requirement) == 0) {
