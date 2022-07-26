@@ -53,10 +53,10 @@ jobs:
           # use 'poetry' to install schematic from the develop branch 
           pip3 install poetry
           # clone patched branch until develop is stable
-          git clone --single-branch --branch develop-single-com-val-bugfix https://github.com/Sage-Bionetworks/schematic.git
+          git clone --single-branch --branch list-comma-patch https://github.com/Sage-Bionetworks/schematic.git
           cd schematic
           # pin to a specific commit
-          git checkout ac76c677d12c703b840eabc273cbbb785df7d0fc 
+          git checkout 748b9229d575a5033183c6519ddb289912b16c5b 
           poetry build
           pip3 install dist/schematicpy-1.0.0-py3-none-any.whl
       - name: Set Configurations for Schematic
