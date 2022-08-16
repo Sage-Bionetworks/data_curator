@@ -22,13 +22,12 @@ dbNetwork <- function(id, uploadData, reqData, selectedDataType) {
     id,
     function(input, output, session) {
       output$network <- renderForceNetwork({
-
         # create input data for network function, forceNetwork
         if (is.null(names(reqData))) {
           # if reqData is a single string of datatype without name, aka no requirements
           # still create data frame for network to prevent breaking the app
           links <- data.frame(source = reqData, target = reqData, value = 5)
-          nodes <- data.frame(name = selectedDataType, group = "Selected", size = c(20))
+          nodes <- data.frame(name = as.character(selectedDataType), group = "Selected", size = c(20))
         } else {
           links <- data.frame(
             source = reqData, target = names(reqData),
