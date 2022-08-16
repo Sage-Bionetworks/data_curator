@@ -6,8 +6,8 @@
 \usage{
 manifest_generate(
   url = "http://localhost:3001/v1/manifest/generate",
- 
-    schema_url = "https://raw.githubusercontent.com/ncihtan/data-models/main/HTAN.model.jsonld",
+  schema_url =
+    "https://raw.githubusercontent.com/ncihtan/data-models/main/HTAN.model.jsonld",
   title,
   data_type,
   oauth = "true",

@@ -24,7 +24,7 @@ ui <- shinydashboardPlus::dashboardPage(
         icon = icon("sliders-h"),
         badgeStatus = "info",
         fluidRow(
-          lapply(datatypes, function(x) {
+          lapply(dropdown_types, function(x) {
             div(
               id = paste0("header_content_", x),
               selectInput(
@@ -91,6 +91,7 @@ ui <- shinydashboardPlus::dashboardPage(
       singleton(includeScript("www/js/readCookie.js")),
       tags$script(htmlwidgets::JS("setTimeout(function(){history.pushState({}, 'Data Curator', window.location.pathname);},2000);"))
     ),
+    # load dependencies
     use_notiflix_report(width = "400px"),
     use_waiter(),
     tabItems(
@@ -118,9 +119,10 @@ ui <- shinydashboardPlus::dashboardPage(
       # second tab content
       tabItem(
         tabName = "tab_data",
-        h2("Set Dataset and Metadata Template for Curation"),
+        h2("Set Dataset and Data Type for Curation"),
         fluidRow(
           box(
+            id = "box_pick_project",
             status = "primary",
             width = 6,
             title = "Choose a Project and Folder: ",
@@ -131,23 +133,25 @@ ui <- shinydashboardPlus::dashboardPage(
             ),
             selectInput(
               inputId = "dropdown_folder",
-              label = "Folder:",
+              label = "Dataset:",
               choices = "Generating..."
             ),
             helpText(
-              "If your recently updated folder does not appear, please wait for Synapse to sync and refresh"
+              "If your recently updated folder does not appear, please wait for a few minutes and refresh"
             )
           ),
           box(
+            id = "box_pick_manifest",
             status = "primary",
             width = 6,
-            title = "Choose a Metadata Template Type: ",
+            title = "Choose a Data Type Template: ",
             selectInput(
               inputId = "dropdown_template",
-              label = "Template:",
+              label = "Data Type Template:",
               choices = "Generating..."
             )
-          )
+          ),
+          dashboardUI("dashboard")
         ),
         switchTabUI("switchTab2", direction = "both")
       ),

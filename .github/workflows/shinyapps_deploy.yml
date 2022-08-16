@@ -10,12 +10,15 @@ on:
     branches:
       - main
       - develop
+      - feat-UI-dashboard
     tags:
       - v*.*.*
     paths-ignore:
       - '.github/ISSUE_TEMPLATE/**'
       - '**/*.md'
       - '**/.gitignore'
+  pull_request:
+    branches: main
 
 jobs:
   shiny-deploy:
@@ -93,7 +96,11 @@ jobs:
           repo <- Sys.getenv("GITHUB_REPOSITORY")
           appName <- strsplit(repo, "/")[[1]][2]
           # if tag is v*.*.*, deploy to prod, otherwise to staging
-          if (!grepl("v[0-9]+.[0-9]+.[0-9]+", refName)) {
+          if (grepl("v[0-9]+.[0-9]+.[0-9]+", refName)) {
+            appName <- appName
+          } else if (refName == 'feat-UI-dashboard') {
+            appName <- paste(appName, "demo", sep = "-")
+          } else {
             appName <- paste(appName, "staging", sep = "-")
           }
           rsConnectUser <- "${{ secrets.RSCONNECT_USER }}"

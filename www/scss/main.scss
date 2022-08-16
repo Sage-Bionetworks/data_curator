@@ -1,14 +1,23 @@
-// global variables
-@import 'basic/variables';
+// basic
+@import 'basic/load';
 
-// dashboard sections
-@import 'section/header';
-@import 'section/sidebar';
-@import 'section/content';
-@import 'section/footer';
+// modules
+@import 'modules/load';
 
+// sections
+@import 'section/load';
+
+// tabs
+@import 'tabs/load';
 // feature styles
-@import 'basic/animation';
-@import 'basic/button';
-@import 'basic/box';
-@import 'basic/message';
+// @import 'basic/animation';
+// @import 'basic/button';
+// @import 'basic/box';
+// @import 'basic/message';
+
+// fonts
+// @import url('https://fonts.googleapis.com/css2?family=Lato:wght@300;400&display=swap');
+
+// body {
+//    font-family: 'Lato', sans-serif;
+// }

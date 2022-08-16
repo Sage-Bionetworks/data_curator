@@ -16,6 +16,12 @@ suppressPackageStartupMessages({
   library(readr)
   library(sass)
   library(shinydashboardPlus)
+  # dashboard
+  library(purrr)
+  library(data.table)
+  library(networkD3)
+  library(data.tree)
+  library(r2d3)
 })
 
 ## Set Up OAuth
@@ -45,9 +51,9 @@ has_auth_code <- function(params) {
 }
 
 app <- oauth_app("shinysynapse",
-                 key = client_id,
-                 secret = client_secret,
-                 redirect_uri = app_url
+  key = client_id,
+  secret = client_secret,
+  redirect_uri = app_url
 )
 
 # These are the user info details ('claims') requested from Synapse:
@@ -82,10 +88,13 @@ scope <- "openid view download modify"
 schematic_config <- yaml::yaml.load_file("schematic_config.yml")
 api_uri <- paste(schematic_config$api$host, schematic_config$api$port, sep = ":")
 
-## Import functions/modules
+# Import functions/modules
 source_files <- list.files(c("functions", "modules"), pattern = "*\\.R$", recursive = TRUE, full.names = TRUE)
 sapply(source_files, FUN = source)
 
 ## Global variables
 datatypes <- c("project", "folder", "template")
 options(sass.cache = FALSE)
+dropdown_types <- c("project", "folder", "template")
+# set up cores used for parallelization
+ncores <- parallel::detectCores()

@@ -6,8 +6,8 @@
 \usage{
 model_submit(
   url = "http://localhost:3001/v1/model/submit",
- 
-    schema_url = "https://raw.githubusercontent.com/ncihtan/data-models/main/HTAN.model.jsonld",
+  schema_url =
+    "https://raw.githubusercontent.com/ncihtan/data-models/main/HTAN.model.jsonld",
   data_type,
   dataset_id,
   input_token,

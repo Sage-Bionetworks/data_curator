@@ -5,6 +5,7 @@
 # using the session token.  https://www.synapse.org
 
 shinyServer(function(input, output, session) {
+  options(shiny.reactlog = TRUE)
   params <- parseQueryString(isolate(session$clientData$url_search))
   if (!has_auth_code(params)) {
     return()
@@ -23,33 +24,40 @@ shinyServer(function(input, output, session) {
   access_token <- token_response$access_token
 
   session$userData$access_token <- access_token
-
+  
   ######## session global variables ########
   source("R/schematic_rest_api.R")
   # import module that contains SynapseStorage class
   # read config in
-  config <- fromJSON("www/config.json")
+  config_file <- jsonlite::fromJSON("www/config.json")
+  config_schemas <- as.data.frame(config_file[[1]])
+  config_project <- config_file[-1]
   schematic_config <- yaml.load_file("schematic_config.yml")
-
   # mapping from display name to schema name
-  template_namedList <- config$manifest_schemas$schema_name
-  names(template_namedList) <- config$manifest_schemas$display_name
+  template_namedList <- config_schemas$schema_name
+  names(template_namedList) <- config_schemas$display_name
 
   synStore_obj <- NULL # gets list of projects they have access to
+  user_name <- NULL # user name
   project_synID <- NULL # selected project synapse ID
-  folder_synID <- reactiveVal("") # selected foler synapse ID
+  folder_synID <- reactiveVal("") # selected folder synapse ID
   template_schema_name <- reactiveVal(NULL) # selected template schema name
   template_type <- NULL # type of selected template
   master_fileview <- schematic_config$synapse$master_fileview
 
+  selected <- list(
+    project = reactiveVal(NULL), folder = reactiveVal(""),
+    schema = reactiveVal(NULL), schema_type = reactiveVal(NULL)
+  )
+  
   isUpdateFolder <- reactiveVal(FALSE)
-  datatype_list <- list(projects = NULL, folders = NULL, manifests = template_namedList, files = NULL)
+  data_list <- list(projects = NULL, folders = reactiveVal(NULL), manifests = template_namedList, files = NULL)
 
   tabs_list <- c("tab_instructions", "tab_data", "tab_template", "tab_upload")
   clean_tags <- c("div_template", "div_validate", NS("tbl_validate", "table"), "btn_val_gsheet", "btn_submit")
 
   # add box effects
-  boxEffect(zoom = TRUE, float = TRUE)
+  boxEffect(zoom = FALSE, float = TRUE)
 
   ######## Initiate Login Process ########
   # synapse cookies
@@ -60,6 +68,7 @@ shinyServer(function(input, output, session) {
   # TODO:  If we don't use cookies, then what event should trigger this?
   #
   observeEvent(input$cookie, {
+
     # login and update session
     #
     # The original code pulled the auth token from a cookie, but it
@@ -70,23 +79,23 @@ shinyServer(function(input, output, session) {
     # Shiny app'
     #
     access_token <- session$userData$access_token
-
+    
     # updating syn storage
     projects_list <- storage_projects(url=file.path(api_uri, "v1/storage/projects"),
                                         asset_view = folder_synID(),
                                         input_token = access_token)
-    datatype_list$projects <<- list2Vector(projects_list)
+    data_list$projects <<- list2Vector(projects_list)
 
       # updates project dropdown
       lapply(c("header_dropdown_", "dropdown_"), function(x) {
         lapply(c(1, 3), function(i) {
-          updateSelectInput(session, paste0(x, datatypes[i]),
-            choices = sort(names(datatype_list[[i]]))
+          updateSelectInput(session, paste0(x, dropdown_types[i]),
+            choices = sort(names(data_list[[i]]))
           )
         })
       })
 
-      user_name <- synapse_user_profile(auth=access_token)[["userName"]]
+      user_name <- datacurator::synapse_user_profile(auth=access_token)[["userName"]]
 
       if (!synapse_is_certified(auth = access_token)) {
         dcWaiter("update", landing = TRUE, isCertified = FALSE)
@@ -113,7 +122,7 @@ shinyServer(function(input, output, session) {
   })
 
   # sync header dropdown with main dropdown
-  lapply(datatypes, function(x) {
+  lapply(dropdown_types, function(x) {
     observeEvent(input[[paste0("dropdown_", x)]], {
       updateSelectInput(session, paste0("header_dropdown_", x),
         selected = input[[paste0("dropdown_", x)]]
@@ -134,7 +143,7 @@ shinyServer(function(input, output, session) {
   observeEvent(input$update_confirm, {
     req(input$update_confirm == TRUE)
     isUpdateFolder(TRUE)
-    lapply(datatypes, function(x) {
+    lapply(dropdown_types, function(x) {
       updateSelectInput(session, paste0("dropdown_", x),
         selected = input[[paste0("header_dropdown_", x)]]
       )
@@ -145,7 +154,7 @@ shinyServer(function(input, output, session) {
   lapply(c("header_dropdown_", "dropdown_"), function(x) {
     observeEvent(ignoreInit = TRUE, input[[paste0(x, "project")]], {
       # get synID of selected project
-      projectID <- datatype_list$projects[[input[[paste0(x, "project")]]]]
+      projectID <- data_list$projects[input[[paste0(x, "project")]]]
 
       # gets folders per project
       folder_list <- storage_project_datasets(url=file.path(api_uri, "v1/storage/project/datasets"),
@@ -158,7 +167,7 @@ shinyServer(function(input, output, session) {
 
       if (x == "dropdown_") {
         project_synID <<- projectID
-        datatype_list$folders <<- folder_list
+        data_list$folders(folder_list)
       }
 
       if (isUpdateFolder()) {
@@ -173,13 +182,26 @@ shinyServer(function(input, output, session) {
   # update selected schema template name
   observeEvent(input$dropdown_template, {
     template_schema_name(template_namedList[match(input$dropdown_template, names(template_namedList))])
-    template_type <<- config$manifest_schemas$type[match(template_schema_name(), template_namedList)]
+    template_type <<- config_schemas$type[match(template_schema_name(), template_namedList)]
   })
+
+  ######## Dashboard ########
+  dashboard(
+    id = "dashboard",
+    syn.store = synStore_obj,
+    project.scope = selected$project,
+    schema = template_schema_name(),
+    disable.ids = c("box_pick_project", "box_pick_manifest"),
+    ncores = ncores,
+    access_token = access_token,
+    fileview = master_fileview,
+    folder = project_synID
+  )
 
   ######## Template Google Sheet Link ########
   observeEvent(c(input$dropdown_folder, input$tabs), {
     req(input$tabs %in% c("tab_template", "tab_upload"))
-    tmp_folder_synID <- datatype_list$folders[[input$dropdown_folder]]
+    tmp_folder_synID <- data_list$folders()[[input$dropdown_folder]]
     req(tmp_folder_synID != folder_synID()) # if folder changes
 
     # update selected folder ID
@@ -196,8 +218,7 @@ shinyServer(function(input, output, session) {
         err_msg <- xml2::xml_text(xml2::xml_child(file_list, "head/title"))
         stop(sprintf("Storage/dataset/files request was unsuccessful. %s", err_msg))
       }
-      datatype_list$files <<- list2Vector(file_list)
-      dcWaiter("hide")
+      data_list$files <<- list2Vector(file_list)
     }
   })
 
@@ -209,8 +230,7 @@ shinyServer(function(input, output, session) {
 
     req(input$tabs == "tab_template")
     hide("div_template_warn")
-
-    req(length(datatype_list$files) == 0 & template_type == "file")
+    req(length(data_list$files) == 0 & template_type == "file")
     warn_text <- paste0(
       strong(sQuote(input$dropdown_folder)), " folder is empty,
        please upload your data before generating manifest.",
@@ -230,12 +250,10 @@ shinyServer(function(input, output, session) {
 
     # loading screen for template link generation
     dcWaiter("show", msg = "Generating link...")
-    
     #schematic rest api to generate manifest
     manifest_url <- manifest_generate(url=file.path(api_uri, "v1/manifest/generate"),
                                       title = input$dropdown_template,
                       data_type = template_schema_name(), dataset_id = folder_synID())
-
     # generate link
     output$text_template <- renderUI(
       tags$a(id = "template_link", href = manifest_url, list(icon("hand-point-right"), manifest_url), target = "_blank")
@@ -266,7 +284,7 @@ shinyServer(function(input, output, session) {
     # hide the validation section when upload a new file
     sapply(clean_tags[-1], FUN = hide)
     # renders in DT for preview
-    DTableServer("tbl_preview", inFile$data())
+    DTableServer("tbl_preview", inFile$data(), filter = "top")
   })
 
   ######## Validation Section #######
@@ -347,9 +365,9 @@ shinyServer(function(input, output, session) {
 
     # If a file-based component selected (define file-based components) note for future
     # the type to filter (eg file-based) on could probably also be a config choice
-    display_names <- config$manifest_schemas$display_name[config$manifest_schemas$type == "file"]
+    display_names <- config_schemas$manifest_schemas$display_name[config_schemas$manifest_schemas$type == "file"]
     # if folder_ID has not been updated yet
-    if (folder_synID() == "") folder_synID(datatype_list$folders[[input$dropdown_folder]])
+    if (folder_synID() == "") folder_synID(data_list$folders()[[input$dropdown_folder]])
 
     if (input$dropdown_template %in% display_names) {
       # make into a csv or table for file-based components already has entityId
@@ -363,11 +381,11 @@ shinyServer(function(input, output, session) {
                                            asset_view = project_synID,
                                             dataset_id = folder_synID(),
                                             input_token=access_token)
-        datatype_list$files <<- list2Vector(file_list)
+        data_list$files <<- list2Vector(file_list)
 
         # better filename checking is needed
         # TODO: crash if no file existing
-        files_df <- stack(datatype_list$files)
+        files_df <- stack(data_list$files)
         # adds entityID, saves it as synapse_storage_manifest.csv, then associates with synapse files
         colnames(files_df) <- c("entityId", "Filename")
         files_entity <- inner_join(submit_data, files_df, by = "Filename")
