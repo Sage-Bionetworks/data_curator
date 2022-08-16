@@ -74,7 +74,7 @@ dashboard <- function(id, syn.store, project.scope, schema, disable.ids = NULL, 
         hide("toggle-btn-container")
         shinydashboardPlus::updateBox("box", action = "restore")
       })
-      t0 <- reactiveVal(NULL)
+
       # retrieving data progress for dashboard should not be executed until dashboard visiable
       # get all uploaded manifests once the project/folder changed
       observeEvent(c(project.scope(), input$box$visible), {

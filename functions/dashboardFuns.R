@@ -67,6 +67,10 @@ get_dataset_metadata <- function(syn.store, datasets, ncores = 1) {
 validate_metadata <- function(metadata, project.scope) {
   stopifnot(is.list(project.scope))
 
+  if (nrow(metadata) == 0) {
+    return(metadata)
+  }
+
   lapply(1:nrow(metadata), function(i) {
     manifest <- metadata[i, ]
     # validate manifest, if no error, output is list()
@@ -121,7 +125,7 @@ get_metadata_nodes <- function(metadata, ncores = 1) {
   if (nrow(metadata) == 0) {
     return(data.frame(from = NA, to = NA, folder = NA, folderSynId = NA, nMiss = NA))
   } else {
-    metadata <- drop_na(metadata, "Component")
+    metadata <- metadata[!is.na(metadata$Component), ]
     parallel::mclapply(1:nrow(metadata), function(i) {
       manifest <- metadata[i, ]
       # get all required data types
