@@ -11,7 +11,7 @@ validationTabUI <- function(id) {
   )
 }
 
-validationTab <- function(id, uploadData, selectedProject, config) {
+validationTab <- function(id, uploadData, selectedProject, config=NULL) {
   moduleServer(
     id,
     function(input, output, session) {
@@ -22,24 +22,24 @@ validationTab <- function(id, uploadData, selectedProject, config) {
 
       # change wrong schema to out-of-date type
       schema_status <- case_when(
-        uploadData$errorType == "Wrong Schema" ~ "Out of Date",
-        uploadData$errorType == "No Error" ~ "Valid",
-        TRUE ~ uploadData$errorType
+        uploadData$ErrorType == "Wrong Schema" ~ "Out of Date",
+        uploadData$ErrorType == "No Error" ~ "Valid",
+        TRUE ~ uploadData$ErrorType
       )
       # process validation result
       validation_df <- tibble(
         `Data Type` = paste0(
           '<a href="https://www.synapse.org/#!Synapse:',
-          uploadData$synID, '" target="_blank">', uploadData$schema, "</a>"
+          uploadData$SynapseID, '" target="_blank">', uploadData$Component, "</a>"
         ),
-        Dataset = uploadData$folder,
-        Validation = ifelse(uploadData$result == "valid" & uploadData$warnMsg == "Valid", "Pass", "Fail"),
+        Dataset = uploadData$Folder,
+        Validation = ifelse(uploadData$Result == "valid" & uploadData$WarnMsg == "Valid", "Pass", "Fail"),
         # change wrong schema to out-of-date type
         `Schema Check` = schema_status,
-        `Internal Links Check` = uploadData$warnMsg,
-        `Created On` = uploadData$createdOn,
-        `Last Modified` = uploadData$modifiedOn,
-        `User Modified` = uploadData$modifiedUser
+        `Internal Links Check` = uploadData$WarnMsg,
+        `Created On` = uploadData$CreatedOn,
+        `Last Modified` = uploadData$ModifiedOn,
+        `User Modified` = uploadData$ModifiedUser
       ) %>% arrange(Validation)
 
       # render the validation result table
