@@ -57,7 +57,6 @@ dbTree <- function(id, up.schema, req.data, selected.project) {
         incompleted_ds <- req.data %>%
           distinct(folder_id, .keep_all = TRUE) %>%
           filter(n_miss > 0)
-        browser()
         # make nodes data from project to datasets
         project_to_dataset <- data.frame(
           from = c(selected.project),
