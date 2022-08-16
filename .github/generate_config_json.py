@@ -8,25 +8,15 @@ from schematic.schemas.generator import SchemaGenerator
 def get_args():
     """Set up command-line interface and get arguments."""
     parser = argparse.ArgumentParser()
-    parser.add_argument('-js', '--jsonld_path',
+    parser.add_argument('--jsonld_path',
                         required=True, help='path to model jsonld file')
-    parser.add_argument('-v1', '--service_version',
+    parser.add_argument('--service_version',
                         default='', help='version of schematic')
-    parser.add_argument('-v2', '--schema_version',
+    parser.add_argument('--schema_version',
                         default='', help='version of data model')
-    parser.add_argument('-o', '--out_dir',
+    parser.add_argument('--out_dir',
                         default='www', help='directory to save result')
     return parser.parse_args()
-
-
-def _get_versions(repo_name, branch=None):
-    """Get release versions of github repo if exists, otherwise, return branch name"""
-    response = requests.get(
-        f'https://api.github.com/repos/{repo_name}/releases/latest')
-    if branch is None and response.status_code == 200:
-        return response.json()["tag_name"]
-    else:
-        return branch
 
 
 def _validate_version(version):
