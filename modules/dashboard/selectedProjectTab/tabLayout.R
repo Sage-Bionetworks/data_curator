@@ -106,8 +106,8 @@ selectedProjectTab <- function(id, username, up.data, req.data, selected.project
           # note, it will not change the req.data outside of observeEvent
           for (d in evaluate_datatypes) {
             # get which folder contains evaluated datatypes
-            evaluate_ds <- unique(req.data$folderSynId[req.data$to == d])
-            loc <- which(req.data$folderSynId %in% evaluate_ds)
+            evaluate_ds <- unique(req.data$folder_id[req.data$to == d])
+            loc <- which(req.data$folder_id %in% evaluate_ds)
             req.data$nMiss[loc] <- req.data$nMiss[loc] - 1
           }
           # add evaluated datatypes to update uploaded data
@@ -121,7 +121,7 @@ selectedProjectTab <- function(id, username, up.data, req.data, selected.project
 
           output$`evaluate-res` <- renderUI({
             # update new total progress
-            uniq_ds <- req.data %>% distinct(folderSynId, .keep_all = TRUE)
+            uniq_ds <- req.data %>% distinct(folder_id, .keep_all = TRUE)
             # number of completed dataset
             n_completed <- sum(uniq_ds$nMiss == 0)
             new_progress <- round(n_completed / nrow(uniq_ds) * 100)
