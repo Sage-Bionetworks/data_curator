@@ -13,7 +13,8 @@ dbRater <- function(id, up.data, req.data, user.name) {
       ns <- session$ns
 
       # number of total dataset
-      uniq_ds <- req.data %>% distinct(folderSynId, .keep_all = TRUE)
+      # AW 10AUG22 had to change folderSynId to folder_id in req.data
+      uniq_ds <- req.data %>% distinct(folder_id, .keep_all = TRUE)
       n_ds <- nrow(uniq_ds)
       # number of completed dataset
       n_completed <- sum(uniq_ds$nMiss == 0)
