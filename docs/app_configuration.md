@@ -1,6 +1,6 @@
 ## Schema Configuration
 
-In the app, the required schemas is configured in the file `www/config.json`, which is used to adapt the dropdown data types list in the app. Below are the steps to generate `config.json` locally using an example data model. Please remember to use your own data model's repo.
+In the app, the required schemas is configured in the file `www/config.json`, which is used to adapt the dropdown data types list in the app. Below are the steps to generate `config.json` locally using an example data model. Please remember to replace the example repo with your own data model's repo. 
 
 1.  Create a repo for your data model using this [template](https://github.com/Sage-Bionetworks/data-models)
 
@@ -11,14 +11,13 @@ In the app, the required schemas is configured in the file `www/config.json`, wh
 3.  Create `config.json` and placed it in the `www` folder. We recommend that you generate the `config.json` via this command:
 
         python3 .github/generate_config_json.py \
-          -i data-models/example.model.jsonld \
-          -o www \
-          --service_version v0.1.0 \
-          --schema_version v0.1.0
+          -jd data-models/example.model.jsonld \
+          -schema 'Sage-Bionetworks/data-models' \
+          -service Sage-Bionetworks/schematic'
 
-    - `service_version` and `schema_version` are optional flags and empty string will be set for by default if no values provided
+    - `service` and `schema` are GitHub repos (`<repo-owner/repo-name>`, i.e `Sage-Bionetworks/schematics`) and are optional flags. If no values provided, empty string will be set for versions.
 
-4.  All properties the in the `config.json` are listed below and modify as needed:
+4.  All properties the in the `config.json` are listed below:
 
     - `manifest schemas`: defines the list of schemas displayed under the "Choose a Metadata Template Type:" dropdown in the application.
       - `display_name` : The display name for the dropdown. (e.g. _scRNA-seq Level 1_)

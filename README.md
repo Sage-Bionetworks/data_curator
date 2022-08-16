@@ -62,7 +62,10 @@ For local testing, run below snippet to generate `www/config.json` and check the
 
 3.  Create `config.json` and placed it in the `www` folder
 
-        python3 .github/generate_config_json.py -ld <local-path-to-model.jsonld> 
+        python3 .github/generate_config_json.py \
+          -jd data-models/example.model.jsonld \
+          -schema 'Sage-Bionetworks/data-models' \
+          -service Sage-Bionetworks/schematic'
 
 ---
 

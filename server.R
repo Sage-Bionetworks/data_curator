@@ -30,7 +30,11 @@ shinyServer(function(input, output, session) {
   # import module that contains SynapseStorage class
   synapse_driver <- import("schematic.store.synapse")$SynapseStorage
   # read config in
-  config <- config_file$manifest_schemas
+  config <- config_file
+
+  # mapping from display name to schema name
+  template_namedList <- config$manifest_schemas$schema_name
+  names(template_namedList) <- config$manifest_schemas$display_name
 
   syn_store <- NULL # gets list of projects they have access to
   project_synID <- NULL # selected project synapse ID
@@ -39,7 +43,7 @@ shinyServer(function(input, output, session) {
   template_type <- NULL # type of selected template
 
   isUpdateFolder <- reactiveVal(FALSE)
-  datatype_list <- list(projects = NULL, folders = NULL, files = NULL)
+  datatype_list <- list(projects = NULL, folders = NULL, manifests = template_namedList, files = NULL)
 
   tabs_list <- c("tab_instructions", "tab_data", "tab_template", "tab_upload")
   clean_tags <- c("div_template", "div_validate", NS("tbl_validate", "table"), "btn_val_gsheet", "btn_submit")
@@ -81,14 +85,11 @@ shinyServer(function(input, output, session) {
 
       # updates project dropdown
       lapply(c("header_dropdown_", "dropdown_"), function(x) {
-        # update project dropdowns
-        updateSelectInput(session, paste0(x, datatypes[1]),
-          choices = sort(names(datatype_list$projects))
-        )
-        # update datatype dropdowns
-        updateSelectInput(session, paste0(x, datatypes[3]),
-          choices = sort(config$display_name)
-        )
+        lapply(c(1, 3), function(i) {
+          updateSelectInput(session, paste0(x, datatypes[i]),
+            choices = sort(names(datatype_list[[i]]))
+          )
+        })
       })
 
       user_name <- syn_getUserProfile()$userName
@@ -175,8 +176,8 @@ shinyServer(function(input, output, session) {
   ######## Update Template ########
   # update selected schema template name
   observeEvent(input$dropdown_template, {
-    template_schema_name(config$schema_name[match(input$dropdown_template, config$display_name)])
-    template_type <<- config$type[match(template_schema_name(), config$schema_name)]
+    template_schema_name(template_namedList[match(input$dropdown_template, names(template_namedList))])
+    template_type <<- config$manifest_schemas$type[match(template_schema_name(), template_namedList)]
   })
 
   ######## Template Google Sheet Link ########
