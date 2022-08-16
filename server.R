@@ -24,7 +24,7 @@ shinyServer(function(input, output, session) {
   access_token <- token_response$access_token
 
   session$userData$access_token <- access_token
-
+  
   ######## session global variables ########
   source("R/schematic_rest_api.R")
   # import module that contains SynapseStorage class
@@ -45,6 +45,11 @@ shinyServer(function(input, output, session) {
   template_type <- NULL # type of selected template
   master_fileview <- schematic_config$synapse$master_fileview
 
+  selected <- list(
+    project = reactiveVal(NULL), folder = reactiveVal(""),
+    schema = reactiveVal(NULL), schema_type = reactiveVal(NULL)
+  )
+  
   isUpdateFolder <- reactiveVal(FALSE)
   data_list <- list(projects = NULL, folders = reactiveVal(NULL), manifests = template_namedList, files = NULL)
 
@@ -74,12 +79,12 @@ shinyServer(function(input, output, session) {
     # Shiny app'
     #
     access_token <- session$userData$access_token
-
+    
     # updating syn storage
     projects_list <- storage_projects(url=file.path(api_uri, "v1/storage/projects"),
                                         asset_view = folder_synID(),
                                         input_token = access_token)
-    datatype_list$projects <<- list2Vector(projects_list)
+    data_list$projects <<- list2Vector(projects_list)
 
       # updates project dropdown
       lapply(c("header_dropdown_", "dropdown_"), function(x) {
@@ -90,7 +95,7 @@ shinyServer(function(input, output, session) {
         })
       })
 
-      user_name <- synapse_user_profile(auth=access_token)[["userName"]]
+      user_name <- datacurator::synapse_user_profile(auth=access_token)[["userName"]]
 
       if (!synapse_is_certified(auth = access_token)) {
         dcWaiter("update", landing = TRUE, isCertified = FALSE)
@@ -183,13 +188,14 @@ shinyServer(function(input, output, session) {
   ######## Dashboard ########
   dashboard(
     id = "dashboard",
-    synStoreObj = synStore_obj,
-    selectedProject = reactive(input$dropdown_project),
-    folderList = data_list$folders,
-    selectedDataType = template_schema_name,
-    userName = user_name,
-    config = config_project,
-    disableIds = c("box_pick_project", "box_pick_manifest")
+    syn.store = synStore_obj,
+    project.scope = selected$project,
+    schema = template_schema_name(),
+    disable.ids = c("box_pick_project", "box_pick_manifest"),
+    ncores = ncores,
+    access_token = access_token,
+    fileview = master_fileview,
+    folder = project_synID
   )
 
   ######## Template Google Sheet Link ########
@@ -212,7 +218,7 @@ shinyServer(function(input, output, session) {
         err_msg <- xml2::xml_text(xml2::xml_child(file_list, "head/title"))
         stop(sprintf("Storage/dataset/files request was unsuccessful. %s", err_msg))
       }
-      datatype_list$files <<- list2Vector(file_list)
+      data_list$files <<- list2Vector(file_list)
     }
   })
 
@@ -375,7 +381,7 @@ shinyServer(function(input, output, session) {
                                            asset_view = project_synID,
                                             dataset_id = folder_synID(),
                                             input_token=access_token)
-        datatype_list$files <<- list2Vector(file_list)
+        data_list$files <<- list2Vector(file_list)
 
         # better filename checking is needed
         # TODO: crash if no file existing
