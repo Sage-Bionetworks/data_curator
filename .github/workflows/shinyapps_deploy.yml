@@ -8,6 +8,7 @@ on:
     branches:
       - main
       - develop*
+      - feature-auto-generate-config
     tags:
       - v*.*.*
     paths-ignore:
