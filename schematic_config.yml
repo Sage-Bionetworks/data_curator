@@ -6,7 +6,8 @@ definitions:
   service_acct_creds: "schematic_service_account_creds.json"
 
 synapse:
-  master_fileview: 'syn20446927'
+  master_fileview: 'syn23643253'
+  #master_fileview: 'syn20446927'
   manifest_folder: 'manifests'
   manifest_basename: 'synapse_storage_manifest'
   token_creds: 'syn23643259'
@@ -22,8 +23,12 @@ manifest:
 
 model:
   input:
-    download_url: 'https://raw.githubusercontent.com/ncihtan/data-models/2bcd27020a46a14139d4723ed62501ea4d5e8e69/HTAN.model.jsonld'
-    location: 'schematic/tests/data/HTAN.model.jsonld'
+    # Uncomment line below for staging
+    download_url: 'https://raw.githubusercontent.com/Sage-Bionetworks/schematic/develop/tests/data/example.model.jsonld'
+    # Update line below for prod
+    #download_url: 'https://raw.githubusercontent.com/ncihtan/data-models/v22.07.1/HTAN.model.jsonld'
+    location: 'schematic/tests/data/example.model.jsonld'
+    #location: 'schematic/tests/data/HTAN.model.jsonld'
     file_type: 'local'
 
 style:
