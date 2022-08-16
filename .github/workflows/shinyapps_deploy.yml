@@ -97,15 +97,20 @@ jobs:
         shell: Rscript {0}
         run: |
           # if there is a tag, 'refName' will be tag name
-          refName <- Sys.getenv("GITHUB_REF_NAME")
-          # if tag is v*.*.*, deploy to prod, if main to staging, otherwise to test
-          if (!grepl("v[0-9]+.[0-9]+.[0-9]+", refName)) {
-            release_type <- "release"
-          } else if (refName == "main") { release_type <- "staging"
-          } else release_type <- "testing"
           repo <- Sys.getenv("GITHUB_REPOSITORY")
           appName <- strsplit(repo, "/")[[1]][2]
-          appName <- paste(appName, release_type, sep = "-")
+          refName <- Sys.getenv("GITHUB_REF_NAME")
+          # if tag is v*.*.*, deploy to prod, if main to staging, otherwise to test
+          if (grepl("v[0-9]+.[0-9]+.[0-9]+", refName)) {
+            message("Deploying release version of app")
+          } else if (refName == "main") {
+            appName <- paste(appName, "staging", sep = "-")
+            message("Deploying staging version of app")
+          } else {
+            appName <- paste(appName, "testing", sep = "-")
+            message("Deploying testing version of app")
+          }
+          message(sprintf("Deploying to %s instance.", appName))
           rsConnectUser <- "${{ secrets.RSCONNECT_USER }}"
           rsConnectToken <- "${{ secrets.RSCONNECT_TOKEN }}"
           rsConnectSecret <- "${{ secrets.RSCONNECT_SECRET }}"
