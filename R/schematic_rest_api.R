@@ -143,6 +143,7 @@ model_component_requirements <- function(url="http://localhost:3001/v1/model/com
                      as_graph = as_graph
                    ))
   
+  if (httr::http_error(req)) stop(httr::http_status(req)$reason)
   cont <- httr::content(req)
   
   if (inherits(cont, "xml_document")){
