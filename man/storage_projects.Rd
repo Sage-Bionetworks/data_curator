@@ -6,19 +6,18 @@
 \usage{
 storage_projects(
   url = "http://localhost:3001/v1/storage/projects",
-  syn_master_file_view,
-  syn_master_file_name,
+  asset_view,
   input_token
 )
 }
 \arguments{
 \item{url}{URL to schematic API endpoint}
 
+\item{input_token}{synapse PAT}
+
 \item{syn_master_file_view}{synapse ID of master file view.}
 
 \item{syn_master_file_name}{Synapse storage manifest file name.}
-
-\item{input_token}{synapse PAT}
 }
 \description{
 Get all storage projects the current user has access to
