@@ -30,7 +30,7 @@ shinyServer(function(input, output, session) {
   # import module that contains SynapseStorage class
   synapse_driver <- import("schematic.store.synapse")$SynapseStorage
   # read config in
-  config <- fromJSON("www/config.json")$manifest_schemas
+  config <- config_file$manifest_schemas
 
   syn_store <- NULL # gets list of projects they have access to
   project_synID <- NULL # selected project synapse ID
