@@ -44,19 +44,20 @@ dbTree <- function(id, up.schema, req.data, selected.project) {
     function(input, output, session) {
       ns <- session$ns
       tree_list <- NULL
-
+      # change d3 tree height based on how many nodes
+      height <- "3600px"
+      
       if (length(up.schema) != 0) {
 
         # get folder list
         folder_list <- sort(unique(req.data$folder))
-        # change d3 tree height based on how many nodes
-        height <- paste0(36 * length(folder_list), "px")
         # remove project name in children to trim long names
         pattern <- paste0(str_replace(selected.project, " ", "_"), "_")
         # get dataset contains any missing requirement children
         incompleted_ds <- req.data %>%
-          distinct(folderSynId, .keep_all = TRUE) %>%
-          filter(nMiss > 0)
+          distinct(folder_id, .keep_all = TRUE) %>%
+          filter(n_miss > 0)
+        browser()
         # make nodes data from project to datasets
         project_to_dataset <- data.frame(
           from = c(selected.project),
