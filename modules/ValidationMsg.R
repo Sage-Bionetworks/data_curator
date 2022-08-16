@@ -6,28 +6,42 @@ ValidationMsgUI <- function(id) {
   htmlOutput(ns("results"))
 }
 
-ValidationMsgServer <- function(id, valRes, template, inFile) {
+ValidationMsgServer <- function(id, result) {
   moduleServer(
     id,
     function(input, output, session) {
       output$results <- renderUI({
-        text_class <-
-          ifelse(!is.null(valRes$validationRes) && valRes$validationRes == "valid" && length(valRes$validationRes) != 0,
-            "success_msg", "error_msg"
-          )
-
         tagList(
-          # TODO: remove first two checking once we set dropdown value as 1st selection by default
-          if (is.null(template)) {
-            span(class = text_class, HTML("Please <b>select a template</b> from the 'Select your Dataset' tab !<br><br>"))
+          if (length(result$error_msg) > 0) {
+            div(
+              class = "validation-card",
+              div(
+                class = "validation-card-header error",
+                icon("times-circle"),
+                span(paste0("Oops, looks like you have ", length(result$error_msg), " errors !!!"))
+              ),
+              if (!is.null(result$error_help_msg)) helpText(class = "validation-card-help-msg", HTML(result$error_help_msg)),
+              div(
+                class = "validation-card-content",
+                lapply(result$error_msg, function(msg) div(class = "validation-card-msg error", span(HTML(msg)))),
+              )
+            )
           },
-          if (is.null(inFile)) {
-            span(class = text_class, HTML("Please <b>upload</b> a filled template !"))
-          },
-          if (!is.null(inFile) & length(inFile) == 0) {
-            span(class = text_class, HTML("File is empty. Please <b>upload</b> a filled template !"))
-          },
-          span(class = text_class, HTML(valRes$outMsg))
+          if (length(result$warning_msg) > 0) {
+            div(
+              class = "validation-card",
+              div(
+                class = "validation-card-header warning",
+                icon("exclamation-circle"),
+                span(paste0("Oops, looks like you have ", length(result$warning_msg), " warnings !!!"))
+              ),
+              if (!is.null(result$warning_help_msg)) helpText(class = "validation-card-help-msg", HTML(result$warning_help_msg)),
+              div(
+                class = "validation-card-content",
+                lapply(result$warning_msg, function(msg) div(class = "validation-card-msg warning", span(HTML(msg)))),
+              )
+            )
+          }
         )
       })
     }

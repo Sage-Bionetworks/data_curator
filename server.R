@@ -32,7 +32,7 @@ shinyServer(function(input, output, session) {
   # read config in
   config <- fromJSON("www/config.json")$manifest_schemas
 
-  synStore_obj <- NULL # gets list of projects they have access to
+  syn_store <- NULL # gets list of projects they have access to
   project_synID <- NULL # selected project synapse ID
   folder_synID <- reactiveVal("") # selected foler synapse ID
   template_schema_name <- reactiveVal(NULL) # selected template schema name
@@ -70,13 +70,13 @@ shinyServer(function(input, output, session) {
     syn_login(authToken = access_token, rememberMe = FALSE)
 
     # updating syn storage
-    tryCatch(synStore_obj <<- synapse_driver(access_token = access_token), error = function(e) NULL)
+    tryCatch(syn_store <<- synapse_driver(access_token = access_token), error = function(e) NULL)
 
-    if (is.null(synStore_obj)) {
+    if (is.null(syn_store)) {
       message("'synapse_driver' fails, run 'synapse_driver' to see detailed error")
       dcWaiter("update", landing = TRUE, isPermission = FALSE)
     } else {
-      projects_list <- synapse_driver$getStorageProjects(synStore_obj)
+      projects_list <- syn_store$getStorageProjects()
       datatype_list$projects <<- list2Vector(projects_list)
 
       # updates project dropdown
@@ -154,7 +154,7 @@ shinyServer(function(input, output, session) {
       projectID <- datatype_list$projects[[input[[paste0(x, "project")]]]]
 
       # gets folders per project
-      folder_list <- synapse_driver$getStorageDatasetsInProject(synStore_obj, projectID) %>% list2Vector()
+      folder_list <- syn_store$getStorageDatasetsInProject(projectID) %>% list2Vector()
 
       # updates foldernames
       updateSelectInput(session, paste0(x, "folder"), choices = sort(names(folder_list)))
@@ -191,10 +191,7 @@ shinyServer(function(input, output, session) {
     if (input$tabs == "tab_template") {
       dcWaiter("show", msg = paste0("Getting files in ", input$dropdown_folder, "..."))
       # get file list in selected folder
-      file_list <- synapse_driver$getFilesInStorageDataset(
-        synStore_obj,
-        folder_synID()
-      )
+      file_list <- syn_store$getFilesInStorageDataset(folder_synID())
       datatype_list$files <<- list2Vector(file_list)
       dcWaiter("hide")
     }
@@ -231,8 +228,9 @@ shinyServer(function(input, output, session) {
     dcWaiter("show", msg = "Generating link...")
 
     manifest_url <-
-      metadata_model$getModelManifest(paste0(manifest_title, " ", input$dropdown_template),
-        template_schema_name(),
+      metadata_model$getModelManifest(
+        title = paste0(config$community, " ", input$dropdown_template),
+        rootNode = template_schema_name(),
         filenames = switch((template_type == "file") + 1,
           NULL,
           as.list(names(datatype_list$files))
@@ -279,57 +277,44 @@ shinyServer(function(input, output, session) {
     # loading screen for validating metadata
     dcWaiter("show", msg = "Validating...")
 
-    try(
-      silent = TRUE,
-      annotation_status <- metadata_model$validateModelManifest(
-        inFile$raw()$datapath,
-        template_schema_name(),
-        restrict_rules = TRUE # set true to disable great expectation
+    annotation_status <-
+      tryCatch(
+        metadata_model$validateModelManifest(
+          manifestPath = inFile$raw()$datapath,
+          rootNode = template_schema_name(),
+          restrict_rules = TRUE, # set true to disable great expectation
+          project_scope = list(project_synID)
+        ),
+        error = function(e) NULL
       )
-    )
 
     # validation messages
-    valRes <- validationResult(annotation_status, input$dropdown_template, inFile$data())
-    ValidationMsgServer("text_validate", valRes, input$dropdown_template, inFile$data())
+    validation_res <- validationResult(annotation_status, input$dropdown_template, inFile$data())
+    ValidationMsgServer("text_validate", validation_res)
 
     # if there is a file uploaded
-    if (!is.null(valRes$validationRes)) {
-
-      # output error messages as data table if it is invalid value type
-      # render empty if error is not "invaid value" type - ifelse() will not work
-      if (valRes$errorType == "Invalid Value") {
-        DTableServer("tbl_validate", valRes$errorDT,
-          rownames = FALSE, filter = "none",
-          caption = "View all the error(s) highlighted in the preview table above",
-          options = list(
-            pageLength = 50, scrollX = TRUE,
-            scrollY = min(50 * nrow(valRes$errorDT), 400), lengthChange = FALSE,
-            info = FALSE, searching = FALSE
-          )
-        )
-        show(NS("tbl_validate", "table"))
-      }
+    if (!is.null(validation_res$result)) {
 
       # highlight invalue cells in preview table
-      if (valRes$errorType == "Wrong Schema") {
+      if (validation_res$error_type == "Wrong Schema") {
         DTableServer("tbl_preview", data = inFile$data(), highlight = "full")
       } else {
         DTableServer(
           "tbl_preview",
           data = inFile$data(),
-          highlight = "partial", highlightValues = valRes$errorHighlight
+          highlight = "partial", highlightValues = validation_res$preview_highlight
         )
       }
 
-      if (valRes$validationRes == "valid") {
+      if (validation_res$result == "valid") {
         # show submit button
         output$submit <- renderUI(actionButton("btn_submit", "Submit to Synapse", class = "btn-primary-color"))
-        dcWaiter("update", msg = paste0(valRes$errorType, " Found !!! "), spin = spin_inner_circles(), sleep = 2.5)
+        dcWaiter("update", msg = paste0(validation_res$error_type, " Found !!! "), spin = spin_inner_circles(), sleep = 2.5)
       } else {
         output$val_gsheet <- renderUI(
           actionButton("btn_val_gsheet", "  Generate Google Sheet Link", icon = icon("table"), class = "btn-primary-color")
         )
-        dcWaiter("update", msg = paste0(valRes$errorType, " Found !!! "), spin = spin_pulsar(), sleep = 2.5)
+        dcWaiter("update", msg = paste0(validation_res$error_type, " Found !!! "), spin = spin_pulsar(), sleep = 2.5)
       }
     } else {
       dcWaiter("hide")
@@ -343,10 +328,11 @@ shinyServer(function(input, output, session) {
     # loading screen for Google link generation
     dcWaiter("show", msg = "Generating link...")
 
-    filled_manifest <- metadata_model$populateModelManifest(paste0(
-      manifest_title,
-      " ", input$dropdown_template
-    ), inFile$raw()$datapath, template_schema_name())
+    filled_manifest <- metadata_model$populateModelManifest(
+      title = paste0(config$community, " ", input$dropdown_template),
+      manifestPath = inFile$raw()$datapath,
+      rootNode = template_schema_name()
+    )
 
     # rerender and change button to link
     output$val_gsheet <- renderUI({
@@ -367,21 +353,21 @@ shinyServer(function(input, output, session) {
     # reads file csv again
     submit_data <- csvInfileServer("inputFile")$data()
 
-    # If an assay component selected (define assay components) note for future
-    # the type to filter (eg assay) on could probably also be a config choice
-    assay_schemas <- config$display_name[config$type == "file"]
+    # If a file-based component selected (define file-based components) note for future
+    # the type to filter (eg file-based) on could probably also be a config choice
+    display_names <- config$manifest_schemas$display_name[config$manifest_schemas$type == "file"]
     # if folder_ID has not been updated yet
     if (folder_synID() == "") folder_synID(datatype_list$folders[[input$dropdown_folder]])
 
-    if (input$dropdown_template %in% assay_schemas) {
-      # make into a csv or table for assay components already has entityId
+    if (input$dropdown_template %in% display_names) {
+      # make into a csv or table for file-based components already has entityId
       if ("entityId" %in% colnames(submit_data)) {
         write.csv(submit_data,
           file = "./tmp/synapse_storage_manifest.csv",
           quote = TRUE, row.names = FALSE, na = ""
         )
       } else {
-        file_list <- synapse_driver$getFilesInStorageDataset(synStore_obj, folder_synID())
+        file_list <- syn_store$getFilesInStorageDataset(folder_synID())
         datatype_list$files <<- list2Vector(file_list)
 
         # better filename checking is needed
@@ -398,11 +384,11 @@ shinyServer(function(input, output, session) {
       }
 
       # associates metadata with data and returns manifest id
-      manifest_id <- synapse_driver$associateMetadataWithFiles(
-        synStore_obj,
-        "./tmp/synapse_storage_manifest.csv",
-        folder_synID(),
-        manifest_record_type = "entity"
+      manifest_id <- syn_store$associateMetadataWithFiles(
+        schemaGenerator = schema_generator,
+        metadataManifestPath = "./tmp/synapse_storage_manifest.csv",
+        datasetId = folder_synID(),
+        manifest_record_type = "table"
       )
       manifest_path <- tags$a(href = paste0("https://www.synapse.org/#!Synapse:", manifest_id), manifest_id, target = "_blank")
 
@@ -426,18 +412,18 @@ shinyServer(function(input, output, session) {
         )), sleep = 3)
       }
     } else {
-      # if not assay type tempalte
+      # if not file-based type template
       write.csv(submit_data,
         file = "./tmp/synapse_storage_manifest.csv", quote = TRUE,
         row.names = FALSE, na = ""
       )
 
       # associates metadata with data and returns manifest id
-      manifest_id <- synapse_driver$associateMetadataWithFiles(
-        synStore_obj,
-        "./tmp/synapse_storage_manifest.csv",
-        folder_synID(),
-        manifest_record_type = "entity"
+      manifest_id <- syn_store$associateMetadataWithFiles(
+        schemaGenerator = schema_generator,
+        metadataManifestPath = "./tmp/synapse_storage_manifest.csv",
+        datasetId = folder_synID(),
+        manifest_record_type = "table"
       )
       manifest_path <- tags$a(href = paste0("https://www.synapse.org/#!Synapse:", manifest_id), manifest_id, target = "_blank")
 
