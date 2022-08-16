@@ -8,21 +8,23 @@ from schematic.schemas.generator import SchemaGenerator
 def get_args():
     """Set up command-line interface and get arguments."""
     parser = argparse.ArgumentParser()
-    parser.add_argument('--jsonld_path',
+    parser.add_argument('-jd', '--jsonld_path',
                         required=True, help='path to model jsonld file')
-    parser.add_argument('--service_version',
-                        default='', help='version of schematic')
-    parser.add_argument('--schema_version',
-                        default='', help='version of data model')
+    parser.add_argument('-service','--service_repo',
+                        default='', help='GH repo of schematic')
+    parser.add_argument('-schema','--schema_repo',
+                        default='', help='GH repo of data model')
     parser.add_argument('--out_dir',
                         default='www', help='directory to save result')
     return parser.parse_args()
 
 
-def _validate_version(version):
-    """Clean up versions."""
-    if bool(re.match('v[0-9]+.[0-9]+.[0-9]+', version)):
-        return version
+def _get_version(repo_name):
+    """Get the latest release version of github repo, otherwise return empty string"""
+    response = requests.get(
+        f'https://api.github.com/repos/{repo_name}/releases/latest')
+    if response.status_code == 200:
+        return response.json()["tag_name"]
     else:
         return ''
 
@@ -50,8 +52,8 @@ def main():
             'type': schema_type
         })
 
-    service_version = _validate_version(args.service_version)
-    schema_version = _validate_version(args.schema_version)
+    service_version = _get_version(args.service_repo)
+    schema_version = _get_version(args.schema_repo)
 
     # write out the config.json including some versions
     config = {'manifest_schemas': schemas,
