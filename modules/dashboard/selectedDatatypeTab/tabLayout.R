@@ -11,8 +11,8 @@ selectedDataTypeTabUI <- function(id) {
         # ),
         column(12,
           class = "bottom-container",
-          column(6, column(12, dbCheckListUI(ns("checklist")))),
-          column(6, column(12, dbNetworkUI(ns("network"), height = "300px")))
+          column(6, column(12, dbNetworkUI(ns("network"), height = "300px"))),
+          column(6, column(12, dbCheckListUI(ns("checklist"))))
         )
       ),
       helpText(HTML(
