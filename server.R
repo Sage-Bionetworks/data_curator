@@ -27,15 +27,21 @@ shinyServer(function(input, output, session) {
 
   ######## session global variables ########
   # read config in
-  config_file <- jsonlite::fromJSON("www/config.json")
-  config_schemas <- as.data.frame(config_file[[1]])
-  config_project <- config_file[-1]
+  config <- jsonlite::fromJSON("www/config.json")
+  config_schema <- as.data.frame(config[[1]])
   # mapping from display name to schema name
-  template_namedList <- config_schemas$schema_name
-  names(template_namedList) <- config_schemas$display_name
+  template_namedList <- config_schema$schema_name
+  names(template_namedList) <- config_schema$display_name
 
   # data available to the user
-  synStore_obj <- NULL # synapse storage object contains fileview data
+  syn_store <- NULL # gets list of projects they have access to
+
+  # from merge conflicts
+  # project_synID <- NULL # selected project synapse ID
+  # folder_synID <- reactiveVal("") # selected foler synapse ID
+  # template_schema_name <- reactiveVal(NULL) # selected template schema name
+  # template_type <- NULL # type of selected template
+
   data_list <- list(
     projects = reactiveVal(NULL), folders = reactiveVal(NULL),
     schemas = reactiveVal(template_namedList), files = reactiveVal(NULL)
@@ -81,13 +87,13 @@ shinyServer(function(input, output, session) {
     syn$login(authToken = access_token, rememberMe = FALSE)
 
     # updating syn storage
-    tryCatch(synStore_obj <<- synapse_driver(access_token = access_token), error = function(e) NULL)
+    tryCatch(syn_store <<- synapse_driver(access_token = access_token), error = function(e) NULL)
 
-    if (is.null(synStore_obj)) {
+    if (is.null(syn_store)) {
       message("'synapse_driver' fails, run 'synapse_driver' to see detailed error")
       dcWaiter("update", landing = TRUE, isPermission = FALSE)
     } else {
-      projects_list <- synapse_driver$getStorageProjects(synStore_obj)
+      projects_list <- syn_store$getStorageProjects()
       data_list$projects(list2Vector(projects_list))
 
       # updates project dropdown
@@ -162,7 +168,7 @@ shinyServer(function(input, output, session) {
       project_id <- data_list$projects()[input[[paste0(x, "project")]]]
 
       # gets folders per project
-      folder_list <- synapse_driver$getStorageDatasetsInProject(synStore_obj, project_id) %>% list2Vector()
+      folder_list <- syn_store$getStorageDatasetsInProject(project_id) %>% list2Vector()
 
       # update folder names
       updateSelectInput(session, paste0(x, "folder"), choices = sort(names(folder_list)))
@@ -185,14 +191,14 @@ shinyServer(function(input, output, session) {
   observeEvent(input$dropdown_template, {
     # update reactive selected values for schema
     selected$schema(data_list$schemas()[input$dropdown_template])
-    schema_type <- config_schemas$type[which(config_schemas$display_name == input$dropdown_template)]
+    schema_type <- config_schema$type[which(config_schema$display_name == input$dropdown_template)]
     selected$schema_type(schema_type)
   })
 
   ######## Dashboard ########
   dashboard(
     id = "dashboard",
-    syn.store = synStore_obj,
+    syn.store = syn_store,
     project.scope = selected$project,
     schema = selected$schema,
     disable.ids = c("box_pick_project", "box_pick_manifest"),
@@ -209,12 +215,11 @@ shinyServer(function(input, output, session) {
 
       dcWaiter("show", msg = paste0("Getting files in ", input$dropdown_folder, "..."))
       # get file list in selected folder
-      file_list <- synapse_driver$getFilesInStorageDataset(
-        synStore_obj,
-        selected$folder()
-      )
+      file_list <- syn_store$getFilesInStorageDataset(folder_synID())
+
       # update files list in the folder
       data_list$files(list2Vector(file_list))
+
       dcWaiter("hide")
     }
   })
@@ -250,8 +255,9 @@ shinyServer(function(input, output, session) {
     dcWaiter("show", msg = "Generating link...")
 
     manifest_url <-
-      metadata_model$getModelManifest(paste0(config_project$community, " ", input$dropdown_template),
-        selected$schema(),
+      metadata_model$getModelManifest(
+        title = paste0(config$community, " ", input$dropdown_template),
+        rootNode = template_schema_name(),
         filenames = switch((selected$schema_type() == "file") + 1,
           NULL,
           as.list(names(data_list$files()))
@@ -301,8 +307,8 @@ shinyServer(function(input, output, session) {
     annotation_status <-
       tryCatch(
         metadata_model$validateModelManifest(
-          inFile$raw()$datapath,
-          selected$schema(),
+          manifestPath = inFile$raw()$datapath,
+          rootNode = selected$schema(),
           restrict_rules = TRUE, # set true to disable great expectation
           project_scope = list(selected$project())
         ),
@@ -349,10 +355,11 @@ shinyServer(function(input, output, session) {
     # loading screen for Google link generation
     dcWaiter("show", msg = "Generating link...")
 
-    filled_manifest <- metadata_model$populateModelManifest(paste0(
-      config_project$community,
-      " ", input$dropdown_template
-    ), inFile$raw()$datapath, selected$schema())
+    filled_manifest <- metadata_model$populateModelManifest(
+      title = paste0(config$community, " ", input$dropdown_template),
+      manifestPath = inFile$raw()$datapath,
+      rootNode = selected$schema()
+    )
 
     # rerender and change button to link
     output$val_gsheet <- renderUI({
@@ -375,7 +382,7 @@ shinyServer(function(input, output, session) {
 
     # If a file-based component selected (define file-based components) note for future
     # the type to filter (eg file-based) on could probably also be a config choice
-    display_names <- config_schemas$manifest_schemas$display_name[config_schemas$manifest_schemas$type == "file"]
+    display_names <- config_schema$manifest_schemas$display_name[config_schema$manifest_schemas$type == "file"]
     # if folder_ID has not been updated yet
     if (is.null(selected$folder())) selected$folder(data_list$folders()[[input$dropdown_folder]])
 
@@ -387,7 +394,7 @@ shinyServer(function(input, output, session) {
           quote = TRUE, row.names = FALSE, na = ""
         )
       } else {
-        file_list <- synapse_driver$getFilesInStorageDataset(synStore_obj, selected$folder())
+        file_list <- syn_store$getFilesInStorageDataset(folder_synID())
         data_list$files(list2Vector(file_list))
 
         # better filename checking is needed
@@ -405,9 +412,9 @@ shinyServer(function(input, output, session) {
 
       # associates metadata with data and returns manifest id
       manifest_id <- synapse_driver$associateMetadataWithFiles(
-        synStore_obj,
-        "./manifests/synapse_storage_manifest.csv",
-        selected$folder(),
+        schemaGenerator = schema_generator,
+        metadataManifestPath = "./tmp/synapse_storage_manifest.csv",
+        datasetId = selected$folder(),
         manifest_record_type = "table"
       )
       manifest_path <- tags$a(href = paste0("https://www.synapse.org/#!Synapse:", manifest_id), manifest_id, target = "_blank")
@@ -439,10 +446,10 @@ shinyServer(function(input, output, session) {
       )
 
       # associates metadata with data and returns manifest id
-      manifest_id <- synapse_driver$associateMetadataWithFiles(
-        synStore_obj,
-        "./manifests/synapse_storage_manifest.csv",
-        selected$folder(),
+      manifest_id <- syn_store$associateMetadataWithFiles(
+        schemaGenerator = schema_generator,
+        metadataManifestPath = "./tmp/synapse_storage_manifest.csv",
+        datasetId = selected$folder(),
         manifest_record_type = "table"
       )
       manifest_path <- tags$a(href = paste0("https://www.synapse.org/#!Synapse:", manifest_id), manifest_id, target = "_blank")
