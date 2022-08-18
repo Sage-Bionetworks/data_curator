@@ -58,8 +58,16 @@ dbNetwork <- function(id, metadata, nodes, schema) {
           linkColour = if_else(links$IDsource == 5, "#694489", "black"),
           colourScale = JS(cols), legend = TRUE, linkDistance = 40,
           zoom = FALSE, bounded = TRUE, arrows = TRUE,
-          opacity = 0.9, fontSize = 16, charge = -500
+          opacity = 0.9, fontFamily = "inherit", charge = -500
         )
+        # htmlwidgets::onRender(
+        #   network,
+        #   '
+        #   function(el) {
+        #     d3.select(el).selectAll(".node text").attr("font-family", "inherit");
+        #   }
+        #   '
+        # )
       })
     }
   )
