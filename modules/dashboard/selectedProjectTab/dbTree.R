@@ -19,6 +19,15 @@ dbTreeUI <- function(id, n.nodes = NULL) {
   div(
     class = "collapsibleTree-container",
     tagList(
+      helpText(
+        HTML(paste0(
+          "
+          If you see ", nodeSVG("#FF794A"), " nodes, please keep clicking the nodes to explore the data requirements until the missing data (", nodeSVG("#E53935"), ") is shown.",
+          "If all required data have been uploaded, you will see ", nodeSVG("#A287AF"), " nodes.
+          "
+        ))
+      ),
+      br(),
       div(
         class = "legend-container",
         lapply(seq_along(legend_cols), function(i) {
@@ -26,14 +35,7 @@ dbTreeUI <- function(id, n.nodes = NULL) {
         })
       ),
       # r2d3 height can only be adjusted in d3output after the number of folders is known
-      d3Output(ns("tree"), width = "100%", height = height),
-      helpText(HTML(paste0(
-        "
-        Click nodes to expand the data requirements for the selected project.
-        Click ", nodeSVG("#FF794A"), "nodes to see which data requirement is missing.
-        If datasets have been uploaded, you will see ", nodeSVG("#A287AF"), " nodes.
-        "
-      )))
+      d3Output(ns("tree"), width = "100%", height = height)
     )
   )
 }

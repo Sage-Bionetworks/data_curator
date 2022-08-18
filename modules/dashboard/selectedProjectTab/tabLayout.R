@@ -14,16 +14,16 @@ selectedProjectTabUI <- function(id) {
         column(
           9,
           fluidRow(
-            column(12, class = "section-title", span("Requirment Relationship Tree")),
+            column(12, class = "section-title", span("Data Requirements Overview")),
             column(12, align = "center", uiOutput(ns("tree-container")))
           )
         ),
         column(
           3,
           fluidRow(
-            column(12, class = "section-title", span("Evaluate Submission")),
-            column(12, checkboxGroupInput(ns("checkbox-evaluate"), NULL)),
+            column(12, class = "section-title", span("Missing Data")),
             column(12, uiOutput(ns("evaluate-res"))),
+            column(12, checkboxGroupInput(ns("checkbox-evaluate"), NULL))
             # column(12, class = "section-title", span("Each dataset progress")),
             # column(12, align = "center", uiOutput(ns("dataset-pb")))
           )
