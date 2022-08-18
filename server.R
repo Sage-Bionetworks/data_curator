@@ -36,12 +36,6 @@ shinyServer(function(input, output, session) {
   # data available to the user
   syn_store <- NULL # gets list of projects they have access to
 
-  # from merge conflicts
-  # project_synID <- NULL # selected project synapse ID
-  # folder_synID <- reactiveVal("") # selected foler synapse ID
-  # template_schema_name <- reactiveVal(NULL) # selected template schema name
-  # template_type <- NULL # type of selected template
-
   data_list <- list(
     projects = reactiveVal(NULL), folders = reactiveVal(NULL),
     schemas = reactiveVal(template_namedList), files = reactiveVal(NULL)
@@ -54,7 +48,7 @@ shinyServer(function(input, output, session) {
 
   isUpdateFolder <- reactiveVal(FALSE)
 
-  tabs_list <- c("tab_instructions", "tab_data", "tab_template", "tab_upload")
+  tabs_list <- c("tab_data", "tab_template", "tab_upload")
   clean_tags <- c(
     "div_template", "div_template_warn",
     "div_validate", NS("tbl_validate", "table"), "btn_val_gsheet", "btn_submit"
@@ -124,7 +118,7 @@ shinyServer(function(input, output, session) {
   ######## Header Dropdown Button ########
   # Adjust header selection dropdown based on tabs
   observe({
-    if (input[["tabs"]] %in% c("tab_instructions", "tab_data")) {
+    if (input[["tabs"]] == "tab_data") {
       hide("header_selection_dropdown")
     } else {
       show("header_selection_dropdown")
@@ -215,7 +209,7 @@ shinyServer(function(input, output, session) {
 
       dcWaiter("show", msg = paste0("Getting files in ", input$dropdown_folder, "..."))
       # get file list in selected folder
-      file_list <- syn_store$getFilesInStorageDataset(folder_synID())
+      file_list <- syn_store$getFilesInStorageDataset(selected$folder())
 
       # update files list in the folder
       data_list$files(list2Vector(file_list))
@@ -394,7 +388,7 @@ shinyServer(function(input, output, session) {
           quote = TRUE, row.names = FALSE, na = ""
         )
       } else {
-        file_list <- syn_store$getFilesInStorageDataset(folder_synID())
+        file_list <- syn_store$getFilesInStorageDataset(selected$folder())
         data_list$files(list2Vector(file_list))
 
         # better filename checking is needed
