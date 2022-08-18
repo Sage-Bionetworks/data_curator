@@ -115,7 +115,7 @@ dashboard <- function(id, syn.store, project.scope, schema, schema.display.name,
       # get requirements for selected data type
       selected_datatype_requirement <- eventReactive(c(schema(), input$box$visible), {
         req(input$box$visible)
-        get_schema_nodes(schema())
+        get_schema_nodes(schema(), schema_url=schematic_config$model$input$download_url)
       })
 
       # get requirements for all uploaded manifests

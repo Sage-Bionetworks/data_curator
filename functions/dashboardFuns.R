@@ -9,7 +9,7 @@ get_dataset_metadata <- function(syn.store, datasets, ncores = 1, access_token, 
   # remove codes to download all manifests
   # get data for all manifests within the specified datasets
   #file_view <- syn.store$storageFileviewTable %>%
-  file_view <- get_asset_view_table(input_token = access_token,
+  file_view <- get_asset_view_table(url = file.path(api_uri, "v1/storage/assets/tables"), input_token = access_token,
                                     asset_view=fileview)
   file_view <- file_view %>%
     filter(name == "synapse_storage_manifest.csv" & parentId %in% datasets)
@@ -112,7 +112,7 @@ validate_metadata <- function(metadata, project.scope) {
 #'
 #' @param schema data type of selected data type or template.
 #' @return list of requirements for \code{schema} or string of \code{schema} if no requirements found
-get_schema_nodes <- function(schema) {
+get_schema_nodes <- function(schema, url=file.path(api_uri, "v1/model/component-requirements"), schema_url) {
   requirement <- tryCatch(
     model_component_requirements(
       url=url,
