@@ -24,7 +24,6 @@ dbNetwork <- function(id, metadata, nodes, schema) {
     id,
     function(input, output, session) {
       output$network <- renderForceNetwork({
-
         # create input data for network function, forceNetwork
         if (is.null(names(nodes))) {
           # if nodes is a single string of datatype without name, aka no requirements

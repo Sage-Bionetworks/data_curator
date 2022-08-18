@@ -1,5 +1,9 @@
 # Data Curator App
 
+<!-- badges: start -->
+[![Codecov test coverage](https://codecov.io/gh/Sage-Bionetworks/data_curator/branch/main/graph/badge.svg)](https://app.codecov.io/gh/Sage-Bionetworks/data_curator?branch=main)
+<!-- badges: end -->
+
 ## Introduction
 
 The _Data Curator App_ is an R Shiny app that serves as the _frontend_ to the schematic Python package. It allows data contributors to easily annotate, validate and submit their metadata.

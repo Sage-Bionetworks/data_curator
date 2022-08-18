@@ -52,7 +52,8 @@ dashboardUI <- function(id) {
 #' @param disable_ids selector ids to be disable during the process of dashboard
 #' @param ncores number of cpu to run parallelization
 #'
-dashboard <- function(id, syn.store, project.scope, schema, schema.display.name, disable.ids = NULL, ncores = 1) {
+dashboard <- function(id, syn.store, project.scope, schema, schema.display.name, disable.ids = NULL, ncores = 1,
+                      access_token, fileview, folder) {
   moduleServer(
     id,
     function(input, output, session) {
@@ -75,7 +76,7 @@ dashboard <- function(id, syn.store, project.scope, schema, schema.display.name,
         hide("toggle-btn-container")
         shinydashboardPlus::updateBox("box", action = "restore")
       })
-
+      t0 <- reactiveVal(NULL)
       # retrieving data progress for dashboard should not be executed until dashboard visiable
       # get all uploaded manifests once the project/folder changed
       observeEvent(c(project.scope(), input$box$visible), {
@@ -92,16 +93,20 @@ dashboard <- function(id, syn.store, project.scope, schema, schema.display.name,
         lapply(disable.ids, FUN = disable, asis = TRUE)
 
         # get all datasets from selected project
-        folder_list <- synapse_driver$getStorageDatasetsInProject(syn.store, project.scope())
+        #folder_list <- synapse_driver$getStorageDatasetsInProject(syn.store, project.scope())
+        folder_list <- storage_project_datasets(url=file.path(api_uri, "v1/storage/project/datasets"),
+                                                asset_view = fileview,
+                                                project_id=folder,
+                                                input_token=access_token)
         folder_list <- list2Vector(folder_list)
-
         # get all uploaded manifests for selected project
         metadata <- get_dataset_metadata(
           syn.store = syn.store,
           datasets = folder_list,
-          ncores = ncores
+          ncores = ncores,
+          access_token = access_token,
+          fileview = fileview
         )
-
         metadata <- validate_metadata(metadata, project.scope = list(project.scope()))
         # update reactive value
         uploaded_manifests(metadata)
@@ -135,7 +140,8 @@ dashboard <- function(id, syn.store, project.scope, schema, schema.display.name,
       # to reduce running time, selected template updates should not initiate this event
       observeEvent(c(uploaded_manifests_requirement(), input$box$visible), {
         req(input$box$visible)
-        user_name <- syn$getUserProfile()$userName
+        #user_name <- syn$getUserProfile()$userName
+        user_name <- datacurator::synapse_user_profile(auth=access_token)[["userName"]]
         selectedProjectTab(
           "tab-selected-project",
           user_name,
