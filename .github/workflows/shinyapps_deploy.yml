@@ -10,7 +10,7 @@ on:
     branches:
       - main
       - develop*
-      - feat-UI-dashboard1
+      - feat-UI-dashboard
     tags:
       - v*.*.*
     paths-ignore:
