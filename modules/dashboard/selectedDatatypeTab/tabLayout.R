@@ -5,10 +5,10 @@ selectedDataTypeTabUI <- function(id) {
     tagList(
       setTabTitleUI(ns("title")),
       fluidRow(
-        column(12,
-          class = "bottom-title-container",
-          column(12, class = "section-title", span("Required Data Types"))
-        ),
+        # column(12,
+        #   class = "bottom-title-container",
+        #   column(12, class = "section-title", span("Required Data Types"))
+        # ),
         column(12,
           class = "bottom-container",
           column(6, column(12, dbCheckListUI(ns("checklist")))),
@@ -25,7 +25,7 @@ selectedDataTypeTabUI <- function(id) {
   )
 }
 
-selectedDataTypeTab <- function(id, metadata, nodes, schema) {
+selectedDataTypeTab <- function(id, metadata, nodes, schema, schema.display.name) {
   moduleServer(
     id,
     function(input, output, session) {
@@ -38,7 +38,7 @@ selectedDataTypeTab <- function(id, metadata, nodes, schema) {
       # remove manifests with invalid component name
       metadata <- metadata[!is.na(metadata$Component), ]
       # render tab title
-      setTabTitle("title", paste0("Completion of Requirements for Data Type: ", sQuote(schema)))
+      setTabTitle("title", paste0("Completion of Requirements for Data Type: ", sQuote(schema.display.name)))
 
       # render check list of requirments for selected datatype
       dbCheckList("checklist", metadata, nodes)

@@ -195,6 +195,7 @@ shinyServer(function(input, output, session) {
     syn.store = syn_store,
     project.scope = selected$project,
     schema = selected$schema,
+    schema.display.name = reactive(input$dropdown_template),
     disable.ids = c("box_pick_project", "box_pick_manifest"),
     ncores = ncores
   )

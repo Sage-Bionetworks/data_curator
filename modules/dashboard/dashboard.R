@@ -48,10 +48,11 @@ dashboardUI <- function(id) {
 #' @param syn.store synapse storage object
 #' @param project.scope selected project syn ID named with project name
 #' @param schema selected schema name
+#' @param schema.display.name display name for selected schema name
 #' @param disable_ids selector ids to be disable during the process of dashboard
 #' @param ncores number of cpu to run parallelization
 #'
-dashboard <- function(id, syn.store, project.scope, schema, disable.ids = NULL, ncores = 1) {
+dashboard <- function(id, syn.store, project.scope, schema, schema.display.name, disable.ids = NULL, ncores = 1) {
   moduleServer(
     id,
     function(input, output, session) {
@@ -125,7 +126,8 @@ dashboard <- function(id, syn.store, project.scope, schema, disable.ids = NULL, 
           "tab-selected-datatype",
           uploaded_manifests(),
           selected_datatype_requirement(),
-          schema()
+          schema(),
+          schema.display.name = schema.display.name()
         )
       })
 
