@@ -5,10 +5,18 @@ selectedProjectTabUI <- function(id) {
     tagList(
       setTabTitleUI(ns("title")),
       fluidRow(
-        column(12,
+        column(
+          12,
           class = "banner-container",
           column(6, dbRaterUI(ns("summary"))),
           column(6, dbStatsBoxUI(ns("stats")))
+        ),
+        column(
+          9,
+          fluidRow(
+            column(12, class = "section-title", span("Requirment Relationship Tree")),
+            column(12, align = "center", uiOutput(ns("tree-container")))
+          )
         ),
         column(
           3,
@@ -16,15 +24,8 @@ selectedProjectTabUI <- function(id) {
             column(12, class = "section-title", span("Evaluate Submission")),
             column(12, checkboxGroupInput(ns("checkbox-evaluate"), NULL)),
             column(12, uiOutput(ns("evaluate-res"))),
-            column(12, class = "section-title", span("Each dataset progress")),
-            column(12, align = "center", uiOutput(ns("dataset-pb")))
-          )
-        ),
-        column(
-          width = 9, class = "tree-box",
-          fluidRow(
-            column(12, class = "section-title", span("Requirment Relationship Tree")),
-            column(12, align = "center", uiOutput(ns("tree-container")))
+            # column(12, class = "section-title", span("Each dataset progress")),
+            # column(12, align = "center", uiOutput(ns("dataset-pb")))
           )
         )
       )
@@ -84,7 +85,7 @@ selectedProjectTab <- function(id, username, metadata, nodes, project.name, pare
 
       observeEvent(input$`checkbox-evaluate`, ignoreNULL = FALSE, {
         # clean the previous ui to avoid duplicate progress ids
-        output$`dataset-pb` <- renderUI(NULL)
+        # output$`dataset-pb` <- renderUI(NULL)
 
         # update required data frame
         evaluate_datatypes <- input$`checkbox-evaluate`
@@ -135,33 +136,33 @@ selectedProjectTab <- function(id, username, metadata, nodes, project.name, pare
         }
 
         # render progress bar ui for each dataset
-        output$`dataset-pb` <- renderUI({
-          fluidRow(
-            # !important: add ns to pb's id, otherwise pb server will not be able to find
-            lapply(folder_list, function(f) {
-              # currently, need to use attr on tag object to add tooltip
-              # runjs somehow not working in module?
-              column(
-                6,
-                progressBarUI(ns(f)) %>%
-                  addTooltip(paste0(f, ": ", ds_pb_values[f], "%"), "top")
-              )
-            })
-          )
-        })
+        # output$`dataset-pb` <- renderUI({
+        #   fluidRow(
+        #     # !important: add ns to pb's id, otherwise pb server will not be able to find
+        #     lapply(folder_list, function(f) {
+        #       # currently, need to use attr on tag object to add tooltip
+        #       # runjs somehow not working in module?
+        #       column(
+        #         6,
+        #         progressBarUI(ns(f)) %>%
+        #           addTooltip(paste0(f, ": ", ds_pb_values[f], "%"), "top")
+        #       )
+        #     })
+        #   )
+        # })
 
         # assign values to progress bar server for each dataset
-        lapply(folder_list, function(f) {
-          progressBar(
-            id = f,
-            value = ds_pb_values[f],
-            display_pct = FALSE,
-            height = "10px",
-            color = "#28a745",
-            backgoundCol = "#e53935",
-            subtitle = f
-          )
-        })
+        # lapply(folder_list, function(f) {
+        #   progressBar(
+        #     id = f,
+        #     value = ds_pb_values[f],
+        #     display_pct = FALSE,
+        #     height = "10px",
+        #     color = "#28a745",
+        #     backgoundCol = "#e53935",
+        #     subtitle = f
+        #   )
+        # })
 
         # render collasiple tree
         dbTree("requirement-tree", na.omit(uploaded), nodes, project.name)
