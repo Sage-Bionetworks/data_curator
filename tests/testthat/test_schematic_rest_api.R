@@ -96,3 +96,18 @@ test_that("get_asset_view_table returns asset view table", {
   storage_tbl <- subset(av, av$name == "synapse_storage_manifest.csv")
   expect_true(inherits(av, "data.frame"), "name" %in% names(av))
 })
+
+test_that("asset_tables returns a data.frame", {
+  skip_it()
+  tst <- get_asset_view_table(url=file.path(schem_url, "v1/storage/assets/tables"),
+                       asset_view = "syn28559058",
+                       input_token = Sys.getenv("SYNAPSE_TOKEN"),
+                       as_json=TRUE)
+  expect_identical(nrow(tst), 3L)
+  
+  tst2 <- get_asset_view_table(url=file.path(schem_url, "v1/storage/assets/tables"),
+                                  asset_view = "syn28559058",
+                                  input_token = Sys.getenv("SYNAPSE_TOKEN"),
+                                  as_json=FALSE)
+  expect_identical(nrow(tst2), 3L)
+})

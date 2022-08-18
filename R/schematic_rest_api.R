@@ -237,16 +237,21 @@ storage_dataset_files <- function(url="http://localhost:3001/v1/storage/dataset/
 #' @param asset_view Synapse ID of asset view
 #' @export
 get_asset_view_table <- function(url="http://localhost:3001/v1/storage/assets/tables",
-                                 input_token, asset_view) {
+                                 input_token, asset_view, as_json=TRUE) {
   
   req <- httr::GET(url,
                    query=list(
                      asset_view=asset_view,
-                     input_token=input_token))
+                     input_token=input_token,
+                     as_json=as_json))
   
   if (httr::http_status(req)$category == "Success") {
+    if (isTRUE(as_json)) {
+      return(dplyr::bind_rows(httr::content(req)))
+    } else {
     csv <- readr::read_csv(httr::content(req))
     return(csv)
+    }
   } else stop("File could not be downloaded from Synapse.")
   
 }
