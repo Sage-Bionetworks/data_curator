@@ -144,7 +144,7 @@ ui <- shinydashboardPlus::dashboardPage(
             id = "box_pick_manifest",
             status = "primary",
             width = 6,
-            title = "Choose a Data Type Template: ",
+            title = "Choose a Data Type: ",
             selectInput(
               inputId = "dropdown_template",
               label = "Data Type Template:",
