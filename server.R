@@ -408,11 +408,12 @@ shinyServer(function(input, output, session) {
       # schematic rest api to submit metadata
       # This validates AND submits the data to Synapse
       # Returns synapse table ID if successful
-      manifest_id <- model_validate(url=file.path(api_uri, "v1/model/validate"),
+      manifest_id <- manifest_validate(url=file.path(api_uri, "v1/model/validate"),
+                                       schema_url = schematic_config$model$input$download_url,
                                     data_type=selected$schema(),
-                              dataset_id=selected$folder(),
-                              input_token=access_token,
-                              csv_file="./tmp/synapse_storage_manifest.csv")
+                              #dataset_id=selected$folder(),
+                              #input_token=access_token,
+                              csv_file="./manifests/synapse_storage_manifest.csv")
       
       #> xml_text(xml_child(content(req3), "head/title"))
       #[1] "jsonschema.exceptions.ValidationError: Manifest could not be validated under provided data model. Validation failed with the following errors: [[2, 'Wrong schema', \"'HTAN Parent ID' is a required property\", 'Wrong schema'], [2, 'Wrong schema', \"'Storage Method' is a required property\", 'Wrong schema'], [2, 'Wrong schema', \"'Protocol Link' is a required property\", 'Wrong schema'], [2, 'Wrong schema', \"'Acquisition Method Type' is a required property\", 'Wrong schema'], [2, 'Wrong schema', \"'Collection Days from Index' is a required property\", 'Wrong schema'], [2, 'Wrong schema', \"'Fixative Type' is a required property\", 'Wrong schema'], [2, 'Wrong schema', \"'HTAN Biospecimen ID' is a required property\", 'Wrong schema'], [2, 'Wrong schema', \"'Biospecimen Type' is a required property\", 'Wrong schema'], [2, 'Wrong schema', \"'Processing Days from Index' is a required property\", 'Wrong schema'], [2, 'Wrong schema', \"'Timepoint Label' is a required property\", 'Wrong schema'], [2, 'Wrong schema', \"'Site of Resection or Biopsy' is a required property\", 'Wrong schema']] // Werkzeug Debugger"
@@ -447,11 +448,12 @@ shinyServer(function(input, output, session) {
       )
 
       # associates metadata with data and returns manifest id
-      manifest_id <- model_validate(url=file.path(api_uri, "v1/model/validate"),
+      manifest_id <- manifest_validate(url=file.path(api_uri, "v1/model/validate"),
                                     data_type=selected$schema(),
-                                    dataset_id=selected$folder(),
-                                    input_token=access_token,
-                                    csv_file="./tmp/synapse_storage_manifest.csv")
+                                    schema_url = schematic_config$model$input$download_url,
+                                    #dataset_id=selected$folder(),
+                                    #input_token=access_token,
+                                    csv_file="./manifests/synapse_storage_manifest.csv")
       manifest_path <- tags$a(href = paste0("synapse.org/#!Synapse:", manifest_id), manifest_id, target = "_blank")
       
       # if uploaded provided valid synID message
