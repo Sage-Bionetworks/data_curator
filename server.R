@@ -408,11 +408,12 @@ shinyServer(function(input, output, session) {
       # schematic rest api to submit metadata
       # This validates AND submits the data to Synapse
       # Returns synapse table ID if successful
-      manifest_id <- manifest_validate(url=file.path(api_uri, "v1/model/validate"),
+      manifest_id <- model_submit(url=file.path(api_uri, "v1/model/submit"),
                                        schema_url = schematic_config$model$input$download_url,
                                     data_type=selected$schema(),
-                              #dataset_id=selected$folder(),
-                              #input_token=access_token,
+                              dataset_id=selected$folder(),
+                              input_token=access_token,
+                              restrict_rules=FALSE,
                               csv_file="./manifests/synapse_storage_manifest.csv")
       
       #> xml_text(xml_child(content(req3), "head/title"))
@@ -448,14 +449,14 @@ shinyServer(function(input, output, session) {
       )
 
       # associates metadata with data and returns manifest id
-      manifest_id <- manifest_validate(url=file.path(api_uri, "v1/model/validate"),
+      manifest_id <- model_submit(url=file.path(api_uri, "v1/model/submit"),
                                     data_type=selected$schema(),
                                     schema_url = schematic_config$model$input$download_url,
-                                    #dataset_id=selected$folder(),
-                                    #input_token=access_token,
+                                    dataset_id=selected$folder(),
+                                    input_token=access_token,
+                                    restrict_rules=FALSE,
                                     csv_file="./manifests/synapse_storage_manifest.csv")
       manifest_path <- tags$a(href = paste0("synapse.org/#!Synapse:", manifest_id), manifest_id, target = "_blank")
-      
       # if uploaded provided valid synID message
       if (startsWith(manifest_id, "syn") == TRUE) {
         dcWaiter("hide")
