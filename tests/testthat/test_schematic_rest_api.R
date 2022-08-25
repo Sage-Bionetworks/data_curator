@@ -61,12 +61,14 @@ test_that("storage_projects returns available projects", {
 })
 
 test_that("storage_dataset_files returns files", {
+  skip_it()
   storage_dataset_files(asset_view = "syn23643253",
                         dataset_id = "syn23643250",
                         input_token=Sys.getenv("SYNAPSE_PAT"))
 })
 
 test_that("model_component_requirements returns list of required components", {
+  skip_it()
   good <- model_component_requirements(url="http://localhost:3001/v1/model/component-requirements",
                                            schema_url="https://raw.githubusercontent.com/ncihtan/data-models/main/HTAN.model.jsonld",
                                            source_component="Patient",
@@ -91,6 +93,7 @@ test_that("manifest_download returns a csv.", {
 })
 
 test_that("get_asset_view_table returns asset view table", {
+  skip_it()
   av <- get_asset_view_table(input_token = Sys.getenv("SYNAPSE_PAT"),
                        asset_view="syn23643253")
   storage_tbl <- subset(av, av$name == "synapse_storage_manifest.csv")

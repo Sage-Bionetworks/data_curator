@@ -26,7 +26,7 @@ test_that("is_certified returns TRUE or FALSE", {
 
 test_that("get returns a tibble or error", {
   
-  good_req <- synapse_get(id="syn27331282", auth=Sys.getenv("SYNAPSE_PAT"))
+  good_req <- synapse_get(id="syn23643255", auth=Sys.getenv("SYNAPSE_PAT"))
   expect_true(nrow(good_req) == 1)
   
   expect_error(synapse_get(id="bad", auth=Sys.getenv("SYNAPSE_PAT")))
