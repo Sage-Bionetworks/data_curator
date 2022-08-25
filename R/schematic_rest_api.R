@@ -110,14 +110,15 @@ manifest_validate <- function(url="http://localhost:3001/v1/model/validate",
 #' @export
 model_submit <- function(url="http://localhost:3001/v1/model/submit",
                          schema_url="https://raw.githubusercontent.com/ncihtan/data-models/main/HTAN.model.jsonld", #notlint
-                         data_type, dataset_id, input_token, csv_file) {
+                         data_type, dataset_id, restrict_rules=FALSE, input_token, csv_file) {
   req <- httr::POST(url,
                     #add_headers(Authorization=paste0("Bearer ", pat)),
                     query=list(
                       schema_url=schema_url,
                       data_type=data_type,
                       dataset_id=dataset_id,
-                      input_token=input_token),
+                      input_token=input_token,
+                      restrict_rules=restrict_rules),
                     body=list(csv_file=httr::upload_file(csv_file))
   )
   
