@@ -6,7 +6,7 @@ dbRaterUI <- function(id) {
   )
 }
 
-dbRater <- function(id, metadata, nodes, username) {
+dbRater <- function(id, metadata, nodes, username, project.name) {
   moduleServer(
     id,
     function(input, output, session) {
@@ -48,7 +48,7 @@ dbRater <- function(id, metadata, nodes, username) {
             div(class = "dbRater-header", h3(paste0("Congratulations ", username, "!"))),
             div(
               class = "dbRater-body",
-              paste0("you have made ", progress_value, "% progress")
+              paste0("you have made ", progress_value, "% progress for ", sQuote(project.name))
             )
           ),
           progressBarUI(ns("progress-box"))

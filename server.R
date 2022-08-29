@@ -182,10 +182,10 @@ shinyServer(function(input, output, session) {
 
   ######## Update Template ########
   # update selected schema template name
-  observeEvent(input$dropdown_template, {
+  observeEvent(input$dropdown_datatype, {
     # update reactive selected values for schema
-    selected$schema(data_list$schemas()[input$dropdown_template])
-    schema_type <- config_schema$type[which(config_schema$display_name == input$dropdown_template)]
+    selected$schema(data_list$schemas()[input$dropdown_datatype])
+    schema_type <- config_schema$type[which(config_schema$display_name == input$dropdown_datatype)]
     selected$schema_type(schema_type)
   })
 
@@ -195,7 +195,7 @@ shinyServer(function(input, output, session) {
     syn.store = syn_store,
     project.scope = selected$project,
     schema = selected$schema,
-    schema.display.name = reactive(input$dropdown_template),
+    schema.display.name = reactive(input$dropdown_datatype),
     disable.ids = c("box_pick_project", "box_pick_manifest"),
     ncores = ncores
   )
@@ -231,14 +231,14 @@ shinyServer(function(input, output, session) {
       warn_text <- paste0(
         strong(sQuote(input$dropdown_folder)), " folder is empty,
         please upload your data before generating manifest.",
-        "<br><br>", strong(sQuote(input$dropdown_template)),
+        "<br><br>", strong(sQuote(input$dropdown_datatype)),
         " requires data files to be uploaded prior generating and submitting templates.",
         "<br><br>", "Filling in a template before uploading your data,
         may result in errors and delays in your data submission later."
       )
 
       nx_report_warning("Warning", HTML(warn_text))
-      output$text_template_warn <- renderUI(tagList(br(), span(class = "warn_msg", HTML(warn_text))))
+      output$text_template_warn <- renderUI(tagList(br(), span(class = "warn-msg", HTML(warn_text))))
 
       show("div_template_warn")
     }
@@ -251,7 +251,7 @@ shinyServer(function(input, output, session) {
 
     manifest_url <-
       metadata_model$getModelManifest(
-        title = paste0(config$community, " ", input$dropdown_template),
+        title = paste0(config$community, " ", input$dropdown_datatype),
         rootNode = template_schema_name(),
         filenames = switch((selected$schema_type() == "file") + 1,
           NULL,
@@ -270,7 +270,7 @@ shinyServer(function(input, output, session) {
     nx_confirm(
       inputId = "btn_template_confirm",
       title = "Go to the template now?",
-      message = paste0("click 'Go' to edit your ", sQuote(input$dropdown_template), " template on the google sheet"),
+      message = paste0("click 'Go' to edit your ", sQuote(input$dropdown_datatype), " template on the google sheet"),
       button_ok = "Go",
     )
 
@@ -311,7 +311,7 @@ shinyServer(function(input, output, session) {
       )
 
     # validation messages
-    validation_res <- validationResult(annotation_status, input$dropdown_template, inFile$data())
+    validation_res <- validationResult(annotation_status, input$dropdown_datatype, inFile$data())
     ValidationMsgServer("text_validate", validation_res)
 
     # if there is a file uploaded
@@ -351,7 +351,7 @@ shinyServer(function(input, output, session) {
     dcWaiter("show", msg = "Generating link...")
 
     filled_manifest <- metadata_model$populateModelManifest(
-      title = paste0(config$community, " ", input$dropdown_template),
+      title = paste0(config$community, " ", input$dropdown_datatype),
       manifestPath = inFile$raw()$datapath,
       rootNode = selected$schema()
     )
@@ -381,7 +381,7 @@ shinyServer(function(input, output, session) {
     # if folder_ID has not been updated yet
     if (is.null(selected$folder())) selected$folder(data_list$folders()[[input$dropdown_folder]])
 
-    if (input$dropdown_template %in% display_names) {
+    if (input$dropdown_datatype %in% display_names) {
       # make into a csv or table for file-based components already has entityId
       if ("entityId" %in% colnames(submit_data)) {
         write.csv(submit_data,

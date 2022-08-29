@@ -32,12 +32,12 @@ dbStatsBox <- function(id, metadata, nodes, source.tab = "tabs", target.tab = "d
           div(
             class = "dbStatsBox-item-container",
             div(
-              class = "dbStatsBox-item completed",
+              class = "dbStatsBox-item uploaded",
               tagList(
                 icon("smile-wink", "fa-3x"),
                 div(
                   class = "dbStatsBox-text",
-                  h4("Completed"), span(n_uploaded)
+                  h4("Uploaded"), span(n_uploaded)
                 )
               )
             ),

@@ -3,7 +3,8 @@ selectedProjectTabUI <- function(id) {
   div(
     class = "selectedProjectTab-container",
     tagList(
-      setTabTitleUI(ns("title")),
+      # setTabTitleUI(ns("title")),
+      br(),
       fluidRow(
         column(
           12,
@@ -14,16 +15,16 @@ selectedProjectTabUI <- function(id) {
         column(
           9,
           fluidRow(
-            column(12, class = "section-title", span("Data Requirements Overview")),
+            column(12, class = "section-title", NULL),
             column(12, align = "center", uiOutput(ns("tree-container")))
           )
         ),
         column(
           3,
           fluidRow(
-            column(12, class = "section-title", span("Missing Data")),
-            column(12, uiOutput(ns("evaluate-res"))),
-            column(12, checkboxGroupInput(ns("checkbox-evaluate"), NULL))
+            column(12, class = "section-title", NULL),
+            column(12, checkboxGroupInput(ns("checkbox-evaluate"), NULL)),
+            column(12, uiOutput(ns("evaluate-res")))
             # column(12, class = "section-title", span("Each dataset progress")),
             # column(12, align = "center", uiOutput(ns("dataset-pb")))
           )
@@ -41,10 +42,10 @@ selectedProjectTab <- function(id, username, metadata, nodes, project.name, pare
 
       ## Summary banner
       # render tab title
-      setTabTitle("title", paste0("Completion of Requirements for Project: ", sQuote(project.name)))
+      # setTabTitle("title", paste0("Completion of Requirements for Project: ", sQuote(project.name)))
 
       # render rator system
-      dbRater("summary", metadata, nodes, username)
+      dbRater("summary", metadata, nodes, username, project.name)
       # render summary stats boxes
       dbStatsBox("stats", metadata, nodes, parent.session = parent.session)
 
@@ -62,8 +63,10 @@ selectedProjectTab <- function(id, username, metadata, nodes, project.name, pare
         session,
         "checkbox-evaluate",
         label = if_else(length(not_uploaded) > 0,
-          "It looks like you are missing these data types:",
-          "It looks like you completed all requirements !!!"
+          "Want to know how your progress is going to change
+          if you upload ones of missing data?
+          Try to select ones of below missing data types to evaluate:",
+          "It looks like you have uploaded all the required data !!!"
         ),
         choices = as.list(not_uploaded)
       )
@@ -92,17 +95,8 @@ selectedProjectTab <- function(id, username, metadata, nodes, project.name, pare
 
         if (is.null(evaluate_datatypes)) {
           # reset progress values if no evaluated data type selected
-          ds_pb_values <- ds_pb_values
-
-          if (length(not_uploaded) > 0) {
-            output$`evaluate-res` <- renderUI({
-              span(
-                class = "warn_msg",
-                "Trying to select one or all of above data types to evaluate
-                how your progress is going to change"
-              )
-            })
-          }
+          # ds_pb_values <- ds_pb_values
+          output$`evaluate-res` <- renderUI(NULL)
         } else {
           # substrate # of evaluated datatypes for nMiss
           # note, it will not change the nodes outside of observeEvent
@@ -128,7 +122,7 @@ selectedProjectTab <- function(id, username, metadata, nodes, project.name, pare
             n_completed <- sum(uniq_ds$n_miss == 0)
             new_progress <- round(n_completed / nrow(uniq_ds) * 100)
             items <- paste0(sQuote(evaluate_datatypes), collapse = ", ")
-            span(class = "warn_msg", HTML(paste0(
+            span(class = "warn-msg", HTML(paste0(
               "By submitting: ", items, ", your total progress will become ",
               strong(new_progress), "% !!!"
             )))

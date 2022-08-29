@@ -3,7 +3,8 @@ selectedDataTypeTabUI <- function(id) {
   div(
     class = "selectedDataTypeTab-container",
     tagList(
-      setTabTitleUI(ns("title")),
+      # setTabTitleUI(ns("title")),
+      br(),
       fluidRow(
         # column(12,
         #   class = "bottom-title-container",
@@ -38,7 +39,7 @@ selectedDataTypeTab <- function(id, metadata, nodes, schema, schema.display.name
       # remove manifests with invalid component name
       metadata <- metadata[!is.na(metadata$Component), ]
       # render tab title
-      setTabTitle("title", paste0("Completion of Requirements for Data Type: ", sQuote(schema.display.name)))
+      # setTabTitle("title", paste0("Completion of Requirements for Data Type: ", sQuote(schema.display.name)))
 
       # render check list of requirments for selected datatype
       dbCheckList("checklist", metadata, nodes)

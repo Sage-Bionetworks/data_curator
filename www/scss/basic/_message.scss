@@ -6,18 +6,24 @@
 }
 
 // validation message
-.error_msg,
+.error-msg,
 .shiny-output-error {
   color: $error_col;
 }
 
-.success_msg {
+.success-msg {
   color: $success_col;
 }
 
-.warn_msg {
+.warn-msg {
   color: $warning_col;
 }
+
+.strong-msg {
+  color: #000;
+  font-weight: 700;
+}
+
 // notification
 .shiny-notification {
   position: fixed;

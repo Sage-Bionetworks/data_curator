@@ -3,7 +3,8 @@ validationTabUI <- function(id) {
   div(
     class = "validationTab-container",
     tagList(
-      setTabTitleUI(ns("title")),
+      # setTabTitleUI(ns("title")),
+      br(),
       dbValidationTableUI(ns("validation-table")),
       helpText("If there is any validation error,
         please re-validate the corresponding metadata to see detailed errors and re-submit once you have corrected metadata.")
@@ -18,7 +19,7 @@ validationTab <- function(id, metadata, project.name) {
       ns <- session$ns
 
       # render tab title
-      setTabTitle("title", paste0("Validation of Uploaded Data for Project: ", sQuote(project.name)))
+      # setTabTitle("title", paste0("Validation of Uploaded Data for Project: ", sQuote(project.name)))
 
       # change wrong schema to out-of-date type
       error_types <- case_when(

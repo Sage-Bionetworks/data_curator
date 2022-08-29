@@ -20,11 +20,13 @@ dbTreeUI <- function(id, n.nodes = NULL) {
     class = "collapsibleTree-container",
     tagList(
       helpText(
-        align = "center",
+        class = "strong-msg",
+        align = "left",
         HTML(paste0(
           "
-          If you see ", nodeSVG("#FF794A"), " nodes, please keep clicking the nodes to explore the data requirements until the missing data (", nodeSVG("#E53935"), ") is shown. ",
-          "If all required data have been uploaded, you will see ", nodeSVG("#A287AF"), " nodes.
+          If you see ", nodeSVG("#FF794A"), " datasets, there are missing data has not been uploaded yet.
+          <br>Please keep clicking the nodes to explore the data requirements until the missing data (", nodeSVG("#E53935"), ") is shown.
+          <br>If all required data have been uploaded, you will see ", nodeSVG("#A287AF"), " nodes.
           "
         ))
       ),

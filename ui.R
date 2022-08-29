@@ -146,8 +146,8 @@ ui <- shinydashboardPlus::dashboardPage(
             width = 6,
             title = "Choose a Data Type: ",
             selectInput(
-              inputId = "dropdown_template",
-              label = "Data Type Template:",
+              inputId = "dropdown_datatype",
+              label = "Data Type:",
               choices = "Generating..."
             )
           ),

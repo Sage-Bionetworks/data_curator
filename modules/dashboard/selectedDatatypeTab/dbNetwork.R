@@ -6,7 +6,13 @@
 dbNetworkUI <- function(id, height = 500) {
   ns <- NS(id)
   tagList(
-    helpText(align = "center", HTML(paste0("Usage: A ", icon("long-arrow-alt-right"), " B: Data type A requires Data type B"))),
+    helpText(
+      class = "strong-msg",
+      align = "center",
+      HTML(paste0(
+        "Usage: A ", icon("long-arrow-alt-right"), " B: Data type A requires Data type B"
+      ))
+    ),
     uiOutput(ns("instruction")),
     forceNetworkOutput(ns("network"), height = height)
   )
@@ -38,7 +44,7 @@ dbNetwork <- function(id, metadata, nodes, schema) {
           )
           nodes_df <- data.frame(
             name = c(schema, names(nodes)),
-            group = c("Selected", ifelse(links$target %in% metadata$Component, "Completed", "Missing")),
+            group = c("Selected", ifelse(links$target %in% metadata$Component, "Uploaded", "Missing")),
             size = c(20)
           ) %>%
             distinct() # remove duplicates requirement
@@ -49,7 +55,7 @@ dbNetwork <- function(id, metadata, nodes, schema) {
         links$IDtarget <- match(links$target, nodes_df$name) - 1
         # assign colors to groups
         cols <- 'd3.scaleOrdinal()
-                .domain(["Selected", "Completed", "Missing"])
+                .domain(["Selected", "Uploaded", "Missing"])
                 .range(["#694489", "#28a745", "#E53935"]);'
         # render network
         forceNetwork(

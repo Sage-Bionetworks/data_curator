@@ -41,7 +41,7 @@ dbCheckList <- function(id, metadata, nodes) {
                   div(
                     class = "checklist-item",
                     tagList(
-                      icon("circle", class = "completed"),
+                      icon("circle", class = "uploaded"),
                       span(name),
                       actionButton(
                         class = "icon-btn", ns(paste0(name, "-dropdown")),

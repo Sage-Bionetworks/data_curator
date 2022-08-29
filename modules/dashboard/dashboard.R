@@ -22,12 +22,12 @@ dashboardUI <- function(id) {
         tabsetPanel(
           id = ns("tabs"),
           tabPanel(
-            "Selected Project",
+            "Data Overview",
             value = "db-tab1",
             selectedProjectTabUI(ns("tab-selected-project"))
           ),
           tabPanel(
-            "Selected Data Type",
+            "Data Requirements",
             value = "db-tab2",
             selectedDataTypeTabUI(ns("tab-selected-datatype"))
           ),
@@ -84,7 +84,7 @@ dashboard <- function(id, syn.store, project.scope, schema, schema.display.name,
         dcWaiter(
           "show",
           id = ns("tab-container"), url = "www/img/logo.svg", custom_spinner = TRUE,
-          msg = "Loading, please wait...", style = "color: #000;", color = transparent(0.95)
+          msg = "Loading, please wait...", style = "color: #000;", color = transparent(0.8)
         )
 
         # disable selection to prevent changes until all uploaded manifests are queried
