@@ -22,7 +22,7 @@ manifest:
 
 model:
   input:
-    download_url: 'https://raw.githubusercontent.com/ncihtan/data-models/2bcd27020a46a14139d4723ed62501ea4d5e8e69/HTAN.model.jsonld'
+    download_url: 'https://raw.githubusercontent.com/ncihtan/data-models/feature-cross-validation/HTAN.model.jsonld'
     location: 'data-models/HTAN.model.jsonld'
     file_type: 'local'
 

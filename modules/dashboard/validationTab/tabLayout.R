@@ -21,15 +21,10 @@ validationTab <- function(id, metadata, project.name) {
       # render tab title
       # setTabTitle("title", paste0("Validation of Uploaded Data for Project: ", sQuote(project.name)))
 
-      # change wrong schema to out-of-date type
-      error_types <- case_when(
-        metadata$ErrorType == "Wrong Schema" ~ "Out of Date",
-        metadata$ErrorType == "No Error" ~ "Valid",
-        TRUE ~ metadata$ErrorType
-      )
       validation_status <- case_when(
         metadata$Result == "valid" & metadata$WarnMsg == "Valid" ~ "Pass",
         metadata$Result == "valid" & metadata$WarnMsg != "Valid" ~ "Warning",
+        metadata$ErrorType == "Out of Date" ~ "Warning",
         TRUE ~ "Fail"
       )
       # process validation result
@@ -41,7 +36,7 @@ validationTab <- function(id, metadata, project.name) {
         Dataset = metadata$Folder,
         Validation = validation_status,
         # change wrong schema to out-of-date type
-        `Schema Check` = error_types,
+        `Schema Check` = metadata$errorMsg, # should return only first error
         `Internal Links Check` = metadata$WarnMsg,
         `Created On` = metadata$CreatedOn,
         `Last Modified` = metadata$ModifiedOn,

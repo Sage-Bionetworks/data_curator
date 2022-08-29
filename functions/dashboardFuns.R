@@ -70,7 +70,6 @@ validate_metadata <- function(metadata, project.scope) {
   if (nrow(metadata) == 0) {
     return(metadata)
   }
-
   lapply(1:nrow(metadata), function(i) {
     manifest <- metadata[i, ]
     # validate manifest, if no error, output is list()
@@ -87,9 +86,12 @@ validate_metadata <- function(metadata, project.scope) {
     )
     # clean validation res from schematicpy
     clean_res <- validationResult(validation_res, manifest$Component, dashboard = TRUE)
+
     data.frame(
       Result = clean_res$result,
-      ErrorType = clean_res$error_type,
+      # change wrong schema to out-of-date type
+      ErrorType = if_else(clean_res$error_type == "Wrong Schema", "Out of Date", clean_res$error_type),
+      errorMsg = if_else(is.null(clean_res$error_msg[1]), "Valid", clean_res$error_msg[1]),
       WarnMsg = if_else(length(clean_res$warning_msg) == 0, "Valid", clean_res$warning_msg)
     )
   }) %>%
