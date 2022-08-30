@@ -45,9 +45,9 @@ has_auth_code <- function(params) {
 }
 
 app <- oauth_app("shinysynapse",
-                 key = client_id,
-                 secret = client_secret,
-                 redirect_uri = app_url
+  key = client_id,
+  secret = client_secret,
+  redirect_uri = app_url
 )
 
 # These are the user info details ('claims') requested from Synapse:
@@ -97,6 +97,16 @@ reticulate::use_virtualenv(file.path(getwd(), ".venv"), required = TRUE)
 ## Import functions/modules
 source_files <- list.files(c("functions", "modules"), pattern = "*\\.R$", recursive = TRUE, full.names = TRUE)
 sapply(source_files, FUN = source)
+
+## Read config.json
+if (!file.exists("www/config.json")) {
+  schematic_config <- yaml.load_file("schematic_config.yml")
+  system(sprintf(
+    "python3 .github/generate_config_json.py -jd %s -schema %s -service %s",
+    schematic_config$model$input$location, schematic_config$model$input$repo, "Sage-Bionetworks/schematic"
+  ))
+}
+config_file <- fromJSON("www/config.json")
 
 ## Global variables
 datatypes <- c("project", "folder", "template")

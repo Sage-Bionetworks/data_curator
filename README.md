@@ -50,15 +50,22 @@ Follow the steps below to make sure the _Data Curator App_ is fully setup to wor
 
 ### Data Model Configuration
 
-Use the app configuration file `www/config.json` to adapt this app to your DCC.
+The app configuration file `www/config.json` will be used to adapt the schema dropdown menu in the app. The `config.json` file will be automatically created in the deployment workflow.
 
-- `manifest schemas`: defines the list of schemas displayed under the "Choose a Metadata Template Type:" dropdown in the application.
-  - `display_name` : The display name for the dropdown. (e.g. _scRNA-seq Level 1_)
-  - `schema_name`: The name of the manifest in the JSON-LD schema (e.g. _ScRNA-seqLevel1_)
-  - `type`: The type of manifest. Either _file (e.g. scRNAseq-level1)_ or _record (e.g. biosepcimen and clinical data)_.
-- `community` (optional): The abbreviated name of the community or project. (e.g. _HTAN_)
-- `schema` (optional): The version of data model
-- `schematic_service` (optional): The version of schematic service
+For local testing, run below snippet to generate `www/config.json` and check the [docs](docs/app_configuration.md#schema-configuration) how to modify it:
+
+1.  Create a repo for your data model using this [template](https://github.com/Sage-Bionetworks/data-models)
+
+2.  Clone your data model repo, i.e:
+
+        git clone https://github.com/Sage-Bionetworks/data-models
+
+3.  Create `config.json` and placed it in the `www` folder
+
+        python3 .github/generate_config_json.py \
+          -jd data-models/example.model.jsonld \
+          -schema 'Sage-Bionetworks/data-models' \
+          -service Sage-Bionetworks/schematic'
 
 ---
 
