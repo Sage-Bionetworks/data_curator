@@ -30,7 +30,7 @@ shinyServer(function(input, output, session) {
   # import module that contains SynapseStorage class
   synapse_driver <- import("schematic.store.synapse")$SynapseStorage
   # read config in
-  config <- fromJSON("www/config.json")
+  config <- config_file
 
   # mapping from display name to schema name
   template_namedList <- config$manifest_schemas$schema_name
