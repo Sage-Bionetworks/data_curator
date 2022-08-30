@@ -30,7 +30,7 @@ shinyServer(function(input, output, session) {
   # import module that contains SynapseStorage class
   synapse_driver <- import("schematic.store.synapse")$SynapseStorage
   # read config in
-  config <- fromJSON("www/config.json")
+  config <- config_file
 
   # mapping from display name to schema name
   template_namedList <- config$manifest_schemas$schema_name
@@ -74,7 +74,13 @@ shinyServer(function(input, output, session) {
     syn_login(authToken = access_token, rememberMe = FALSE)
 
     # updating syn storage
-    tryCatch(syn_store <<- synapse_driver(access_token = access_token), error = function(e) NULL)
+    syn_store <<- tryCatch(
+      synapse_driver(access_token = access_token),
+      error = function(e) {
+        message(e$message)
+        return(NULL)
+      }
+    )
 
     if (is.null(syn_store)) {
       message("'synapse_driver' fails, run 'synapse_driver' to see detailed error")
@@ -286,7 +292,10 @@ shinyServer(function(input, output, session) {
           restrict_rules = TRUE, # set true to disable great expectation
           project_scope = list(project_synID)
         ),
-        error = function(e) NULL
+        error = function(e) {
+          message(e$message)
+          return(NULL)
+        }
       )
 
     # validation messages
