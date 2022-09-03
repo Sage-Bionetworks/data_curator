@@ -19,9 +19,27 @@
   color: $warning_col;
 }
 
-.strong-msg {
-  color: #000;
+.black-msg {
+  color: $black;
+}
+
+// bold
+.no-bold {
+  font-weight: 400;
+}
+.bold-sm {
+  font-weight: 500;
+}
+.bold-normal {
+  font-weight: 600;
+}
+.bold-lg {
   font-weight: 700;
+}
+
+//styles
+.font-italic {
+  font-style: italic;
 }
 
 // notification

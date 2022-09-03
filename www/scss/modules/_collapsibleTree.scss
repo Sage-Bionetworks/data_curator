@@ -1,17 +1,32 @@
 .collapsibleTree-container {
-  .legend-container {
+  .top-section {
     display: flex;
-    flex-wrap: wrap;
-    justify-content: left;
-    align-items: center;
+    align-items: flex-end;
+
+    h3 {
+      padding-bottom: 0;
+      color: #737373;
+    }
+  }
+  .legend-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(135px, max-content));
+    justify-content: space-evenly;
+    border: 1px solid #ccc;
+    border-radius: 12px;
+    padding: 6px;
+    max-width: 300px;
+    gap: 4px;
 
     .legend {
       display: inline-flex;
       align-items: center;
 
+      svg {
+        margin-right: 6px;
+      }
       span {
-        margin-left: 8px;
-        margin-right: 12px;
+        white-space: nowrap;
       }
     }
   }
