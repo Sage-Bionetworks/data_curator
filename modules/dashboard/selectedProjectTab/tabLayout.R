@@ -22,7 +22,13 @@ selectedProjectTabUI <- function(id) {
           12,
           fluidRow(
             column(12, class = "section-title", NULL),
-            column(12, align = "center", uiOutput(ns("tree-container")))
+            column(12, column(12,
+              align = "left",
+              tagList(
+                h3("Explore your uploaded data status", class = "bold-normal"),
+                uiOutput(ns("tree-container"))
+              )
+            ))
           )
         )
       )
@@ -39,8 +45,6 @@ selectedProjectTab <- function(id, username, metadata, nodes, project.name, pare
       # render tab title
       # setTabTitle("title", paste0("Completion of Requirements for Project: ", sQuote(project.name)))
 
-      saveRDS(metadata, "metadata.rds")
-      saveRDS(nodes, "nodes.rds")
       ## **************** Clean data ****************
       # get all uploaded data types
       uploaded <- metadata$Component
@@ -81,7 +85,11 @@ selectedProjectTab <- function(id, username, metadata, nodes, project.name, pare
             column(12, class = "section-title", NULL),
             column(12, tagList(
               h3("Already want to upload more data?", class = "bold-normal"),
-              span("Start here by selecting ones of your missing data types below to evaluate how your progress is going to change:"),
+              span(
+                class = "black-msg bold-sm",
+                "Start here by selecting ones of your missing data types
+                below to evaluate how your progress is going to change:"
+              ),
               checkboxGroupInput(ns("checkbox-evaluate"), NULL, choices = as.list(not_uploaded), inline = TRUE),
               uiOutput(ns("evaluate-res"))
             ))

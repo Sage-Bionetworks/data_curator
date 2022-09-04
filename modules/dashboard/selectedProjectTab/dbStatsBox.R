@@ -65,7 +65,7 @@ dbStatsBox <- function(id, metadata, nodes, source.tab = "tabs", target.tab = "d
           div(
             class = "dbStatsBox-btn-container",
             actionButton(ns("view-btn"), "View More", class = "btn-primary-color"),
-            span("Click to see the Out-of-Date manifests")
+            span("Click to see the validation results of your manifests")
           )
         )
       })

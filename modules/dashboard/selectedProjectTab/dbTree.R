@@ -71,8 +71,7 @@ dbTreeUI <- function(id, n.nodes = NULL) {
           7,
           align = "left",
           tagList(
-            h3("Explore your datasets status", class = "no-bold font-italic"),
-            helpText(
+            span(
               class = "black-msg bold-sm",
               HTML(paste0(
                 "
