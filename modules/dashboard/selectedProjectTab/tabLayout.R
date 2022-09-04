@@ -39,6 +39,8 @@ selectedProjectTab <- function(id, username, metadata, nodes, project.name, pare
       # render tab title
       # setTabTitle("title", paste0("Completion of Requirements for Project: ", sQuote(project.name)))
 
+      saveRDS(metadata, "metadata.rds")
+      saveRDS(nodes, "nodes.rds")
       ## **************** Clean data ****************
       # get all uploaded data types
       uploaded <- metadata$Component
@@ -49,10 +51,13 @@ selectedProjectTab <- function(id, username, metadata, nodes, project.name, pare
       not_uploaded <- setdiff(requirements, uploaded)
       # folder list
       folder_list <- unique(nodes$folder)
-      # number of total dataset
-      uniq_ds <- nodes %>% distinct(folder_id, .keep_all = TRUE)
       # completion progress percentage: complete datasets / total datasets
-      progress_value <- round(sum(uniq_ds$n_miss == 0) / nrow(uniq_ds) * 100)
+      progress_value <- nodes %>%
+        group_by(folder) %>%
+        mutate(perc = sum(to %in% uploaded) / n() * 100) %>%
+        pull(perc) %>%
+        mean() %>%
+        round(0)
 
       ## **************** Summary banner ****************
       # render banner
@@ -103,9 +108,12 @@ selectedProjectTab <- function(id, username, metadata, nodes, project.name, pare
             uploaded <- c(uploaded, input$`checkbox-evaluate`)
 
             # calculate new progress value
-            uniq_ds <- nodes %>% distinct(folder_id, .keep_all = TRUE)
-            n_completed <- sum(uniq_ds$n_miss == 0)
-            progress_value <- round(n_completed / nrow(uniq_ds) * 100)
+            progress_value <- nodes %>%
+              group_by(folder) %>%
+              mutate(perc = sum(to %in% uploaded) / n() * 100) %>%
+              pull(perc) %>%
+              mean() %>%
+              round(0)
 
             # render new total progress result
             output$`evaluate-res` <- renderUI({
