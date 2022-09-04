@@ -13,20 +13,16 @@ selectedProjectTabUI <- function(id) {
           column(6, dbStatsBoxUI(ns("stats")))
         ),
         column(
-          9,
+          12,
           fluidRow(
-            column(12, class = "section-title", NULL),
-            column(12, align = "center", uiOutput(ns("tree-container")))
+            column(12, uiOutput(ns("evaluate-container")))
           )
         ),
         column(
-          3,
+          12,
           fluidRow(
             column(12, class = "section-title", NULL),
-            column(12, checkboxGroupInput(ns("checkbox-evaluate"), NULL)),
-            column(12, uiOutput(ns("evaluate-res")))
-            # column(12, class = "section-title", span("Each dataset progress")),
-            # column(12, align = "center", uiOutput(ns("dataset-pb")))
+            column(12, align = "center", uiOutput(ns("tree-container")))
           )
         )
       )
@@ -40,16 +36,10 @@ selectedProjectTab <- function(id, username, metadata, nodes, project.name, pare
     function(input, output, session) {
       ns <- session$ns
 
-      ## Summary banner
       # render tab title
       # setTabTitle("title", paste0("Completion of Requirements for Project: ", sQuote(project.name)))
 
-      # render rator system
-      dbRater("summary", metadata, nodes, username, project.name)
-      # render summary stats boxes
-      dbStatsBox("stats", metadata, nodes, parent.session = parent.session)
-
-      ## Evaluate submission
+      ## **************** Clean data ****************
       # get all uploaded data types
       uploaded <- metadata$Component
       # collect all required datatype including selected datatype
@@ -57,110 +47,84 @@ selectedProjectTab <- function(id, username, metadata, nodes, project.name, pare
       requirements <- requirements[!grepl("f:", requirements)]
       # get all missing requirements
       not_uploaded <- setdiff(requirements, uploaded)
-
-      # render checkbox options for evaluation of submission
-      updateCheckboxGroupInput(
-        session,
-        "checkbox-evaluate",
-        label = if_else(length(not_uploaded) > 0,
-          "Want to know how your progress is going to change
-          if you upload ones of missing data?
-          Try to select ones of below missing data types to evaluate:",
-          "It looks like you have uploaded all the required data !!!"
-        ),
-        choices = as.list(not_uploaded)
-      )
-
-      ## Dataset progress bars
+      # folder list
       folder_list <- unique(nodes$folder)
-      ds_pb_values <- sapply(folder_list, function(f) {
-        tmp <- nodes[nodes$folder == f, ]
-        round(sum(tmp$to %in% uploaded) / nrow(tmp) * 100, 0)
-      }) %>% set_names(folder_list)
+      # number of total dataset
+      uniq_ds <- nodes %>% distinct(folder_id, .keep_all = TRUE)
+      # completion progress percentage: complete datasets / total datasets
+      progress_value <- round(sum(uniq_ds$n_miss == 0) / nrow(uniq_ds) * 100)
 
-      # reorder based on completion progress
-      folder_list <- folder_list[order(ds_pb_values)]
+      ## **************** Summary banner ****************
+      # render banner
+      dbRater("summary", progress_value, username, project.name)
+      # render summary stats boxes
+      dbStatsBox("stats", metadata, nodes, parent.session = parent.session)
 
+      ## **************** Tree plot ****************
       # change d3 tree height based on how many nodes
       output$`tree-container` <- renderUI({
         dbTreeUI(ns("requirement-tree"), n.nodes = length(folder_list))
       })
+      # render collasiple tree
+      dbTree("requirement-tree", na.omit(uploaded), nodes, project.name)
 
-      observeEvent(input$`checkbox-evaluate`, ignoreNULL = FALSE, {
-        # clean the previous ui to avoid duplicate progress ids
-        # output$`dataset-pb` <- renderUI(NULL)
+      ## **************** Evaluate submission ****************
+      if (length(not_uploaded) > 0) {
+        # render UI section for evaluation of submission
+        output$`evaluate-container` <- renderUI({
+          tagList(
+            column(12, class = "section-title", NULL),
+            column(12, tagList(
+              h3("Already want to upload more data?", class = "bold-normal"),
+              span("Start here by selecting ones of your missing data types below to evaluate how your progress is going to change:"),
+              checkboxGroupInput(ns("checkbox-evaluate"), NULL, choices = as.list(not_uploaded), inline = TRUE),
+              uiOutput(ns("evaluate-res"))
+            ))
+          )
+        })
 
-        # update required data frame
-        evaluate_datatypes <- input$`checkbox-evaluate`
+        observeEvent(input$`checkbox-evaluate`, ignoreNULL = FALSE, {
+          # update required data frame
+          evaluate_datatypes <- input$`checkbox-evaluate`
 
-        if (is.null(evaluate_datatypes)) {
-          # reset progress values if no evaluated data type selected
-          # ds_pb_values <- ds_pb_values
-          output$`evaluate-res` <- renderUI(NULL)
-        } else {
-          # substrate # of evaluated datatypes for nMiss
-          # note, it will not change the nodes outside of observeEvent
-          for (d in evaluate_datatypes) {
-            # get which folder contains evaluated datatypes
-            evaluate_ds <- unique(nodes$folder_id[nodes$to == d])
-            loc <- which(nodes$folder_id %in% evaluate_ds)
-            nodes$n_miss[loc] <- nodes$n_miss[loc] - 1
-          }
-          # add evaluated datatypes to update uploaded data
-          uploaded <- c(uploaded, input$`checkbox-evaluate`)
+          if (is.null(evaluate_datatypes)) {
+            # reset progress values if no evaluated data type selected
+            output$`evaluate-res` <- renderUI(NULL)
+          } else {
+            # substrate # of evaluated datatypes for nMiss
+            # note, it will not change the nodes outside of observeEvent
+            for (d in evaluate_datatypes) {
+              # get which folder contains evaluated datatypes
+              evaluate_ds <- unique(nodes$folder_id[nodes$to == d])
+              loc <- which(nodes$folder_id %in% evaluate_ds)
+              nodes$n_miss[loc] <- nodes$n_miss[loc] - 1
+            }
+            # add evaluated datatypes to update uploaded data
+            uploaded <- c(uploaded, input$`checkbox-evaluate`)
 
-          # update progress value each dataset
-          ds_pb_values <- sapply(folder_list, function(f) {
-            tmp <- nodes[nodes$folder == f, ]
-            round(sum(tmp$to %in% uploaded) / nrow(tmp) * 100, 0)
-          })
-
-          output$`evaluate-res` <- renderUI({
-            # update new total progress
+            # calculate new progress value
             uniq_ds <- nodes %>% distinct(folder_id, .keep_all = TRUE)
-            # number of completed dataset
             n_completed <- sum(uniq_ds$n_miss == 0)
-            new_progress <- round(n_completed / nrow(uniq_ds) * 100)
-            items <- paste0(sQuote(evaluate_datatypes), collapse = ", ")
-            span(class = "warn-msg", HTML(paste0(
-              "By submitting: ", items, ", your total progress will become ",
-              strong(new_progress), "% !!!"
-            )))
-          })
-        }
+            progress_value <- round(n_completed / nrow(uniq_ds) * 100)
 
-        # render progress bar ui for each dataset
-        # output$`dataset-pb` <- renderUI({
-        #   fluidRow(
-        #     # !important: add ns to pb's id, otherwise pb server will not be able to find
-        #     lapply(folder_list, function(f) {
-        #       # currently, need to use attr on tag object to add tooltip
-        #       # runjs somehow not working in module?
-        #       column(
-        #         6,
-        #         progressBarUI(ns(f)) %>%
-        #           addTooltip(paste0(f, ": ", ds_pb_values[f], "%"), "top")
-        #       )
-        #     })
-        #   )
-        # })
-
-        # assign values to progress bar server for each dataset
-        # lapply(folder_list, function(f) {
-        #   progressBar(
-        #     id = f,
-        #     value = ds_pb_values[f],
-        #     display_pct = FALSE,
-        #     height = "10px",
-        #     color = "#28a745",
-        #     backgoundCol = "#e53935",
-        #     subtitle = f
-        #   )
-        # })
-
-        # render collasiple tree
-        dbTree("requirement-tree", na.omit(uploaded), nodes, project.name)
-      })
+            # render new total progress result
+            output$`evaluate-res` <- renderUI({
+              items <- paste0(sQuote(evaluate_datatypes), collapse = ", ")
+              span(class = "warn-msg", HTML(paste0(
+                "By submitting: ", items, ", your total progress will become ",
+                strong(progress_value), "% !!!"
+              )))
+            })
+          }
+          # update banner
+          dbRater("summary", progress_value, username, project.name)
+          # update collasiple tree
+          dbTree("requirement-tree", na.omit(uploaded), nodes, project.name)
+        })
+      } else {
+        # reset container
+        output$`evaluate-container` <- renderUI(NULL)
+      }
     }
   )
 }

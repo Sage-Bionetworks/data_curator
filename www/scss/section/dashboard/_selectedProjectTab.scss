@@ -3,6 +3,19 @@
     display: flex;
     align-items: center;
   }
+
+  #dashboard-tab-selected-project-checkbox-evaluate {
+    margin-top: 24px;
+  }
+
+  .shiny-input-checkboxgroup.shiny-input-container-inline
+    label
+    ~ .shiny-options-group
+    > label
+    > span {
+    color: $primary_col;
+    font-weight: 600;
+  }
 }
 
 @media (max-width: $desktop) {
