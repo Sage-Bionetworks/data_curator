@@ -22,13 +22,7 @@ selectedProjectTabUI <- function(id) {
           12,
           fluidRow(
             column(12, class = "section-title", NULL),
-            column(12, column(12,
-              align = "left",
-              tagList(
-                h3("Explore your uploaded data status", class = "bold-normal"),
-                uiOutput(ns("tree-container"))
-              )
-            ))
+            column(12, uiOutput(ns("tree-container")))
           )
         )
       )
@@ -75,7 +69,7 @@ selectedProjectTab <- function(id, username, metadata, nodes, project.name, pare
         dbTreeUI(ns("requirement-tree"), n.nodes = length(folder_list))
       })
       # render collasiple tree
-      dbTree("requirement-tree", na.omit(uploaded), nodes, project.name)
+      dbTree("requirement-tree", uploaded, nodes, project.name)
 
       ## **************** Evaluate submission ****************
       if (length(not_uploaded) > 0) {
@@ -135,7 +129,7 @@ selectedProjectTab <- function(id, username, metadata, nodes, project.name, pare
           # update banner
           dbRater("summary", progress_value, username, project.name)
           # update collasiple tree
-          dbTree("requirement-tree", na.omit(uploaded), nodes, project.name)
+          dbTree("requirement-tree", uploaded, nodes, project.name)
         })
       } else {
         # reset container

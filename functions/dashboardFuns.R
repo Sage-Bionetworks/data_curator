@@ -11,10 +11,25 @@ get_dataset_metadata <- function(syn.store, datasets, ncores = 1) {
   file_view <- syn.store$storageFileviewTable %>%
     filter(name == "synapse_storage_manifest.csv" & parentId %in% datasets)
 
+  # datasets don't have a manifest
+  ds_no_manifest <- datasets[which(!datasets %in% file_view$parentId)]
+
   manifest_info <- list()
   modified_user <- list()
   # return empty data frame if no manifest or no component in the manifest
-  metadata <- data.frame()
+  # create with column names to prevent dplyr funcs failed
+  cols <- c(
+    "SynapseID",
+    "Component",
+    "CreatedOn",
+    "ModifiedOn",
+    "ModifiedUser",
+    "Path",
+    "Folder",
+    "FolderSynId"
+  )
+  cols <- setNames(rep("", length(cols)), cols)
+  metadata <- bind_rows(cols)[0, ]
 
   lapply(file_view$parentId, function(dataset) {
     # get manifest's synapse id(s) in each dataset folder
@@ -37,10 +52,9 @@ get_dataset_metadata <- function(syn.store, datasets, ncores = 1) {
       # extract manifest essential information for dashboard
       manifest_path <- info["path"]
       manifest_df <- data.table::fread(manifest_path)
-      # keep all manifests used for validation, even if it has invalid component value
-      # if manifest doesn't have "Component" column, or empty, return NA for component
+      # keep invalid component values as 'Missing'
       manifest_component <- ifelse("Component" %in% colnames(manifest_df) & nrow(manifest_df) > 0,
-        manifest_df$Component[1], NA_character_
+        manifest_df$Component[1], "Unknown"
       )
       metadata <- data.frame(
         SynapseID = info["properties"]["id"],
@@ -55,6 +69,15 @@ get_dataset_metadata <- function(syn.store, datasets, ncores = 1) {
     }, mc.cores = ncores) %>% bind_rows()
   }
 
+  # add datasets even if there are no manifests
+  metadata <- bind_rows(
+    metadata,
+    data.frame(
+      SynapseID = ds_no_manifest,
+      Folder = names(ds_no_manifest),
+      FolderSynId = ds_no_manifest
+    )
+  )
   return(metadata)
 }
 
@@ -70,30 +93,47 @@ validate_metadata <- function(metadata, project.scope) {
   if (nrow(metadata) == 0) {
     return(metadata)
   }
+
   lapply(1:nrow(metadata), function(i) {
     manifest <- metadata[i, ]
-    # validate manifest, if no error, output is list()
-    # for invalid components, it will return NULL and relay as 'Out of Date', e.g.:
-    # "LungCancerTier3", "BreastCancerTier3", "ScRNA-seqAssay", "MolecularTest", "NaN", "" ...
-    validation_res <- tryCatch(
-      metadata_model$validateModelManifest(
-        manifest$Path,
-        manifest$Component,
-        restrict_rules = TRUE,
-        project_scope = project.scope
-      ),
-      error = function(err) NULL
-    )
-    # clean validation res from schematicpy
-    clean_res <- validationResult(validation_res, manifest$Component, dashboard = TRUE)
 
-    data.frame(
-      Result = clean_res$result,
-      # change wrong schema to out-of-date type
-      ErrorType = if_else(clean_res$error_type == "Wrong Schema", "Out of Date", clean_res$error_type),
-      errorMsg = if_else(is.null(clean_res$error_msg[1]), "Valid", clean_res$error_msg[1]),
-      WarnMsg = if_else(length(clean_res$warning_msg) == 0, "Valid", clean_res$warning_msg)
-    )
+    if (is.na(manifest$Component)) {
+      data.frame(
+        Result = "invalid",
+        ErrorType = "Out of Date",
+        errorMsg = "No manifest found",
+        WarnMsg = "No manifest found"
+      )
+    } else if (manifest$Component == "Unknown") {
+      data.frame(
+        Result = "invalid",
+        ErrorType = "Out of Date",
+        errorMsg = "'Component' is missing",
+        WarnMsg = "'Component' is missing"
+      )
+    } else {
+      validation_res <- tryCatch(
+        metadata_model$validateModelManifest(
+          manifest$Path,
+          manifest$Component,
+          restrict_rules = TRUE,
+          project_scope = project.scope
+        ),
+        # for invalid components, it will return NULL and relay as 'Out of Date', e.g.:
+        # "LungCancerTier3", "BreastCancerTier3", "ScRNA-seqAssay", "MolecularTest", "NaN", "" ...
+        error = function(err) NULL
+      )
+      # clean validation res from schematicpy
+      clean_res <- validationResult(validation_res, manifest$Component, dashboard = TRUE)
+
+      data.frame(
+        Result = clean_res$result,
+        # change wrong schema to out-of-date type
+        ErrorType = if_else(clean_res$error_type == "Wrong Schema", "Out of Date", clean_res$error_type),
+        errorMsg = if_else(is.null(clean_res$error_msg[1]), "Valid", clean_res$error_msg[1]),
+        WarnMsg = if_else(length(clean_res$warning_msg) == 0, "Valid", clean_res$warning_msg)
+      )
+    }
   }) %>%
     bind_rows() %>%
     cbind(metadata, .) # expand metadata with validation results
@@ -127,7 +167,6 @@ get_metadata_nodes <- function(metadata, ncores = 1) {
   if (nrow(metadata) == 0) {
     return(data.frame(from = NA, to = NA, folder = NA, folderSynId = NA, nMiss = NA))
   } else {
-    metadata <- metadata[!is.na(metadata$Component), ]
     parallel::mclapply(1:nrow(metadata), function(i) {
       manifest <- metadata[i, ]
       # get all required data types

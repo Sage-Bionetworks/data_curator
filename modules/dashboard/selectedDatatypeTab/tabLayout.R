@@ -36,8 +36,6 @@ selectedDataTypeTab <- function(id, metadata, nodes, schema, schema.display.name
       all_req <- union(nodes, names(nodes))
       # get number of total requirements
       n_req <- length(all_req)
-      # remove manifests with invalid component name
-      metadata <- metadata[!is.na(metadata$Component), ]
       # render tab title
       # setTabTitle("title", paste0("Completion of Requirements for Data Type: ", sQuote(schema.display.name)))
 

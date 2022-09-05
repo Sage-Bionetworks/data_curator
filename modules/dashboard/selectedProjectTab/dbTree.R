@@ -71,6 +71,7 @@ dbTreeUI <- function(id, n.nodes = NULL) {
           7,
           align = "left",
           tagList(
+            h3("Explore your uploaded data status", class = "bold-normal"),
             span(
               class = "black-msg bold-sm",
               HTML(paste0(

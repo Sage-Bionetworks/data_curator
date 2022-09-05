@@ -116,15 +116,21 @@ dashboard <- function(id, syn.store, project.scope, schema, schema.display.name,
       # get requirements for all uploaded manifests
       uploaded_manifests_requirement <- eventReactive(uploaded_manifests(), {
         req(input$box$visible)
-        get_metadata_nodes(uploaded_manifests(), ncores = ncores)
+        req(uploaded_manifests())
+        # remove rows with invalid component name
+        metadata <- uploaded_manifests() %>% filter(!is.na(Component), Component != "Unknown")
+        get_metadata_nodes(metadata, ncores = ncores)
       })
 
       # render info/plots for selected datatype
       observeEvent(c(uploaded_manifests(), selected_datatype_requirement(), input$dashboard$visible), {
         req(input$box$visible)
+        req(uploaded_manifests())
+        # remove rows with invalid component name
+        metadata <- uploaded_manifests() %>% filter(!is.na(Component), Component != "Unknown")
         selectedDataTypeTab(
           "tab-selected-datatype",
-          uploaded_manifests(),
+          metadata,
           selected_datatype_requirement(),
           schema(),
           schema.display.name = schema.display.name()
@@ -135,16 +141,20 @@ dashboard <- function(id, syn.store, project.scope, schema, schema.display.name,
       # to reduce running time, selected template updates should not initiate this event
       observeEvent(c(uploaded_manifests_requirement(), input$box$visible), {
         req(input$box$visible)
+        req(uploaded_manifests())
         user_name <- syn$getUserProfile()$userName
+        # remove rows with invalid component name
+        metadata <- uploaded_manifests() %>% filter(!is.na(Component), Component != "Unknown")
         selectedProjectTab(
           "tab-selected-project",
           user_name,
-          uploaded_manifests(),
+          metadata,
           uploaded_manifests_requirement(),
           names(project.scope()),
           parent.session = session
         )
         # validation table for all uploaded data
+        # use all metadata including invalid components
         validationTab("tab-validation", uploaded_manifests(), names(project.scope()))
         # force switch tabs to solve tabs content not rendered initially
         if (input$`toggle-btn` == 1) {
