@@ -85,9 +85,9 @@ dbTreeUI <- function(id, n.nodes = NULL) {
           )
         ),
         column(
-          4,
+          5,
           align = "left",
-          div(
+          column(12,
             class = "legend-container",
             lapply(seq_along(legend_icons), function(i) {
               tags$span(class = "legend", legend_icons[[i]], span(legend_names[i]))
@@ -96,9 +96,7 @@ dbTreeUI <- function(id, n.nodes = NULL) {
         )
       ),
       # r2d3 height can only be adjusted in d3output after the number of folders is known
-      column(
-        12, d3Output(ns("tree"), width = "100%", height = height)
-      )
+      column(12, column(12, d3Output(ns("tree"), width = "100%", height = height)))
     )
   )
 }

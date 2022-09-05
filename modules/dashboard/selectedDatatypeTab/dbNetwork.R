@@ -6,13 +6,6 @@
 dbNetworkUI <- function(id, height = 500) {
   ns <- NS(id)
   tagList(
-    helpText(
-      class = "strong-msg",
-      align = "center",
-      HTML(paste0(
-        "Usage: A ", icon("long-arrow-alt-right"), " B: Data type A requires Data type B"
-      ))
-    ),
     uiOutput(ns("instruction")),
     forceNetworkOutput(ns("network"), height = height)
   )

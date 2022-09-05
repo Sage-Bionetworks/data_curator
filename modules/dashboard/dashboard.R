@@ -27,7 +27,7 @@ dashboardUI <- function(id) {
             selectedProjectTabUI(ns("tab-selected-project"))
           ),
           tabPanel(
-            "Data Requirements",
+            textOutput(ns("db-tab2-name")),
             value = "db-tab2",
             selectedDataTypeTabUI(ns("tab-selected-datatype"))
           ),
@@ -84,7 +84,7 @@ dashboard <- function(id, syn.store, project.scope, schema, schema.display.name,
         dcWaiter(
           "show",
           id = ns("tab-container"), url = "www/img/logo.svg", custom_spinner = TRUE,
-          msg = "Loading, please wait...", style = "color: #000;", color = transparent(0.8)
+          msg = "Loading, please wait...", style = "color: #000;", color = transparent(1)
         )
 
         # disable selection to prevent changes until all uploaded manifests are queried
@@ -126,6 +126,8 @@ dashboard <- function(id, syn.store, project.scope, schema, schema.display.name,
       observeEvent(c(uploaded_manifests(), selected_datatype_requirement(), input$dashboard$visible), {
         req(input$box$visible)
         req(uploaded_manifests())
+        # update tab 2 name
+        output$`db-tab2-name` <- renderText(sprintf("'%s' Requirements", schema.display.name()))
         # remove rows with invalid component name
         metadata <- uploaded_manifests() %>% filter(!is.na(Component), Component != "Unknown")
         selectedDataTypeTab(
