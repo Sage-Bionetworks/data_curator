@@ -110,6 +110,16 @@ synapse_driver <- import("schematic.store.synapse")$SynapseStorage
 source_files <- list.files(c("functions", "modules"), pattern = "*\\.R$", recursive = TRUE, full.names = TRUE)
 sapply(source_files, FUN = source)
 
+## Read config.json
+if (!file.exists("www/config.json")) {
+  schematic_config <- yaml.load_file("schematic_config.yml")
+  system(sprintf(
+    "python3 .github/generate_config_json.py -jd %s -schema %s -service %s",
+    schematic_config$model$input$location, schematic_config$model$input$repo, "Sage-Bionetworks/schematic"
+  ))
+}
+config_file <- fromJSON("www/config.json")
+
 ## Global variables
 dropdown_types <- c("project", "folder", "datatype")
 # set up cores used for parallelization

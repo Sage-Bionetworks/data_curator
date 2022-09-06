@@ -6,8 +6,9 @@ HTAN_test_shiny.Rproj
 app.bak.R
 get_manifest_anno.R
 manifest_url.txt
-www/*
+**/config.json
 manifests/*.csv
+tmp/synapse_storage_manifest.csv
 .Rproj.user
 schematic/
 **/credentials.json

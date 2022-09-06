@@ -27,8 +27,9 @@ shinyServer(function(input, output, session) {
 
   ######## session global variables ########
   # read config in
-  config <- jsonlite::fromJSON("www/config.json")
+  config <- config_file
   config_schema <- as.data.frame(config[[1]])
+
   # mapping from display name to schema name
   template_namedList <- config_schema$schema_name
   names(template_namedList) <- config_schema$display_name
@@ -81,7 +82,13 @@ shinyServer(function(input, output, session) {
     syn$login(authToken = access_token, rememberMe = FALSE)
 
     # updating syn storage
-    tryCatch(syn_store <<- synapse_driver(access_token = access_token), error = function(e) NULL)
+    syn_store <<- tryCatch(
+      synapse_driver(access_token = access_token),
+      error = function(e) {
+        message(e$message)
+        return(NULL)
+      }
+    )
 
     if (is.null(syn_store)) {
       message("'synapse_driver' fails, run 'synapse_driver' to see detailed error")
@@ -307,7 +314,10 @@ shinyServer(function(input, output, session) {
           restrict_rules = TRUE, # set true to disable great expectation
           project_scope = list(selected$project())
         ),
-        error = function(e) NULL
+        error = function(e) {
+          message(e$message)
+          return(NULL)
+        }
       )
 
     # validation messages
@@ -410,7 +420,8 @@ shinyServer(function(input, output, session) {
         schemaGenerator = schema_generator,
         metadataManifestPath = "./tmp/synapse_storage_manifest.csv",
         datasetId = selected$folder(),
-        manifest_record_type = "table"
+        manifest_record_type = "table",
+        restrict_manifest = TRUE
       )
       manifest_path <- tags$a(href = paste0("https://www.synapse.org/#!Synapse:", manifest_id), manifest_id, target = "_blank")
 
@@ -445,7 +456,8 @@ shinyServer(function(input, output, session) {
         schemaGenerator = schema_generator,
         metadataManifestPath = "./tmp/synapse_storage_manifest.csv",
         datasetId = selected$folder(),
-        manifest_record_type = "table"
+        manifest_record_type = "table",
+        restrict_manifest = TRUE
       )
       manifest_path <- tags$a(href = paste0("https://www.synapse.org/#!Synapse:", manifest_id), manifest_id, target = "_blank")
 
