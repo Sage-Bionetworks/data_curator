@@ -139,8 +139,6 @@ jobs:
             writeLines(config, configFileConn),
             finally=close(configFileConn)
           )
-          # increase bundle size
-          options(rsconnect.max.bundle.size=3145728000)
           rsconnect::setAccountInfo(rsConnectUser, rsConnectToken, rsConnectSecret)
           rsconnect::deployApp(appName = appName)
           rsconnect::configureApp(appName = appName, size="xxxlarge")
