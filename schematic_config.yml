@@ -22,8 +22,8 @@ manifest:
 
 model:
   input:
-    repo: 'ncihtan/data-models/'
-    location: 'data-models/HTAN.model.jsonld'
+    repo: 'ncihtan/data-models' # data model repo url (<repo-owner>/<repo-name>)
+    location: 'data-models/HTAN.model.jsonld' # path to JSON-LD file
     file_type: 'local'
 
 style:
