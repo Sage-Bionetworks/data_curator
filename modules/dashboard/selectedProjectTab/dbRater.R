@@ -15,19 +15,19 @@ dbRater <- function(id, progress.value, username, project.name) {
       # rater system
       completion_icon <- case_when(
         progress.value == 0 ~ "street-view",
-        progress.value > 0 & progress.value < 60 ~ "running",
-        progress.value >= 60 & progress.value < 90 ~ "medal",
+        progress.value > 0 & progress.value < 70 ~ "running",
+        progress.value >= 70 & progress.value < 100 ~ "medal",
         TRUE ~ "crown"
       )
       completion_icon_col <- case_when(
-        progress.value < 60 ~ "#5c5ca899",
-        progress.value >= 60 & progress.value < 70 ~ "#A77044",
-        progress.value >= 70 & progress.value < 80 ~ "#A7A7AD",
+        progress.value < 70 ~ "#5c5ca899",
+        progress.value >= 70 & progress.value < 80 ~ "#A77044",
+        progress.value >= 80 & progress.value < 90 ~ "#A7A7AD",
         TRUE ~ "#FEE101"
       )
       completion_msg <- case_when(
         progress.value == 0 ~ "Hi",
-        progress.value > 0 & progress.value < 60 ~ "Good job",
+        progress.value > 0 & progress.value < 70 ~ "Good progress",
         TRUE ~ "Congratulations"
       )
 
@@ -45,7 +45,7 @@ dbRater <- function(id, progress.value, username, project.name) {
             div(class = "dbRater-header", h3(class = "bold-lg", paste0(completion_msg, ", ", username, "!!!"))),
             div(
               class = "dbRater-body font-italic",
-              paste0("you have made ", progress.value, "% progress for ", sQuote(project.name))
+              paste0("you have uploaded ", progress.value, "% data for ", sQuote(project.name))
             )
           ),
           progressBarUI(ns("progress-box"))

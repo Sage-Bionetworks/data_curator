@@ -259,7 +259,7 @@ shinyServer(function(input, output, session) {
     manifest_url <-
       metadata_model$getModelManifest(
         title = paste0(config$community, " ", input$dropdown_datatype),
-        rootNode = template_schema_name(),
+        rootNode = selected$schema(),
         filenames = switch((selected$schema_type() == "file") + 1,
           NULL,
           as.list(names(data_list$files()))
