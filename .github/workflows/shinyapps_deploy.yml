@@ -141,5 +141,4 @@ jobs:
           )
           rsconnect::setAccountInfo(rsConnectUser, rsConnectToken, rsConnectSecret)
           rsconnect::deployApp(appName = appName)
-          rsconnect::configureApp(appName = appName, size="xxxlarge")
 
