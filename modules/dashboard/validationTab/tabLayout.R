@@ -3,11 +3,8 @@ validationTabUI <- function(id) {
   div(
     class = "validationTab-container",
     tagList(
-      # setTabTitleUI(ns("title")),
       br(),
-      dbValidationTableUI(ns("validation-table")),
-      helpText("If there is any validation error,
-        please re-validate the corresponding metadata to see detailed errors and re-submit once you have corrected metadata.")
+      dbValidationTableUI(ns("validation-table"))
     )
   )
 }
@@ -17,10 +14,6 @@ validationTab <- function(id, metadata, project.name) {
     id,
     function(input, output, session) {
       ns <- session$ns
-
-      # render tab title
-      # setTabTitle("title", paste0("Validation of Uploaded Data for Project: ", sQuote(project.name)))
-
       validation_status <- case_when(
         metadata$Result == "valid" & metadata$WarnMsg == "Valid" ~ "Pass",
         metadata$Result == "valid" & metadata$WarnMsg != "Valid" ~ "Warning",

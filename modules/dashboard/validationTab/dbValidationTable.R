@@ -15,6 +15,8 @@ dbValidationTable <- function(id, data, columns = "Validation") {
 
         DT::datatable(
           data,
+          caption = HTML("Click 'Data Type' texts will take you to the manifest file on Synapse.<br>
+          To view detailed errors/warnings, please download and re-validate the manifest in the 'Submit & Validate Metadata' tab."),
           escape = FALSE,
           options = list(scrollX = TRUE, columnDefs = list(list(className = "dt-center", targets = "_all")))
         ) %>%

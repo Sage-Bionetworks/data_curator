@@ -3,7 +3,6 @@ selectedProjectTabUI <- function(id) {
   div(
     class = "selectedProjectTab-container",
     tagList(
-      # setTabTitleUI(ns("title")),
       br(),
       fluidRow(
         column(
@@ -35,9 +34,6 @@ selectedProjectTab <- function(id, username, metadata, nodes, project.name, pare
     id,
     function(input, output, session) {
       ns <- session$ns
-
-      # render tab title
-      # setTabTitle("title", paste0("Completion of Requirements for Project: ", sQuote(project.name)))
 
       ## **************** Clean data ****************
       # get all uploaded data types
