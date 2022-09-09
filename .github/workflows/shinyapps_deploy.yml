@@ -8,6 +8,7 @@ on:
     branches:
       - main
       - develop*
+      - demo-instance
     tags:
       - v*.*.*
     paths-ignore:
@@ -118,6 +119,9 @@ jobs:
           } else if (refName == "main") {
             appName <- paste(appName, "staging", sep = "-")
             message("Deploying staging version of app")
+          } else if (refName == "demo-instance") {
+            appName <- paste(appName, "testing2", sep = "-")
+            message("Deploying demo version of app")
           } else {
             appName <- paste(appName, "testing1", sep = "-")
             message("Deploying testing version of app")
