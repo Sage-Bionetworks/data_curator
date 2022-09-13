@@ -48,10 +48,11 @@ dashboardUI <- function(id) {
 #' @param syn.store synapse storage object
 #' @param project.scope selected project syn ID named with project name
 #' @param schema selected schema name
+#' @param schema.display.name display name for selected schema name
 #' @param disable_ids selector ids to be disable during the process of dashboard
 #' @param ncores number of cpu to run parallelization
 #'
-dashboard <- function(id, syn.store, project.scope, schema, disable.ids = NULL, ncores = 1,
+dashboard <- function(id, syn.store, project.scope, schema, schema.display.name, disable.ids = NULL, ncores = 1,
                       access_token, fileview, folder) {
   moduleServer(
     id,
@@ -112,9 +113,9 @@ dashboard <- function(id, syn.store, project.scope, schema, disable.ids = NULL, 
       })
 
       # get requirements for selected data type
-      selected_datatype_requirement <- eventReactive(c(schema, input$box$visible), {
+      selected_datatype_requirement <- eventReactive(c(schema(), input$box$visible), {
         req(input$box$visible)
-        get_schema_nodes(schema)
+        get_schema_nodes(schema(), schema_url=schematic_config$model$input$download_url)
       })
 
       # get requirements for all uploaded manifests
@@ -130,7 +131,8 @@ dashboard <- function(id, syn.store, project.scope, schema, disable.ids = NULL, 
           "tab-selected-datatype",
           uploaded_manifests(),
           selected_datatype_requirement(),
-          schema
+          schema(),
+          schema.display.name = schema.display.name()
         )
       })
 

@@ -7,7 +7,7 @@ app.bak.R
 get_manifest_anno.R
 manifest_url.txt
 www/*
-tmp/synapse_storage_manifest.csv
+manifests/*.csv
 .Rproj.user
 schematic/
 **/credentials.json
@@ -15,7 +15,6 @@ schematic/
 **/token.pickle
 **/.synapseConfig
 **/__pycache__
-files/*
 oauth_config.yml
 schematic_config.yml
 .project

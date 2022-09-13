@@ -9,7 +9,7 @@ get_dataset_metadata <- function(syn.store, datasets, ncores = 1, access_token, 
   # remove codes to download all manifests
   # get data for all manifests within the specified datasets
   #file_view <- syn.store$storageFileviewTable %>%
-  file_view <- get_asset_view_table(input_token = access_token,
+  file_view <- get_asset_view_table(url = file.path(api_uri, "v1/storage/assets/tables"), input_token = access_token,
                                     asset_view=fileview)
   file_view <- file_view %>%
     filter(name == "synapse_storage_manifest.csv" & parentId %in% datasets)
@@ -48,15 +48,6 @@ get_dataset_metadata <- function(syn.store, datasets, ncores = 1, access_token, 
   })
 
   if (length(manifest_info) > 0) {
-    # metadata <- manifest_info %>%
-    #   mutate(SynpaseID = id,
-    #          Component = Component,
-    #          CreatedOn = as.Date(CreatedOn),
-    #          ModifiedOn = as.Date(ModifiedOn),
-    #          ModifiedUser = paste0("@", ModifiedBy),
-    #          Path = NA_character_,
-    #          Folder = NA_character_,
-    #          FolderSynId = parentId)
     metadata <- parallel::mclapply(seq_along(manifest_info), function(i) {
       info <- manifest_info[[i]]
       # extract manifest essential information for dashboard
@@ -91,31 +82,26 @@ get_dataset_metadata <- function(syn.store, datasets, ncores = 1, access_token, 
 #' @return data frame contains required data types for tree plot
 validate_metadata <- function(metadata, project.scope) {
   stopifnot(is.list(project.scope))
+
+  if (nrow(metadata) == 0) {
+    return(metadata)
+  }
+
   lapply(1:nrow(metadata), function(i) {
     manifest <- metadata[i, ]
     # validate manifest, if no error, output is list()
     # for invalid components, it will return NULL and relay as 'Out of Date', e.g.:
     # "LungCancerTier3", "BreastCancerTier3", "ScRNA-seqAssay", "MolecularTest", "NaN", "" ...
-    # validation_res <- tryCatch(
-    #   metadata_model$validateModelManifest(
-    #     manifest$Path,
-    #     manifest$Component,
-    #     restrict_rules = TRUE,
-    #     project_scope = project.scope
-    #   ),
-    #   error = function(err) NULL
-    # )
-    #browser()
     validation_res <- manifest_validate(url=file.path(api_uri, "v1/model/validate"),
                                         data_type=manifest$Component,
                                         schema_url = schematic_config$model$input$download_url,
                                         csv_file=manifest$Path)
     # clean validation res from schematicpy
-    clean_res <- validationResult(validation_res, template=manifest$Component, dashboard = FALSE)
+    clean_res <- validationResult(validation_res, manifest$Component, dashboard = TRUE)
     data.frame(
       Result = clean_res$result,
       ErrorType = clean_res$error_type,
-      WarnMsg = if_else(length(clean_res$warning_msg) == 0, "Valid", clean_res$warning_msg)
+      WarnMsg = if_else(length(clean_res$warning_msg) == 0, "Valid", paste(clean_res$warning_msg, collapse="; "))
     )
   }) %>%
     bind_rows() %>%
@@ -126,17 +112,16 @@ validate_metadata <- function(metadata, project.scope) {
 #'
 #' @param schema data type of selected data type or template.
 #' @return list of requirements for \code{schema} or string of \code{schema} if no requirements found
-get_schema_nodes <- function(schema, schema_url=schematic_config$model$input$download_url, url = file.path(api_uri, "v1/model/component-requirements")) {
-  # requirement <- tryCatch(
-  #   metadata_model$get_component_requirements(schema, as_graph = TRUE),
-  #   error = function(err) list()
-  # )
-  requirement <- tryCatch(model_component_requirements(
-    url=url,
-    schema_url=schema_url,
-    source_component = schema,
-    as_graph = TRUE
-  ), error = function(err) list())
+get_schema_nodes <- function(schema, url=file.path(api_uri, "v1/model/component-requirements"), schema_url) {
+  requirement <- tryCatch(
+    model_component_requirements(
+      url=url,
+      schema_url=schema_url,
+      source_component = schema,
+      as_graph = TRUE
+    ),
+    error = function(err) list()
+  )
 
   if (length(requirement) == 0) {
     # return data type itself without name

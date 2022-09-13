@@ -19,6 +19,16 @@ dbTreeUI <- function(id, n.nodes = NULL) {
   div(
     class = "collapsibleTree-container",
     tagList(
+      helpText(
+        align = "center",
+        HTML(paste0(
+          "
+          If you see ", nodeSVG("#FF794A"), " nodes, please keep clicking the nodes to explore the data requirements until the missing data (", nodeSVG("#E53935"), ") is shown. ",
+          "If all required data have been uploaded, you will see ", nodeSVG("#A287AF"), " nodes.
+          "
+        ))
+      ),
+      br(),
       div(
         class = "legend-container",
         lapply(seq_along(legend_cols), function(i) {
@@ -26,58 +36,52 @@ dbTreeUI <- function(id, n.nodes = NULL) {
         })
       ),
       # r2d3 height can only be adjusted in d3output after the number of folders is known
-      d3Output(ns("tree"), width = "100%", height = height),
-      helpText(HTML(paste0(
-        "
-        Click nodes to expand the data requirements for the selected project.
-        Click ", nodeSVG("#FF794A"), "nodes to see which data requirement is missing.
-        If datasets have been uploaded, you will see ", nodeSVG("#A287AF"), " nodes.
-        "
-      )))
+      d3Output(ns("tree"), width = "100%", height = height)
     )
   )
 }
 
-dbTree <- function(id, up.schema, req.data, selected.project) {
+dbTree <- function(id, upload.data, nodes, project.name) {
   moduleServer(
     id,
     function(input, output, session) {
       ns <- session$ns
       tree_list <- NULL
-      # change d3 tree height based on how many nodes
-      height <- "3600px"
-      
-      if (length(up.schema) != 0) {
+
+      if (length(upload.data) != 0) {
 
         # get folder list
-        folder_list <- sort(unique(req.data$folder))
+        folder_list <- sort(unique(nodes$folder))
+        # change d3 tree height based on how many nodes
+        height <- paste0(36 * length(folder_list), "px")
         # remove project name in children to trim long names
-        pattern <- paste0(str_replace(selected.project, " ", "_"), "_")
+        pattern <- paste0(str_replace(project.name, " ", "_"), "_")
         # get dataset contains any missing requirement children
-        incompleted_ds <- req.data %>%
+        incompleted_ds <- nodes %>%
           distinct(folder_id, .keep_all = TRUE) %>%
           filter(n_miss > 0)
-        # make nodes data from project to datasets
+
+        # make nodes data frame: from project to dataset to required data type
         project_to_dataset <- data.frame(
-          from = c(selected.project),
+          from = c(project.name),
           to = paste0("f:", folder_list),
-          node_opacity = c(0),
-          node_color = ifelse(folder_list %in% incompleted_ds$folder, "#FF794A", "#A287AF")
+          font_opacity = c(0),
+          node_color = if_else(folder_list %in% incompleted_ds$folder, "#FF794A", "#A287AF")
         )
         # make nodes data from datasets to their requirements
-        dataset_to_req <- req.data %>%
+        dataset_to_req <- nodes %>%
           mutate(
-            node_opacity = if_else(req.data$to %in% req.data$from, 0, 1),
-            node_color = if_else(req.data$to %in% up.schema, "#28a745", "#E53935")
+            font_opacity = if_else(nodes$to %in% nodes$from, 0, 1),
+            node_color = if_else(nodes$to %in% upload.data, "#28a745", "#E53935")
           ) %>%
-          select(from, to, node_opacity, node_color)
+          select(from, to, font_opacity, node_color)
         tree_df <- rbind(project_to_dataset, dataset_to_req) %>%
           mutate_at(1:2, ~ gsub(pattern, "", .)) %>%
           distinct() # remove duplicated rows to save conversion time
         # convert to tree list using `data.tree`
         tree_list <- data.tree::FromDataFrameNetwork(tree_df)
         # tree_list$Set(group = ifelse(tree_list$Get("name") %in% c(upData$folder, upData$schema), "upload", "not_load"))
-        tree_list$node_opacity <- 1
+        tree_list$font_opacity <- 1
         tree_list$node_color <- "#694489"
         tree_list <- as.list(tree_list, mode = "explicit", unname = TRUE)
       }

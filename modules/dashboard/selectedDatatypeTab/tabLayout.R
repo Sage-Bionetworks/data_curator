@@ -5,14 +5,14 @@ selectedDataTypeTabUI <- function(id) {
     tagList(
       setTabTitleUI(ns("title")),
       fluidRow(
-        column(12,
-          class = "bottom-title-container",
-          column(12, class = "section-title", span("Required Data Types"))
-        ),
+        # column(12,
+        #   class = "bottom-title-container",
+        #   column(12, class = "section-title", span("Required Data Types"))
+        # ),
         column(12,
           class = "bottom-container",
-          column(6, column(12, dbCheckListUI(ns("checklist")))),
-          column(6, column(12, dbNetworkUI(ns("network"), height = "300px")))
+          column(6, column(12, dbNetworkUI(ns("network"), height = "300px"))),
+          column(6, column(12, dbCheckListUI(ns("checklist"))))
         )
       ),
       helpText(HTML(
@@ -25,24 +25,25 @@ selectedDataTypeTabUI <- function(id) {
   )
 }
 
-selectedDataTypeTab <- function(id, uploadData, reqData, selectedDataType) {
+selectedDataTypeTab <- function(id, metadata, nodes, schema, schema.display.name) {
   moduleServer(
     id,
     function(input, output, session) {
       ns <- session$ns
 
       # collect all required datatype including selected datatype
-      all_req <- union(reqData, names(reqData))
+      all_req <- union(nodes, names(nodes))
       # get number of total requirements
       n_req <- length(all_req)
-
+      # remove manifests with invalid component name
+      metadata <- metadata[!is.na(metadata$Component), ]
       # render tab title
-      setTabTitle("title", paste0("Completion of Requirements for Data Type: ", sQuote(selectedDataType)))
+      setTabTitle("title", paste0("Completion of Requirements for Data Type: ", sQuote(schema.display.name)))
 
       # render check list of requirments for selected datatype
-      dbCheckList("checklist", uploadData, reqData)
+      dbCheckList("checklist", metadata, nodes)
       # render network plot for requirements of selected datatype
-      dbNetwork("network", uploadData, reqData, selectedDataType)
+      dbNetwork("network", metadata, nodes, schema)
     }
   )
 }

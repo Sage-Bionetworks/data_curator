@@ -20,7 +20,7 @@ ValidationMsgServer <- function(id, result) {
                 icon("times-circle"),
                 span(paste0("Oops, looks like you have ", length(result$error_msg), " errors !!!"))
               ),
-              helpText(class = "validation-card-help-msg", HTML(result$error_help_msg)),
+              if (!is.null(result$error_help_msg)) helpText(class = "validation-card-help-msg", HTML(result$error_help_msg)),
               div(
                 class = "validation-card-content",
                 lapply(result$error_msg, function(msg) div(class = "validation-card-msg error", span(HTML(msg)))),
@@ -35,7 +35,7 @@ ValidationMsgServer <- function(id, result) {
                 icon("exclamation-circle"),
                 span(paste0("Oops, looks like you have ", length(result$warning_msg), " warnings !!!"))
               ),
-              helpText(class = "validation-card-help-msg", HTML(result$warning_help_msg)),
+              if (!is.null(result$warning_help_msg)) helpText(class = "validation-card-help-msg", HTML(result$warning_help_msg)),
               div(
                 class = "validation-card-content",
                 lapply(result$warning_msg, function(msg) div(class = "validation-card-msg warning", span(HTML(msg)))),

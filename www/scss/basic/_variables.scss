@@ -2,9 +2,7 @@
 
 // basic color
 $primary_col: #605ca8;
-$htan_col: #5b008c;
-// $primary_col: rgba(64,123,160, 1);
-// $cckp_col: rgba(91,176,181,1);
+$htan_col: rgb(95, 0, 140);
 $light: #f8f9fa;
 $light2: #f4f4f4;
 $dark: #343a40;
@@ -17,9 +15,6 @@ $sidebar_col: #191919;
 $sidebar_pink: #a63faa;
 $footer_col: #878787;
 $footer_bg_col: #202020;
-$sidebar_blue: #9cc4e9;
-// $footer_col: #fff;
-// $footer_bg_col: $primary_col;
 
 // message color
 $error_col: #e53935;
@@ -54,6 +49,5 @@ $desktop: 1024px;
     $htan_col,
     transparent
   );
-  // background-image: linear-gradient(450deg, $sidebar_col, $cckp_col, transparent);
   background-color: $primary_col;
 }
