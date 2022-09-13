@@ -73,7 +73,7 @@ shinyServer(function(input, output, session) {
 
     syn_login(authToken = access_token, rememberMe = FALSE)
 
-    login_res <- tryCatch(
+    access_res <- tryCatch(
       {
         # get syn storage
         syn_store <<- synapse_driver(access_token = access_token)
@@ -86,7 +86,7 @@ shinyServer(function(input, output, session) {
       }
     )
 
-    if (is.null(login_res) || length(datatype_list$projects) == 0) {
+    if (is.null(access_res) || length(datatype_list$projects) == 0) {
       dcWaiter("update", landing = TRUE, isPermission = FALSE)
     } else {
       # updates project dropdown
