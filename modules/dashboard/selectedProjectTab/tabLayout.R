@@ -74,11 +74,11 @@ selectedProjectTab <- function(id, username, metadata, nodes, project.name, pare
           tagList(
             column(12, class = "section-title", NULL),
             column(12, tagList(
-              h3("Already want to upload more data?", class = "bold-normal"),
+              h3("What data you need to upload next?", class = "bold-normal"),
               span(
                 class = "black-msg bold-sm",
-                "Start here by selecting ones of your missing data types
-                below to evaluate how your progress is going to change:"
+                "Select one or more of your missing data types
+                below to evaluate how your submission would progress. If unsure, start with uploading data types that get you closer to completion:"
               ),
               checkboxGroupInput(ns("checkbox-evaluate"), NULL, choices = as.list(not_uploaded), inline = TRUE),
               uiOutput(ns("evaluate-res"))

@@ -42,7 +42,7 @@ dbRater <- function(id, progress.value, username, project.name) {
                 style = paste0("color: ", completion_icon_col, ";")
               )
             ),
-            div(class = "dbRater-header", h3(class = "bold-lg", paste0(completion_msg, ", ", username, "!!!"))),
+            div(class = "dbRater-header", h3(class = "bold-lg", paste0(completion_msg, ", ", username, "!"))),
             div(
               class = "dbRater-body font-italic",
               paste0("you have uploaded ", progress.value, "% data for ", sQuote(project.name))
