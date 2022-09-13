@@ -23,7 +23,7 @@ jobs:
     container: rocker/rstudio:4.1.2
     env:
       # This should not be necessary for installing from public repo's however remotes::install_github() fails without it.
-      GITHUB_PAT: ${{ secrets.REPO_PAT }}
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
       - name: Install System Dependencies
