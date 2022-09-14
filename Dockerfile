@@ -21,16 +21,7 @@ WORKDIR data_curator
 
 # set up r packages via renv
 # This step takes forever, so do early to avoid invalidating cache with code changes
-ENV RENV_PATHS_LIBRARY renv/library
-RUN  R -e 'install.packages("renv")' 
-RUN R -e 'renv::restore()' 
-RUN R -e 'remotes::install_local("./")'
-
-#COPY server.R ui.R global.R ./
-#ADD www/ www/
-#ADD functions/ functions/
-#ADD modules/ modules/
-#ADD R/ R/
+RUN R --vanilla -e 'install.packages("renv", repos = "https://cloud.r-project.org/"); renv::restore(); remotes::install_local("./")'
 
 RUN addgroup --system app \
     && adduser --system --ingroup app app
@@ -40,5 +31,5 @@ RUN echo "local(options(shiny.port = 8100, shiny.host = '0.0.0.0'))" > /usr/lib/
 RUN chown app:app -R /home/app
 USER app
 EXPOSE 8100
-CMD ["R", "--vanilla", "-e", "shiny::runApp()"]
+CMD ["R", "--vanilla", "-e", "shiny::runApp('/home/app/data_curator', port=8100, host='0.0.0.0')"]
 
