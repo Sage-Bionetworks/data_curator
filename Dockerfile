@@ -10,38 +10,35 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libssl-dev \
     libssh2-1-dev \
     libxml2-dev \
+    git \
     && rm -rf /var/lib/apt/lists/*
 
 # add app and code
 WORKDIR /home/app
-COPY renv.lock ./
+RUN git clone https://github.com/sage-bionetworks/data_curator --branch schematic-rest-api
+WORKDIR data_curator
+#COPY renv.lock ./
 
 # set up r packages via renv
 # This step takes forever, so do early to avoid invalidating cache with code changes
-RUN  R -e 'install.packages("renv")' \
-     && R -e 'renv::restore()'
-     
-COPY server.R ui.R global.R oauth_config.yml schematic_config.yml ./
-ADD www/ www/
-ADD functions/ functions/
-ADD modules/ modules/
-ADD R/ R/
+ENV RENV_PATHS_LIBRARY renv/library
+RUN  R -e 'install.packages("renv")' 
+RUN R -e 'renv::restore()' 
+RUN R -e 'remotes::install_local("./")'
 
-# set up python venv
-#RUN apt-get update && apt-get install -y --no-install-recommends \
-#    pip \
-#    python3-venv \
-#    && python3 -m venv .venv \
-#    && chmod 755 .venv \
-#    && . .venv/bin/activate \
-#    && pip3 install schematicpy
+#COPY server.R ui.R global.R ./
+#ADD www/ www/
+#ADD functions/ functions/
+#ADD modules/ modules/
+#ADD R/ R/
 
 RUN addgroup --system app \
     && adduser --system --ingroup app app
 
 RUN echo "local(options(shiny.port = 8100, shiny.host = '0.0.0.0'))" > /usr/lib/R/etc/Rprofile.site
+#RUN echo "local(options(shiny.port = 8100, shiny.host = '0.0.0.0'))" > .Rprofile
 RUN chown app:app -R /home/app
 USER app
 EXPOSE 8100
-CMD ["R", "-e", "shiny::runApp('/home/app')"]
+CMD ["R", "--vanilla", "-e", "shiny::runApp()"]
 
