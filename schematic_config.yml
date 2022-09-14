@@ -6,7 +6,7 @@ definitions:
   service_acct_creds: "schematic_service_account_creds.json"
 
 synapse:
-  master_fileview: 'syn23643253'
+  master_fileview: 'syn33715412'
   manifest_folder: 'manifests'
   manifest_basename: 'synapse_storage_manifest'
   token_creds: 'syn23643259'
@@ -25,6 +25,7 @@ model:
     repo: 'Sage-Bionetworks/data-models' # data model repo url (<repo-owner>/<repo-name>)
     location: 'data-models/example.model.jsonld' # path to JSON-LD file
     file_type: 'local'
+    download_url: 'https://raw.githubusercontent.com/Sage-Bionetworks/data-models/main/example.model.jsonld'
 
 style:
   google_manifest:
@@ -38,3 +39,7 @@ style:
       blue: 0.9019
     master_template_id: '1LYS5qE4nV9jzcYw5sXwCza25slDfRA1CIg3cs-hCdpU'
     strict_validation: true
+
+api:
+  host: http://0.0.0.0
+  port: 3001

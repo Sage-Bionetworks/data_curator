@@ -8,6 +8,7 @@ on:
     branches:
       - main
       - develop*
+      - feat-UI-dashboard
     tags:
       - v*.*.*
     paths-ignore:
@@ -54,14 +55,11 @@ jobs:
           if [[ $GITHUB_REF_NAME == v*.*.* ]] || [[ $GITHUB_REF_NAME == main ]]; then
             echo Installing pypi version of schematic
             git clone --single-branch --branch main https://github.com/Sage-Bionetworks/schematic.git
-            cp schematic_config.yml schematic/config.yml
-            cd schematic
             pip3 install schematicpy
           else
             pip3 install poetry
             echo Installing develop branch of schematic from github
             git clone --single-branch --branch develop https://github.com/Sage-Bionetworks/schematic.git
-            cp schematic_config.yml schematic/config.yml
             cd schematic
             poetry build
             pip3 install dist/schematicpy-1.0.0-py3-none-any.whl
@@ -118,8 +116,10 @@ jobs:
           } else if (refName == "main") {
             appName <- paste(appName, "staging", sep = "-")
             message("Deploying staging version of app")
+          } else if (refName == 'feat-UI-dashboard') { # tmp
+            appName <- paste(appName, "demo", sep = "-")
           } else {
-            appName <- paste(appName, "testing1", sep = "-")
+            appName <- paste(appName, "testing", sep = "-")
             message("Deploying testing version of app")
           }
           message(sprintf("Deploying to %s instance.", appName))

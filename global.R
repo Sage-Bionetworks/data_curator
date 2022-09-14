@@ -16,6 +16,12 @@ suppressPackageStartupMessages({
   library(readr)
   library(sass)
   library(shinydashboardPlus)
+  # dashboard
+  library(purrr)
+  library(data.table)
+  library(networkD3)
+  library(data.tree)
+  library(r2d3)
 })
 
 ## Set Up OAuth
@@ -79,22 +85,10 @@ api <- oauth_endpoint(
 # The 'openid' scope is required by the protocol for retrieving user information.
 scope <- "openid view download modify"
 
-## Set Up Virtual Environment
-# ShinyAppys has a limit of 7000 files which this app' grossly exceeds
-# due to its Python dependencies.  To get around the limit we zip up
-# the virtual environment before deployment and unzip it here.
+schematic_config <- yaml::yaml.load_file("schematic_config.yml")
+api_uri <- paste(schematic_config$api$host, schematic_config$api$port, sep = ":")
 
-# unzip virtual environment, named as ".venv.zip"
-if (!file.exists(".venv")) utils::unzip(".venv.zip")
-
-# We get a '126' error (non-executable) if we don't do this:
-system("chmod -R +x .venv")
-
-# Don't necessarily have to set `RETICULATE_PYTHON` env variable
-Sys.unsetenv("RETICULATE_PYTHON")
-reticulate::use_virtualenv(file.path(getwd(), ".venv"), required = TRUE)
-
-## Import functions/modules
+# Import functions/modules
 source_files <- list.files(c("functions", "modules"), pattern = "*\\.R$", recursive = TRUE, full.names = TRUE)
 sapply(source_files, FUN = source)
 
@@ -110,3 +104,7 @@ config_file <- fromJSON("www/config.json")
 
 ## Global variables
 datatypes <- c("project", "folder", "template")
+options(sass.cache = FALSE)
+dropdown_types <- c("project", "folder", "template")
+# set up cores used for parallelization
+ncores <- parallel::detectCores()

@@ -1,4 +1,4 @@
-validationResult <- function(anno.res, template, manifest) {
+validationResult <- function(anno.res, template, manifest = NULL, dashboard = FALSE) {
   result <- "invalid"
   error_msg <- NULL
   error_help_msg <- NULL
@@ -9,7 +9,7 @@ validationResult <- function(anno.res, template, manifest) {
   highlight_values <- list()
 
   # if no uploaded manifest or empty manifest
-  if (is.null(manifest) || nrow(manifest) == 0) {
+  if (!dashboard & (is.null(manifest) || nrow(manifest) == 0)) {
     return(list(
       result = "invalid",
       error_type = "Empty File",
@@ -26,10 +26,10 @@ validationResult <- function(anno.res, template, manifest) {
       error_help_msg = "Please contact DCC staff for assistance."
     ))
   }
-
   errors <- anno.res[[1]]
-  warns <- anno.res[[2]]
-
+  warns <- list()
+  if (length(anno.res) > 1) warns <- anno.res[[2]]
+  
   # format the errors
   if (length(errors) != 0) {
     # mismatched template index
@@ -46,14 +46,14 @@ validationResult <- function(anno.res, template, manifest) {
         x[[2]]
       )
     }))
-
+    
     if (length(inx_mt) > 0) {
       # mismatched error(s): selected template mismatched with validating template
       error_type <- "Mismatched Template"
       # get all mismatched components
       error_values <- sapply(errors[inx_mt], function(x) x[[4]][[1]]) %>%
         unique()
-
+      
       # error messages for mismatch
       mismatch_c <- error_values %>%
         sQuote() %>%
@@ -87,7 +87,7 @@ validationResult <- function(anno.res, template, manifest) {
       lapply(unique(error_table$Column), function(col) {
         highlight_values[[col]] <<- error_table$Value[error_table$Column == col]
       })
-
+      
       # concatenated similar errors into one error message
       # TODO: remove below code chunck if the backend error messages are standardized
       error_table <- error_table %>%
@@ -100,7 +100,7 @@ validationResult <- function(anno.res, template, manifest) {
         ) %>%
         ungroup() %>%
         mutate(new_error = paste0("<b>", Value, "</b> from row(s) ", Row, " in column <b>'", Column, "'</b>: ", Error))
-
+      
       # sort rows based on input column names
       error_table <- error_table[order(match(error_table$Column, colnames(manifest))), ]
       error_msg <- error_table$new_error
@@ -110,7 +110,7 @@ validationResult <- function(anno.res, template, manifest) {
     result <- "valid"
     error_type <- "No Error"
   }
-
+  
   # format the warnings
   if (length(warns) != 0) {
     # add warning values to highlight
@@ -129,10 +129,10 @@ validationResult <- function(anno.res, template, manifest) {
       highlight_values[[warn[[2]]]] <<- append(highlight_values[[warn[[2]]]], warn_values)
       warning_msg <<- append(warning_msg, warn[[3]])
     })
-
+    
     warning_help_msg <- "View all the warning(s) highlighted in the preview table above"
   }
-
+  
   return(list(
     result = result,
     error_msg = error_msg,

@@ -1,0 +1,59 @@
+.dbStatsBox-box {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
+  min-height: 200px;
+  padding: 8px;
+
+  .dbStatsBox-item-container {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    width: 100%;
+
+    .dbStatsBox-item {
+      display: flex;
+      align-items: center;
+
+      h4 {
+        border-bottom: 1px solid;
+        padding-bottom: 4px;
+        margin-bottom: 4px;
+        min-width: 5em;
+      }
+
+      .dbStatsBox-text {
+        margin: 0 8px;
+      }
+    }
+  }
+
+  .dbStatsBox-btn-container {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 20px;
+
+    span {
+      padding: 8px;
+      text-align: center;
+    }
+  }
+}
+
+.completed {
+  color: $success_col;
+  border-color: $success_col;
+}
+
+.missing {
+  color: $error_col;
+  border-color: $error_col;
+}
+
+.outdated {
+  color: $warning_col;
+  border-color: $warning_col;
+}

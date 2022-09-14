@@ -1,30 +1,28 @@
 # This is script to wrap up the waiter screen for data curator app
-# TODO: maybe we could split into UI and server if we need
-
-dcWaiter <- function(stage = c("show", "update", "hide"), landing = FALSE, userName = NULL,
+dcWaiter <- function(stage = c("show", "update", "hide"),
+                     id = NULL, landing = FALSE, userName = NULL,
                      isLogin = TRUE, isCertified = TRUE, isPermission = TRUE,
-                     sleep = 2, msg = NULL, spin = NULL) {
+                     sleep = 2, msg = NULL, style = NULL,
+                     spin = NULL, custom_spinner = FALSE, url = "",
+                     color = "rgba(66, 72, 116, .9)") {
   # validate arguments
   if (!is.logical(landing)) stop("landing must be a boolean")
   if (!is.logical(isLogin)) stop("isLogin must be a boolean")
   if (!is.logical(isCertified)) stop("isCertified must be a boolean")
   if (!is.logical(isPermission)) stop("isPermission must be a boolean")
   if (!is.numeric(sleep)) stop("sleep must be a numeric")
-  if (!stage %in% c("show", "update", "hide")) {
-    stop("Please provide a value for stage: 'show', 'update' or 'hide'.")
-  }
   if (is.null(msg)) msg <- "Loading ..."
   if (is.null(spin)) spin <- spin_plus()
+  match.arg(stage, c("show", "update", "hide"))
 
   # if "hide", proceed hiding process immediately and exit function
   if (stage == "hide") {
     Sys.sleep(sleep)
-    return(waiter_hide())
+    return(waiter_hide(id = id))
   }
 
   # first loading screen of app
   if (landing) {
-  
     if (stage == "show") {
       waiter_show_on_load(
         html = tagList(
@@ -33,24 +31,25 @@ dcWaiter <- function(stage = c("show", "update", "hide"), landing = FALSE, userN
         ),
         color = "#424874"
       )
-    # } else if (!isLogin) {
-    #   # when user is not login
-    #   waiter_update(html = tagList(
-    #     img(src = "img/synapse_logo.png", height = "120px"),
-    #     h3("Looks like you're not logged in!"), 
-    #     span("Please ", 
-    #       a("login", href = "https://www.synapse.org/#!LoginPlace:0", target = "_blank"),
-    #       " to Synapse, then refresh this page."
-    #     )
-    #   ))
+      # } else if (!isLogin) {
+      #   # when user is not login
+      #   waiter_update(html = tagList(
+      #     img(src = "img/synapse_logo.png", height = "120px"),
+      #     h3("Looks like you're not logged in!"),
+      #     span("Please ",
+      #       a("login", href = "https://www.synapse.org/#!LoginPlace:0", target = "_blank"),
+      #       " to Synapse, then refresh this page."
+      #     )
+      #   ))
     } else if (!isCertified) {
       # when user is not certified synapse user
       waiter_update(html = tagList(
         img(src = "img/synapse_logo.png", height = "120px"),
         h3("Looks like you're not a synapse certified user!"),
-        span("Please follow the ", 
-          a("instruction", 
-            href = "https://help.synapse.org/docs/User-Account-Tiers.2007072795.html#UserAccountTiers-CertifiedUsers", 
+        span(
+          "Please follow the ",
+          a("instruction",
+            href = "https://help.synapse.org/docs/User-Account-Tiers.2007072795.html#UserAccountTiers-CertifiedUsers",
             target = "_blank"
           ),
           " to become a certified user, then refresh this page."
@@ -73,20 +72,36 @@ dcWaiter <- function(stage = c("show", "update", "hide"), landing = FALSE, userN
       Sys.sleep(sleep)
       waiter_hide()
     }
-
   } else {
-  
+
+    # prepare loading tags
+    if (custom_spinner) {
+      img_type <- tools::file_ext(basename(url))
+      if (img_type == "svg") img_type <- "svg+xml"
+      b64 <- base64enc::dataURI(file = url, mime = paste0("image/", img_type))
+      spinner <-
+        tagList(
+          # div(class="custom-spinner",
+          img(src = b64, class = "image-spin"),
+          h4(msg, style = style)
+          # )
+        )
+    } else {
+      spinner <- tagList(spin, br(), h4(msg, style = style))
+    }
+
     # other loading screens
     if (stage == "show") {
       waiter_show(
-        html = tagList(spin, br(), h3(msg)),
-        color = "rgba(66, 72, 116, .9)"
+        id = id,
+        html = spinner,
+        color = color
       )
     } else {
       Sys.sleep(2) # has to put at least 2s before to make update work
-      waiter_update(html = tagList(spin, br(), h3(msg)))
+      waiter_update(id = id, html = spinner)
       Sys.sleep(sleep)
-      waiter_hide()
+      waiter_hide(id = id)
     }
   }
 }
