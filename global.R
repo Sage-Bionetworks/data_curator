@@ -88,8 +88,9 @@ api <- oauth_endpoint(
 # The 'openid' scope is required by the protocol for retrieving user information.
 scope <- "openid view download modify"
 
-schematic_config <- yaml::yaml.load_file("schematic_config.yml")
-api_uri <- paste(schematic_config$api$host, schematic_config$api$port, sep = ":")
+#schematic_config <- yaml::yaml.load_file("schematic_config.yml")
+#api_uri <- paste(schematic_config$api$host, schematic_config$api$port, sep = ":")
+api_uri <- api_uri <- paste(Sys.getenv("DCA_API_HOST"), Sys.getenv("DCA_API_PORT"), sep = ":")
 
 # Import functions/modules
 source_files <- list.files(c("functions", "modules"), pattern = "*\\.R$", recursive = TRUE, full.names = TRUE)
@@ -97,10 +98,11 @@ sapply(source_files, FUN = source)
 
 ## Read config.json
 if (!file.exists("www/config.json")) {
-  schematic_config <- yaml.load_file("schematic_config.yml")
+  #schematic_config <- yaml.load_file("schematic_config.yml")
   system(sprintf(
     "python3 .github/generate_config_json.py -jd %s -schema %s -service %s",
-    schematic_config$model$input$location, schematic_config$model$input$repo, "Sage-Bionetworks/schematic"
+    # schematic_config$model$input$location, schematic_config$model$input$repo, "Sage-Bionetworks/schematic"
+    Sys.getenv("DCA_MODEL_INPUT_LOCATION"), Sys.getenv("DCA_MODEL_INPUT_REPO"), "Sage-Bionetworks/schematic"
   ))
 }
 config_file <- fromJSON("www/config.json")

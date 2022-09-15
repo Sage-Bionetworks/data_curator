@@ -34,7 +34,8 @@ shinyServer(function(input, output, session) {
   # mapping from display name to schema name
   template_namedList <- config_schema$schema_name
   names(template_namedList) <- config_schema$display_name
-  master_fileview <- schematic_config$synapse$master_fileview
+  #master_fileview <- schematic_config$synapse$master_fileview
+  master_fileview <- Sys.getenv("DCA_SYNAPSE_MASTER_FILEVIEW")
 
   # data available to the user
   syn_store <- NULL # gets list of projects they have access to
@@ -304,7 +305,7 @@ shinyServer(function(input, output, session) {
 
     # schematic rest api to validate metadata
     annotation_status <- manifest_validate(url=file.path(api_uri, "v1/model/validate"),
-                                           schema_url=schematic_config$model$input$download_url,
+                                           schema_url=Sys.getenv("DCA_MODEL_INPUT_DOWNLOAD_URL"),
                                            data_type=selected$schema(),
                            csv_file=inFile$raw()$datapath)
 
@@ -410,7 +411,7 @@ shinyServer(function(input, output, session) {
       # This validates AND submits the data to Synapse
       # Returns synapse table ID if successful
       manifest_id <- model_submit(url=file.path(api_uri, "v1/model/submit"),
-                                       schema_url = schematic_config$model$input$download_url,
+                                       schema_url = Sys.getenv("DCA_MODEL_INPUT_DOWNLOAD_URL"),
                                     data_type=selected$schema(),
                               dataset_id=selected$folder(),
                               input_token=access_token,
@@ -452,7 +453,7 @@ shinyServer(function(input, output, session) {
       # associates metadata with data and returns manifest id
       manifest_id <- model_submit(url=file.path(api_uri, "v1/model/submit"),
                                     data_type=selected$schema(),
-                                    schema_url = schematic_config$model$input$download_url,
+                                    schema_url = Sys.getenv("DCA_MODEL_INPUT_DOWNLOAD_URL"),
                                     dataset_id=selected$folder(),
                                     input_token=access_token,
                                     restrict_rules=FALSE,
