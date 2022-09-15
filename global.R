@@ -25,15 +25,18 @@ suppressPackageStartupMessages({
 })
 
 ## Set Up OAuth
-oauth_client <- yaml.load_file("oauth_config.yml")
+#oauth_client <- yaml.load_file("oauth_config.yml")
 
-client_id <- toString(oauth_client$CLIENT_ID)
-client_secret <- toString(oauth_client$CLIENT_SECRET)
-app_url <- toString(oauth_client$APP_URL)
+# client_id <- toString(oauth_client$CLIENT_ID)
+# client_secret <- toString(oauth_client$CLIENT_SECRET)
+# app_url <- toString(oauth_client$APP_URL)
+client_id <- Sys.getenv("DCA_CLIENT_ID")
+client_secret <- Sys.getenv("DCA_CLIENT_SECRET")
+app_url <- Sys.getenv("DCA_APP_URL")
 
-if (is.null(client_id) || nchar(client_id) == 0) stop("oauth_config.yml is missing CLIENT_ID")
-if (is.null(client_secret) || nchar(client_secret) == 0) stop("oauth_config.yml is missing CLIENT_SECRET")
-if (is.null(app_url) || nchar(app_url) == 0) stop("oauth_config.yml is missing APP_URL")
+if (is.null(client_id) || nchar(client_id) == 0) stop("missing DCA_CLIENT_ID environmental variable")
+if (is.null(client_secret) || nchar(client_secret) == 0) stop("missing DCA_CLIENT_SECRET environmental variable")
+if (is.null(app_url) || nchar(app_url) == 0) stop("missing DCA_APP_URL environmental variable")
 
 # update port if running app locally
 if (interactive()) {
