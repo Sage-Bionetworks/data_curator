@@ -79,14 +79,16 @@ shinyServer(function(input, output, session) {
         syn_store <<- synapse_driver(access_token = access_token)
         # get user's common projects
         datatype_list$projects <<- list2Vector(syn_store$getStorageProjects())
+        # assign 1 if no error
+        1L
       },
       error = function(e) {
         message(e$message)
-        return(NULL)
+        return(0L)
       }
     )
 
-    if (is.null(access_res) || length(datatype_list$projects) == 0) {
+    if (!access_res || length(datatype_list$projects) == 0) {
       dcWaiter("update", landing = TRUE, isPermission = FALSE)
     } else {
       # updates project dropdown
