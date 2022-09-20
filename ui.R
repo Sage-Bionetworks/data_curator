@@ -12,43 +12,43 @@ ui <- shinydashboardPlus::dashboardPage(
   title = "Data Curator",
   skin = "purple",
   dashboardHeader(
-    # titleWidth = 250,
-    # title = tagList(
-    #   span(class = "logo-lg", "Data Curator"),
-    #   span(class = "logo-mini", "DCA")
-    # ),
-    # leftUi = tagList(
-    #   dropdownBlock(
-    #     id = "header_selection_dropdown",
-    #     title = "Selection",
-    #     icon = icon("sliders-h"),
-    #     badgeStatus = "info",
-    #     fluidRow(
-    #       lapply(datatypes, function(x) {
-    #         div(
-    #           id = paste0("header_content_", x),
-    #           selectInput(
-    #             inputId = paste0("header_dropdown_", x),
-    #             label = NULL,
-    #             choices = character(0)
-    #           )
-    #         )
-    #       }),
-    #       actionButton("btn_header_update", NULL, icon("sync-alt"), class = "btn-shiny-effect")
-    #     )
-    #   )
-    # ),
-    # tags$li(
-    #   class = "dropdown", id = "HTAN_logo",
-    #   tags$a(
-    #     href = "https://humantumoratlas.org/",
-    #     target = "_blank",
-    #     tags$img(
-    #       height = "40px", alt = "HTAN LOGO",
-    #       src = "img/HTAN_text_logo.png"
-    #     )
-    #   )
-    # )
+     titleWidth = 250,
+     title = tagList(
+       span(class = "logo-lg", "Data Curator"),
+       span(class = "logo-mini", "DCA")
+     ),
+     leftUi = tagList(
+       dropdownBlock(
+         id = "header_selection_dropdown",
+         title = "Selection",
+         icon = icon("sliders-h"),
+         badgeStatus = "info",
+         fluidRow(
+           lapply(datatypes, function(x) {
+             div(
+               id = paste0("header_content_", x),
+               selectInput(
+                 inputId = paste0("header_dropdown_", x),
+                 label = NULL,
+                 choices = character(0)
+               )
+             )
+           }),
+           actionButton("btn_header_update", NULL, icon("sync-alt"), class = "btn-shiny-effect")
+         )
+       )
+     ),
+     tags$li(
+       class = "dropdown", id = "HTAN_logo",
+       tags$a(
+         href = "https://synapse.org/",
+         target = "_blank",
+         tags$img(
+           height = "40px", alt = "SYNAPSE LOGO",
+           src = "img/synapse_logo.png"
+         )
+       )
+     )
   ),
   dashboardSidebar(
     width = 250,
