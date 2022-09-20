@@ -4,14 +4,15 @@
 .DS_Store
 HTAN_test_shiny.Rproj
 app.bak.R
-get_manifest_anno.R
-manifest_url.txt
-**/config.json
-tmp/synapse_storage_manifest.csv
 .Rproj.user
 schematic/
-**/credentials.json
-**/schematic_service_account_creds.json
+data-models/
+great_expectations/
+*.json
+*.jsonld
+*.rds
+*.csv
+*.txt
 **/token.pickle
 **/.synapseConfig
 **/__pycache__
@@ -20,4 +21,3 @@ schematic_config.yml
 .project
 .settings/**
 .venv
-data-models/
