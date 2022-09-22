@@ -399,7 +399,7 @@ shinyServer(function(input, output, session) {
         metadataManifestPath = "./tmp/synapse_storage_manifest.csv",
         datasetId = folder_synID(),
         manifest_record_type = "table",
-        restrict_manifest = TRUE
+        restrict_manifest = FALSE
       )
       manifest_path <- tags$a(href = paste0("https://www.synapse.org/#!Synapse:", manifest_id), manifest_id, target = "_blank")
 
@@ -435,7 +435,7 @@ shinyServer(function(input, output, session) {
         metadataManifestPath = "./tmp/synapse_storage_manifest.csv",
         datasetId = folder_synID(),
         manifest_record_type = "table",
-        restrict_manifest = TRUE
+        restrict_manifest = FALSE
       )
       manifest_path <- tags$a(href = paste0("https://www.synapse.org/#!Synapse:", manifest_id), manifest_id, target = "_blank")
 
