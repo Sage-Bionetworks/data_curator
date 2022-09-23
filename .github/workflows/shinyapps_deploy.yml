@@ -70,11 +70,11 @@ jobs:
         shell: Rscript {0}
         run: |
           # retrieve data model repo information
-          repo_pattern <- '^([-_\\.A-z0-9]+\\/)([-_\\.A-z0-9]+)$'
-          jd_pattern <- '^([-_\\.A-z0-9]+\\/)*([-_\\.A-z0-9]+\\.jsonld)$'
+          # repo_pattern <- "^([-_\\.A-z0-9]+\\/)([-_\\.A-z0-9]+)$"
+          # jd_pattern <- "^([-_\\.A-z0-9]+\\/)*([-_\\.A-z0-9]+\\.jsonld)$"
           config <- yaml::yaml.load_file("schematic_config.yml")
           model_input <- config$model$input
-          if (!grepl(jd_pattern, model_input$location)) stop("ValueError: No valid 'location' value found in 'schematic_config.yml' \u274C")
+          if (!grepl("^([-_\\.A-z0-9]+\\/)*([-_\\.A-z0-9]+\\.jsonld)$", model_input$location)) stop("ValueError: No valid 'location' value found in 'schematic_config.yml' \u274C")
           # ******************** temporary check start********************
           # Note: this condition is used for grace period to temporarily allow 'download_url' to download data-models
           # Remove once the users change to use 'repo' in schematic_config.yml
@@ -86,7 +86,7 @@ jobs:
             system(sprintf("echo 'MODEL_REPO=%s' >> $GITHUB_ENV", ""))
             system(sprintf("echo 'MODEL_PATH=%s' >> $GITHUB_ENV", model_input$location))
           # ******************** temporary check nend ********************
-          } else if (!is.null(model_input$repo) && grepl(repo_pattern, model_input$repo)) {
+          } else if (!is.null(model_input$repo) && grepl("^([-_\\.A-z0-9]+\\/)([-_\\.A-z0-9]+)$", model_input$repo)) {
             system(sprintf("echo 'MODEL_REPO=%s' >> $GITHUB_ENV", model_input$repo))
             system(sprintf("echo 'MODEL_PATH=%s' >> $GITHUB_ENV", model_input$location))
           } else {
