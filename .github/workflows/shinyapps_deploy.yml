@@ -75,7 +75,7 @@ jobs:
             jd_pattern <- '^([A-z0-9-_+\\.]+\\/)*([A-z0-9-_+\\.]+\\.jsonld)$';
             config <- yaml::yaml.load_file("schematic_config.yml");
             model_input <- config$model$input;
-            if (grepl(jd_pattern, model_input$location, perl = TRUE)) stop("ValueError: No valid 'location' value found in 'schematic_config.yml' \u274C");
+            if (!grepl(jd_pattern, model_input$location, perl = TRUE)) stop("ValueError: No valid 'location' value found in 'schematic_config.yml' \u274C");
             ******************** temporary check start********************
             # Note: this condition is used for grace period to temporarily allow 'download_url' to download data-models
             # Remove once the users change to use 'repo' in schematic_config.yml
