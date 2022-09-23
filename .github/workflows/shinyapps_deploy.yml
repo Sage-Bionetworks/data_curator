@@ -66,38 +66,24 @@ jobs:
       #       pip3 install dist/schematicpy-1.0.0-py3-none-any.whl
       #     fi
 
-      - name: Set Configurations
+      - name: Set Configurations for App
         shell: Rscript {0}
         run: |
           # retrieve data model repo information
-          config <- yaml::yaml.load_file("schematic_config.yml")
-          model_input <- config$model$input
-          if (is.null(model_input$location) || nchar(model_input$location) == 0) {
-            stop("ValueError: No valid 'location' value found in 'schematic_config.yml' \u274C")
-          }
-          # ******************** temporary check start********************
-          # Note: this condition is used for grace period to temporarily allow 'download_url' to download data-models
-          # Remove once the users change to use 'repo' in schematic_config.yml
-          if (!is.null(model_input$download_url)) {
-            url <- model_input$download_url
-            path <- model_input$location
-            system(sprintf("mkdir -p %s", dirname(path)))
-            system(sprintf("wget %s -O %s", url, path))
-            system(sprintf("echo 'MODEL_REPO=%s' >> $GITHUB_ENV", ""))
-            system(sprintf("echo 'MODEL_PATH=%s' >> $GITHUB_ENV", model_input$location))
-          # ******************** temporary check nend ********************
-          } else if (!is.null(model_input$repo) && nchar(model_input$repo) > 0) {
-            system(sprintf("echo 'MODEL_REPO=%s' >> $GITHUB_ENV", model_input$repo))
-            system(sprintf("echo 'MODEL_PATH=%s' >> $GITHUB_ENV", model_input$location))
-          } else {
-            stop("ValueError: No valid 'repo' value found in 'schematic_config.yml' \u274C")
-          }
+          R -e '
+            config <- yaml::yaml.load_file("schematic_config.yml");
+            system(sprintf("echo 'MODEL_REPO=%s' >> $GITHUB_ENV", config$model$input$repo));
+            system(sprintf("echo 'MODEL_PATH=%s' >> $GITHUB_ENV", config$model$input$location));
+          '
 
-          # # write out configuration files using github secrets
-          # echo "${{ secrets.SCHEMATIC_SYNAPSE_CONFIG }}" > .synapseConfig
-          # echo "${{ secrets.SCHEMATIC_SERVICE_ACCT_CREDS }}" > schematic_service_account_creds.json
-          # echo "${{ secrets.SCHEMATIC_CREDS_PATH }}" > credentials.json
-          # echo "${{ secrets.SCHEMATIC_TOKEN_PICKLE }}" | base64 -d > token.pickle
+      - name: Set Configurations for Schematic
+        shell: bash
+        run: |
+          # write out configuration files using github secrets
+          echo "${{ secrets.SCHEMATIC_SYNAPSE_CONFIG }}" > .synapseConfig
+          echo "${{ secrets.SCHEMATIC_SERVICE_ACCT_CREDS }}" > schematic_service_account_creds.json
+          echo "${{ secrets.SCHEMATIC_CREDS_PATH }}" > credentials.json
+          echo "${{ secrets.SCHEMATIC_TOKEN_PICKLE }}" | base64 -d > token.pickle
 
       - name: Clone Data Model
         shell: bash
