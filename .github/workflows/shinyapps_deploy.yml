@@ -18,32 +18,31 @@ on:
 jobs:
   shiny-deploy:
     runs-on: ubuntu-latest
+    # This image seems to be based on rocker/r-ver which in turn is based on debian
+    container: rocker/rstudio:4.1.2
     env:
       # This should not be necessary for installing from public repo's however remotes::install_github() fails without it.
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
-      - uses: actions/checkout@v3
-
-      - name: Set up R
-        uses: r-lib/actions/setup-r@v2
-      - name: Install R Packages Dependencies
+      - name: Install System Dependencies
         run: |
-          # R -f install-pkgs.R
-          R -e 'install.packages("yaml")'
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.9'
+          sudo apt-get update
+          sudo apt-get install -y pip python3.8-venv libcurl4-openssl-dev
+      - uses: actions/checkout@v2
+      - uses: r-lib/actions/setup-pandoc@v1
 
       - name: Create and Activate Python Virtual Environment
         shell: bash
         run: |
-          python -m venv .venv
+          python3 -m venv .venv
           chmod 755 .venv/bin/activate
           source .venv/bin/activate
 
+      - name: Install R Packages Dependencies
+        run: |
+          # R -f install-pkgs.R
+          R -e 'install.packages("yaml")'
       # - name: Install Schematic
       #   shell: bash
       #   run: |
@@ -71,11 +70,11 @@ jobs:
         shell: Rscript {0}
         run: |
           # retrieve data model repo information
-          repo_pattern <- "^[-_.A-z0-9]+\\/[-_\\.A-z0-9]+$"
-          jd_pattern <- "^[-_.A-z0-9]+\\/*[-_\\.A-z0-9]+.jsonld$"
           config <- yaml::yaml.load_file("schematic_config.yml")
           model_input <- config$model$input
-          if (!grepl(jd_pattern, model_input$location)) stop("ValueError: No valid 'location' value found in 'schematic_config.yml' \u274C")
+          if (is.null(model_input$location) || nchar(model_input$location) == 0) {
+            stop("ValueError: No valid 'location' value found in 'schematic_config.yml' \u274C")
+          }
           # ******************** temporary check start********************
           # Note: this condition is used for grace period to temporarily allow 'download_url' to download data-models
           # Remove once the users change to use 'repo' in schematic_config.yml
@@ -87,7 +86,7 @@ jobs:
             system(sprintf("echo 'MODEL_REPO=%s' >> $GITHUB_ENV", ""))
             system(sprintf("echo 'MODEL_PATH=%s' >> $GITHUB_ENV", model_input$location))
           # ******************** temporary check nend ********************
-          } else if (!is.null(model_input$repo) && grepl(repo_pattern, model_input$repo)) {
+          } else if (!is.null(model_input$repo) && nchar(model_input$repo) > 0) {
             system(sprintf("echo 'MODEL_REPO=%s' >> $GITHUB_ENV", model_input$repo))
             system(sprintf("echo 'MODEL_PATH=%s' >> $GITHUB_ENV", model_input$location))
           } else {
