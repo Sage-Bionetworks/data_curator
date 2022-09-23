@@ -30,7 +30,6 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y pip python3.8-venv libcurl4-openssl-dev
       - uses: actions/checkout@v2
-
       - uses: r-lib/actions/setup-pandoc@v1
 
       - name: Create and Activate Python Virtual Environment
@@ -72,11 +71,30 @@ jobs:
         run: |
           # retrieve data model repo information
           R -e '
+            repo_pattern <- '^([A-z0-9-_+\\.]+\\/)([A-z0-9-_+\\.]+)$';
+            jd_pattern <- '^([A-z0-9-_+\\.]+\/)*([A-z0-9-_+\\.]+\\.jsonld)$';
             config <- yaml::yaml.load_file("schematic_config.yml");
-            system(sprintf("echo 'MODEL_REPO=%s' >> $GITHUB_ENV", config$model$input$repo));
-            system(sprintf("echo 'MODEL_PATH=%s' >> $GITHUB_ENV", config$model$input$location));
+            model_input <- config$model$input;
+            if (grepl(jd_pattern, model_input$location, perl = TRUE)) stop("ValueError: No valid 'location' value found in 'schematic_config.yml' \u274C");
+            ******************** temporary check start********************
+            # Note: this condition is used for grace period to temporarily allow 'download_url' to download data-models
+            # Remove once the users change to use 'repo' in schematic_config.yml
+            if (!is.null(model_input$download_url)) {
+              url <- model_input$download_url;
+              path <- model_input$location;
+              system(sprintf("mkdir -p %s", dirname(path)));
+              system(sprintf("wget %s -O %s", url, path));
+              system(sprintf("echo 'MODEL_REPO=%s' >> $GITHUB_ENV", ""));
+              system(sprintf("echo 'MODEL_PATH=%s' >> $GITHUB_ENV", model_input$location));
+            ******************** temporary check nend ********************
+            } else if (!is.null(model_input$repo) && grepl(repo_pattern, model_input$repo, perl = TRUE)) {
+              system(sprintf("echo 'MODEL_REPO=%s' >> $GITHUB_ENV", model_input$repo));
+              system(sprintf("echo 'MODEL_PATH=%s' >> $GITHUB_ENV", model_input$location));
+            } else {
+              stop("ValueError: No valid 'repo' value found in 'schematic_config.yml' \u274C");
+            };
           '
-  
+
           # write out configuration files using github secrets
           echo "${{ secrets.SCHEMATIC_SYNAPSE_CONFIG }}" > .synapseConfig
           echo "${{ secrets.SCHEMATIC_SERVICE_ACCT_CREDS }}" > schematic_service_account_creds.json
@@ -85,6 +103,7 @@ jobs:
 
       - name: Clone Data Model
         shell: bash
+        if: ${{ env.MODEL_PATH != "" }}
         run: |
           git clone https://github.com/${{ env.MODEL_REPO }}.git
 
@@ -96,7 +115,7 @@ jobs:
             -jd ${{ env.MODEL_PATH }} \
             -schema ${{ env.MODEL_REPO }} \
             -service 'Sage-Bionetworks/schematic'
-  
+
       - name: zip virtual env
         shell: bash
         # ShinyApps has a limit of 7000 files, far exceeded by the many Python dependencies
@@ -138,4 +157,3 @@ jobs:
           )
           rsconnect::setAccountInfo(rsConnectUser, rsConnectToken, rsConnectSecret)
           rsconnect::deployApp(appName = appName)
-
