@@ -7,7 +7,7 @@ on:
   push:
     branches:
       - main
-      - develop*
+      - develop-*
     tags:
       - v*.*.*
     paths-ignore:
@@ -94,7 +94,6 @@ jobs:
               stop("ValueError: No valid 'repo' value found in 'schematic_config.yml' \u274C");
             };
           '
-
           # write out configuration files using github secrets
           echo "${{ secrets.SCHEMATIC_SYNAPSE_CONFIG }}" > .synapseConfig
           echo "${{ secrets.SCHEMATIC_SERVICE_ACCT_CREDS }}" > schematic_service_account_creds.json
