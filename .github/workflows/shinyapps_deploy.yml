@@ -70,11 +70,9 @@ jobs:
         shell: Rscript {0}
         run: |
           # retrieve data model repo information
-          R -e '
-            config <- yaml::yaml.load_file("schematic_config.yml");
-            system(sprintf("echo 'MODEL_REPO=%s' >> $GITHUB_ENV", config$model$input$repo));
-            system(sprintf("echo 'MODEL_PATH=%s' >> $GITHUB_ENV", config$model$input$location));
-          '
+          config <- yaml::yaml.load_file("schematic_config.yml")
+          system(sprintf("echo 'MODEL_REPO=%s' >> $GITHUB_ENV", config$model$input$repo))
+          system(sprintf("echo 'MODEL_PATH=%s' >> $GITHUB_ENV", config$model$input$location))
 
       - name: Set Configurations for Schematic
         shell: bash
