@@ -42,7 +42,7 @@ jobs:
       - name: Install R Packages Dependencies
         run: |
           # R -f install-pkgs.R
-          R -e 'install.packages('yaml')'
+          R -e 'install.packages("yaml")'
       # - name: Install Schematic
       #   shell: bash
       #   run: |
