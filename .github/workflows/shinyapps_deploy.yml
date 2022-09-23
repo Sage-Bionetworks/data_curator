@@ -70,8 +70,8 @@ jobs:
         shell: Rscript {0}
         run: |
           # retrieve data model repo information
-          repo_pattern <- '^([A-z0-9-_+\\.]+\\/)([A-z0-9-_+\\.]+)$'
-          jd_pattern <- '^([A-z0-9-_+\\.]+\\/)*([A-z0-9-_+\\.]+\\.jsonld)$'
+          repo_pattern <- '^(\\[A-z0-9-_+\\.\\]+\\/)(\\[A-z0-9-_+\\.\\]+)$'
+          jd_pattern <- '^(\\[A-z0-9-_+\\.\\]+\\/)*(\\[A-z0-9-_+\\.\\]+\\.jsonld)$'
           config <- yaml::yaml.load_file("schematic_config.yml")
           model_input <- config$model$input
           if (!grepl(jd_pattern, model_input$location, perl = TRUE)) stop("ValueError: No valid 'location' value found in 'schematic_config.yml' \u274C")
