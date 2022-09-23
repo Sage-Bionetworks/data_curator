@@ -102,7 +102,7 @@ jobs:
 
       - name: Clone Data Model
         shell: bash
-        if: ${{ env.MODEL_PATH != "" }}
+        if: ${{ env.MODEL_PATH != '' }}
         run: |
           git clone https://github.com/${{ env.MODEL_REPO }}.git
 
