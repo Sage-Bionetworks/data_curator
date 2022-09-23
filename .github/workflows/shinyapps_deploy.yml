@@ -94,11 +94,11 @@ jobs:
               stop("ValueError: No valid 'repo' value found in 'schematic_config.yml' \u274C");
             };
           '
-          # write out configuration files using github secrets
-          echo "${{ secrets.SCHEMATIC_SYNAPSE_CONFIG }}" > .synapseConfig
-          echo "${{ secrets.SCHEMATIC_SERVICE_ACCT_CREDS }}" > schematic_service_account_creds.json
-          echo "${{ secrets.SCHEMATIC_CREDS_PATH }}" > credentials.json
-          echo "${{ secrets.SCHEMATIC_TOKEN_PICKLE }}" | base64 -d > token.pickle
+          # # write out configuration files using github secrets
+          # echo "${{ secrets.SCHEMATIC_SYNAPSE_CONFIG }}" > .synapseConfig
+          # echo "${{ secrets.SCHEMATIC_SERVICE_ACCT_CREDS }}" > schematic_service_account_creds.json
+          # echo "${{ secrets.SCHEMATIC_CREDS_PATH }}" > credentials.json
+          # echo "${{ secrets.SCHEMATIC_TOKEN_PICKLE }}" | base64 -d > token.pickle
 
       - name: Clone Data Model
         shell: bash
