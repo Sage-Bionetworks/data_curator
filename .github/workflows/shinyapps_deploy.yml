@@ -71,19 +71,22 @@ jobs:
         run: |
           # retrieve data model repo information
           config <- yaml::yaml.load_file("schematic_config.yml")
-          if (is.null(config$model$input$location) || nchar(config$model$input$location) == 0) {
+          model_input <- config$model$input
+          if (is.null(model_input$location) || nchar(model_input$location) == 0) {
             stop("ValueError: No valid 'location' value found in 'schematic_config.yml'")
           }
-          if (!is.null(config$model$input$download_url)) {
-            url <- config$model$input$download_url
-            path <- config$model$input$location
+          # Note: this condition is used for grace period to temporarily allow 'download_url' to download data-models
+          # Remove once the users change to use 'repo' in schematic_config.yml
+          if (!is.null(model_input$download_url)) {
+            url <- model_input$download_url
+            path <- model_input$location
             system(sprintf("mkdir -p %s", dirname(path)))
             system(sprintf("wget %s -O %s", url, path))
             system(sprintf("echo 'MODEL_REPO=%s' >> $GITHUB_ENV", ""))
-            system(sprintf("echo 'MODEL_PATH=%s' >> $GITHUB_ENV", config$model$input$location))
-          } else if (!is.null(config$model$input$repo) && nchar(config$model$input$repo) > 0) {
-            system(sprintf("echo 'MODEL_REPO=%s' >> $GITHUB_ENV", config$model$input$repo))
-            system(sprintf("echo 'MODEL_PATH=%s' >> $GITHUB_ENV", config$model$input$location))
+            system(sprintf("echo 'MODEL_PATH=%s' >> $GITHUB_ENV", model_input$location))
+          } else if (!is.null(model_input$repo) && nchar(model_input$repo) > 0) {
+            system(sprintf("echo 'MODEL_REPO=%s' >> $GITHUB_ENV", model_input$repo))
+            system(sprintf("echo 'MODEL_PATH=%s' >> $GITHUB_ENV", model_input$location))
           } else {
             stop("ValueError: No valid 'repo' value found in 'schematic_config.yml'")
           }
