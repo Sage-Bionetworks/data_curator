@@ -71,8 +71,10 @@ jobs:
         run: |
           # retrieve data model repo information
           config <- yaml::yaml.load_file("schematic_config.yml")
+          repo_pattern <- "^[-_.A-z0-9]+\\/)[-_.A-z0-9]+$"
+          jd_pattern <- "^[-_.A-z0-9]+\\/*[-_.A-z0-9]+.jsonld$"
           model_input <- config$model$input
-          if (is.null(model_input$location) || nchar(model_input$location) == 0) {
+          if (is.null(model_input$location) || !grepl(jd_pattern, model_input$location)) {
             stop("ValueError: No valid 'location' value found in 'schematic_config.yml'")
           }
           # Note: this condition is used for grace period to temporarily allow 'download_url' to download data-models
@@ -84,7 +86,7 @@ jobs:
             system(sprintf("wget %s -O %s", url, path))
             system(sprintf("echo 'MODEL_REPO=%s' >> $GITHUB_ENV", ""))
             system(sprintf("echo 'MODEL_PATH=%s' >> $GITHUB_ENV", model_input$location))
-          } else if (!is.null(model_input$repo) && nchar(model_input$repo) > 0) {
+          } else if (!is.null(model_input$repo) && grepl(repo_pattern, model_input$repo)) {
             system(sprintf("echo 'MODEL_REPO=%s' >> $GITHUB_ENV", model_input$repo))
             system(sprintf("echo 'MODEL_PATH=%s' >> $GITHUB_ENV", model_input$location))
           } else {
