@@ -1,20 +1,22 @@
-# Data Curator App
+# NF Data Curator App
 
 ## Introduction
 
 The _Data Curator App_ is an R Shiny app that serves as the _frontend_ to the schematic Python package. It allows data contributors to easily annotate, validate and submit their metadata.
 
----
+## Shiny app configuration
 
-## Get Started and Installation
+There are two editions of the front end: 
 
-Follow the steps below to make sure the _Data Curator App_ is fully setup to work with the [schematic]:
+TO UPDATE TO SHINYAPPS.IO DETAILS
 
 ### Data Curator App Setup
 
+Follow the steps below to run locally. 
+
 1.  Clone this repo (front-end) with one single branch (i.e., _main_):
 
-        git clone --single-branch --branch main https://github.com/Sage-Bionetworks/data_curator.git
+        git clone --single-branch --branch main https://github.com/nf-osi/NF_data_curator.git
 
 2.  Create and modify the configuration file ([How to obtain OAuth Credential](https://github.com/Sage-Bionetworks/data_curator#Authentication)):
 

@@ -40,4 +40,5 @@ invisible(
     remotes::install_version(cran_pkg[1], version = cran_pkg[2])
   })
 )
+
 remotes::install_github(gh)

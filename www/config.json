@@ -1,18 +1,26 @@
 {
   "manifest_schemas": [
-    {
-      "display_name": "Bulk RNA-seq Assay",
-      "schema_name": "BulkRNA-seqAssay",
-      "type": "file"
-    },
-    { "display_name": "Patient", "schema_name": "Patient", "type": "record" },
-    {
-      "display_name": "Biospecimen Tier 1 & 2",
-      "schema_name": "Biospecimen",
-      "type": "record"
-    }
-  ],
-  "community": "Example",
-  "schema": "v0.1.0",
+      {"display_name": "Whole Genome Sequencing Assay", "schema_name": "WGSTemplate", "type": "file"},
+      {"display_name": "Whole Exome Sequencing Assay", "schema_name": "WESTemplate", "type": "file"},
+      {"display_name": "RNA Sequencing Assay", "schema_name": "RNASeqTemplate", "type": "file"},
+      {"display_name": "Single-cell RNA Sequencing Assay", "schema_name": "ScRNASeqTemplate", "type": "file"},
+      {"display_name": "Epigenetics Assay", "schema_name": "EpigeneticsAssayTemplate", "type": "file"},
+      {"display_name": "PDX Genomics Assay", "schema_name": "PdxGenomicsAssayTemplate", "type": "file"},
+      {"display_name": "Other Genomics Assay", "schema_name": "GenomicsAssayTemplate", "type": "file"},
+      {"display_name": "Other Genomics Assay (Extended)", "schema_name": "GenomicsAssayTemplateExtended", "type": "file"},
+      {"display_name": "Imaging Assay", "schema_name": "ImagingAssayTemplate", "type": "file"},
+      {"display_name": "MRI Assay", "schema_name": "MRIAssayTemplate", "type": "file"},
+      {"display_name": "Pharmacokinetics Assay", "schema_name": "PharmacokineticsAssayTemplate", "type": "file"},
+      {"display_name": "Proteomics Assay", "schema_name": "ProteomicsAssayTemplate", "type": "file"},
+      {"display_name": "Plate-Based Reporter Assay", "schema_name": "PlateBasedReporterAssayTemplate", "type": "file"},
+      {"display_name": "Update Milestone Report Values", "schema_name": "UpdateMilestoneReportTemplate", "type": "file"},
+      {"display_name": "Clinical Assay Template", "schema_name": "ClinicalAssayTemplate", "type": "file"},
+      {"display_name": "Processed/Aligned Sequencing Reads", "schema_name": "ProcessedAlignedReadsTemplate", "type": "file"},
+      {"display_name": "Processed Variant Calls", "schema_name": "ProcessedVariantCallsTemplate", "type": "file"},
+      {"display_name": "Processed Expression Data", "schema_name": "ProcessedExpressionTemplate", "type": "file"}
+    ],
+  "main_fileview" : "syn16858331",
+  "community" : "NF",
+  "schema": "v6.1.0",
   "schematic_service": "v1"
 }

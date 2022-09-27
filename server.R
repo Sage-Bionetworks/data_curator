@@ -155,7 +155,9 @@ shinyServer(function(input, output, session) {
       projectID <- datatype_list$projects[[input[[paste0(x, "project")]]]]
 
       # gets folders per project
-      folder_list <- synapse_driver$getStorageDatasetsInProject(synStore_obj, projectID) %>% list2Vector()
+      folder_df <- syn_tableQuery(sprintf("select name, id from %s where type = 'folder' and projectId = '%s'", config$main_fileview, projectID))$asDataFrame()
+      
+      folder_list <- setNames(as.list(folder_df$id), folder_df$name)
 
       # updates foldernames
       updateSelectInput(session, paste0(x, "folder"), choices = sort(names(folder_list)))
@@ -238,7 +240,8 @@ shinyServer(function(input, output, session) {
           NULL,
           as.list(names(datatype_list$files))
         ),
-        datasetId = folder_synID()
+        datasetId = folder_synID(),
+        useAnnotations = T
       )
 
     # generate link
@@ -390,7 +393,9 @@ shinyServer(function(input, output, session) {
         synStore_obj,
         "./tmp/synapse_storage_manifest.csv",
         folder_synID(),
-        manifest_record_type = "table"
+        useSchemaLabel = FALSE,
+        hideBlanks = TRUE,
+        manifest_record_type = "entity"
       )
       manifest_path <- tags$a(href = paste0("https://www.synapse.org/#!Synapse:", manifest_id), manifest_id, target = "_blank")
 
@@ -425,7 +430,9 @@ shinyServer(function(input, output, session) {
         synStore_obj,
         "./tmp/synapse_storage_manifest.csv",
         folder_synID(),
-        manifest_record_type = "table"
+        useSchemaLabel = FALSE,
+        hideBlanks = TRUE,
+        manifest_record_type = "entity"
       )
       manifest_path <- tags$a(href = paste0("https://www.synapse.org/#!Synapse:", manifest_id), manifest_id, target = "_blank")
 
