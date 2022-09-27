@@ -19,10 +19,6 @@ shinyServer(function(input, output, session) {
     type = "basic"
   ), config = list())
   # Stop the code if anything other than 2XX status code is returned
-  str(req)
-  httr::http_status(req)
-  httr::http_error(req)
-  httr::http_type(req)
   stop_for_status(req, task = "get an access token")
   token_response <- content(req, type = NULL)
   access_token <- token_response$access_token
