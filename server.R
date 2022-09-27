@@ -392,7 +392,7 @@ shinyServer(function(input, output, session) {
       manifest_id <- synapse_driver$associateMetadataWithFiles(
         synStore_obj,
         "./tmp/synapse_storage_manifest.csv",
-        folder_synID(),
+        datasetId = folder_synID(),
         useSchemaLabel = FALSE,
         hideBlanks = TRUE,
         manifest_record_type = "entity"
@@ -429,7 +429,7 @@ shinyServer(function(input, output, session) {
       manifest_id <- synapse_driver$associateMetadataWithFiles(
         synStore_obj,
         "./tmp/synapse_storage_manifest.csv",
-        folder_synID(),
+        datasetId = folder_synID(),
         useSchemaLabel = FALSE,
         hideBlanks = TRUE,
         manifest_record_type = "entity"
