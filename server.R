@@ -288,6 +288,7 @@ shinyServer(function(input, output, session) {
   })
 
   ######## Reads .csv File ########
+  # Check out module and don't use filepath. Keep file in memory
   inFile <- csvInfileServer("inputFile", colsAsCharacters = TRUE, keepBlank = TRUE)
 
   observeEvent(inFile$data(), {
@@ -307,7 +308,9 @@ shinyServer(function(input, output, session) {
     annotation_status <- manifest_validate(url=file.path(api_uri, "v1/model/validate"),
                                            schema_url=Sys.getenv("DCA_MODEL_INPUT_DOWNLOAD_URL"),
                                            data_type=selected$schema(),
-                           csv_file=inFile$raw()$datapath)
+                                           json_str=toJSON(inFile$data()))
+                           c#sv_file=inFile$raw()$datapath)
+                           #file_name = toJSON(inFile$data))
 
     # validation messages
     validation_res <- validationResult(annotation_status, input$dropdown_template, inFile$data())
@@ -383,6 +386,7 @@ shinyServer(function(input, output, session) {
     if (input$dropdown_template %in% display_names) {
       # make into a csv or table for file-based components already has entityId
       if ("entityId" %in% colnames(submit_data)) {
+        # Convert this to JSON instead and submit
         write.csv(submit_data,
           file = "./manifests/synapse_storage_manifest.csv",
           quote = TRUE, row.names = FALSE, na = ""
@@ -400,7 +404,7 @@ shinyServer(function(input, output, session) {
         # adds entityID, saves it as synapse_storage_manifest.csv, then associates with synapse files
         colnames(files_df) <- c("entityId", "Filename")
         files_entity <- inner_join(submit_data, files_df, by = "Filename")
-
+        # convert this to JSON instead and submit
         write.csv(files_entity,
           file = "./manifests/synapse_storage_manifest.csv",
           quote = TRUE, row.names = FALSE, na = ""
@@ -416,7 +420,9 @@ shinyServer(function(input, output, session) {
                               dataset_id=selected$folder(),
                               input_token=access_token,
                               restrict_rules=FALSE,
-                              csv_file="./manifests/synapse_storage_manifest.csv")
+                              #csv_file="./manifests/synapse_storage_manifest.csv")
+                              json_str = toJSON(inFile$data()),
+                              asset_view=master_fileview)
       
       #> xml_text(xml_child(content(req3), "head/title"))
       #[1] "jsonschema.exceptions.ValidationError: Manifest could not be validated under provided data model. Validation failed with the following errors: [[2, 'Wrong schema', \"'HTAN Parent ID' is a required property\", 'Wrong schema'], [2, 'Wrong schema', \"'Storage Method' is a required property\", 'Wrong schema'], [2, 'Wrong schema', \"'Protocol Link' is a required property\", 'Wrong schema'], [2, 'Wrong schema', \"'Acquisition Method Type' is a required property\", 'Wrong schema'], [2, 'Wrong schema', \"'Collection Days from Index' is a required property\", 'Wrong schema'], [2, 'Wrong schema', \"'Fixative Type' is a required property\", 'Wrong schema'], [2, 'Wrong schema', \"'HTAN Biospecimen ID' is a required property\", 'Wrong schema'], [2, 'Wrong schema', \"'Biospecimen Type' is a required property\", 'Wrong schema'], [2, 'Wrong schema', \"'Processing Days from Index' is a required property\", 'Wrong schema'], [2, 'Wrong schema', \"'Timepoint Label' is a required property\", 'Wrong schema'], [2, 'Wrong schema', \"'Site of Resection or Biopsy' is a required property\", 'Wrong schema']] // Werkzeug Debugger"
@@ -445,6 +451,7 @@ shinyServer(function(input, output, session) {
       }
     } else {
       # if not file-based type template
+      # convert this to JSON and submit
       write.csv(submit_data,
         file = "./manifests/synapse_storage_manifest.csv", quote = TRUE,
         row.names = FALSE, na = ""
@@ -457,7 +464,9 @@ shinyServer(function(input, output, session) {
                                     dataset_id=selected$folder(),
                                     input_token=access_token,
                                     restrict_rules=FALSE,
-                                    csv_file="./manifests/synapse_storage_manifest.csv")
+                                    #csv_file="./manifests/synapse_storage_manifest.csv")
+                                  json_str = toJSON(inFile$data()),
+                                  asset_view=master_fileview)
       manifest_path <- tags$a(href = paste0("synapse.org/#!Synapse:", manifest_id), manifest_id, target = "_blank")
       # if uploaded provided valid synID message
       if (startsWith(manifest_id, "syn") == TRUE) {
