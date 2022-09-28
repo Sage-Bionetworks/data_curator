@@ -22,7 +22,7 @@ manifest:
 
 model:
   input:
-    repo: 'Sage-Bionetworks/data-models' # data model repo url (<repo-owner>/<repo-name>)
+    download_url: 'https://github.com/ncihtan/data-models/blob/main/HTAN.model.jsonld' # data model repo url (<repo-owner>/<repo-name>)
     location: 'data-models/example.model.jsonld' # path to JSON-LD file
     file_type: 'local'
 
