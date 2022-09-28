@@ -10,11 +10,11 @@ def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('-jd', '--jsonld_path',
                         required=True, help='path to model jsonld file')
-    parser.add_argument('-service', '--service_repo', nargs='?',
+    parser.add_argument('-service', '--service_repo',
                         default='', help='GH repo of schematic')
-    parser.add_argument('-schema', '--schema_repo', nargs='?',
+    parser.add_argument('-schema', '--schema_repo',
                         default='', help='GH repo of data model')
-    parser.add_argument('--out_dir', nargs='?',
+    parser.add_argument('--out_dir',
                         default='www', help='directory to save result')
     return parser.parse_args()
 

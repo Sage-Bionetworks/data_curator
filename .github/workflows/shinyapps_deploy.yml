@@ -82,8 +82,6 @@ jobs:
               system(sprintf("echo 'MODEL_REPO=%s' >> $GITHUB_ENV", model_input$repo))
               system(sprintf("echo 'MODEL_PATH=%s' >> $GITHUB_ENV", model_input$location))
             } else if (!is.null(model_input$download_url)) {
-              # Note: this condition temporarily allows to use 'download_url' key to download data models
-              # Remove once the most of users have change to use 'repo' in schematic_config.yml
               url <- model_input$download_url
               path <- model_input$location
               system(sprintf("mkdir -p %s", dirname(path)))
@@ -111,8 +109,8 @@ jobs:
         run: |
           source .venv/bin/activate
           python3 .github/generate_config_json.py \
-            -jd ${{ env.MODEL_PATH }} \
-            -schema ${{ env.MODEL_REPO }} \
+            -jd '${{ env.MODEL_PATH }}' \
+            -schema '${{ env.MODEL_REPO }}' \
             -service 'Sage-Bionetworks/schematic'
 
       - name: zip virtual env
