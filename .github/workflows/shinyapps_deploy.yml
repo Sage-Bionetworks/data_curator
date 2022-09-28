@@ -78,17 +78,17 @@ jobs:
             if (is.null(model_input$location) || !grepl(jd_pattern, model_input$location)) {
               stop("ValueError: No valid 'location' value found in 'schematic_config.yml' \u274C")
             }
-            # Note: this condition is used for grace period to temporarily allow 'download_url' to download data-models
-            # Remove once the users change to use 'repo' in schematic_config.yml
-            if (!is.null(model_input$download_url)) {
+            if (!is.null(model_input$repo) && grepl(repo_pattern, model_input$repo)) {
+              system(sprintf("echo 'MODEL_REPO=%s' >> $GITHUB_ENV", model_input$repo))
+              system(sprintf("echo 'MODEL_PATH=%s' >> $GITHUB_ENV", model_input$location))
+            } else if (!is.null(model_input$download_url)) {
+              # Note: this condition temporarily allows to use 'download_url' key to download data models
+              # Remove once the most of users have change to use 'repo' in schematic_config.yml
               url <- model_input$download_url
               path <- model_input$location
               system(sprintf("mkdir -p %s", dirname(path)))
               system(sprintf("wget %s -O %s", url, path))
               system(sprintf("echo 'MODEL_REPO=%s' >> $GITHUB_ENV", ""))
-              system(sprintf("echo 'MODEL_PATH=%s' >> $GITHUB_ENV", model_input$location))
-            } else if (!is.null(model_input$repo) && grepl(repo_pattern, model_input$repo)) {
-              system(sprintf("echo 'MODEL_REPO=%s' >> $GITHUB_ENV", model_input$repo))
               system(sprintf("echo 'MODEL_PATH=%s' >> $GITHUB_ENV", model_input$location))
             } else {
               stop("ValueError: No valid 'repo' value found in 'schematic_config.yml' \u274C")
@@ -102,7 +102,7 @@ jobs:
 
       - name: Clone Data Model
         shell: bash
-        if: ${{ env.MODEL_PATH != '' }}
+        if: ${{ env.MODEL_REPO != '' }}
         run: |
           git clone https://github.com/${{ env.MODEL_REPO }}.git
 
