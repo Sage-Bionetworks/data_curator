@@ -66,53 +66,23 @@ jobs:
             pip3 install dist/schematicpy-1.0.0-py3-none-any.whl
           fi
 
-      - name: Set Configurations
+      - name: Set Configurations for Schematic
         shell: bash
         run: |
-          R -e '
-            # retrieve data model repo information
-            config <- yaml::yaml.load_file("schematic_config.yml")
-            repo_pattern <- "^[-_.A-z0-9]+\\/[-_.A-z0-9]+$"
-            jd_pattern <- "^[-_.A-z0-9]+\\/*[-_.A-z0-9]+.jsonld$"
-            model_input <- config$model$input
-            if (is.null(model_input$location) || !grepl(jd_pattern, model_input$location)) {
-              stop("ValueError: No valid 'location' value found in 'schematic_config.yml' \u274C")
-            }
-            if (!is.null(model_input$download_url)) {
-              # keep the option to enable 'download_url' config
-              url <- model_input$download_url
-              path <- model_input$location
-              system(sprintf("mkdir -p %s", dirname(path)))
-              system(sprintf("wget %s -O %s", url, path))
-              system(sprintf("echo 'MODEL_REPO=%s' >> $GITHUB_ENV", ""))
-              system(sprintf("echo 'MODEL_PATH=%s' >> $GITHUB_ENV", model_input$location))
-            } else if (!is.null(model_input$repo) && grepl(repo_pattern, model_input$repo)) {
-              system(sprintf("echo 'MODEL_REPO=%s' >> $GITHUB_ENV", model_input$repo))
-              system(sprintf("echo 'MODEL_PATH=%s' >> $GITHUB_ENV", model_input$location))
-            } else {
-              stop("ValueError: No valid 'repo' value found in 'schematic_config.yml' \u274C")
-            }
-          '
           # write out configuration files using github secrets
           echo "${{ secrets.SCHEMATIC_SYNAPSE_CONFIG }}" > .synapseConfig
           echo "${{ secrets.SCHEMATIC_SERVICE_ACCT_CREDS }}" > schematic_service_account_creds.json
           echo "${{ secrets.SCHEMATIC_CREDS_PATH }}" > credentials.json
           echo "${{ secrets.SCHEMATIC_TOKEN_PICKLE }}" | base64 -d > token.pickle
 
-      - name: Clone Data Model
-        shell: bash
-        if: ${{ env.MODEL_REPO != '' }}
-        run: |
-          git clone https://github.com/${{ env.MODEL_REPO }}.git
-
-      - name: Create config.json
+      - name: Set Configurations for Data Model
         shell: bash
         run: |
           source .venv/bin/activate
-          python3 .github/generate_config_json.py \
-            -jd '${{ env.MODEL_PATH }}' \
-            -schema '${{ env.MODEL_REPO }}' \
-            -service 'Sage-Bionetworks/schematic'
+          # download the data models and create config.json
+          python3 config_schema.py \
+            -c schematic_config.yml \
+            --service_repo 'Sage-Bionetworks/schematic'
 
       - name: zip virtual env
         shell: bash
