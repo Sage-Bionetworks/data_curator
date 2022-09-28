@@ -55,7 +55,7 @@ def download_schema(config_path):
         location = config["location"]
     else:
         raise ValueError(
-            f'No valid "location" value found in"{config_path}" \u274C')
+            f'No valid "location" value found in "{config_path}" \u274C')
 
     repo = ''
     version = ''
@@ -92,7 +92,6 @@ def generate_schema_config(schema_path):
     # get display names for required data types
     mm_graph = sg.se.get_nx_schema()
     display_names = sg.get_nodes_display_names(components, mm_graph)
-
     # save display_name, schema_name, assay type to list
     for index, component in enumerate(components):
         # get component's dependencies

@@ -80,7 +80,7 @@ jobs:
         run: |
           source .venv/bin/activate
           # download the data models and create config.json
-          python3 config_schema.py \
+          python3 .github/config_schema.py \
             -c schematic_config.yml \
             --service_repo 'Sage-Bionetworks/schematic'
 
