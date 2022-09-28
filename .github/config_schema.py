@@ -71,7 +71,7 @@ def download_schema(config_path):
             repo = config["repo"]
             os.system(
                 f'git clone https://github.com/{repo}.git --depth 1')
-    elif config.get('download_url'):
+    elif config.get('download_url'):  # to let users keep using 'download_url' for now
         url = config.get("download_url")
         os.system(f'mkdir -p {os.path.dirname(location)}')
         os.system(f'wget {url} -O {location}')
