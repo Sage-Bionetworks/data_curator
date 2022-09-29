@@ -9,6 +9,7 @@ get_dataset_metadata <- function(syn.store, datasets, ncores = 1, access_token, 
   # remove codes to download all manifests
   # get data for all manifests within the specified datasets
   #file_view <- syn.store$storageFileviewTable %>%
+  # either use branch that returns JSON or wait until it's available in devel
   file_view <- get_asset_view_table(url = file.path(api_uri, "v1/storage/assets/tables"), input_token = access_token,
                                     asset_view=fileview)
   file_view <- file_view %>%
@@ -16,6 +17,7 @@ get_dataset_metadata <- function(syn.store, datasets, ncores = 1, access_token, 
 
   manifest_info <- list()
   modified_user <- list()
+  manifest_dfs <- list()
   # return empty data frame if no manifest or no component in the manifest
   metadata <- data.frame()
 
@@ -28,15 +30,19 @@ get_dataset_metadata <- function(syn.store, datasets, ncores = 1, access_token, 
       for (id in manifest_ids) {
         #info <- syn$get(id)
         info <- datacurator::synapse_get(id = id, auth = access_token)
-        manifest <- datacurator::manifest_download(
+        manifest <- manifest_download(
           url = file.path(api_uri, "v1/manifest/download"),
           input_token = access_token,
           asset_view = fileview,
-          dataset_id = info$parentId
+          dataset_id = info$parentId,
+          as_json = TRUE
         )
-        tmp_man <- tempfile()
-        info$Path <- tmp_man
-        write_csv(manifest, tmp_man)
+        
+        # refactor this not to write files but save in a object
+        #tmp_man <- tempfile()
+        info$Path <- NA_character_
+        #write_csv(manifest, tmp_man)
+        manifest_dfs[[id]] <<- manifest
         manifest_info <<- append(manifest_info, list(unlist(info)))
         #user <- syn$getUserProfile(info["properties"]["modifiedBy"])["userName"]
         user <- datacurator::synapse_user_profile(auth=access_token)[["userName"]]
@@ -46,19 +52,21 @@ get_dataset_metadata <- function(syn.store, datasets, ncores = 1, access_token, 
       # manifest_info <- bind_rows(manifest_info)
     }
   })
-
+  
   if (length(manifest_info) > 0) {
     metadata <- parallel::mclapply(seq_along(manifest_info), function(i) {
       info <- manifest_info[[i]]
       # extract manifest essential information for dashboard
       manifest_path <- info["Path"]
-      manifest_df <- data.table::fread(manifest_path)
+      # See above - don't read from file, read from object
+      #manifest_df <- data.table::fread(manifest_path)
+      manifest_df <- manifest_dfs[[i]]
       # keep all manifests used for validation, even if it has invalid component value
       # if manifest doesn't have "Component" column, or empty, return NA for component
       manifest_component <- ifelse("Component" %in% colnames(manifest_df) & nrow(manifest_df) > 0,
         manifest_df$Component[1], NA_character_
       )
-      metadata <- data.frame(
+      metadata <- tibble(
         SynapseID = info["id"],
         Component = manifest_component,
         CreatedOn = as.Date(info["createdOn"]),
@@ -66,7 +74,8 @@ get_dataset_metadata <- function(syn.store, datasets, ncores = 1, access_token, 
         ModifiedUser = paste0("@", modified_user[[i]]),
         Path = manifest_path,
         Folder = names(datasets)[which(datasets == info["parentId"])],
-        FolderSynId = info["parentId"]
+        FolderSynId = info["parentId"],
+        manifest = manifest_df
       )
     }, mc.cores = ncores) %>% bind_rows()
   }
@@ -86,7 +95,6 @@ validate_metadata <- function(metadata, project.scope) {
   if (nrow(metadata) == 0) {
     return(metadata)
   }
-
   lapply(1:nrow(metadata), function(i) {
     manifest <- metadata[i, ]
     # validate manifest, if no error, output is list()
@@ -94,8 +102,10 @@ validate_metadata <- function(metadata, project.scope) {
     # "LungCancerTier3", "BreastCancerTier3", "ScRNA-seqAssay", "MolecularTest", "NaN", "" ...
     validation_res <- manifest_validate(url=file.path(api_uri, "v1/model/validate"),
                                         data_type=manifest$Component,
-                                        schema_url = schematic_config$model$input$download_url,
-                                        csv_file=manifest$Path)
+                                        schema_url = Sys.getenv("DCA_MODEL_INPUT_DOWNLOAD_URL"),
+                                        json_str = jsonlite::toJSON(manifest$manifest))
+                                        #csv_file=manifest$Path)
+    # Wait until you can pass a JSON to manifest_validate
     # clean validation res from schematicpy
     clean_res <- validationResult(validation_res, manifest$Component, dashboard = TRUE)
     data.frame(
@@ -137,7 +147,7 @@ get_schema_nodes <- function(schema, url=file.path(api_uri, "v1/model/component-
 #'
 #' @param metadata output from \code{get_dataset_metadata}.
 #' @return data frame of nodes contains source and target used for tree plot
-get_metadata_nodes <- function(metadata, ncores = 1, schema_url=schematic_config$model$input$download_url, url = file.path(api_uri, "v1/model/component-requirements")) {
+get_metadata_nodes <- function(metadata, ncores = 1, schema_url=Sys.getenv("DCA_MODEL_INPUT_DOWNLOAD_URL"), url = file.path(api_uri, "v1/model/component-requirements")) {
   if (nrow(metadata) == 0) {
     return(data.frame(from = NA, to = NA, folder = NA, folderSynId = NA, nMiss = NA))
   } else {
