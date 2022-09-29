@@ -7,12 +7,12 @@
 #' @returns a csv of the manifest
 #' @export
 manifest_download <- function(url="http://localhost:3001/v1/manifest/download",
-                              input_token, asset_view, dataset_id, return_type="json"){
+                              input_token, asset_view, dataset_id, as_json=TRUE){
   req <- httr::GET(url,
                    query = list(
                      asset_view = asset_view,
                      dataset_id = dataset_id,
-                     return_type = return_type,
+                     as_json = as_json,
                      input_token = input_token
                    ))
   manifest <- httr::content(req, as = "text")
