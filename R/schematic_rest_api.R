@@ -1,4 +1,4 @@
-#' Download an existing manifest
+#' @description Download an existing manifest
 #' @param url URI of API endpoint
 #' @param input_token Synapse PAT
 #' @param asset_view ID of view listing all project data assets
@@ -7,12 +7,12 @@
 #' @returns a csv of the manifest
 #' @export
 manifest_download <- function(url="http://localhost:3001/v1/manifest/download",
-                              input_token, asset_view, dataset_id, as_json=TRUE){
+                              input_token, asset_view, dataset_id, return_type="json"){
   req <- httr::GET(url,
                    query = list(
                      asset_view = asset_view,
                      dataset_id = dataset_id,
-                     as_json = as_json,
+                     return_type = return_type,
                      input_token = input_token
                    ))
   manifest <- httr::content(req, as = "text")
@@ -83,12 +83,14 @@ manifest_populate <- function(url="http://localhost:3001/v1/manifest/populate",
 #' @export
 manifest_validate <- function(url="http://localhost:3001/v1/model/validate",
                               schema_url="https://raw.githubusercontent.com/ncihtan/data-models/main/HTAN.model.jsonld", #nolint
-                              data_type, csv_file) {
+                              data_type, json_str) {
   req <- httr::POST(url,
                      query=list(
                        schema_url=schema_url,
-                       data_type=data_type),
-                     body=list(csv_file=httr::upload_file(csv_file))
+                       data_type=data_type,
+                       json_str=json_str)
+                     #body=list(csv_file=httr::upload_file(csv_file))
+                    #body=list(file_name=file_name)
   )
   
   if (httr::http_status(req)$category == "Server error") return(list(list(), list()))
@@ -110,7 +112,7 @@ manifest_validate <- function(url="http://localhost:3001/v1/model/validate",
 #' @export
 model_submit <- function(url="http://localhost:3001/v1/model/submit",
                          schema_url="https://raw.githubusercontent.com/ncihtan/data-models/main/HTAN.model.jsonld", #notlint
-                         data_type, dataset_id, restrict_rules=FALSE, input_token, csv_file) {
+                         data_type, dataset_id, restrict_rules=FALSE, input_token, json_str, asset_view) {
   req <- httr::POST(url,
                     #add_headers(Authorization=paste0("Bearer ", pat)),
                     query=list(
@@ -118,8 +120,11 @@ model_submit <- function(url="http://localhost:3001/v1/model/submit",
                       data_type=data_type,
                       dataset_id=dataset_id,
                       input_token=input_token,
-                      restrict_rules=restrict_rules),
-                    body=list(csv_file=httr::upload_file(csv_file))
+                      restrict_rules=restrict_rules,
+                      json_str=json_str,
+                      asset_view=asset_view),
+                    #body=list(file_name=httr::upload_file(file_name))
+                    #body=list(file_name=file_name)
   )
   
   manifest_id <- httr::content(req)
@@ -239,17 +244,17 @@ storage_dataset_files <- function(url="http://localhost:3001/v1/storage/dataset/
 #' @param asset_view Synapse ID of asset view
 #' @export
 get_asset_view_table <- function(url="http://localhost:3001/v1/storage/assets/tables",
-                                 input_token, asset_view, as_json=TRUE) {
+                                 input_token, asset_view, return_type="json") {
   
   req <- httr::GET(url,
                    query=list(
                      asset_view=asset_view,
                      input_token=input_token,
-                     as_json=as_json))
+                     return_type=return_type))
   
   if (httr::http_status(req)$category == "Success") {
-    if (isTRUE(as_json)) {
-      return(dplyr::bind_rows(httr::content(req)))
+    if (return_type=="json") {
+      return(list2DF(fromJSON(httr::content(req))))
     } else {
     csv <- readr::read_csv(httr::content(req))
     return(csv)
