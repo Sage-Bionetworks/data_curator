@@ -31,7 +31,6 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y pip python3.8-venv libcurl4-openssl-dev
       - uses: actions/checkout@v2
-
       - uses: r-lib/actions/setup-pandoc@v1
 
       - name: Create and Activate Python Virtual Environment
@@ -50,7 +49,7 @@ jobs:
         run: |
           # has to activate each bash step
           source .venv/bin/activate
-          # use 'poetry' to install schematic dev schematic 
+          # use 'poetry' to install schematic dev schematic
           # If commit is tagged for release or in main branch, install schematic from pypi
           if [[ $GITHUB_REF_NAME == v*.*.* ]] || [[ $GITHUB_REF_NAME == main ]]; then
             echo Installing pypi version of schematic
@@ -68,36 +67,25 @@ jobs:
             pip3 install dist/schematicpy-1.0.0-py3-none-any.whl
           fi
 
-      - name: Set Configurations
+      - name: Set Configurations for Schematic
         shell: bash
         run: |
-          # retrieve data model repo information
-          R -e '
-            config <- yaml::yaml.load_file("schematic_config.yml");
-            system(sprintf("echo 'MODEL_REPO=%s' >> $GITHUB_ENV", config$model$input$repo));
-            system(sprintf("echo 'MODEL_PATH=%s' >> $GITHUB_ENV", config$model$input$location));
-          '
-  
           # write out configuration files using github secrets
           echo "${{ secrets.SCHEMATIC_SYNAPSE_CONFIG }}" > .synapseConfig
           echo "${{ secrets.SCHEMATIC_SERVICE_ACCT_CREDS }}" > schematic_service_account_creds.json
           echo "${{ secrets.SCHEMATIC_CREDS_PATH }}" > credentials.json
           echo "${{ secrets.SCHEMATIC_TOKEN_PICKLE }}" | base64 -d > token.pickle
 
-      - name: Clone Data Model
-        shell: bash
-        run: |
-          git clone https://github.com/${{ env.MODEL_REPO }}.git
-
-      - name: Create config.json
+      - name: Set Configurations for Data Model
         shell: bash
         run: |
           source .venv/bin/activate
-          python3 .github/generate_config_json.py \
-            -jd ${{ env.MODEL_PATH }} \
-            -schema ${{ env.MODEL_REPO }} \
-            -service 'Sage-Bionetworks/schematic'
-  
+          # download the data models and create config.json
+          python3 .github/config_schema.py \
+            -c schematic_config.yml \
+            --service_repo 'Sage-Bionetworks/schematic' \
+            --overwrite
+
       - name: zip virtual env
         shell: bash
         # ShinyApps has a limit of 7000 files, far exceeded by the many Python dependencies
@@ -141,4 +129,3 @@ jobs:
           )
           rsconnect::setAccountInfo(rsConnectUser, rsConnectToken, rsConnectSecret)
           rsconnect::deployApp(appName = appName)
-

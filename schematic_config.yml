@@ -1,9 +1,9 @@
 # Do not change the 'definitions' section unless you know what you're doing
 definitions:
-  synapse_config: ".synapseConfig"
-  creds_path: "credentials.json"
-  token_pickle: "token.pickle"
-  service_acct_creds: "schematic_service_account_creds.json"
+  synapse_config: '.synapseConfig'
+  creds_path: 'credentials.json'
+  token_pickle: 'token.pickle'
+  service_acct_creds: 'schematic_service_account_creds.json'
 
 synapse:
   master_fileview: 'syn20446927'
@@ -16,13 +16,15 @@ manifest:
   # if making many manifests, just include name prefix
   title: 'example'
   # to make all manifests enter only 'all manifests'
-  data_type: 
+  data_type:
     - 'Biospecimen'
     - 'Patient'
 
 model:
   input:
-    repo: 'ncihtan/data-models' # data model repo url (<repo-owner>/<repo-name>)
+    # if both 'download_url' and 'repo' present, `repo` will be used
+    download_url: 'https://raw.githubusercontent.com/Sage-Bionetworks/data-models/main/example.model.jsonld' # url to download JSON-LD data model
+    repo: 'ncihtan/data-models' # data model repo url (<repo-owner>/<repo-name>/<version/branch>), version or branch is optional
     location: 'data-models/HTAN.model.jsonld' # path to JSON-LD file
     file_type: 'local'
 

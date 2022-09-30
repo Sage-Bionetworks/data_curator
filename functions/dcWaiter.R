@@ -31,16 +31,6 @@ dcWaiter <- function(stage = c("show", "update", "hide"),
         ),
         color = "#424874"
       )
-      # } else if (!isLogin) {
-      #   # when user is not login
-      #   waiter_update(html = tagList(
-      #     img(src = "img/synapse_logo.png", height = "120px"),
-      #     h3("Looks like you're not logged in!"),
-      #     span("Please ",
-      #       a("login", href = "https://www.synapse.org/#!LoginPlace:0", target = "_blank"),
-      #       " to Synapse, then refresh this page."
-      #     )
-      #   ))
     } else if (!isCertified) {
       # when user is not certified synapse user
       waiter_update(html = tagList(
@@ -59,7 +49,7 @@ dcWaiter <- function(stage = c("show", "update", "hide"),
       # when user is not certified synapse user
       waiter_update(html = tagList(
         img(src = "img/synapse_logo.png", height = "120px"),
-        h3("Fileview Access Denied!"),
+        h3("Fileview/Project Access Denied!"),
         span("You may not have sufficient permissions for curation.
          Please contact your team and project administrators.")
       ))
