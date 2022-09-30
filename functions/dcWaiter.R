@@ -24,7 +24,6 @@ dcWaiter <- function(stage = c("show", "update", "hide"), landing = FALSE, userN
 
   # first loading screen of app
   if (landing) {
-  
     if (stage == "show") {
       waiter_show_on_load(
         html = tagList(
@@ -33,24 +32,15 @@ dcWaiter <- function(stage = c("show", "update", "hide"), landing = FALSE, userN
         ),
         color = "#424874"
       )
-    # } else if (!isLogin) {
-    #   # when user is not login
-    #   waiter_update(html = tagList(
-    #     img(src = "img/synapse_logo.png", height = "120px"),
-    #     h3("Looks like you're not logged in!"), 
-    #     span("Please ", 
-    #       a("login", href = "https://www.synapse.org/#!LoginPlace:0", target = "_blank"),
-    #       " to Synapse, then refresh this page."
-    #     )
-    #   ))
     } else if (!isCertified) {
       # when user is not certified synapse user
       waiter_update(html = tagList(
         img(src = "img/synapse_logo.png", height = "120px"),
         h3("Looks like you're not a synapse certified user!"),
-        span("Please follow the ", 
-          a("instruction", 
-            href = "https://help.synapse.org/docs/User-Account-Tiers.2007072795.html#UserAccountTiers-CertifiedUsers", 
+        span(
+          "Please follow the ",
+          a("instruction",
+            href = "https://help.synapse.org/docs/User-Account-Tiers.2007072795.html#UserAccountTiers-CertifiedUsers",
             target = "_blank"
           ),
           " to become a certified user, then refresh this page."
@@ -60,7 +50,7 @@ dcWaiter <- function(stage = c("show", "update", "hide"), landing = FALSE, userN
       # when user is not certified synapse user
       waiter_update(html = tagList(
         img(src = "img/synapse_logo.png", height = "120px"),
-        h3("Fileview Access Denied!"),
+        h3("Fileview/Project Access Denied!"),
         span("You may not have sufficient permissions for curation.
          Please contact your team and project administrators.")
       ))
@@ -73,9 +63,8 @@ dcWaiter <- function(stage = c("show", "update", "hide"), landing = FALSE, userN
       Sys.sleep(sleep)
       waiter_hide()
     }
-
   } else {
-  
+
     # other loading screens
     if (stage == "show") {
       waiter_show(

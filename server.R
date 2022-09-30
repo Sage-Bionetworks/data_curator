@@ -30,13 +30,13 @@ shinyServer(function(input, output, session) {
   # import module that contains SynapseStorage class
   synapse_driver <- import("schematic.store.synapse")$SynapseStorage
   # read config in
-  config <- fromJSON("www/config.json")
+  config <- config_file
 
   # mapping from display name to schema name
   template_namedList <- config$manifest_schemas$schema_name
   names(template_namedList) <- config$manifest_schemas$display_name
 
-  synStore_obj <- NULL # gets list of projects they have access to
+  syn_store <- NULL # gets list of projects they have access to
   project_synID <- NULL # selected project synapse ID
   folder_synID <- reactiveVal("") # selected foler synapse ID
   template_schema_name <- reactiveVal(NULL) # selected template schema name
@@ -73,16 +73,22 @@ shinyServer(function(input, output, session) {
 
     syn_login(authToken = access_token, rememberMe = FALSE)
 
-    # updating syn storage
-    tryCatch(synStore_obj <<- synapse_driver(access_token = access_token), error = function(e) NULL)
+    datatype_list$projects <<- tryCatch(
+      {
+        # get syn storage
+        syn_store <<- synapse_driver(access_token = access_token)
+        # get user's common projects
+        list2Vector(syn_store$getStorageProjects())
+      },
+      error = function(e) {
+        message(e$message)
+        return(NULL)
+      }
+    )
 
-    if (is.null(synStore_obj)) {
-      message("'synapse_driver' fails, run 'synapse_driver' to see detailed error")
+    if (is.null(datatype_list$projects) || length(datatype_list$projects) == 0) {
       dcWaiter("update", landing = TRUE, isPermission = FALSE)
     } else {
-      projects_list <- synapse_driver$getStorageProjects(synStore_obj)
-      datatype_list$projects <<- list2Vector(projects_list)
-
       # updates project dropdown
       lapply(c("header_dropdown_", "dropdown_"), function(x) {
         lapply(c(1, 3), function(i) {
@@ -155,7 +161,7 @@ shinyServer(function(input, output, session) {
       projectID <- datatype_list$projects[[input[[paste0(x, "project")]]]]
 
       # gets folders per project
-      folder_list <- synapse_driver$getStorageDatasetsInProject(synStore_obj, projectID) %>% list2Vector()
+      folder_list <- syn_store$getStorageDatasetsInProject(projectID) %>% list2Vector()
 
       # updates foldernames
       updateSelectInput(session, paste0(x, "folder"), choices = sort(names(folder_list)))
@@ -192,10 +198,7 @@ shinyServer(function(input, output, session) {
     if (input$tabs == "tab_template") {
       dcWaiter("show", msg = paste0("Getting files in ", input$dropdown_folder, "..."))
       # get file list in selected folder
-      file_list <- synapse_driver$getFilesInStorageDataset(
-        synStore_obj,
-        folder_synID()
-      )
+      file_list <- syn_store$getFilesInStorageDataset(folder_synID())
       datatype_list$files <<- list2Vector(file_list)
       dcWaiter("hide")
     }
@@ -232,8 +235,9 @@ shinyServer(function(input, output, session) {
     dcWaiter("show", msg = "Generating link...")
 
     manifest_url <-
-      metadata_model$getModelManifest(paste0(config$community, " ", input$dropdown_template),
-        template_schema_name(),
+      metadata_model$getModelManifest(
+        title = paste0(config$community, " ", input$dropdown_template),
+        rootNode = template_schema_name(),
         filenames = switch((template_type == "file") + 1,
           NULL,
           as.list(names(datatype_list$files))
@@ -283,12 +287,15 @@ shinyServer(function(input, output, session) {
     annotation_status <-
       tryCatch(
         metadata_model$validateModelManifest(
-          inFile$raw()$datapath,
-          template_schema_name(),
+          manifestPath = inFile$raw()$datapath,
+          rootNode = template_schema_name(),
           restrict_rules = TRUE, # set true to disable great expectation
           project_scope = list(project_synID)
         ),
-        error = function(e) NULL
+        error = function(e) {
+          message(e$message)
+          return(NULL)
+        }
       )
 
     # validation messages
@@ -331,10 +338,11 @@ shinyServer(function(input, output, session) {
     # loading screen for Google link generation
     dcWaiter("show", msg = "Generating link...")
 
-    filled_manifest <- metadata_model$populateModelManifest(paste0(
-      config$community,
-      " ", input$dropdown_template
-    ), inFile$raw()$datapath, template_schema_name())
+    filled_manifest <- metadata_model$populateModelManifest(
+      title = paste0(config$community, " ", input$dropdown_template),
+      manifestPath = inFile$raw()$datapath,
+      rootNode = template_schema_name()
+    )
 
     # rerender and change button to link
     output$val_gsheet <- renderUI({
@@ -369,7 +377,7 @@ shinyServer(function(input, output, session) {
           quote = TRUE, row.names = FALSE, na = ""
         )
       } else {
-        file_list <- synapse_driver$getFilesInStorageDataset(synStore_obj, folder_synID())
+        file_list <- syn_store$getFilesInStorageDataset(folder_synID())
         datatype_list$files <<- list2Vector(file_list)
 
         # better filename checking is needed
@@ -386,11 +394,12 @@ shinyServer(function(input, output, session) {
       }
 
       # associates metadata with data and returns manifest id
-      manifest_id <- synapse_driver$associateMetadataWithFiles(
-        synStore_obj,
-        "./tmp/synapse_storage_manifest.csv",
-        folder_synID(),
-        manifest_record_type = "table"
+      manifest_id <- syn_store$associateMetadataWithFiles(
+        schemaGenerator = schema_generator,
+        metadataManifestPath = "./tmp/synapse_storage_manifest.csv",
+        datasetId = folder_synID(),
+        manifest_record_type = "table",
+        restrict_manifest = FALSE
       )
       manifest_path <- tags$a(href = paste0("https://www.synapse.org/#!Synapse:", manifest_id), manifest_id, target = "_blank")
 
@@ -421,11 +430,12 @@ shinyServer(function(input, output, session) {
       )
 
       # associates metadata with data and returns manifest id
-      manifest_id <- synapse_driver$associateMetadataWithFiles(
-        synStore_obj,
-        "./tmp/synapse_storage_manifest.csv",
-        folder_synID(),
-        manifest_record_type = "table"
+      manifest_id <- syn_store$associateMetadataWithFiles(
+        schemaGenerator = schema_generator,
+        metadataManifestPath = "./tmp/synapse_storage_manifest.csv",
+        datasetId = folder_synID(),
+        manifest_record_type = "table",
+        restrict_manifest = FALSE
       )
       manifest_path <- tags$a(href = paste0("https://www.synapse.org/#!Synapse:", manifest_id), manifest_id, target = "_blank")
 

@@ -3,13 +3,11 @@
 
 name: shiny-deploy
 
-# TODO: remove `shiny-server-develop` when we use shinyapps.io as production site
-# also consider to change shiny-server-main to main since we will not host in shinyServer
 on:
   push:
     branches:
       - main
-      - develop
+      - develop*
     tags:
       - v*.*.*
     paths-ignore:
@@ -24,16 +22,14 @@ jobs:
     container: rocker/rstudio:4.1.2
     env:
       # This should not be necessary for installing from public repo's however remotes::install_github() fails without it.
-      GITHUB_PAT: ${{ secrets.REPO_PAT }}
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
       - name: Install System Dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y pip python3.8-venv libcurl4-openssl-dev
-
       - uses: actions/checkout@v2
-
       - uses: r-lib/actions/setup-pandoc@v1
 
       - name: Create and Activate Python Virtual Environment
@@ -52,30 +48,42 @@ jobs:
         run: |
           # has to activate each bash step
           source .venv/bin/activate
-          # use 'poetry' to install schematic from the develop branch 
-          pip3 install poetry
-          git clone --single-branch --branch develop https://github.com/Sage-Bionetworks/schematic.git
-          cd schematic
-          poetry build
-          pip3 install dist/schematicpy-1.0.0-py3-none-any.whl
+          # use 'poetry' to install schematic dev schematic
+          # If commit is tagged for release or in main branch, install schematic from pypi
+          if [[ $GITHUB_REF_NAME == v*.*.* ]] || [[ $GITHUB_REF_NAME == main ]]; then
+            echo Installing pypi version of schematic
+            git clone --single-branch --branch main https://github.com/Sage-Bionetworks/schematic.git
+            cp schematic_config.yml schematic/config.yml
+            cd schematic
+            pip3 install schematicpy
+          else
+            pip3 install poetry
+            echo Installing develop branch of schematic from github
+            git clone --single-branch --branch develop https://github.com/Sage-Bionetworks/schematic.git
+            cp schematic_config.yml schematic/config.yml
+            cd schematic
+            poetry build
+            pip3 install dist/schematicpy-1.0.0-py3-none-any.whl
+          fi
 
       - name: Set Configurations for Schematic
         shell: bash
         run: |
-          source .venv/bin/activate
-          # download data model to the correct location
-          R -e '
-            config <- yaml::yaml.load_file("schematic_config.yml");
-            url  <- config$model$input$download_url;
-            path <- config$model$input$location;
-            system(sprintf("mkdir -p %s", dirname(path)));
-            system(sprintf("wget %s -O %s", url, path));
-          '
           # write out configuration files using github secrets
           echo "${{ secrets.SCHEMATIC_SYNAPSE_CONFIG }}" > .synapseConfig
           echo "${{ secrets.SCHEMATIC_SERVICE_ACCT_CREDS }}" > schematic_service_account_creds.json
           echo "${{ secrets.SCHEMATIC_CREDS_PATH }}" > credentials.json
           echo "${{ secrets.SCHEMATIC_TOKEN_PICKLE }}" | base64 -d > token.pickle
+
+      - name: Set Configurations for Data Model
+        shell: bash
+        run: |
+          source .venv/bin/activate
+          # download the data models and create config.json
+          python3 .github/config_schema.py \
+            -c schematic_config.yml \
+            --service_repo 'Sage-Bionetworks/schematic' \
+            --overwrite
 
       - name: zip virtual env
         shell: bash
@@ -89,23 +97,28 @@ jobs:
         shell: Rscript {0}
         run: |
           # if there is a tag, 'refName' will be tag name
-          refName <- Sys.getenv("GITHUB_REF_NAME")
           repo <- Sys.getenv("GITHUB_REPOSITORY")
           appName <- strsplit(repo, "/")[[1]][2]
-          # if tag is v*.*.*, deploy to prod, otherwise to staging
-          if (!grepl("v[0-9]+.[0-9]+.[0-9]+", refName)) {
+          refName <- Sys.getenv("GITHUB_REF_NAME")
+          # if tag is v*.*.*, deploy to prod, if main to staging, otherwise to test
+          if (grepl("v[0-9]+.[0-9]+.[0-9]+", refName)) {
+            message("Deploying release version of app")
+          } else if (refName == "main") {
             appName <- paste(appName, "staging", sep = "-")
+            message("Deploying staging version of app")
+          } else {
+            appName <- paste(appName, "testing1", sep = "-")
+            message("Deploying testing version of app")
           }
+          message(sprintf("Deploying to %s instance.", appName))
           rsConnectUser <- "${{ secrets.RSCONNECT_USER }}"
           rsConnectToken <- "${{ secrets.RSCONNECT_TOKEN }}"
           rsConnectSecret <- "${{ secrets.RSCONNECT_SECRET }}"
-
           # create config file
           config <- "CLIENT_ID: ${{ secrets.OAUTH_CLIENT_ID }}"
           config <- c(config, "CLIENT_SECRET: ${{ secrets.OAUTH_CLIENT_SECRET }}")
           appUrl <- sprintf("https://%s.shinyapps.io/%s", rsConnectUser, appName)
           config <- c(config, sprintf("APP_URL: %s", appUrl))
-
           configFileConn <- file("oauth_config.yml")
           tryCatch(
             writeLines(config, configFileConn),
