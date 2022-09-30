@@ -21,3 +21,5 @@ schematic_config.yml
 .project
 .settings/**
 .venv
+# tmp not ignore config.json
+!www/config.json

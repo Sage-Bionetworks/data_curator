@@ -82,7 +82,8 @@ jobs:
           # download the data models and create config.json
           python3 .github/config_schema.py \
             -c schematic_config.yml \
-            --service_repo 'Sage-Bionetworks/schematic'
+            --service_repo 'Sage-Bionetworks/schematic' \
+            --overwrite
 
       - name: zip virtual env
         shell: bash

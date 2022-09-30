@@ -16,6 +16,8 @@ def get_args():
                         help='repo path to service')
     parser.add_argument('-o', '--out_dir', default='www', metavar="",
                         help='directory to save result')
+    parser.add_argument('--overwrite', action='store_true', default=False,
+                        help='whether to overwrite the existing config.json')
     return parser.parse_args()
 
 
@@ -109,18 +111,20 @@ def main():
     args = get_args()
     # download schema and retrieve schema info
     s_repo, s_vesion, s_path = download_schema(args.config_path)
-    # get versions for both service and schema
-    service_version = _get_version(args.service_repo)
-    schema_version = s_vesion if s_vesion else _get_version(s_repo)
-    # generate schema configuration based on *.model.jsonld
-    schemas_config = generate_schema_config(s_path)
-    # write out the config.json including versions
-    config = {'manifest_schemas': schemas_config,
-              'service_version': service_version,
-              'schema_version': schema_version
-              }
-    with open(f'{args.out_dir}/config.json', 'w') as o:
-        o.write(json.dumps(config, indent=2, separators=(',', ': ')))
+
+    if args.overwrite:
+        # get versions for both service and schema
+        service_version = _get_version(args.service_repo)
+        schema_version = s_vesion if s_vesion else _get_version(s_repo)
+        # generate schema configuration based on *.model.jsonld
+        schemas_config = generate_schema_config(s_path)
+        # write out the config.json including versions
+        config = {'manifest_schemas': schemas_config,
+                  'service_version': service_version,
+                  'schema_version': schema_version
+                  }
+        with open(f'{args.out_dir}/config.json', 'w') as o:
+            o.write(json.dumps(config, indent=2, separators=(',', ': ')))
 
 
 if __name__ == '__main__':
