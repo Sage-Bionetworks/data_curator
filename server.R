@@ -161,11 +161,11 @@ shinyServer(function(input, output, session) {
       projectID <- datatype_list$projects[[input[[paste0(x, "project")]]]]
 
       # gets folders per project
-      folder_list <- syn_store$getStorageDatasetsInProject(projectID)
-      if (length(folder_list) > 0) folder_list <- sort(names(list2Vector(folder_list)))
+      folder_list <- syn_store$getStorageDatasetsInProject(projectID) %>% list2Vector()
+      folder_names <- ifelse(length(folder_list) > 0), sort(names(folder_list), "")
 
       # updates foldernames
-      updateSelectInput(session, paste0(x, "folder"), choices = folder_list)
+      updateSelectInput(session, paste0(x, "folder"), choices = folder_names)
 
       if (x == "dropdown_") {
         project_synID <<- projectID
