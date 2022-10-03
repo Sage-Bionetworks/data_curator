@@ -161,12 +161,15 @@ shinyServer(function(input, output, session) {
       projectID <- datatype_list$projects[[input[[paste0(x, "project")]]]]
 
       # gets folders per project
-      folder_list <- syn_store$getStorageDatasetsInProject(projectID) %>%
-        list2Vector() %>%
-        names()
-      if (length(folder_list) == 0) folder_list <- ""
+      folder_list <- syn_store$getStorageDatasetsInProject(projectID)
+      if (length(folder_list) > 0) {
+        folder_list <- folder_list %>%
+          list2Vector() %>%
+          names() %>%
+          sort()
+      }
       # updates foldernames
-      updateSelectInput(session, paste0(x, "folder"), choices = sort(folder_list))
+      updateSelectInput(session, paste0(x, "folder"), choices = folder_list)
 
       if (x == "dropdown_") {
         project_synID <<- projectID
@@ -215,7 +218,7 @@ shinyServer(function(input, output, session) {
     req(input$tabs == "tab_template")
     hide("div_template_warn")
 
-    req(length(datatype_list$files) == 0 & template_type == "file")
+    req(length(datatype_list$files) == 0 && template_type == "file")
     warn_text <- paste0(
       strong(sQuote(input$dropdown_folder)), " folder is empty,
        please upload your data before generating manifest.",
