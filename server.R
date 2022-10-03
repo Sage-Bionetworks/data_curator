@@ -162,12 +162,8 @@ shinyServer(function(input, output, session) {
 
       # gets folders per project
       folder_list <- syn_store$getStorageDatasetsInProject(projectID)
-      if (length(folder_list) > 0) {
-        folder_list <- folder_list %>%
-          list2Vector() %>%
-          names() %>%
-          sort()
-      }
+      if (length(folder_list) > 0) folder_list <- sort(names(list2Vector(folder_list)))
+
       # updates foldernames
       updateSelectInput(session, paste0(x, "folder"), choices = folder_list)
 
