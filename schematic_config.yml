@@ -24,7 +24,7 @@ model:
   input:
     # if both 'download_url' and 'repo' present, `repo` will be used
     download_url: 'https://raw.githubusercontent.com/Sage-Bionetworks/data-models/main/example.model.jsonld' # url to download JSON-LD data model
-    repo: 'ncihtan/data-models' # data model repo url (<repo-owner>/<repo-name>/<version/branch>), version or branch is optional
+    repo: 'ncihtan/data-models/feature-cross-validation' # data model repo url (<repo-owner>/<repo-name>/<version/branch>), version or branch is optional
     location: 'data-models/HTAN.model.jsonld' # path to JSON-LD file
     file_type: 'local'
 
