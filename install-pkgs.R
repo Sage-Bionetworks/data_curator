@@ -2,6 +2,7 @@
 cran <- c(
   "ellipsis==0.3.2",
   "shiny==1.7.1",
+  "fontawesome==0.3.0",
   "httr==1.4.2",
   "yaml==2.2.1",
   "shinyjs==2.1.0",
