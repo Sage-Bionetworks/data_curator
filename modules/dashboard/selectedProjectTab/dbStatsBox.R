@@ -34,7 +34,7 @@ dbStatsBox <- function(id, metadata, nodes, source.tab = "tabs", target.tab = "d
             div(
               class = "dbStatsBox-item uploaded",
               tagList(
-                icon("smile-wink", "fa-3x"),
+                icon("face-smile-wink", "fa-3x"),
                 div(
                   class = "dbStatsBox-text",
                   h4("Uploaded"), span(n_uploaded)
@@ -44,7 +44,7 @@ dbStatsBox <- function(id, metadata, nodes, source.tab = "tabs", target.tab = "d
             div(
               class = "dbStatsBox-item missing",
               tagList(
-                icon("frown", "fa-3x"),
+                icon("face-frown", "fa-3x"),
                 div(
                   class = "dbStatsBox-text",
                   h4("Missing"), span(n_not_uploaded)
@@ -54,7 +54,7 @@ dbStatsBox <- function(id, metadata, nodes, source.tab = "tabs", target.tab = "d
             div(
               class = "dbStatsBox-item outdated",
               tagList(
-                icon("surprise", "fa-3x"),
+                icon("face-surprise", "fa-3x"),
                 div(
                   class = "dbStatsBox-text",
                   h4("Out of Date"), span(n_outdated)
