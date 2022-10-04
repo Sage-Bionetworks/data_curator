@@ -100,6 +100,10 @@ system("chmod -R +x .venv")
 Sys.unsetenv("RETICULATE_PYTHON")
 reticulate::use_virtualenv(file.path(getwd(), ".venv"), required = TRUE)
 
+## Import functions/modules
+source_files <- list.files(c("functions", "modules"), pattern = "*\\.R$", recursive = TRUE, full.names = TRUE)
+sapply(source_files, FUN = source)
+
 ## Read config.json
 if (!file.exists("www/config.json")) {
   schematic_config <- yaml.load_file("schematic_config.yml")

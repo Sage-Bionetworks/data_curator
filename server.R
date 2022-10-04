@@ -25,15 +25,12 @@ shinyServer(function(input, output, session) {
 
   session$userData$access_token <- access_token
 
-  ########  Import functions/modules ########
+  ########  Import schematic modules ########
   # import synapse client
   syn <- import("synapseclient")$Synapse()
   # import schematic modules
   source_python("functions/metadataModel.py")
   synapse_driver <- import("schematic.store.synapse")$SynapseStorage
-  # Import functions/modules
-  source_files <- list.files(c("functions", "modules"), pattern = "*\\.R$", recursive = TRUE, full.names = TRUE)
-  sapply(source_files, FUN = source)
 
   ######## session global variables ########
   # read config in
