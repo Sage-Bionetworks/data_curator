@@ -114,14 +114,17 @@ validate_metadata <- function(metadata, project.scope) {
     } else {
       validation_res <- tryCatch(
         metadata_model$validateModelManifest(
-          manifest$Path,
-          manifest$Component,
-          restrict_rules = TRUE,
+          manifestPath = manifest$Path,
+          rootNode = manifest$Component,
+          restrict_rules = TRUE, # set true to disable great expectation
           project_scope = project.scope
         ),
         # for invalid components, it will return NULL and relay as 'Out of Date', e.g.:
         # "LungCancerTier3", "BreastCancerTier3", "ScRNA-seqAssay", "MolecularTest", "NaN", "" ...
-        error = function(err) NULL
+        error = function(e) {
+          message("Error found in 'validate_metadata' function:\n", e$message)
+          return(NULL)
+        }
       )
       # clean validation res from schematicpy
       clean_res <- validationResult(validation_res, manifest$Component, dashboard = TRUE)
@@ -146,7 +149,10 @@ validate_metadata <- function(metadata, project.scope) {
 get_schema_nodes <- function(schema) {
   requirement <- tryCatch(
     metadata_model$get_component_requirements(schema, as_graph = TRUE),
-    error = function(err) list()
+    error = function(e) {
+      message("Error found in 'get_schema_nodes' function:\n", e$message)
+      return(list())
+    }
   )
 
   if (length(requirement) == 0) {
@@ -172,7 +178,10 @@ get_metadata_nodes <- function(metadata, ncores = 1) {
       # get all required data types
       nodes <- tryCatch(
         metadata_model$get_component_requirements(manifest$Component, as_graph = TRUE),
-        error = function(err) list()
+        error = function(e) {
+          message("Error found in 'get_metadata_nodes' function:\n", e$message)
+          return(list())
+        }
       ) %>% list2Vector()
 
       source <- as.character(nodes)
