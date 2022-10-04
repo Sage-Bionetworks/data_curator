@@ -34,7 +34,7 @@ progressBar <- function(id, value = 100, title = NULL, subtitle = NULL,
       if (is.null(color)) color <- c("#e91e63", "#673ab7")
       if (is.null(backgoundCol)) backgoundCol <- "#f5f5f5"
       # add gap in linear pb if two colors are not identical
-      border <- if_else(value != 0 && value != 100 && color != backgoundCol, "2px solid #fff", "none")
+      border <- if_else(value != 0 && value != 100 && identical(color, backgoundCol), "2px solid #fff", "none")
 
       # progress_id
       pb_id <- sample(1:10000, 1)
