@@ -198,16 +198,18 @@ shinyServer(function(input, output, session) {
   })
 
   ######## Template Google Sheet Link ########
+  # validate before generating template
   observeEvent(c(folder_synID(), template_schema_name(), input$tabs), {
-    req(input$tabs == "tab_template")
+    req(input$tabs %in% c("tab_template", "tab_validate"))
 
     warn_text <- NULL
 
     if (length(datatype_list$folder) == 0) {
       # add warning if there is no folder in the selected project
       warn_text <- paste0(
-        "No folder found in the ", strong(sQuote(input$dropdown_project)), " ,
-        please create a folder prior to submitting templates."
+        "please create a folder in the ",
+        strong(sQuote(input$dropdown_project)),
+        " prior to submitting templates."
       )
     } else if (template_type == "file") {
       # check number of files if it's file-based template
@@ -236,6 +238,7 @@ shinyServer(function(input, output, session) {
     show("div_template_warn")
   })
 
+  # generate template
   observeEvent(input$btn_template, {
 
     # loading screen for template link generation
@@ -365,6 +368,14 @@ shinyServer(function(input, output, session) {
     # loading screen for submitting data
     dcWaiter("show", msg = "Submitting...")
 
+    if (is.null(folder_synID())) {
+      # add waiter if no folder selected
+      dcWaiter("update", msg = paste0("Please select a folder to submit"), spin = spin_pulsar(), sleep = 2.5)
+    }
+
+    # abort submission if no folder selected
+    req(folder_synID())
+
     dir.create("./tmp", showWarnings = FALSE)
 
     # reads file csv again
@@ -374,7 +385,7 @@ shinyServer(function(input, output, session) {
     # the type to filter (eg file-based) on could probably also be a config choice
     display_names <- config$manifest_schemas$display_name[config$manifest_schemas$type == "file"]
     # if folder_ID has not been updated yet
-    if (folder_synID() == "") folder_synID(datatype_list$folders[[input$dropdown_folder]])
+    # if (folder_synID() == "") folder_synID(datatype_list$folders[[input$dropdown_folder]])
 
     if (input$dropdown_template %in% display_names) {
       # make into a csv or table for file-based components already has entityId
