@@ -26,8 +26,6 @@ shinyServer(function(input, output, session) {
   session$userData$access_token <- access_token
 
   ########  Import schematic modules ########
-  # import synapse client
-  syn <- import("synapseclient")$Synapse()
   # import schematic modules
   source_python("functions/metadataModel.py")
   synapse_driver <- import("schematic.store.synapse")$SynapseStorage
@@ -426,7 +424,7 @@ shinyServer(function(input, output, session) {
       }
 
       # associates metadata with data and returns manifest id
-      manifest_id <- synapse_driver$associateMetadataWithFiles(
+      manifest_id <- syn_store$associateMetadataWithFiles(
         schemaGenerator = schema_generator,
         metadataManifestPath = "./tmp/synapse_storage_manifest.csv",
         datasetId = selected$folder(),

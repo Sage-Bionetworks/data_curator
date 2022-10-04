@@ -92,7 +92,7 @@ dashboard <- function(id, syn.store, project.scope, schema, schema.display.name,
         lapply(disable.ids, FUN = disable, asis = TRUE)
 
         # get all datasets from selected project
-        folder_list <- synapse_driver$getStorageDatasetsInProject(syn.store, project.scope())
+        folder_list <- syn.store$getStorageDatasetsInProject(project.scope())
         folder_list <- list2Vector(folder_list)
 
         # get all uploaded manifests for selected project
