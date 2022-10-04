@@ -88,20 +88,22 @@ shinyServer(function(input, output, session) {
 
     syn$login(authToken = access_token, rememberMe = FALSE)
 
-    data_list$projects <<- tryCatch(
-      {
-        # get syn storage
-        syn_store <<- synapse_driver(access_token = access_token)
-        # get user's common projects
-        list2Vector(syn_store$getStorageProjects())
-      },
-      error = function(e) {
-        message(e$message)
-        return(NULL)
-      }
+    data_list$projects(
+      tryCatch(
+        {
+          # get syn storage
+          syn_store <<- synapse_driver(access_token = access_token)
+          # get user's common projects
+          list2Vector(syn_store$getStorageProjects())
+        },
+        error = function(e) {
+          message(e$message)
+          return(NULL)
+        }
+      )
     )
 
-    if (is.null(data_list$projects) || length(data_list$projects) == 0) {
+    if (is.null(data_list$projects()) || length(data_list$projects()) == 0) {
       dcWaiter("update", landing = TRUE, isPermission = FALSE)
     } else {
 
@@ -242,7 +244,7 @@ shinyServer(function(input, output, session) {
 
     # only show below warning in template tab
     if (input$tabs == "tab_template") {
-      req(length(data_list$files) == 0 & selected$schema_type() == "file")
+      req(length(data_list$files()) == 0 & selected$schema_type() == "file")
       warn_text <- paste0(
         strong(sQuote(input$dropdown_folder)), " folder is empty,
         please upload your data before generating manifest.",
