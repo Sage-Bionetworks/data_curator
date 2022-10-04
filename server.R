@@ -46,7 +46,7 @@ shinyServer(function(input, output, session) {
   datatype_list <- list(projects = NULL, folders = NULL, manifests = template_namedList, files = NULL)
 
   tabs_list <- c("tab_instructions", "tab_data", "tab_template", "tab_upload")
-  clean_tags <- c("div_template", "div_validate", NS("tbl_validate", "table"), "btn_val_gsheet", "btn_submit")
+  clean_tags <- c("div_template", "div_template_warn", "div_validate", NS("tbl_validate", "table"), "btn_val_gsheet", "btn_submit")
 
   # add box effects
   boxEffect(zoom = TRUE, float = TRUE)
@@ -162,7 +162,7 @@ shinyServer(function(input, output, session) {
 
       # gets folders per project
       folder_list <- syn_store$getStorageDatasetsInProject(projectID) %>% list2Vector()
-      folder_names <- ifelse(length(folder_list) > 0), sort(names(folder_list), "")
+      folder_names <- ifelse(length(folder_list) > 0, sort(names(folder_list)), " ")
 
       # updates foldernames
       updateSelectInput(session, paste0(x, "folder"), choices = folder_names)
@@ -180,53 +180,59 @@ shinyServer(function(input, output, session) {
     })
   })
 
+  ######## Update Folder ########
+  # update selected folder synapse id and name
+  observeEvent(input$dropdown_folder, {
+    folder_synID(datatype_list$folders[[input$dropdown_folder]])
+    # clean tags in generating-template tab
+    sapply(clean_tags[1:2], FUN = hide)
+  })
+
   ######## Update Template ########
   # update selected schema template name
   observeEvent(input$dropdown_template, {
     template_schema_name(template_namedList[match(input$dropdown_template, names(template_namedList))])
     template_type <<- config$manifest_schemas$type[match(template_schema_name(), template_namedList)]
+    # clean all tags related with selected template
+    sapply(clean_tags, FUN = hide)
   })
 
   ######## Template Google Sheet Link ########
-  observeEvent(c(input$dropdown_folder, input$tabs), {
-    req(input$tabs %in% c("tab_template", "tab_upload"))
-    tmp_folder_synID <- datatype_list$folders[[input$dropdown_folder]]
-    req(tmp_folder_synID != folder_synID()) # if folder changes
+  observeEvent(c(folder_synID(), template_schema_name(), input$tabs), {
+    req(input$tabs == "tab_template")
 
-    # update selected folder ID
-    folder_synID(tmp_folder_synID)
+    warn_text <- NULL
 
-    if (input$tabs == "tab_template") {
+    if (length(datatype_list$folder) == 0) {
+      # add warning if there is no folder in the selected project
+      warn_text <- paste0(
+        "No folder found in the ", strong(sQuote(input$dropdown_project)), " ,
+        please create a folder prior to submitting templates."
+      )
+    } else if (template_type == "file") {
+      # check number of files if it's file-based template
       dcWaiter("show", msg = paste0("Getting files in ", input$dropdown_folder, "..."))
       # get file list in selected folder
       file_list <- syn_store$getFilesInStorageDataset(folder_synID())
       datatype_list$files <<- list2Vector(file_list)
       dcWaiter("hide")
+
+      if (length(datatype_list$files) == 0) {
+        # display warning message if folder is empty and data type is file-based
+        warn_text <- paste0(
+          strong(sQuote(input$dropdown_folder)), " folder is empty,
+          please upload your data before generating manifest.",
+          "<br>", strong(sQuote(input$dropdown_template)),
+          " requires data files to be uploaded prior to generating and submitting templates.",
+          "<br>", "Filling in a template before uploading your data,
+          may result in errors and delays in your data submission later."
+        )
+      }
     }
-  })
-
-  # display warning message if folder is empty and data type is file-based
-  observeEvent(c(folder_synID(), template_schema_name()), {
-
-    # hide tags when users select new template
-    sapply(clean_tags, FUN = hide)
-
-    req(input$tabs == "tab_template")
-    hide("div_template_warn")
-
-    req(length(datatype_list$files) == 0 && template_type == "file")
-    warn_text <- paste0(
-      strong(sQuote(input$dropdown_folder)), " folder is empty,
-       please upload your data before generating manifest.",
-      "<br><br>", strong(sQuote(input$dropdown_template)),
-      " requires data files to be uploaded prior generating and submitting templates.",
-      "<br><br>", "Filling in a template before uploading your data,
-       may result in errors and delays in your data submission later."
-    )
-
-    nx_report_warning("Warning", HTML(warn_text))
+    # if there is warning from above checks
+    req(warn_text)
+    # display warnings
     output$text_template_warn <- renderUI(tagList(br(), span(class = "warn_msg", HTML(warn_text))))
-
     show("div_template_warn")
   })
 
