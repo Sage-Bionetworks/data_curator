@@ -25,9 +25,6 @@ shinyServer(function(input, output, session) {
 
   session$userData$access_token <- access_token
 
-  ########  Import schematic modules ########
-  # import schematic modules
-  source_python("functions/metadataModel.py")
   synapse_driver <- import("schematic.store.synapse")$SynapseStorage
 
   ######## session global variables ########

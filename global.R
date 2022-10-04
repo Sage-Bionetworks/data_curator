@@ -103,6 +103,9 @@ reticulate::use_virtualenv(file.path(getwd(), ".venv"), required = TRUE)
 ## Import functions/modules
 # import synapse client
 syn <- import("synapseclient")$Synapse()
+# import schematic modules
+source_python("functions/metadataModel.py")
+# import R files
 source_files <- list.files(c("functions", "modules"), pattern = "*\\.R$", recursive = TRUE, full.names = TRUE)
 sapply(source_files, FUN = source)
 
