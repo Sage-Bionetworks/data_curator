@@ -11,8 +11,8 @@ selectedDataTypeTabUI <- function(id) {
         tags$li("Hover over nodes on the right to view data type labels"),
         tags$li(HTML(paste0(
           strong(
-            "node A ", icon("long-arrow-alt-right"), " node B ",
-            icon("long-arrow-alt-right"), " node C"
+            "node A ", icon("right-long"), " node B ",
+            icon("right-long"), " node C"
           ),
           "illustrates that ",
           strong("Data type A"), " requires upload of ",
