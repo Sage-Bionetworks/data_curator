@@ -100,11 +100,9 @@ sapply(source_files, FUN = source)
 
 ## Read config.json
 if (!file.exists("www/config.json")) {
-  schematic_config <- yaml.load_file("schematic_config.yml")
-  system(sprintf(
-    "python3 .github/generate_config_json.py -jd %s -schema %s -service %s",
-    schematic_config$model$input$location, schematic_config$model$input$repo, "Sage-Bionetworks/schematic"
-  ))
+  system(
+    "python3 .github/config_schema.py -c schematic_config.yml --service_repo 'Sage-Bionetworks/schematic' --overwrite"
+  )
 }
 config_file <- fromJSON("www/config.json")
 

@@ -1,27 +1,35 @@
 ## Schema Configuration
 
-In the app, the required schemas is configured in the file `www/config.json`, which is used to adapt the dropdown data types list in the app. Below are the steps to generate `config.json` locally using an example data model. Please remember to replace the example repo with your own data model's repo. 
+In the app, the required schemas is configured in the file `www/config.json`, which is used to adapt the dropdown data types list in the app.
 
-1.  Create a repo for your data model using this [template](https://github.com/Sage-Bionetworks/data-models)
+All properties in the `config.json` are listed below:
 
-2.  Clone your data model repo, i.e:
+- `manifest schemas`: defines the list of schemas displayed under the "Choose a Metadata Template Type:" dropdown in the application.
+  - `display_name` : The display name for the dropdown. (e.g. _scRNA-seq Level 1_)
+  - `schema_name`: The name of the manifest in the JSON-LD schema (e.g. _ScRNA-seqLevel1_)
+  - `type`: The type of manifest, either _file_ or _record_.
+- `service_version`: The version of schematic service (Default is empty string if no value provided)
+- `schema_version`: The version of data model (if no specific version or branch provided in the `schematic_config.yml`, default is to query the latest release of the schema repo)
 
-    git clone https://github.com/Sage-Bionetworks/data-models
+### Workflow Deployment
 
-3.  Create `config.json` and placed it in the `www` folder. We recommend that you generate the `config.json` via this command:
+During the app deployment, the workflow will perform following steps to automatically generate the `config.json` file:
 
-        python3 .github/generate_config_json.py \
-          -jd data-models/example.model.jsonld \
-          -schema 'Sage-Bionetworks/data-models' \
-          -service Sage-Bionetworks/schematic'
+1. Clone the data model repo defined in the `repo` configuration in the `schematic_config.yml` file (if you would like to continue using `download_url`, please remove or comment out the `repo` key).
 
-    - `service` and `schema` are GitHub repos (`<repo-owner/repo-name>`, i.e `Sage-Bionetworks/schematics`) and are optional flags. If no values provided, empty string will be set for versions.
+2. Run `create_schema.py` script to automatically generate the `config.json` file (filled `DependsOn Component` column of your data model is required)
 
-4.  All properties the in the `config.json` are listed below:
+## Local Development
 
-    - `manifest schemas`: defines the list of schemas displayed under the "Choose a Metadata Template Type:" dropdown in the application.
-      - `display_name` : The display name for the dropdown. (e.g. _scRNA-seq Level 1_)
-      - `schema_name`: The name of the manifest in the JSON-LD schema (e.g. _ScRNA-seqLevel1_)
-      - `type`: The type of manifest, either _file_ or _record_.
-    - `service_version`: The version of schematic service (Default is empty string if no value provided)
-    - `schema_version`: The version of data model (Default is empty string if no value provided)
+For the local developers, the `config.json` will be automatically generated after the app launches via below command in `global.R`. You can always manually modify the `config.json` or replace with your own existing `config.json` in the `www` folder.
+
+```python
+python3 .github/config_schema.py \
+  -c schematic_config.yml \
+  --service_repo 'Sage-Bionetworks/schematic' \
+  --overwrite
+```
+
+- `-c` is the path to the schematic configuration file
+- `--service_repo` is the repo path for schematic, with the format as `<repo-owner>/<repo-name>`
+- `--overwrite` is to set whether to overwrite the existing `config.json` file (please remove this flag if you would like to use your own `config.json`)
