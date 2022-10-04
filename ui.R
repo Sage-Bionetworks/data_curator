@@ -21,7 +21,7 @@ ui <- shinydashboardPlus::dashboardPage(
       dropdownBlock(
         id = "header_selection_dropdown",
         title = "Selection",
-        icon = icon("sliders-h"),
+        icon = icon("sliders"),
         badgeStatus = "info",
         fluidRow(
           lapply(datatypes, function(x) {
@@ -34,7 +34,7 @@ ui <- shinydashboardPlus::dashboardPage(
               )
             )
           }),
-          actionButton("btn_header_update", NULL, icon("sync-alt"), class = "btn-shiny-effect")
+          actionButton("btn_header_update", NULL, icon("rotate"), class = "btn-shiny-effect")
         )
       )
     ),
@@ -63,7 +63,7 @@ ui <- shinydashboardPlus::dashboardPage(
       menuItem(
         "Select your Dataset",
         tabName = "tab_data",
-        icon = icon("mouse-pointer")
+        icon = icon("arrow-pointer")
       ),
       menuItem(
         "Get Metadata Template",
