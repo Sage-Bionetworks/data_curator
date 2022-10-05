@@ -175,9 +175,10 @@ shinyServer(function(input, output, session) {
 
       # gets folders per project
       folder_list <- syn_store$getStorageDatasetsInProject(project_id) %>% list2Vector()
+      folder_names <- ifelse(length(folder_list) > 0, sort(names(folder_list)), " ")
 
       # update folder names
-      updateSelectInput(session, paste0(x, "folder"), choices = sort(names(folder_list)))
+      updateSelectInput(session, paste0(x, "folder"), choices =  folder_names)
 
       if (x == "dropdown_") {
         selected$project(project_id)
@@ -192,6 +193,14 @@ shinyServer(function(input, output, session) {
     })
   })
 
+  ######## Update Folder ########
+  # update selected folder synapse id and name
+  observeEvent(input$dropdown_folder, {
+    selected$folder(datatype_list$folders[[input$dropdown_folder]])
+    # clean tags in generating-template tab
+    sapply(clean_tags[1:2], FUN = hide)
+  })
+
   ######## Update Template ########
   # update selected schema template name
   observeEvent(input$dropdown_datatype, {
@@ -199,6 +208,8 @@ shinyServer(function(input, output, session) {
     selected$schema(data_list$schemas()[input$dropdown_datatype])
     schema_type <- config_schema$type[which(config_schema$display_name == input$dropdown_datatype)]
     selected$schema_type(schema_type)
+    # clean all tags related with selected template
+    sapply(clean_tags, FUN = hide)
   })
 
   ######## Dashboard ########
@@ -213,12 +224,21 @@ shinyServer(function(input, output, session) {
   )
 
   ######## Template Google Sheet Link ########
-  observeEvent(c(input$dropdown_folder, input$tabs), {
-    if (input$tabs == "tab_template") {
-      tmp_folder_id <- data_list$folders()[[input$dropdown_folder]]
-      # update selected folder ID if folder changes
-      req(tmp_folder_id != selected$folder())
-      selected$folder(tmp_folder_id)
+  # validate before generating template
+  observeEvent(c(selected$folder(), selected$schema(), input$tabs), {
+    req(input$tabs %in% c("tab_template", "tab_validate"))
+
+    warn_text <- NULL
+
+    if (length(datatype_list$folder) == 0) {
+      # add warning if there is no folder in the selected project
+      warn_text <- paste0(
+        "please create a folder in the ",
+        strong(sQuote(input$dropdown_project)),
+        " prior to submitting templates."
+      )
+    } else if (selected$schema_type() == "file") {
+      # check number of files if it's file-based template
 
       dcWaiter("show", msg = paste0("Getting files in ", input$dropdown_folder, "..."))
       # get file list in selected folder
@@ -228,34 +248,28 @@ shinyServer(function(input, output, session) {
       data_list$files(list2Vector(file_list))
 
       dcWaiter("hide")
+
+      if (length(data_list$files()) == 0) {
+        # display warning message if folder is empty and data type is file-based
+        warn_text <- paste0(
+          strong(sQuote(input$dropdown_folder)), " folder is empty,
+          please upload your data before generating manifest.",
+          "<br>", strong(sQuote(input$dropdown_template)),
+          " requires data files to be uploaded prior to generating and submitting templates.",
+          "<br>", "Filling in a template before uploading your data,
+          may result in errors and delays in your data submission later."
+        )
+      }
     }
+ 
+    # if there is warning from above checks
+    req(warn_text)
+    # display warnings
+    output$text_template_warn <- renderUI(tagList(br(), span(class = "warn_msg", HTML(warn_text))))
+    show("div_template_warn")
   })
 
-  # display warning message if folder is empty and data type is file-based
-  observeEvent(c(selected$folder(), selected$schema()), {
-
-    # hide tags when users select new template
-    sapply(clean_tags, FUN = hide)
-
-    # only show below warning in template tab
-    if (input$tabs == "tab_template") {
-      req(length(data_list$files()) == 0 & selected$schema_type() == "file")
-      warn_text <- paste0(
-        strong(sQuote(input$dropdown_folder)), " folder is empty,
-        please upload your data before generating manifest.",
-        "<br><br>", strong(sQuote(input$dropdown_datatype)),
-        " requires data files to be uploaded prior generating and submitting templates.",
-        "<br><br>", "Filling in a template before uploading your data,
-        may result in errors and delays in your data submission later."
-      )
-
-      nx_report_warning("Warning", HTML(warn_text))
-      output$text_template_warn <- renderUI(tagList(br(), span(class = "warn-msg", HTML(warn_text))))
-
-      show("div_template_warn")
-    }
-  })
-
+  # generate template
   observeEvent(input$btn_template, {
 
     # loading screen for template link generation
@@ -385,22 +399,32 @@ shinyServer(function(input, output, session) {
     # loading screen for submitting data
     dcWaiter("show", msg = "Submitting...")
 
-    dir.create("./manifests", showWarnings = FALSE)
 
+    
+    if (is.null(selected$folder())) {
+      # add waiter if no folder selected
+      dcWaiter("update", msg = paste0("Please select a folder to submit"), spin = spin_pulsar(), sleep = 2.5)
+    }
+
+    # abort submission if no folder selected
+    req(selected$folder())
+
+    tmp_out_dir <- "./manifest"
+    tmp_file_path <- file.path(tmp_out_dir, "synapse_storage_manifest.csv")
+    dir.create(tmp_out_dir, showWarnings = FALSE)
+   
     # reads file csv again
     submit_data <- csvInfileServer("inputFile")$data()
 
     # If a file-based component selected (define file-based components) note for future
     # the type to filter (eg file-based) on could probably also be a config choice
     display_names <- config_schema$manifest_schemas$display_name[config_schema$manifest_schemas$type == "file"]
-    # if folder_ID has not been updated yet
-    if (is.null(selected$folder())) selected$folder(data_list$folders()[[input$dropdown_folder]])
 
     if (input$dropdown_datatype %in% display_names) {
       # make into a csv or table for file-based components already has entityId
       if ("entityId" %in% colnames(submit_data)) {
         write.csv(submit_data,
-          file = "./manifests/synapse_storage_manifest.csv",
+          file = tmp_file_path,
           quote = TRUE, row.names = FALSE, na = ""
         )
       } else {
@@ -415,7 +439,7 @@ shinyServer(function(input, output, session) {
         files_entity <- inner_join(submit_data, files_df, by = "Filename")
 
         write.csv(files_entity,
-          file = "./manifests/synapse_storage_manifest.csv",
+          file = tmp_file_path,
           quote = TRUE, row.names = FALSE, na = ""
         )
       }
@@ -423,7 +447,7 @@ shinyServer(function(input, output, session) {
       # associates metadata with data and returns manifest id
       manifest_id <- syn_store$associateMetadataWithFiles(
         schemaGenerator = schema_generator,
-        metadataManifestPath = "./tmp/synapse_storage_manifest.csv",
+        metadataManifestPath = tmp_file_path,
         datasetId = selected$folder(),
         manifest_record_type = "table",
         restrict_manifest = FALSE
@@ -452,14 +476,14 @@ shinyServer(function(input, output, session) {
     } else {
       # if not file-based type template
       write.csv(submit_data,
-        file = "./manifests/synapse_storage_manifest.csv", quote = TRUE,
+        file = tmp_file_path, quote = TRUE,
         row.names = FALSE, na = ""
       )
 
       # associates metadata with data and returns manifest id
       manifest_id <- syn_store$associateMetadataWithFiles(
         schemaGenerator = schema_generator,
-        metadataManifestPath = "./tmp/synapse_storage_manifest.csv",
+        metadataManifestPath = tmp_file_path,
         datasetId = selected$folder(),
         manifest_record_type = "table",
         restrict_manifest = FALSE
@@ -497,6 +521,6 @@ shinyServer(function(input, output, session) {
       }
     }
     # delete tmp manifest folder
-    unlink("./manifests/synapse_storage_manifest.csv")
+    unlink(tmp_file_path)
   })
 })
