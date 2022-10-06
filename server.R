@@ -178,7 +178,7 @@ shinyServer(function(input, output, session) {
       folder_names <- ifelse(length(folder_list) > 0, sort(names(folder_list)), " ")
 
       # update folder names
-      updateSelectInput(session, paste0(x, "folder"), choices =  folder_names)
+      updateSelectInput(session, paste0(x, "folder"), choices = folder_names)
 
       if (x == "dropdown_") {
         selected$project(project_id)
@@ -196,7 +196,7 @@ shinyServer(function(input, output, session) {
   ######## Update Folder ########
   # update selected folder synapse id and name
   observeEvent(input$dropdown_folder, {
-    selected$folder(datatype_list$folders[[input$dropdown_folder]])
+    selected$folder(data_list$folders[[input$dropdown_folder]])
     # clean tags in generating-template tab
     sapply(clean_tags[1:2], FUN = hide)
   })
@@ -230,7 +230,7 @@ shinyServer(function(input, output, session) {
 
     warn_text <- NULL
 
-    if (length(datatype_list$folder) == 0) {
+    if (length(data_list$folder) == 0) {
       # add warning if there is no folder in the selected project
       warn_text <- paste0(
         "please create a folder in the ",
@@ -261,7 +261,7 @@ shinyServer(function(input, output, session) {
         )
       }
     }
- 
+
     # if there is warning from above checks
     req(warn_text)
     # display warnings
@@ -400,7 +400,7 @@ shinyServer(function(input, output, session) {
     dcWaiter("show", msg = "Submitting...")
 
 
-    
+
     if (is.null(selected$folder())) {
       # add waiter if no folder selected
       dcWaiter("update", msg = paste0("Please select a folder to submit"), spin = spin_pulsar(), sleep = 2.5)
@@ -412,7 +412,7 @@ shinyServer(function(input, output, session) {
     tmp_out_dir <- "./manifest"
     tmp_file_path <- file.path(tmp_out_dir, "synapse_storage_manifest.csv")
     dir.create(tmp_out_dir, showWarnings = FALSE)
-   
+
     # reads file csv again
     submit_data <- csvInfileServer("inputFile")$data()
 
