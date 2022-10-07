@@ -94,9 +94,8 @@ validate_metadata <- function(metadata, project.scope) {
     return(metadata)
   }
 
-  lapply(1:nrow(metadata), function(i) {
+  parallel::mclapply(1:nrow(metadata), function(i) {
     manifest <- metadata[i, ]
-
     if (is.na(manifest$Component)) {
       data.frame(
         Result = "invalid",
@@ -122,7 +121,7 @@ validate_metadata <- function(metadata, project.scope) {
         # for invalid components, it will return NULL and relay as 'Out of Date', e.g.:
         # "LungCancerTier3", "BreastCancerTier3", "ScRNA-seqAssay", "MolecularTest", "NaN", "" ...
         error = function(e) {
-          message("Error found in 'validate_metadata' function:\n", e$message)
+          warning("'validateModelManifest' failed: ", sQuote(manifest$SynapseID), ":\n", e$message)
           return(NULL)
         }
       )
@@ -137,7 +136,7 @@ validate_metadata <- function(metadata, project.scope) {
         WarnMsg = if_else(length(clean_res$warning_msg) == 0, "Valid", clean_res$warning_msg)
       )
     }
-  }) %>%
+  }, mc.cores = ncores) %>%
     bind_rows() %>%
     cbind(metadata, .) # expand metadata with validation results
 }
@@ -150,7 +149,7 @@ get_schema_nodes <- function(schema) {
   requirement <- tryCatch(
     metadata_model$get_component_requirements(schema, as_graph = TRUE),
     error = function(e) {
-      message("Error found in 'get_schema_nodes' function:\n", e$message)
+      warning("'get_schema_nodes' failed: ", sQuote(schema), ":\n", e$message)
       return(list())
     }
   )
@@ -179,7 +178,7 @@ get_metadata_nodes <- function(metadata, ncores = 1) {
       nodes <- tryCatch(
         metadata_model$get_component_requirements(manifest$Component, as_graph = TRUE),
         error = function(e) {
-          message("Error found in 'get_metadata_nodes' function:\n", e$message)
+          warning("'get_metadata_nodes' failed: ", sQuote(manifest$Component), ":\n", e$message)
           return(list())
         }
       ) %>% list2Vector()

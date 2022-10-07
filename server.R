@@ -335,7 +335,7 @@ shinyServer(function(input, output, session) {
           project_scope = list(selected$project())
         ),
         error = function(e) {
-          message(e$message)
+          message("'validateModelManifest' failed:\n", e$message)
           return(NULL)
         }
       )
