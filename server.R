@@ -170,6 +170,7 @@ shinyServer(function(input, output, session) {
   ######## Update Folder List ########
   lapply(c("header_dropdown_", "dropdown_"), function(x) {
     observeEvent(ignoreInit = TRUE, input[[paste0(x, "project")]], {
+
       # get synID of selected project
       project_id <- data_list$projects()[input[[paste0(x, "project")]]]
 
@@ -196,7 +197,7 @@ shinyServer(function(input, output, session) {
   ######## Update Folder ########
   # update selected folder synapse id and name
   observeEvent(input$dropdown_folder, {
-    selected$folder(data_list$folders[[input$dropdown_folder]])
+    selected$folder(data_list$folders()[input$dropdown_folder])
     # clean tags in generating-template tab
     sapply(clean_tags[1:2], FUN = hide)
   })
@@ -230,7 +231,7 @@ shinyServer(function(input, output, session) {
 
     warn_text <- NULL
 
-    if (length(data_list$folder) == 0) {
+    if (length(data_list$folder()) == 0) {
       # add warning if there is no folder in the selected project
       warn_text <- paste0(
         "please create a folder in the ",
