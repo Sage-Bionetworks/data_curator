@@ -35,29 +35,32 @@ shinyServer(function(input, output, session) {
   template_namedList <- config_schema$schema_name
   names(template_namedList) <- config_schema$display_name
   #master_fileview <- schematic_config$synapse$master_fileview
-  master_fileview <- Sys.getenv("DCA_SYNAPSE_MASTER_FILEVIEW")
+  #master_fileview <- Sys.getenv("DCA_SYNAPSE_MASTER_FILEVIEW")
 
   # data available to the user
   syn_store <- NULL # gets list of projects they have access to
 
   data_list <- list(
     project = reactiveVal(NULL), folders = reactiveVal(NULL),
-    schemas = reactiveVal(template_namedList), files = reactiveVal(NULL)
+    schemas = reactiveVal(template_namedList), files = reactiveVal(NULL),
+    master_fileview = reactiveVal(NULL)
   )
   # synapse ID of selected data
   selected <- list(
     project = reactiveVal(NULL), folder = reactiveVal(""),
-    schema = reactiveVal(NULL), schema_type = reactiveVal(NULL)
+    schema = reactiveVal(NULL), schema_type = reactiveVal(NULL),
+    master_fileview = reactiveVal(NULL)
   )
 
   selected <- list(
     project = reactiveVal(NULL), folder = reactiveVal(""),
-    schema = reactiveVal(NULL), schema_type = reactiveVal(NULL)
+    schema = reactiveVal(NULL), schema_type = reactiveVal(NULL),
+    master_fileview = reactiveVal(NULL)
   )
   
   isUpdateFolder <- reactiveVal(FALSE)
 
-  tabs_list <- c("tab_data", "tab_template", "tab_upload")
+  tabs_list <- c("tab_asset_view", "tab_data", "tab_template", "tab_upload")
   clean_tags <- c(
     "div_template", "div_template_warn",
     "div_validate", NS("tbl_validate", "table"), "btn_val_gsheet", "btn_submit"
@@ -87,47 +90,52 @@ shinyServer(function(input, output, session) {
     #
     access_token <- session$userData$access_token
     
-    # updating syn storage
-    projects_list <- storage_projects(url=file.path(api_uri, "v1/storage/projects"),
-                                        asset_view = master_fileview,
-                                        input_token = access_token)
-    data_list$project(list2Vector(projects_list))
-
-      # updates project dropdown
-      lapply(c("header_dropdown_", "dropdown_"), function(x) {
-        lapply(c(1, 3), function(i) {
-          updateSelectInput(session, paste0(x, dropdown_types[i]),
-            choices = sort(names(data_list[[i]]()))
-          )
-        })
-      })
-
-      user_name <- datacurator::synapse_user_profile(auth=access_token)[["userName"]]
-
-      if (!synapse_is_certified(auth = access_token)) {
-        dcWaiter("update", landing = TRUE, isCertified = FALSE)
-      } else {
-        # update waiter loading screen once login successful
-        dcWaiter("update", landing = TRUE, userName = user_name)
-      }
+    user_name <- datacurator::synapse_user_profile(auth=access_token)[["userName"]]
+    
+    if (!synapse_is_certified(auth = access_token)) {
+      dcWaiter("update", landing = TRUE, isCertified = FALSE)
+    } else {
+      # update waiter loading screen once login successful
+      dcWaiter("update", landing = TRUE, userName = user_name)
+    }
+    
+    ######## Arrow Button ########
+    lapply(1:4, function(i) {
+      switchTabServer(id = paste0("switchTab", i), tabId = "tabs", tab = reactive(input$tabs)(), tabList = tabs_list, parent = session)
+    })
+    
   })
-
-  ######## Arrow Button ########
-  lapply(1:3, function(i) {
-    switchTabServer(id = paste0("switchTab", i), tabId = "tabs", tab = reactive(input$tabs)(), tabList = tabs_list, parent = session)
-  })
+  
+  #observeEvent(input[["dropdown_asset_view"]], ignoreNULL = TRUE, ignoreInit = TRUE, {
+  observeEvent(input$btn_asset_view, {
+    selected$master_fileview(input$dropdown_asset_view)
+               # updating syn storage
+               projects_list <- storage_projects(url=file.path(api_uri, "v1/storage/projects"),
+                                                 asset_view = selected$master_fileview(),
+                                                 input_token = access_token)
+               data_list$project(list2Vector(projects_list))
+               
+               # updates project dropdown
+               lapply(c("header_dropdown_", "dropdown_"), function(x) {
+                 lapply(c(1, 3), function(i) {
+                   updateSelectInput(session, paste0(x, dropdown_types[i]),
+                                     choices = sort(names(data_list[[i]]()))
+                   )
+                 })
+               })
+})
 
   ######## Header Dropdown Button ########
   # Adjust header selection dropdown based on tabs
   observe({
-    if (input[["tabs"]] == "tab_data") {
+    if (input[["tabs"]] %in% c("tab_data", "tab_asset_view")) {
       hide("header_selection_dropdown")
     } else {
       show("header_selection_dropdown")
       addClass(id = "header_selection_dropdown", class = "open")
     }
   })
-
+  
   # sync header dropdown with main dropdown
   lapply(dropdown_types, function(x) {
     observeEvent(input[[paste0("dropdown_", x)]], {
@@ -165,7 +173,7 @@ shinyServer(function(input, output, session) {
 
       # gets folders per project
       folder_list <- storage_project_datasets(url=file.path(api_uri, "v1/storage/project/datasets"),
-                                              asset_view = master_fileview,
+                                              asset_view = selected$master_fileview(),
                                               project_id=project_id,
                                               input_token=access_token) %>% list2Vector()
 
@@ -204,7 +212,7 @@ shinyServer(function(input, output, session) {
     disable.ids = c("box_pick_project", "box_pick_manifest"),
     ncores = ncores,
     access_token = access_token,
-    fileview = master_fileview,
+    fileview = selected$master_fileview(),
     folder = selected$project()
   )
 
@@ -219,7 +227,7 @@ shinyServer(function(input, output, session) {
       dcWaiter("show", msg = paste0("Getting files in ", input$dropdown_folder, "..."))
       # get file list in selected folder
       file_list <- storage_dataset_files(url=file.path(api_uri, "v1/storage/dataset/files"),
-                                         asset_view = master_fileview,
+                                         asset_view = selected$master_fileview(),
                             dataset_id = selected$project(),
                             input_token=access_token)
       if (inherits(file_list, "xml_document")) {
@@ -309,7 +317,7 @@ shinyServer(function(input, output, session) {
                                            schema_url=Sys.getenv("DCA_MODEL_INPUT_DOWNLOAD_URL"),
                                            data_type=selected$schema(),
                                            json_str=toJSON(inFile$data()))
-                           c#sv_file=inFile$raw()$datapath)
+                           #csv_file=inFile$raw()$datapath)
                            #file_name = toJSON(inFile$data))
 
     # validation messages
@@ -422,7 +430,7 @@ shinyServer(function(input, output, session) {
                               restrict_rules=FALSE,
                               #csv_file="./manifests/synapse_storage_manifest.csv")
                               json_str = toJSON(inFile$data()),
-                              asset_view=master_fileview)
+                              asset_view=selected$master_fileview())
       
       #> xml_text(xml_child(content(req3), "head/title"))
       #[1] "jsonschema.exceptions.ValidationError: Manifest could not be validated under provided data model. Validation failed with the following errors: [[2, 'Wrong schema', \"'HTAN Parent ID' is a required property\", 'Wrong schema'], [2, 'Wrong schema', \"'Storage Method' is a required property\", 'Wrong schema'], [2, 'Wrong schema', \"'Protocol Link' is a required property\", 'Wrong schema'], [2, 'Wrong schema', \"'Acquisition Method Type' is a required property\", 'Wrong schema'], [2, 'Wrong schema', \"'Collection Days from Index' is a required property\", 'Wrong schema'], [2, 'Wrong schema', \"'Fixative Type' is a required property\", 'Wrong schema'], [2, 'Wrong schema', \"'HTAN Biospecimen ID' is a required property\", 'Wrong schema'], [2, 'Wrong schema', \"'Biospecimen Type' is a required property\", 'Wrong schema'], [2, 'Wrong schema', \"'Processing Days from Index' is a required property\", 'Wrong schema'], [2, 'Wrong schema', \"'Timepoint Label' is a required property\", 'Wrong schema'], [2, 'Wrong schema', \"'Site of Resection or Biopsy' is a required property\", 'Wrong schema']] // Werkzeug Debugger"
@@ -466,7 +474,7 @@ shinyServer(function(input, output, session) {
                                     restrict_rules=FALSE,
                                     #csv_file="./manifests/synapse_storage_manifest.csv")
                                   json_str = toJSON(inFile$data()),
-                                  asset_view=master_fileview)
+                                  asset_view=selected$master_fileview())
       manifest_path <- tags$a(href = paste0("synapse.org/#!Synapse:", manifest_id), manifest_id, target = "_blank")
       # if uploaded provided valid synID message
       if (startsWith(manifest_id, "syn") == TRUE) {
