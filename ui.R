@@ -61,6 +61,11 @@ ui <- shinydashboardPlus::dashboardPage(
       #   icon = icon("book-open")
       # ),
       menuItem(
+        "Select your Asset View",
+        tabName = "tab_asset_view",
+        icon = icon("mouse-pointer")
+      ),
+      menuItem(
         "Select your Dataset",
         tabName = "tab_data",
         icon = icon("mouse-pointer")
@@ -118,6 +123,32 @@ ui <- shinydashboardPlus::dashboardPage(
       # ),
       # second tab content
       tabItem(
+        tabName = "tab_asset_view",
+        h2("Select the asset view"),
+        fluidRow(
+          box(
+            id = "box_pick_asset_view",
+            status = "primary",
+            width = 6,
+            title = "Choose an asset view: ",
+            selectInput(
+              inputId = "dropdown_asset_view",
+              label = "Asset View:",
+              choices = fromJSON(Sys.getenv("DCA_SYNAPSE_MASTER_FILEVIEW"))#"Generating..."
+            )
+          ),
+          box(
+            title = "Confirm asset view above",
+            status = "primary",
+            width = 12,
+            actionButton("btn_asset_view", "Click to Confirm Asset View",
+                         class = "btn-primary-color"
+                         )
+          )
+        ),
+        switchTabUI("switchTab1", direction = "right")
+      ),
+      tabItem(
         tabName = "tab_data",
         h2("Set Dataset and Data Type for Curation"),
         fluidRow(
@@ -153,7 +184,7 @@ ui <- shinydashboardPlus::dashboardPage(
           ),
           dashboardUI("dashboard")
         ),
-        switchTabUI("switchTab1", direction = "right")
+        switchTabUI("switchTab2", direction = "right")
       ),
       # Third tab item
       tabItem(
@@ -181,9 +212,32 @@ ui <- shinydashboardPlus::dashboardPage(
               )
             ),
             helpText("This link will leads to an empty template or your previously submitted template with new files if applicable.")
+          ),
+        ),
+        fluidRow(
+          box(
+            title = "Or download data as an Excel sheet",
+            status = "primary",
+            width = 12,
+            actionButton("btn_template_xls", "Click to Generate Excel Spreadsheet",
+                         class = "btn-primary-color"
+            ),
+            hidden(
+              div(
+                id = "div_template_warn_xls",
+                height = "100%",
+                htmlOutput("text_template_warn_xls")
+              ),
+              div(
+                id = "div_template_xls",
+                height = "100%",
+                htmlOutput("text_template_xls")
+              )
+            ),
+            helpText("This link will leads to an empty template or your previously submitted template with new files if applicable.")
           )
         ),
-        switchTabUI("switchTab2", direction = "both")
+        switchTabUI("switchTab3", direction = "both")
       ),
       # Fourth tab content
       tabItem(
@@ -228,7 +282,7 @@ ui <- shinydashboardPlus::dashboardPage(
             uiOutput("submit")
           )
         ),
-        switchTabUI("switchTab3", direction = "left")
+        switchTabUI("switchTab4", direction = "left")
       )
     ),
     # waiter loading screen
