@@ -26,7 +26,7 @@ RUN R --vanilla -e 'install.packages("renv", repos = "https://cloud.r-project.or
 RUN addgroup --system app \
     && adduser --system --ingroup app app
 
-RUN echo "local(options(shiny.port = 8100, shiny.host = '0.0.0.0'))" > /usr/lib/R/etc/Rprofile.site
+#RUN echo "local(options(shiny.port = 8100, shiny.host = '0.0.0.0'))" > /usr/lib/R/etc/Rprofile.site
 #RUN echo "local(options(shiny.port = 8100, shiny.host = '0.0.0.0'))" > .Rprofile
 RUN chown app:app -R /home/app
 USER app
