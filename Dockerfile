@@ -1,6 +1,6 @@
 # Based on https://github.com/Sage-Bionetworks/shiny-module-gallery/blob/feature-47-Docker_file/Dockerfile
 # and https://github.com/Sage-Bionetworks/kubernetes-deployments/blob/add-shiny/shiny/example_shiny/Dockerfile
-FROM rocker/r-base:latest
+FROM rocker/r-ver:latest
 LABEL maintainer="Anthony anthony.williams@sagebase.org"
 RUN apt-get update && apt-get install -y --no-install-recommends \
     sudo \
