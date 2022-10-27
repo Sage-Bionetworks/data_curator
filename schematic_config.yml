@@ -25,7 +25,7 @@ model:
     # if both 'download_url' and 'repo' present, `repo` will be used
     download_url: 'https://raw.githubusercontent.com/Sage-Bionetworks/sysbioDCCjsonschemas/model-ad-test-schema/schematic_schemas/model-ad-test/model-ad-schematic-test-schema-v1.jsonld' # url to download JSON-LD data model
     repo: 'Sage-Bionetworks/sysbioDCCjsonschemas' # data model repo url (<repo-owner>/<repo-name>/<version/branch>), version or branch is optional
-    location: 'sysbioDCCjsonschemas/tree/model-ad-test-schema/schematic_schemas/model-ad-test' # path to JSON-LD file
+    location: 'sysbioDCCjsonschemas/tree/model-ad-test-schema/schematic_schemas/model-ad-test/model-ad-schematic-test-schema-v1.jsonld' # path to JSON-LD file
     file_type: 'local'
 
 style:
