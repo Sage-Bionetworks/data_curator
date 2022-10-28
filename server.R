@@ -263,19 +263,23 @@ shinyServer(function(input, output, session) {
       show("div_template_warn")
     }
   })
+  
+  manifest_url <- reactiveVal(NULL)
 
   observeEvent(input$btn_template, {
 
     # loading screen for template link generation
     dcWaiter("show", msg = "Generating link...")
     #schematic rest api to generate manifest
-    manifest_url <- manifest_generate(url=file.path(api_uri, "v1/manifest/generate"),
+    manifest_url(manifest_generate(url=file.path(api_uri, "v1/manifest/generate"),
                                       title = input$dropdown_template,
-                      data_type = selected$schema(), dataset_id = selected$folder())
+                      data_type = selected$schema(), dataset_id = selected$folder(),
+                      asset_view=selected$master_fileview(),
+                      output_format = Sys.getenv("DCA_MANIFEST_OUTPUT_FORMAT")))
     # generate link
-    output$text_template <- renderUI(
-      tags$a(id = "template_link", href = manifest_url, list(icon("hand-point-right"), manifest_url), target = "_blank")
-    )
+    #output$text_template <- renderUI(
+    #  tags$a(id = "template_link", href = manifest_url, list(icon("hand-point-right"), manifest_url), target = "_blank")
+    #)
 
     dcWaiter("hide", sleep = 1)
 
@@ -289,6 +293,35 @@ shinyServer(function(input, output, session) {
     # display link
     show("div_template") # TODO: add progress bar on (loading) screen
   })
+  
+ 
+  
+  # observeEvent(input$btn_template_xls, {
+  #   
+  #   # loading screen for template link generation
+  #   dcWaiter("show", msg = "Generating link...")
+  #   #schematic rest api to generate manifest
+  #   manifest_url(manifest_generate(url=file.path(api_uri, "v1/manifest/generate"),
+  #                                     title = input$dropdown_template,
+  #                                     data_type = selected$schema(), dataset_id = selected$folder(),
+  #                                     asset_view=selected$master_fileview(),
+  #                                     output_format = Sys.getenv("DCA_MANIFEST_OUTPUT_FORMAT"))
+  #   )
+  #   
+  # })
+  # 
+  output$downloadData <- downloadHandler(
+    filename = function() "test.xlsx",
+    content = function(file) {
+      writeBin(manifest_url(), file)
+      #capture.output(print(manifest_url()), file=file) # actually kinda works
+      # Just shows NULL
+      # sink(file)
+      # print(manifest_url())
+      # sink()
+    }
+  )
+  
 
   observeEvent(input$btn_template_confirm, {
     req(input$btn_template_confirm == TRUE)
