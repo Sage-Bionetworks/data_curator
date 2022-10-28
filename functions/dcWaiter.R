@@ -64,17 +64,16 @@ dcWaiter <- function(stage = c("show", "update", "hide"),
     }
   } else {
 
-    # prepare loading tags
+    # loading tags
     if (custom_spinner) {
+      # encode the custom image
       img_type <- tools::file_ext(basename(url))
       if (img_type == "svg") img_type <- "svg+xml"
       b64 <- base64enc::dataURI(file = url, mime = paste0("image/", img_type))
       spinner <-
         tagList(
-          # div(class="custom-spinner",
           img(src = b64, class = "image-spin"),
           h4(msg, style = style)
-          # )
         )
     } else {
       spinner <- tagList(spin, br(), h4(msg, style = style))
@@ -88,7 +87,7 @@ dcWaiter <- function(stage = c("show", "update", "hide"),
         color = color
       )
     } else {
-      Sys.sleep(2) # has to put at least 2s before to make update work
+      Sys.sleep(2) # wait at least 2s to update
       waiter_update(id = id, html = spinner)
       Sys.sleep(sleep)
       waiter_hide(id = id)

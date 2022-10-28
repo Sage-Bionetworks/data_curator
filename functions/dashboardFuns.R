@@ -17,7 +17,7 @@ get_dataset_metadata <- function(syn.store, datasets, ncores = 1) {
   manifest_info <- list()
   modified_user <- list()
   # return empty data frame if no manifest or no component in the manifest
-  # create with column names to prevent dplyr funcs failed
+  # create with column names to prevent dplyr funcs from failing on empty df
   cols <- c(
     "SynapseID",
     "Component",
@@ -69,7 +69,7 @@ get_dataset_metadata <- function(syn.store, datasets, ncores = 1) {
     }, mc.cores = ncores) %>% bind_rows()
   }
 
-  # add datasets even if there are no manifests
+  # add empty dataset ids even if there are no manifests
   metadata <- bind_rows(
     metadata,
     data.frame(

@@ -1,4 +1,5 @@
 
+# tranform the list output from schematic to named vectore
 # convert [list] parent_list: child_list1, child_list2
 # to [vector]: child_list1 with name as child_list2
 list2Vector <- function(list) {
@@ -8,14 +9,8 @@ list2Vector <- function(list) {
   return(child)
 }
 
-runTime <- function(expr) {
-  t1 <- Sys.time()
-  expr
-  t2 <- Sys.time() - t1
-  return(t2)
-}
-
-# convert long string from "x1, x2, x3, x4, x5" into "x1, x2 ... x5"
+# truncate long string with ellipsis, e.g. "x1, x2, x3, x4, x5" into "x1, x2 ... x5"
+# TODO: consider replacing by stringr::str_trunc
 truncate_ellipsis <- function(string, max, pattern = NULL) {
   if (!is.null(pattern)) {
     string <- str_split(string, pattern)
