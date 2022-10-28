@@ -239,15 +239,17 @@ shinyServer(function(input, output, session) {
       data_list$files <<- list2Vector(file_list)
       dcWaiter("hide")
       
-      dcWaiter("show", msg = "Downloading data from Synapse...")
-      #schematic rest api to generate manifest
-      manifest_url(manifest_generate(url=file.path(api_uri, "v1/manifest/generate"),
-                                     title = input$dropdown_template,
-                                     data_type = selected$schema(), dataset_id = selected$folder(),
-                                     asset_view=selected$master_fileview(),
-                                     output_format = Sys.getenv("DCA_MANIFEST_OUTPUT_FORMAT")))
-      
-      dcWaiter("hide", sleep = 1)
+      if (Sys.getenv("DCA_MANIFEST_OUTPUT_FORMAT") == "excel") {
+        dcWaiter("show", msg = "Downloading data from Synapse...")
+        #schematic rest api to generate manifest
+        manifest_url(manifest_generate(url=file.path(api_uri, "v1/manifest/generate"),
+                                       title = input$dropdown_template,
+                                       data_type = selected$schema(), dataset_id = selected$folder(),
+                                       asset_view=selected$master_fileview(),
+                                       output_format = Sys.getenv("DCA_MANIFEST_OUTPUT_FORMAT")))
+        
+        dcWaiter("hide", sleep = 1)
+      }
     }
   })
 
@@ -275,8 +277,6 @@ shinyServer(function(input, output, session) {
       show("div_template_warn")
     }
   })
-  
- # manifest_url <- reactiveVal(NULL)
 
   observeEvent(input$btn_template, {
 
@@ -289,9 +289,9 @@ shinyServer(function(input, output, session) {
                       asset_view=selected$master_fileview(),
                       output_format = Sys.getenv("DCA_MANIFEST_OUTPUT_FORMAT")))
     # generate link
-    #output$text_template <- renderUI(
-    #  tags$a(id = "template_link", href = manifest_url, list(icon("hand-point-right"), manifest_url), target = "_blank")
-    #)
+    output$text_template <- renderUI(
+      tags$a(id = "template_link", href = manifest_url(), list(icon("hand-point-right"), manifest_url()), target = "_blank")
+    )
 
     dcWaiter("hide", sleep = 1)
 
@@ -304,38 +304,6 @@ shinyServer(function(input, output, session) {
 
     # display link
     show("div_template") # TODO: add progress bar on (loading) screen
-  })
-  
- 
-  
-  # observeEvent(input$btn_template_xls, {
-  #   
-  #   # loading screen for template link generation
-  #   dcWaiter("show", msg = "Generating link...")
-  #   #schematic rest api to generate manifest
-  #   manifest_url(manifest_generate(url=file.path(api_uri, "v1/manifest/generate"),
-  #                                     title = input$dropdown_template,
-  #                                     data_type = selected$schema(), dataset_id = selected$folder(),
-  #                                     asset_view=selected$master_fileview(),
-  #                                     output_format = Sys.getenv("DCA_MANIFEST_OUTPUT_FORMAT"))
-  #   )
-  #   
-  # })
-  # 
-  
-  observeEvent(input$tab_template, {
-    
-    # loading screen for template link generation
-    dcWaiter("show", msg = "Downloading data from Synapse...")
-    #schematic rest api to generate manifest
-    manifest_url(manifest_generate(url=file.path(api_uri, "v1/manifest/generate"),
-                                   title = input$dropdown_template,
-                                   data_type = selected$schema(), dataset_id = selected$folder(),
-                                   asset_view=selected$master_fileview(),
-                                   output_format = Sys.getenv("DCA_MANIFEST_OUTPUT_FORMAT")))
- 
-    dcWaiter("hide", sleep = 1)
- 
   })
   
   # Bookmarking this thread in case we can't use writeBin...
