@@ -20,15 +20,16 @@ Follow the steps below to make sure the _Data Curator App_ is fully setup to wor
 
         git clone --single-branch --branch main https://github.com/Sage-Bionetworks/data_curator.git
 
-2.  Create and modify the configuration file ([How to obtain OAuth Credential](https://github.com/Sage-Bionetworks/data_curator#Authentication)):
+2.  Set environmental variables to configure app:
 
-        cp example_oauth_config.yml oauth_config.yml
-        chmod 400 oauth_config.yml
+        `DCA_MANIFEST_OUTPUT_FORMAT` = "google_sheet" or "excel" - control whether templates can be exported as 
+google sheets or excel documents. 
 
-3.  Create and activate a virtual environment within which you can install the package:
+3.  Set environmental variable to schematic's REST API service
 
-        python -m venv .venv
-        source .venv/bin/activate
+    If running schematic locally with a Flask server:  
+    `DCA_API_HOST`="http://0.0.0.0" 
+    `DCA_API_PORT`="3001"
 
 4.  Install required R pacakges dependencies:
 
