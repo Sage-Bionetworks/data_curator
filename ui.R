@@ -212,16 +212,17 @@ ui <- shinydashboardPlus::dashboardPage(
               )
             ),
             helpText("This link will leads to an empty template or your previously submitted template with new files if applicable.")
-          ),
+          )
         ),
         fluidRow(
           box(
             title = "Or download data as an Excel sheet",
             status = "primary",
             width = 12,
-            actionButton("btn_template_xls", "Click to Generate Excel Spreadsheet",
-                         class = "btn-primary-color"
-            ),
+            #actionButton("btn_template_xls", "Click to Generate Excel Spreadsheet",
+            #             class = "btn-primary-color"
+            #),
+            downloadButton("downloadData", "Download Excel Spreadsheet."),
             hidden(
               div(
                 id = "div_template_warn_xls",
