@@ -216,6 +216,8 @@ shinyServer(function(input, output, session) {
     folder = selected$project()
   )
 
+  manifest_url <- reactiveVal(NULL)
+  
   ######## Template Google Sheet Link ########
   observeEvent(c(input$dropdown_folder, input$tabs), {
     if (input$tabs == "tab_template") {
@@ -236,6 +238,16 @@ shinyServer(function(input, output, session) {
       }
       data_list$files <<- list2Vector(file_list)
       dcWaiter("hide")
+      
+      dcWaiter("show", msg = "Downloading data from Synapse...")
+      #schematic rest api to generate manifest
+      manifest_url(manifest_generate(url=file.path(api_uri, "v1/manifest/generate"),
+                                     title = input$dropdown_template,
+                                     data_type = selected$schema(), dataset_id = selected$folder(),
+                                     asset_view=selected$master_fileview(),
+                                     output_format = Sys.getenv("DCA_MANIFEST_OUTPUT_FORMAT")))
+      
+      dcWaiter("hide", sleep = 1)
     }
   })
 
@@ -264,7 +276,7 @@ shinyServer(function(input, output, session) {
     }
   })
   
-  manifest_url <- reactiveVal(NULL)
+ # manifest_url <- reactiveVal(NULL)
 
   observeEvent(input$btn_template, {
 
@@ -311,8 +323,24 @@ shinyServer(function(input, output, session) {
   # })
   # 
   
-
+  observeEvent(input$tab_template, {
+    
+    # loading screen for template link generation
+    dcWaiter("show", msg = "Downloading data from Synapse...")
+    #schematic rest api to generate manifest
+    manifest_url(manifest_generate(url=file.path(api_uri, "v1/manifest/generate"),
+                                   title = input$dropdown_template,
+                                   data_type = selected$schema(), dataset_id = selected$folder(),
+                                   asset_view=selected$master_fileview(),
+                                   output_format = Sys.getenv("DCA_MANIFEST_OUTPUT_FORMAT")))
+ 
+    dcWaiter("hide", sleep = 1)
+ 
+  })
   
+  # Bookmarking this thread in case we can't use writeBin...
+  # Use a db connection instead
+  # https://community.rstudio.com/t/how-to-let-download-button-work-with-eventreactive/20937
   output$downloadData <- downloadHandler(
     filename = function() sprintf("%s.xlsx", input$dropdown_template),
     content = function(file) {
@@ -324,6 +352,7 @@ shinyServer(function(input, output, session) {
       # sink()
     }
   )
+  
   
   
   observeEvent(input$btn_template_confirm, {
