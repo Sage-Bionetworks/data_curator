@@ -310,8 +310,11 @@ shinyServer(function(input, output, session) {
   #   
   # })
   # 
+  
+
+  
   output$downloadData <- downloadHandler(
-    filename = function() "test.xlsx",
+    filename = function() sprintf("%s.xlsx", input$dropdown_template),
     content = function(file) {
       writeBin(manifest_url(), file)
       #capture.output(print(manifest_url()), file=file) # actually kinda works
@@ -322,7 +325,7 @@ shinyServer(function(input, output, session) {
     }
   )
   
-
+  
   observeEvent(input$btn_template_confirm, {
     req(input$btn_template_confirm == TRUE)
     runjs("$('#template_link')[0].click();")
