@@ -83,7 +83,7 @@ jobs:
       - name: Clone Data Model
         shell: bash
         run: |
-          git clone -b model-ad-test-schema https://github.com/${{ env.MODEL_REPO }}.git
+          git clone -b main https://github.com/${{ env.MODEL_REPO }}.git
 
       - name: Create config.json
         shell: bash
