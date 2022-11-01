@@ -89,10 +89,10 @@ jobs:
         shell: bash
         run: |
           source .venv/bin/activate
-          python3 .github/generate_config_json.py \
-            -jd ${{ env.MODEL_PATH }} \
-            -schema ${{ env.MODEL_REPO }} \
-            -service 'Sage-Bionetworks/schematic'
+          #python3 .github/generate_config_json.py \
+          #  -jd ${{ env.MODEL_PATH }} \
+          #  -schema ${{ env.MODEL_REPO }} \
+          #  -service 'Sage-Bionetworks/schematic'
   
       - name: zip virtual env
         shell: bash
