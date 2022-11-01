@@ -1,0 +1,26 @@
+{
+  "manifest_schemas": [
+    {
+      "display_name": "assay_MRI_metadata_template",
+      "schema_name": "AssayMRIMetadataTemplate",
+      "type": "record"
+    },
+    {
+      "display_name": "biospecimen_metadata_template",
+      "schema_name": "BiospecimenMetadataTemplate",
+      "type": "record"
+    },
+    {
+      "display_name": "individual_animal_metadata_template",
+      "schema_name": "IndividualAnimalMetadataTemplate",
+      "type": "record"
+    },
+    {
+      "display_name": "assay_rnaSeq_metadata_template",
+      "schema_name": "AssayRnaSeqMetadataTemplate",
+      "type": "record"
+    }
+  ],
+  "service_version": "",
+  "schema_version": ""
+}
