@@ -134,7 +134,7 @@ ui <- shinydashboardPlus::dashboardPage(
             selectInput(
               inputId = "dropdown_asset_view",
               label = "Asset View:",
-              choices = unlist(rjson::fromJSON(Sys.getenv("DCA_SYNAPSE_MASTER_FILEVIEW"), simplify=FALSE))#"Generating..."
+              choices = unlist(jsonlite::fromJSON(Sys.getenv("DCA_SYNAPSE_MASTER_FILEVIEW"), simplifyVector=FALSE))#"Generating..."
             )
           ),
           box(
