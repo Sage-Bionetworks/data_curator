@@ -29,11 +29,12 @@ shinyServer(function(input, output, session) {
   source("R/schematic_rest_api.R")
   # import module that contains SynapseStorage class
   # read config in
-  config <- jsonlite::fromJSON("www/config.json")
-  config_schema <- as.data.frame(config[[1]])
+  config <- reactiveVal()
+  config_schema <- reactiveVal()
   # mapping from display name to schema name
-  template_namedList <- config_schema$schema_name
-  names(template_namedList) <- config_schema$display_name
+  #template_namedList <- config_schema$schema_name
+  #names(template_namedList) <- config_schema$display_name
+  template_namedList <- reactiveVal()
   #master_fileview <- schematic_config$synapse$master_fileview
   #master_fileview <- Sys.getenv("DCA_SYNAPSE_MASTER_FILEVIEW")
 
@@ -42,7 +43,7 @@ shinyServer(function(input, output, session) {
 
   data_list <- list(
     project = reactiveVal(NULL), folders = reactiveVal(NULL),
-    schemas = reactiveVal(template_namedList), files = reactiveVal(NULL),
+    schemas = reactiveVal(), files = reactiveVal(NULL),
     master_fileview = reactiveVal(NULL)
   )
   # synapse ID of selected data
@@ -109,20 +110,30 @@ shinyServer(function(input, output, session) {
   #observeEvent(input[["dropdown_asset_view"]], ignoreNULL = TRUE, ignoreInit = TRUE, {
   observeEvent(input$btn_asset_view, {
     selected$master_fileview(input$dropdown_asset_view)
-               # updating syn storage
-               projects_list <- storage_projects(url=file.path(api_uri, "v1/storage/projects"),
-                                                 asset_view = selected$master_fileview(),
-                                                 input_token = access_token)
-               data_list$project(list2Vector(projects_list))
-               
-               # updates project dropdown
-               lapply(c("header_dropdown_", "dropdown_"), function(x) {
-                 lapply(c(1, 3), function(i) {
-                   updateSelectInput(session, paste0(x, dropdown_types[i]),
-                                     choices = sort(names(data_list[[i]]()))
-                   )
-                 })
-               })
+    
+    config_ops <- unlist(jsonlite::fromJSON(Sys.getenv("DCA_TEMPLATE_MENU_CONFIG")))
+    config_name <- reactiveVal(config_ops[names(config_ops) %in% selected$master_fileview()])
+    config(jsonlite::fromJSON(file.path("www", config_name())))
+    config_schema(as.data.frame(config()[[1]]))
+    # mapping from display name to schema name
+    template_namedList(setNames(config_schema()$schema_name, config_schema()$display_name))
+    data_list$schemas(template_namedList())
+    #names(template_namedList()) <- config_schema()$display_name
+  #  
+     # updating syn storage
+     projects_list <- storage_projects(url=file.path(api_uri, "v1/storage/projects"),
+                                       asset_view = selected$master_fileview(),
+                                       input_token = access_token)
+     data_list$project(list2Vector(projects_list))
+     
+     # updates project dropdown
+     lapply(c("header_dropdown_", "dropdown_"), function(x) {
+       lapply(c(1, 3), function(i) {
+         updateSelectInput(session, paste0(x, dropdown_types[i]),
+                           choices = sort(names(data_list[[i]]()))
+         )
+       })
+     })
 })
 
   ######## Header Dropdown Button ########
@@ -198,7 +209,7 @@ shinyServer(function(input, output, session) {
   observeEvent(input$dropdown_template, {
     # update reactive selected values for schema
     selected$schema(data_list$schemas()[input$dropdown_template])
-    schema_type <- config_schema$type[which(config_schema$display_name == input$dropdown_template)]
+    schema_type <- config_schema()$type[which(config_schema()$display_name == input$dropdown_template)]
     selected$schema_type(schema_type)
   })
 
