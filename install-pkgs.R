@@ -9,7 +9,7 @@ cran <- c(
   "dplyr==1.0.7",
   "shinythemes==1.2.0",
   "shinydashboard==0.7.2",
-  "stringr==1.4.0",
+  "stringr==1.4.1",
   "DT==0.20",
   "jsonlite==1.7.3",
   "reticulate==1.23",
