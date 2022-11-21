@@ -1,6 +1,4 @@
 # This is the module to create one/two buttons to switch to previous/next tab
-# TODO: Add more descriptions
-
 tagID <- c("Next", "Prev") # Do not change order, to ensure server works properly
 
 switchTabUI <- function(id, direction = c("left", "right", "both")) {
