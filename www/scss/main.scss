@@ -1,11 +1,11 @@
-// global variables
-@import 'basic/variables';
+// basic
+@import 'basic/load';
 
-// dashboard sections
-@import 'section/header';
-@import 'section/sidebar';
-@import 'section/content';
-@import 'section/footer';
+// modules
+@import 'modules/load';
+
+// sections
+@import 'section/load';
 
 // feature styles
 @import 'basic/animation';
