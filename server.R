@@ -37,7 +37,11 @@ shinyServer(function(input, output, session) {
   template_namedList <- reactiveVal()
   #master_fileview <- schematic_config$synapse$master_fileview
   #master_fileview <- Sys.getenv("DCA_SYNAPSE_MASTER_FILEVIEW")
-
+  
+  # Set data_model to a URL to jsonld after choosing asset view
+  data_model_options <- jsonlite::fromJSON(Sys.getenv("DCA_MODEL_INPUT_DOWNLOAD_URL"))
+  data_model = reactiveVal(NULL)
+  
   # data available to the user
   syn_store <- NULL # gets list of projects they have access to
 
@@ -53,12 +57,6 @@ shinyServer(function(input, output, session) {
     master_fileview = reactiveVal(NULL)
   )
 
-  selected <- list(
-    project = reactiveVal(NULL), folder = reactiveVal(""),
-    schema = reactiveVal(NULL), schema_type = reactiveVal(NULL),
-    master_fileview = reactiveVal(NULL)
-  )
-  
   isUpdateFolder <- reactiveVal(FALSE)
 
   tabs_list <- c("tab_asset_view", "tab_data", "tab_template", "tab_upload")
@@ -118,6 +116,8 @@ shinyServer(function(input, output, session) {
     # mapping from display name to schema name
     template_namedList(setNames(config_schema()$schema_name, config_schema()$display_name))
     data_list$schemas(template_namedList())
+
+    data_model(data_model_options[selected$master_fileview()])
     #names(template_namedList()) <- config_schema()$display_name
   #  
      # updating syn storage
@@ -358,7 +358,7 @@ shinyServer(function(input, output, session) {
 
     # schematic rest api to validate metadata
     annotation_status <- manifest_validate(url=file.path(api_uri, "v1/model/validate"),
-                                           schema_url=Sys.getenv("DCA_MODEL_INPUT_DOWNLOAD_URL"),
+                                           schema_url=data_model(),
                                            data_type=selected$schema(),
                                            json_str=toJSON(inFile$data()))
                            #csv_file=inFile$raw()$datapath)
@@ -467,7 +467,7 @@ shinyServer(function(input, output, session) {
       # This validates AND submits the data to Synapse
       # Returns synapse table ID if successful
       manifest_id <- model_submit(url=file.path(api_uri, "v1/model/submit"),
-                                       schema_url = Sys.getenv("DCA_MODEL_INPUT_DOWNLOAD_URL"),
+                                       schema_url = data_model(),
                                     data_type=selected$schema(),
                               dataset_id=selected$folder(),
                               input_token=access_token,
@@ -512,7 +512,7 @@ shinyServer(function(input, output, session) {
       # associates metadata with data and returns manifest id
       manifest_id <- model_submit(url=file.path(api_uri, "v1/model/submit"),
                                     data_type=selected$schema(),
-                                    schema_url = Sys.getenv("DCA_MODEL_INPUT_DOWNLOAD_URL"),
+                                    schema_url = data_model(),
                                     dataset_id=selected$folder(),
                                     input_token=access_token,
                                     restrict_rules=FALSE,
