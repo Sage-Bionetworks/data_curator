@@ -230,6 +230,16 @@
       "schema_name": "ScmC-seqLevel2",
       "type": "file"
     } 
+    {
+      "display_name": "scDNA-seq Level 1",
+      "schema_name": "ScDNA-seqLevel1",
+      "type": "file"
+    } 
+    {
+      "display_name": "scDNA-seq Level 2",
+      "schema_name": "ScDNA-seqLevel2",
+      "type": "file"
+    } 
   ],
 
   "community": "HTAN",
