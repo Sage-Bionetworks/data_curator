@@ -258,7 +258,7 @@
   ],
 
   "community": "HTAN",
-  "schema": "v22.10.1",
+  "schema": "v22.11.1",
   "schematic_service": "v1",
-  "schematic": "v22.11.2"
+  "schematic": "v22.11.3"
 }
