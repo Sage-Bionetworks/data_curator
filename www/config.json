@@ -88,7 +88,7 @@
     {
       "display_name": "Imaging Level 4",
       "schema_name": "ImagingLevel4",
-      "type": "assay"
+      "type": "file"
     },
     {
       "display_name": "Clinical Tier 1: Demographics",
