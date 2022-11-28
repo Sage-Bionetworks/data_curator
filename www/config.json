@@ -220,6 +220,16 @@
       "schema_name": "PublicationManifest",
       "type": "record"
     } 
+    {
+      "display_name": "scmC-seq Level 1",
+      "schema_name": "ScmC-seqLevel1",
+      "type": "file"
+    } 
+    {
+      "display_name": "scmC-seq Level 2",
+      "schema_name": "ScmC-seqLevel2",
+      "type": "file"
+    } 
   ],
 
   "community": "HTAN",
