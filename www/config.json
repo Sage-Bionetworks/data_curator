@@ -216,9 +216,44 @@
       "type": "record"
     },
     {
+      "display_name": "RPPA Level 3",
+      "schema_name": "RPPALevel3",
+      "type": "file"
+    },
+    {
+      "display_name": "RPPA Level 4",
+      "schema_name": "RPPALevel4",
+      "type": "file"
+    },
+    {
       "display_name": "Publication Manifest",
       "schema_name": "PublicationManifest",
       "type": "record"
+    } 
+    {
+      "display_name": "scmC-seq Level 1",
+      "schema_name": "ScmC-seqLevel1",
+      "type": "file"
+    } 
+    {
+      "display_name": "scmC-seq Level 2",
+      "schema_name": "ScmC-seqLevel2",
+      "type": "file"
+    } 
+    {
+      "display_name": "scDNA-seq Level 1",
+      "schema_name": "ScDNA-seqLevel1",
+      "type": "file"
+    } 
+    {
+      "display_name": "scDNA-seq Level 2",
+      "schema_name": "ScDNA-seqLevel2",
+      "type": "file"
+    } 
+    {
+      "display_name": "scDNA-seq Level 2",
+      "schema_name": "ScDNA-seqLevel2",
+      "type": "file"
     } 
   ],
 
