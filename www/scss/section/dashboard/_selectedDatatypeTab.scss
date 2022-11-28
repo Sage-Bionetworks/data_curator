@@ -1,0 +1,31 @@
+.selectedDataTypeTab-container {
+  .instruction-container {
+    display: flex;
+    flex-direction: column;
+    margin-top: 12px;
+
+    li {
+      min-height: 36px;
+      padding: 8px;
+      margin-top: 12px;
+    }
+  }
+
+  .network-container {
+    margin-top: 32px;
+  }
+
+  .legend-container {
+    display: flex;
+    justify-content: space-evenly;
+    margin-bottom: 10px;
+
+    span {
+      font-size: 1em;
+
+      i {
+        margin-right: 8px;
+      }
+    }
+  }
+}
