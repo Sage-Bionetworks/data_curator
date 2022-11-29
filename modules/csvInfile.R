@@ -29,7 +29,7 @@ csvInfileServer <- function(id, na = c("", "NA"), colsAsCharacters = FALSE, keep
 
         if (keepBlank) {
           # change NA to blank to match schematic output
-          infile <- infile %>% mutate(across(everything(), ~ replace_na(., "")))
+          infile <- infile %>% mutate(across(everything(), ~replace_na(., "")))
         }
 
         # remove empty rows/columns where readr called it 'X'[digit] for unnamed col

@@ -21,10 +21,10 @@ ui <- shinydashboardPlus::dashboardPage(
       dropdownBlock(
         id = "header_selection_dropdown",
         title = "Selection",
-        icon = icon("sliders"),
+        icon = icon("sliders-h"),
         badgeStatus = "info",
         fluidRow(
-          lapply(dropdown_types, function(x) {
+          lapply(datatypes, function(x) {
             div(
               id = paste0("header_content_", x),
               selectInput(
@@ -34,7 +34,7 @@ ui <- shinydashboardPlus::dashboardPage(
               )
             )
           }),
-          actionButton("btn_header_update", NULL, icon("rotate"), class = "btn-shiny-effect")
+          actionButton("btn_header_update", NULL, icon("sync-alt"), class = "btn-shiny-effect")
         )
       )
     ),
@@ -54,10 +54,16 @@ ui <- shinydashboardPlus::dashboardPage(
     width = 250,
     sidebarMenu(
       id = "tabs",
+      # uiOutput("title"),
+      menuItem(
+        "Instructions",
+        tabName = "tab_instructions",
+        icon = icon("book-open")
+      ),
       menuItem(
         "Select your Dataset",
         tabName = "tab_data",
-        icon = icon("arrow-pointer")
+        icon = icon("mouse-pointer")
       ),
       menuItem(
         "Get Metadata Template",
@@ -83,17 +89,36 @@ ui <- shinydashboardPlus::dashboardPage(
       singleton(includeScript("www/js/readCookie.js")),
       tags$script(htmlwidgets::JS("setTimeout(function(){history.pushState({}, 'Data Curator', window.location.pathname);},2000);"))
     ),
-    # load dependencies
     use_notiflix_report(width = "400px"),
     use_waiter(),
     tabItems(
-      # data selection & dashboard tab content
+      # First tab content
+      tabItem(
+        tabName = "tab_instructions",
+        h2("Instructions for the Data Curator App (DCA):"),
+        h3(
+          "1. Go to",
+          strong("Select your Dataset"),
+          "tab - select your project; choose your folder and metadata template type matching your metadata."
+        ),
+        h3(
+          "2. Go to",
+          strong("Get Metadata Template"),
+          "tab - click on the link to generate the metadata template, then fill out and download the file as a CSV. If you already have an annotated metadata template, you may skip this step."
+        ),
+        h3(
+          "3. Go to",
+          strong("Submit and Validate Metadata"),
+          "tab - upload your filled CSV and validate your metadata. If you receive errors correct them, reupload your CSV, and revalidate until you receive no more errors. When your metadata is valid, you will be able to see a 'Submit' button. Press it to submit your metadata."
+        ),
+        switchTabUI("switchTab1", direction = "right")
+      ),
+      # second tab content
       tabItem(
         tabName = "tab_data",
-        h2("Set Dataset and Data Type for Curation"),
+        h2("Set Dataset and Metadata Template for Curation"),
         fluidRow(
           box(
-            id = "box_pick_project",
             status = "primary",
             width = 6,
             title = "Choose a Project and Folder: ",
@@ -104,29 +129,27 @@ ui <- shinydashboardPlus::dashboardPage(
             ),
             selectInput(
               inputId = "dropdown_folder",
-              label = "Dataset:",
+              label = "Folder:",
               choices = "Generating..."
             ),
             helpText(
-              "If your recently updated folder does not appear, please wait for a few minutes and refresh"
+              "If your recently updated folder does not appear, please wait for Synapse to sync and refresh"
             )
           ),
           box(
-            id = "box_pick_manifest",
             status = "primary",
             width = 6,
-            title = "Choose a Data Type: ",
+            title = "Choose a Metadata Template Type: ",
             selectInput(
-              inputId = "dropdown_datatype",
-              label = "Data Type:",
+              inputId = "dropdown_template",
+              label = "Template:",
               choices = "Generating..."
             )
-          ),
-          dashboardUI("dashboard")
+          )
         ),
-        switchTabUI("switchTab1", direction = "right")
+        switchTabUI("switchTab2", direction = "both")
       ),
-      # template tab item
+      # Third tab item
       tabItem(
         tabName = "tab_template",
         useShinyjs(),
@@ -154,9 +177,9 @@ ui <- shinydashboardPlus::dashboardPage(
             helpText("This link will leads to an empty template or your previously submitted template with new files if applicable.")
           )
         ),
-        switchTabUI("switchTab2", direction = "both")
+        switchTabUI("switchTab3", direction = "both")
       ),
-      # upload & submit tab content
+      # Fourth tab content
       tabItem(
         tabName = "tab_upload",
         h2("Submit & Validate a Filled Metadata Template"),
@@ -198,8 +221,7 @@ ui <- shinydashboardPlus::dashboardPage(
             width = 12,
             uiOutput("submit")
           )
-        ),
-        switchTabUI("switchTab3", direction = "left")
+        )
       )
     ),
     # waiter loading screen
