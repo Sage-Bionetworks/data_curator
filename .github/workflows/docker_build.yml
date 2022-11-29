@@ -6,7 +6,9 @@ name: Create and publish a Docker image
 
 on:
   push:
-    branches: ['schematic-rest-api'] #['release*']
+    tags:
+      - 'v*'
+    #branches: ['schematic-rest-api'] #['release*']
 
 env:
   REGISTRY: ghcr.io
