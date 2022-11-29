@@ -7,7 +7,7 @@ name: Create and publish a Docker image
 on:
   push:
     tags:
-      - 'v*'
+      - '*beta*'
     #branches: ['schematic-rest-api'] #['release*']
 
 env:
@@ -40,8 +40,7 @@ jobs:
           tags: |
             type=ref,event=branch
             type=ref,event=pr
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{raw}}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
