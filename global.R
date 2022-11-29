@@ -27,7 +27,7 @@ suppressPackageStartupMessages({
 ## Set Up OAuth
 #oauth_client <- yaml.load_file("oauth_config.yml")
 
-Sys.getenv() # Test to see env variables in log
+message(Sys.getenv()) # Test to see env variables in log
 # client_id <- toString(oauth_client$CLIENT_ID)
 # client_secret <- toString(oauth_client$CLIENT_SECRET)
 # app_url <- toString(oauth_client$APP_URL)
