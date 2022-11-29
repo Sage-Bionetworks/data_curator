@@ -1,4 +1,4 @@
-validationResult <- function(anno.res, template, manifest = NULL, dashboard = FALSE) {
+validationResult <- function(anno.res, template, manifest) {
   result <- "invalid"
   error_msg <- NULL
   error_help_msg <- NULL
@@ -8,9 +8,8 @@ validationResult <- function(anno.res, template, manifest = NULL, dashboard = FA
   error_type <- NULL
   highlight_values <- list()
 
-  # validate if no uploaded manifest or empty manifest
-  # dashboard does not need this step
-  if (!dashboard && (is.null(manifest) || nrow(manifest) == 0)) {
+  # if no uploaded manifest or empty manifest
+  if (is.null(manifest) || nrow(manifest) == 0) {
     return(list(
       result = "invalid",
       error_type = "Empty File",

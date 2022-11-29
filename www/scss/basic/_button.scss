@@ -16,10 +16,8 @@
   background-image: linear-gradient(270deg, #8e9ac2, #42579a);
   background-size: 400% 400%;
   animation: TransitioningBackground 10s ease infinite;
-  outline: none !important;
 
-  &:hover,
-  &:focus {
+  &:hover, &:focus {
     color: #fff;
     background-image: linear-gradient(to left, #2d8fe5, #d155b8);
     transform: scale(1.05);
@@ -52,8 +50,7 @@
     transform: translateX(-100px) skewX(-15deg);
   }
 
-  &::before,
-  &::after {
+  &::before, &::after {
     transform: translateX(300px) skewX(-15deg);
     transition: 0.7s;
   }
@@ -61,8 +58,8 @@
 
 // dropdown hover effect
 .option {
-  &:hover,
-  &:focus {
+
+  &:hover, &:focus {
     transform: scale(1.01);
     font-size: 1.02em;
     box-shadow: $primary_shadow;
@@ -72,8 +69,7 @@
 }
 
 // previous - next button
-.switch-tab-prev,
-.switch-tab-next {
+.switch-tab-prev, .switch-tab-next {
   background: #fff;
   color: #000;
   display: flex;
@@ -85,14 +81,12 @@
   padding: 5px;
   border-radius: 10px;
   box-shadow: $simple_shadow;
-  outline: none !important;
-
-  &:hover,
-  &:focus {
+  
+  &:hover, &:focus {
     background: #fff;
     outline: none !important;
   }
-
+  
   .fa {
     margin: 1.5px;
     font-size: 20px;
@@ -112,9 +106,10 @@
 }
 
 .switch-tab-next:hover {
+
   .fa {
     animation: move-right 2s infinite;
-
+    
     &:nth-child(2) {
       animation-delay: -0.2s;
     }
@@ -122,82 +117,24 @@
     &:nth-child(3) {
       animation-delay: -0.4s;
     }
-  }
-}
-
-.scroll-down {
-  background: inherit !important;
-  color: inherit !important;
-  border: none;
-  box-shadow: none !important;
-  outline: none !important;
-  cursor: pointer;
-
-  &:hover {
-    color: #878787 !important;
-    opacity: 0.8;
-  }
-
-  span:hover {
-    border-color: #878787 !important;
-    color: #878787 !important;
-    opacity: 0.8;
-  }
-
-  div {
-    display: flex;
-    align-items: center;
-    margin-top: 40px;
-
-    p {
-      margin: 0;
-      font-size: 1.8em;
-      text-align: center;
-    }
-
-    span {
-      position: relative;
-      margin-right: 15px;
-      width: 30px;
-      height: 50px;
-      margin-left: -15px;
-      border: 2.5px solid #000;
-      border-radius: 50px;
-      box-sizing: border-box;
-
-      &:before {
-        content: '';
-        position: absolute;
-        top: 10px;
-        left: 50%;
-        width: 6px;
-        height: 6px;
-        margin-left: -3px;
-        background-color: #000;
-        border-radius: 100%;
-        box-sizing: border-box;
-        animation: move-down 1.8s infinite;
-      }
-    }
-  }
+  } 
 }
 
 // simple float effect
-// #btn_download, #btn_validate, #btn_val_gsheet, #btn_submit
+// #btn_download, #btn_validate, #btn_val_gsheet, #btn_submit 
 .btn-primary-color {
-  background: $primary_col;
-  color: #fff;
-  border-color: transparent;
-  border-radius: 40px;
-  cursor: pointer;
-  outline: none !important;
+    background: $primary_col;
+    color: #fff;
+    border-color: transparent;
+    border-radius: 40px;
+    cursor: pointer;
 
-  &:hover {
+  &:hover, &:focus {
     background: $primary_col;
     color: #fff;
     box-shadow: $float_shadow2;
-    -webkit-transition: box-shadow 0.4s ease-out;
-    transition: box-shadow 0.4s ease-out;
+    -webkit-transition: box-shadow .4s ease-out;
+    transition: box-shadow .4s ease-out;
   }
 }
 
@@ -205,10 +142,4 @@
 .shiny-file-input-progress .progress-bar {
   background: $primary_col;
   border-radius: 40px;
-}
-
-// checkbox button
-// TODO: create custom one (hidden default styling)
-input[type='checkbox'] {
-  filter: hue-rotate(38deg) brightness(1.1);
 }
