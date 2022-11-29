@@ -26,7 +26,7 @@ COPY --chown=shiny ./ ./
 
 # set up r packages via renv
 # This step takes forever, so do early to avoid invalidating cache with code changes
-RUN Rscript -e 'install.packages(c("remotes", "renv"), repos = "https://cloud.r-project.org/"); renv::restore(); remotes::install_github("https://github.com/sage-bionetworks/data_curator", ref="schematic-rest-api")'
+RUN Rscript -e 'install.packages(c("remotes", "renv"), repos = "https://cloud.r-project.org/"); source('renv/activate.R'); renv::restore(); remotes::install_github("https://github.com/sage-bionetworks/data_curator", ref="schematic-rest-api")'
 
 #RUN echo "local(options(shiny.port = 8100, shiny.host = '0.0.0.0'))" > /usr/lib/R/etc/Rprofile.site
 #RUN echo "local(options(shiny.port = 8100, shiny.host = '0.0.0.0'))" > .Rprofile
