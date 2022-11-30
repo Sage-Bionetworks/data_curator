@@ -5,12 +5,12 @@ name: shiny-deploy
 
 on:
   push:
-    branches:
-      - main
-      - develop*
-      - feat-UI-dashboard
-    tags:
-      - v*.*.*
+#    branches:
+#      - main
+#      - develop*
+#      - feat-UI-dashboard
+#    tags:
+#      - v*.*.*
     paths-ignore:
       - '.github/ISSUE_TEMPLATE/**'
       - '**/*.md'
