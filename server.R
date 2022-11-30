@@ -38,16 +38,6 @@ shinyServer(function(input, output, session) {
   #master_fileview <- schematic_config$synapse$master_fileview
   #master_fileview <- Sys.getenv("DCA_SYNAPSE_MASTER_FILEVIEW")
   
-  parse_env_var <- function(x, el_delim=",", kv_delim=":"){
-  
-    # assume string of key-value pairs
-    elements <- stringr::str_split(x, el_delim, simplify = TRUE)
-    unlist(lapply(elements, function(y){
-      kv <- stringr::str_split(y, kv_delim, n=2) 
-      setNames(kv[[1]][[2]], kv[[1]][[1]])
-    }))
-  
-  }
   # Set data_model to a URL to jsonld after choosing asset view
   data_model_options <- Sys.getenv("DCA_MODEL_INPUT_DOWNLOAD_URL")
   data_model_options <- parse_env_var(data_model_options) 
