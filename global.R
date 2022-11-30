@@ -27,6 +27,17 @@ suppressPackageStartupMessages({
 ## Set Up OAuth
 #oauth_client <- yaml.load_file("oauth_config.yml")
 
+parse_env_var <- function(x, el_delim=",", kv_delim=":"){
+  
+  # assume string of key-value pairs
+  elements <- stringr::str_split(x, el_delim, simplify = TRUE)
+  unlist(lapply(elements, function(y){
+    kv <- stringr::str_split(y, kv_delim, n=2) 
+    setNames(kv[[1]][[2]], kv[[1]][[1]])
+  }))
+  
+}
+
 message(Sys.getenv()) # Test to see env variables in log
 # client_id <- toString(oauth_client$CLIENT_ID)
 # client_secret <- toString(oauth_client$CLIENT_SECRET)
