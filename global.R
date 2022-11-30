@@ -27,6 +27,7 @@ suppressPackageStartupMessages({
 ## Set Up OAuth
 #oauth_client <- yaml.load_file("oauth_config.yml")
 
+# parse environment variables for configuration
 parse_env_var <- function(x, el_delim=",", kv_delim=":"){
   
   # assume string of key-value pairs
