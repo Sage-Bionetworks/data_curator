@@ -98,14 +98,6 @@ source_files <- list.files(c("functions", "modules"), pattern = "*\\.R$", recurs
 sapply(source_files, FUN = source)
 
 ## Read config.json
-if (!file.exists("www/config.json")) {
-  #schematic_config <- yaml.load_file("schematic_config.yml")
-  system(sprintf(
-    "python3 .github/generate_config_json.py -jd %s -schema %s -service %s",
-    # schematic_config$model$input$location, schematic_config$model$input$repo, "Sage-Bionetworks/schematic"
-    Sys.getenv("DCA_MODEL_INPUT_LOCATION"), Sys.getenv("DCA_MODEL_INPUT_REPO"), "Sage-Bionetworks/schematic"
-  ))
-}
 config_file <- fromJSON("www/config.json")
 
 ## Global variables
