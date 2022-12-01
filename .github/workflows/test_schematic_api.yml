@@ -6,12 +6,12 @@
 # schematic's REST API endpoints.
 name: test-schematic-api
 
-#on:
-#  push:
-#    branches:
-#      - schematic-rest-api
-#    paths-ignore:
-#      - .github/ISSUE_TEMPLATE/**
+on:
+  push:
+    branches:
+      - develop
+    paths-ignore:
+      - .github/ISSUE_TEMPLATE/**
 
 jobs:
   test-schematic-rest-api:
