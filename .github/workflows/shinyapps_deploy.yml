@@ -3,18 +3,18 @@
 
 name: shiny-deploy
 
-#on:
-#  push:
-#    branches:
-#      - main
-#      - develop*
-#      - feat-UI-dashboard
-#    tags:
-#      - v*.*.*
-#    paths-ignore:
-#      - '.github/ISSUE_TEMPLATE/**'
-#      - '**/*.md'
-#      - '**/.gitignore'
+on:
+  push:
+    branches:
+      - main
+      - develop*
+      - feat-UI-dashboard
+    tags:
+      - v[0-9]+.[0-9]+.[0-9]+
+    paths-ignore:
+      - '.github/ISSUE_TEMPLATE/**'
+      - '**/*.md'
+      - '**/.gitignore'
 
 jobs:
   shiny-deploy:
