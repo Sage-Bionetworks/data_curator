@@ -14,6 +14,8 @@ on:
       - '.github/ISSUE_TEMPLATE/**'
       - '**/*.md'
       - '**/.gitignore'
+  repository_dispatch:
+    types: trigger-frontend
 
 jobs:
   shiny-deploy:
