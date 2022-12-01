@@ -110,7 +110,7 @@ shinyServer(function(input, output, session) {
   observeEvent(input$btn_asset_view, {
     selected$master_fileview(input$dropdown_asset_view)
     
-    config_ops <- unlist(jsonlite::fromJSON(Sys.getenv("DCA_TEMPLATE_MENU_CONFIG")))
+    config_ops <- parse_env_var(Sys.getenv("DCA_TEMPLATE_MENU_CONFIG"))
     config_name <- reactiveVal(config_ops[names(config_ops) %in% selected$master_fileview()])
     config(jsonlite::fromJSON(file.path("www", config_name())))
     config_schema(as.data.frame(config()[[1]]))
