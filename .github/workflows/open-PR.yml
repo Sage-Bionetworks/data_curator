@@ -4,19 +4,21 @@ on:
   repository_dispatch:
     types: trigger-frontend
 jobs:
-  open-PR:
+  auto-open-pr:
     runs-on: ubuntu-latest
-steps:
-  - name: Open PR
-  - uses: actions/checkout@v3
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+        with:
+          ref: main
 
-  # create pull request
-  - name: Create Pull Request
-    uses: peter-evans/create-pull-request@v4
-  
-  # checking outputs (not necessary)
-  - name: Check outputs
-    if: ${{ steps.cpr.outputs.pull-request-number }}
-    run: |
-      echo "Pull Request Number - ${{ steps.cpr.outputs.pull-request-number }}"
-      echo "Pull Request URL - ${{ steps.cpr.outputs.pull-request-url }}"
+      # create pull request
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v4
+      
+      # checking outputs (not necessary)
+      - name: Check outputs
+        if: ${{ steps.cpr.outputs.pull-request-number }}
+        run: |
+          echo "Pull Request Number - ${{ steps.cpr.outputs.pull-request-number }}"
+          echo "Pull Request URL - ${{ steps.cpr.outputs.pull-request-url }}"
