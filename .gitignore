@@ -8,7 +8,7 @@ get_manifest_anno.R
 manifest_url.txt
 **/config.json
 tmp/synapse_storage_manifest.csv
-www/*
+www/{img,js,scss}/*
 manifests/*.csv
 .Rproj.user
 schematic/
