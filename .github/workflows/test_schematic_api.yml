@@ -9,7 +9,7 @@ name: test-schematic-api
 on:
   push:
     branches:
-      - schematic-rest-api
+      - develop
     paths-ignore:
       - .github/ISSUE_TEMPLATE/**
 
