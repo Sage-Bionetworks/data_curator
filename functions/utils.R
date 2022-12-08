@@ -1,13 +1,16 @@
 
+# tranform the list output from schematic to named vectore
+# convert [list] parent_list: child_list1, child_list2
+# to [vector]: child_list1 with name as child_list2
 list2Vector <- function(list) {
-  vector <- c()
-  for (i in seq_along(list)) {
-    vector[list[[i]][[2]]] <- list[[i]][[1]]
-  }
-  return(vector)
+  child <- sapply(list, `[[`, 1)
+  names(child) <- sapply(list, `[[`, 2)
+
+  return(child)
 }
 
-# convert long string from "x1, x2, x3, x4, x5" into "x1, x2 ... x5"
+# truncate long string with ellipsis, e.g. "x1, x2, x3, x4, x5" into "x1, x2 ... x5"
+# TODO: consider replacing by stringr::str_trunc
 truncate_ellipsis <- function(string, max, pattern = NULL) {
   if (!is.null(pattern)) {
     string <- str_split(string, pattern)
@@ -23,4 +26,13 @@ truncate_ellipsis <- function(string, max, pattern = NULL) {
     }
     return(paste0("[", concatenated_str, "]"))
   })
+}
+
+# add tooltip; only support its position on the top for now
+addTooltip <- function(.data, message, position = c("top")) {
+  position <- match.arg(position, c("top"))
+  tooltip_class <- paste0("dc-tooltip ", position)
+  .data %>%
+    tagAppendAttributes(`aria-label` = message) %>%
+    tagAppendAttributes(class = tooltip_class)
 }

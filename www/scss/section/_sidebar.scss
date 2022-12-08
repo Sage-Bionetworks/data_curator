@@ -1,82 +1,82 @@
 /*** Sidebar ***/
 
-.left-side, .main-sidebar {
-  padding-top: 80px; 
-  font-weight: bold; 
-  font-size: 1.1em 
+.left-side,
+.main-sidebar {
+  padding-top: 80px;
+  font-weight: bold;
+  font-size: 1.1em;
 }
 
 // when sidebar is open
 .main-sidebar {
-	background-color: $sidebar_col !important;
+  background-color: $sidebar_col !important;
 
-	.sidebar {
-		padding: 0px;
+  .sidebar {
+    padding: 0px;
 
-		//icon color
-		.fa {
-			color: $sidebar_pink;
-			transition: 100ms;
-		}
+    //icon color
+    .fa {
+      color: $sidebar_pink;
+      transition: 100ms;
+    }
 
-		// add background img - synapse logo
-		&:before {
-			content: '';
-			background-image: url('https://www.synapse.org/images/logo.svg');
-			background-repeat: no-repeat;
-			position: absolute;
-			height: 260px;
-			top: 80px;
-			left: 0;
-			right: 0;
-			bottom: 0;
-			opacity: 0.4;
-			background-size: contain;
-			transform: scale(0.8);
-		}
+    // add background img - synapse logo
+    &:before {
+      content: '';
+      background-image: url('https://www.synapse.org/images/logo.svg');
+      background-repeat: no-repeat;
+      position: absolute;
+      height: 260px;
+      top: 80px;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      opacity: 0.4;
+      background-size: contain;
+      transform: scale(0.8);
+    }
 
-		li>a {
-			color: #FFF !important;
-			border-radius: 8px;
-			border-left: none !important; 
-			margin: 10px 5px 10px 5px;
-			filter: grayscale(100%) opacity(0.7);
-			transition: 100ms;
+    li > a {
+      color: #fff !important;
+      border-radius: 8px;
+      border-left: none !important;
+      margin: 10px 5px 10px 5px;
+      filter: grayscale(100%) opacity(0.7);
+      transition: 100ms;
 
-			&:hover {
-				background: $glass_grey !important;
-				filter: grayscale(0%) opacity(1);
-			}
-			
-			i {
-				margin-left: -3px; //move icon to left a bit
-			}
-		} 
+      &:hover {
+        background: $glass_grey !important;
+        filter: grayscale(0%) opacity(1);
+      }
 
-		li.active>a {
-			background-color: rgba($primary_col, 0.8) !important;
-			filter: unset;
-			// box-shadow: 0 0px 20px 0px $htan_col;
+      i {
+        margin-left: -3px; //move icon to left a bit
+      }
+    }
 
-			.fa{
-				color: #FFF
-			}
-		}
-	}
+    li.active > a {
+      background-color: rgba($primary_col, 0.8) !important;
+      filter: unset;
+      // box-shadow: 0 0px 20px 0px $htan_col;
+
+      .fa {
+        color: #fff;
+      }
+    }
+  }
 }
 
 // when sidebar is collapsed
-.sidebar-collapse .sidebar{
+.sidebar-collapse .sidebar {
+  &:before {
+    visibility: hidden;
+  }
 
-	&:before {
-		visibility: hidden;
-	}
+  span {
+    visibility: hidden;
+  }
 
-	span {
-		visibility: hidden;
-	}
-
-	li>a {
-		margin-right: 5px !important;		
-	}
+  li > a {
+    margin-right: 5px !important;
+  }
 }

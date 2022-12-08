@@ -20,7 +20,12 @@ cran <- c(
   "remotes==2.4.2",
   "rsconnect==0.8.25",
   "png==0.1.7",
-  "tidyr==1.1.4"
+  "tidyr==1.1.4",
+  "data.table==1.14.2",
+  "igraph==1.2.11",
+  "networkD3==0.4",
+  "data.tree==1.0.0",
+  "r2d3==0.2.6"
 )
 gh <- c(
   "dreamRs/shinypop",
@@ -33,7 +38,7 @@ gh <- c(
 # The binary package distributions from R Studio dramatically speed up installation time
 # For Ubuntu 18.04 (Bionic) it's https://packagemanager.rstudio.com/all/__linux__/bionic/latest
 # For Ubuntu 20.04 (Focal)  it's https://packagemanager.rstudio.com/all/__linux__/focal/latest
-options(repos = c(REPO_NAME = "https://packagemanager.rstudio.com/all/__linux__/bionic/latest", getOption("repos")))
+options(repos = c(REPO_NAME = "https://packagemanager.rstudio.com/all/__linux__/focal/latest", getOption("repos")))
 
 install.packages("remotes")
 invisible(

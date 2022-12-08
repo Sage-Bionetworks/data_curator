@@ -14,8 +14,9 @@ DTableUI <- function(id) {
   DT::DTOutput(ns("table"))
 }
 
-DTableServer <- function(id, data,
+DTableServer <- function(id, data, escape = TRUE,
                          rownames = TRUE, caption = NULL, filter = "top",
+                         selection = "none", cell_border = FALSE,
                          options = list(lengthChange = FALSE, scrollX = TRUE),
                          highlight = NULL, highlightValues = NULL) {
   moduleServer(
@@ -23,7 +24,9 @@ DTableServer <- function(id, data,
     function(input, output, session) {
       df <- datatable(data,
         caption = caption,
+        escape = escape,
         rownames = rownames,
+        selection = selection,
         filter = filter,
         options = options
       )
@@ -37,12 +40,20 @@ DTableServer <- function(id, data,
 
           # iterate each col to avoid messing around same value in multiple columns
           for (col in names(highlightValues)) {
+            # This check prevents errors of the following form 
+            #   Warning: Error in name2int: You specified the columns: 0,
+            #   but the column names of the data are  , Component, ...
+            if (! col %in% names(data)) next()
             values <- highlightValues[[col]]
             # if NULL is provided for values, it will highlight entire columns
             if ("ht_entire_column" %in% values) style <- "yellow" else style <- styleEqual(values, rep("yellow", length(values)))
             df <- df %>% formatStyle(col, backgroundColor = style)
           }
         }
+      }
+
+      if (cell_border) {
+        df <- df %>% formatStyle(1:ncol(data), border = "1px solid #ddd")
       }
 
       output$table <- renderDT(df)
