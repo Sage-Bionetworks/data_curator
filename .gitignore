@@ -12,7 +12,7 @@ great_expectations/
 *.jsonld
 *.rds
 *.csv
-restart.txt
+*.txt
 **/token.pickle
 **/.synapseConfig
 **/__pycache__
