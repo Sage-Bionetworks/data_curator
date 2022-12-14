@@ -7,10 +7,7 @@ on:
 jobs:
   auto-open-pr:
     runs-on: ubuntu-latest
-    steps:
-      - name: Print out branch info
-        run: 'echo "Triggered by event branch: ${{ github.event.client_payload.branch }}"'
-        
+    steps:        
       - name: Check out repository
         uses: actions/checkout@v3
 
@@ -24,11 +21,11 @@ jobs:
       - name: Get commit sha, release tag, and branch name
         run: |
           echo 'COMMIT_REF=${{ github.event.client_payload.commit-sha }}' >> $GITHUB_ENV
-          echo 'BRANCH_NAME=${{ github.event.client_payload.branch }}' >> $GITHUB_ENV
           echo 'RELEASE_VERSION=${{ github.event.client_payload.release-version }}' >> $GITHUB_ENV
           echo 'DEFAULT_VAL='empty'' >> $GITHUB_ENV
 
-      # create different pull request based on if release tag exists. 
+      #### create different pull request based on if release tag exists. 
+      ## when a new release is available
       - name: Update values.yaml
         uses: fjogeleit/yaml-update-action@main
         if: ${{ env.RELEASE_VERSION != '' }}
@@ -49,7 +46,7 @@ jobs:
               "schematic.release_version": "${{ env.RELEASE_VERSION || env.DEFAULT_VAL}}"
             }
 
-      # create pull request
+      ## when the develop branch gets updated
       - name: Update values.yaml
         uses: fjogeleit/yaml-update-action@main
         if: ${{ env.RELEASE_VERSION == '' }}
@@ -60,12 +57,12 @@ jobs:
           targetBranch: develop
           createPR: true
           labels: 'auto-release'
-          title: 'Version Updates triggered by schematic ${{ env.BRANCH_NAME }} branch'
+          title: 'Version Updates triggered by schematic develop branch'
           description: Triggered by schematic updates 
           message: 'Triggered by schematic updates'
           changes: |
             {
-              "schematic.branch": "${{ env.BRANCH_NAME|| env.DEFAULT_VAL }}",
+              "schematic.branch": "develop",
               "schematic.sha": "${{ env.COMMMIT_REF || env.DEFAULT_VAL }}",
-              "schematic.release_version": "${{ env.RELEASE_VERSION || env.DEFAULT_VAL}}"
+              "schematic.release_version": "${{env.DEFAULT_VAL}}"
             }
