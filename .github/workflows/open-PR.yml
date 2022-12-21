@@ -34,7 +34,7 @@ jobs:
           branch: develop-update-schematic
           targetBranch: develop
           createPR: true
-          labels: 'auto-release'
+          labels: 'auto-PR'
           title: 'Version Updates triggered by schematic'
           description: Triggered by schematic updates 
           message: 'Triggered by schematic updates'
