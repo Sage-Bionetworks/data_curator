@@ -10,7 +10,7 @@ on:
       - develop*
       - feat-UI-dashboard
     tags:
-      - v*.*.*
+      - v[0-9]+.[0-9]+.[0-9]+
     paths-ignore:
       - '.github/ISSUE_TEMPLATE/**'
       - '**/*.md'
