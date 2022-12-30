@@ -91,7 +91,10 @@ scope <- "openid view download modify"
 
 #schematic_config <- yaml::yaml.load_file("schematic_config.yml")
 #api_uri <- paste(schematic_config$api$host, schematic_config$api$port, sep = ":")
-api_uri <- api_uri <- paste(Sys.getenv("DCA_API_HOST"), Sys.getenv("DCA_API_PORT"), sep = ":")
+api_uri <- api_uri <- ifelse(Sys.getenv("DCA_API_PORT") == "",
+                             Sys.getenv("DCA_API_HOST"),
+                             paste(Sys.getenv("DCA_API_HOST"), Sys.getenv("DCA_API_PORT"), sep = ":")
+)
 
 # Import functions/modules
 source_files <- list.files(c("functions", "modules"), pattern = "*\\.R$", recursive = TRUE, full.names = TRUE)
