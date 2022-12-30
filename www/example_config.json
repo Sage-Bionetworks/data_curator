@@ -1,0 +1,21 @@
+{
+  "manifest_schemas": [
+    {
+      "display_name": "Biospecimen",
+      "schema_name": "Biospecimen",
+      "type": "record"
+    },
+    {
+      "display_name": "Patient",
+      "schema_name": "Patient",
+      "type": "record"
+    },
+    {
+      "display_name": "Bulk RNA-seq Assay",
+      "schema_name": "BulkRNA-seqAssay",
+      "type": "file"
+    }
+  ],
+  "service_version": "",
+  "schema_version": ""
+}

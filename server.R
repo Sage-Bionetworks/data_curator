@@ -39,7 +39,8 @@ shinyServer(function(input, output, session) {
   #master_fileview <- Sys.getenv("DCA_SYNAPSE_MASTER_FILEVIEW")
   
   # Set data_model to a URL to jsonld after choosing asset view
-  data_model_options <- jsonlite::fromJSON(Sys.getenv("DCA_MODEL_INPUT_DOWNLOAD_URL"))
+  data_model_options <- Sys.getenv("DCA_MODEL_INPUT_DOWNLOAD_URL")
+  data_model_options <- parse_env_var(data_model_options) 
   data_model = reactiveVal(NULL)
   
   # data available to the user
@@ -109,7 +110,7 @@ shinyServer(function(input, output, session) {
   observeEvent(input$btn_asset_view, {
     selected$master_fileview(input$dropdown_asset_view)
     
-    config_ops <- unlist(jsonlite::fromJSON(Sys.getenv("DCA_TEMPLATE_MENU_CONFIG")))
+    config_ops <- parse_env_var(Sys.getenv("DCA_TEMPLATE_MENU_CONFIG"))
     config_name <- reactiveVal(config_ops[names(config_ops) %in% selected$master_fileview()])
     config(jsonlite::fromJSON(file.path("www", config_name())))
     config_schema(as.data.frame(config()[[1]]))
