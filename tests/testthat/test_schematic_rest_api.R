@@ -4,7 +4,7 @@ context("test schematic rest api wrappers")
 ### schematic server URL https://github.com/Sage-Bionetworks/schematic/tree/develop/api
 ### If not available, skip these tests.
 
-schem_url <- "http://0.0.0.0:3001/"
+schem_url <- "https://schematic.dnt-dev.sagebase.org"
 ping <- try(httr::GET(schem_url), silent = TRUE)
 skip_it <- function(skip=ping) {
   if (inherits(ping, "try-error")) skip(sprintf("schematic server URL unavailable (%s). Is it running locally?", schem_url)) #nolint
@@ -21,6 +21,14 @@ test_that("manifest_generate returns a URL if sucessful", {
   url <- manifest_generate(title="Test biospecimen", data_type="Biospecimen",
                   dataset_id="syn20977135")
   expect_true(grepl("^https://docs.google", url))
+})
+
+test_that("manifest_generate returns an xlsx", {
+  skip_it()
+  
+  xlsx <- manifest_generate(title="Test biospecimen", data_type="Biospecimen",
+                    asset_view="syn33715412", output_format="excel")
+  
 })
 
 test_that("manifest_populate returns a google sheet link with records filled", {
@@ -56,7 +64,8 @@ test_that("storage_project_datasets returns available datasets", {
 
 test_that("storage_projects returns available projects", {
   skip_it()
-  storage_projects(asset_view="syn23643253",
+  storage_projects(url=file.path(schem_url, "v1/storage/project/datasets"),
+                   asset_view="syn23643253",
                    input_token=Sys.getenv("SYNAPSE_PAT"))
 })
 
