@@ -39,6 +39,32 @@ parse_env_var <- function(x, el_delim=",", kv_delim=":"){
   
 }
 
+update_logo <- function(project = "sage") {
+  
+  img <- switch(project,
+                syn20446927 = list(href = "https://humantumoratlas.org/",
+                                   img_src = "img/HTAN_text_logo.png"),
+                list(href = "https://synapse.org",
+                     img_src = "img/synapse_logo.png")
+  )
+  
+  tags$li(
+    class = "dropdown", id = "logo",
+    tags$a(
+      href = img$href,
+      target = "_blank",
+      tags$img(
+        height = "40px", alt = "LOGO",
+        src = img$img_src
+      )
+    )
+  )
+}
+
+syn_themes <- c(
+  "syn20446927" = "htan"
+)
+
 message(Sys.getenv()) # Test to see env variables in log
 # client_id <- toString(oauth_client$CLIENT_ID)
 # client_secret <- toString(oauth_client$CLIENT_SECRET)
