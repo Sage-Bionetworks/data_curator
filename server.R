@@ -110,6 +110,51 @@ shinyServer(function(input, output, session) {
   observeEvent(input$btn_asset_view, {
     selected$master_fileview(input$dropdown_asset_view)
     
+    # Update logo and theme
+    dca_theme <- ifelse(selected$master_fileview() %in% names(syn_themes),
+                        syn_themes[selected$master_fileview()],
+                        "sage")
+    insertUI(
+      selector = "div",
+      where = "beforeBegin",
+      dcamodules::use_dca(theme=dca_theme)
+    )
+    
+    removeUI("header")
+    insertUI(
+      selector = "div",
+      where = "beforeBegin",
+      dashboardHeader(
+        titleWidth = 250,
+        title = tagList(
+          span(class = "logo-lg", "Data Curator"),
+          span(class = "logo-mini", "DCA")
+        ),
+        leftUi = tagList(
+          dropdownBlock(
+            id = "header_selection_dropdown",
+            title = "Selection",
+            icon = icon("sliders-h"),
+            badgeStatus = "info",
+            fluidRow(
+              lapply(dropdown_types, function(x) {
+                div(
+                  id = paste0("header_content_", x),
+                  selectInput(
+                    inputId = paste0("header_dropdown_", x),
+                    label = NULL,
+                    choices = character(0)
+                  )
+                )
+              }),
+              actionButton("btn_header_update", NULL, icon("sync-alt"), class = "btn-shiny-effect")
+            )
+          )
+        ),
+        update_logo(selected$master_fileview())
+      )
+    )
+    
     config_ops <- parse_env_var(Sys.getenv("DCA_TEMPLATE_MENU_CONFIG"))
     config_name <- reactiveVal(config_ops[names(config_ops) %in% selected$master_fileview()])
     config(jsonlite::fromJSON(file.path("www", config_name())))
@@ -135,6 +180,7 @@ shinyServer(function(input, output, session) {
          )
        })
      })
+     
 })
 
   ######## Header Dropdown Button ########
