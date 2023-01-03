@@ -75,7 +75,7 @@ jobs:
 
       - name: Save service account credentials for Schematic
         id: create-json
-        uses: jsdaniell/create-json@1.2.2
+        uses: jsdaniell/create-json@1.1.2
         with:
           name: "schematic_service_account_creds.json"
           json: ${{ secrets.SCHEMATIC_SERVICE_ACCT_CREDS }}
