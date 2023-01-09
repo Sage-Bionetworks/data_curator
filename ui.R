@@ -37,18 +37,18 @@ ui <- shinydashboardPlus::dashboardPage(
           actionButton("btn_header_update", NULL, icon("sync-alt"), class = "btn-shiny-effect")
         )
       )
-    ),
-    tags$li(
-      class = "dropdown", id = "HTAN_logo",
-      tags$a(
-        href = "https://humantumoratlas.org/",
-        target = "_blank",
-        tags$img(
-          height = "40px", alt = "HTAN LOGO",
-          src = "img/HTAN_text_logo.png"
-        )
-      )
-    )
+    )#,
+    # tags$li(
+    #   class = "dropdown", id = "HTAN_logo",
+    #   tags$a(
+    #     href = "https://humantumoratlas.org/",
+    #     target = "_blank",
+    #     tags$img(
+    #       height = "40px", alt = "HTAN LOGO",
+    #       src = "img/HTAN_text_logo.png"
+    #     )
+    #   )
+    # )
   ),
   dashboardSidebar(
     width = 250,
@@ -122,27 +122,31 @@ ui <- shinydashboardPlus::dashboardPage(
       # second tab content
       tabItem(
         tabName = "tab_asset_view",
-        h2("Select the asset view"),
+        #h2("Select the asset view"),
         fluidRow(
           box(
             id = "box_pick_asset_view",
             status = "primary",
             width = 6,
-            title = "Choose an asset view: ",
+            title = "Select a DCC: ",
             selectInput(
               inputId = "dropdown_asset_view",
-              label = "Asset View:",
+              label = NULL, #"Asset View:",
               choices = parse_env_var(Sys.getenv("DCA_SYNAPSE_MASTER_FILEVIEW"))#"Generating..."
-            )
-          ),
-          box(
-            title = "Confirm asset view above",
-            status = "primary",
-            width = 12,
-            actionButton("btn_asset_view", "Click to Confirm Asset View",
+            ),
+            actionButton("btn_asset_view", "Click to confirm",
                          class = "btn-primary-color"
-                         )
+            )
           )
+          ,
+          # box(
+          #   #title = "Confirm choice",
+          #   status = "primary",
+          #   width = 6,
+          #   actionButton("btn_asset_view", "Click to confirm",
+          #                class = "btn-primary-color"
+          #                )
+          # )
         ),
         switchTabUI("switchTab1", direction = "right")
       ),
