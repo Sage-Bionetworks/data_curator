@@ -110,6 +110,8 @@ shinyServer(function(input, output, session) {
   observeEvent(input$btn_asset_view, {
     selected$master_fileview(input$dropdown_asset_view)
     
+    dcWaiter("show", msg = paste0("Getting data from ", selected$master_fileview(), "..."))
+    
     # Update logo and theme
     dca_theme <- ifelse(selected$master_fileview() %in% names(syn_themes),
                         syn_themes[selected$master_fileview()],
@@ -180,6 +182,8 @@ shinyServer(function(input, output, session) {
          )
        })
      })
+     
+     dcWaiter("hide")
      
 })
 
