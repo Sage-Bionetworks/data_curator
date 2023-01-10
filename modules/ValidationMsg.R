@@ -1,6 +1,5 @@
 
 # format and process validation results from schematic
-
 ValidationMsgUI <- function(id) {
   ns <- NS(id)
   htmlOutput(ns("results"))
