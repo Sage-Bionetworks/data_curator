@@ -24,7 +24,7 @@ model:
   input:
     # if both 'download_url' and 'repo' present, `repo` will be used
     download_url: 'https://github.com/adknowledgeportal/test-data-model/blob/main/schematic_schemas/amp.ad.data.model.jsonld' # url to download JSON-LD data model
-    repo: 'adknowledgeportal/test-data-model/main' # data model repo url (<repo-owner>/<repo-name>/<version/branch>), version or branch is optional
+    repo: 'adknowledgeportal/test-data-model' # data model repo url (<repo-owner>/<repo-name>/<version/branch>), version or branch is optional
     location: 'schematic-schemas/amp.ad.data.model.jsonld' # path to JSON-LD file
     file_type: 'local'
 
