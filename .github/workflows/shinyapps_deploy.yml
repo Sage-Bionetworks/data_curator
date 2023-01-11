@@ -79,7 +79,6 @@ jobs:
           echo "${{ secrets.SCHEMATIC_CREDS_PATH }}" > credentials.json
           echo "${{ secrets.SCHEMATIC_TOKEN_PICKLE }}" | base64 -d > token.pickle
 
-<<<<<<< HEAD
       - name: Save service account credentials for Schematic
         id: create-json
         uses: jsdaniell/create-json@1.1.2
@@ -89,7 +88,6 @@ jobs:
 
 
       - name: Set Configurations for Data Model
->>>>>>> 40cb35a8da598525b17b92786e02c423bc3d9003
         shell: bash
         run: |
           git clone -b main https://github.com/${{ env.MODEL_REPO }}.git
