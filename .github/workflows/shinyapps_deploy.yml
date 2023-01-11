@@ -71,6 +71,8 @@ jobs:
         run: |
           # write out configuration files using github secrets
           echo "${{ secrets.SCHEMATIC_SYNAPSE_CONFIG }}" > .synapseConfig
+          echo "${{ secrets.SCHEMATIC_CREDS_PATH }}" > credentials.json
+          echo "${{ secrets.SCHEMATIC_TOKEN_PICKLE }}" | base64 -d > token.pickle
 
       - name: Save service account credentials for Schematic
         id: create-json
