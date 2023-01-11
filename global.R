@@ -106,7 +106,8 @@ syn <- import("synapseclient")$Synapse()
 # import schematic modules
 source_python("functions/metadataModel.py")
 # import R files
-source_files <- list.files(c("functions", "modules"), pattern = "*\\.R$", recursive = TRUE, full.names = TRUE)
+source_files <- list.files(c("functions", "modules"), pattern = "*\\.R$", recursive = TRUE, full.names = TRUE) %>%
+  .[!grepl("dashboard", .)]
 sapply(source_files, FUN = source)
 
 ## Read config.json
