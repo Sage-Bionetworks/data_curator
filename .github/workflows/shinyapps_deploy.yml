@@ -81,6 +81,16 @@ jobs:
           name: 'schematic_service_account_creds.json'
           json: ${{ secrets.SCHEMATIC_SERVICE_ACCT_CREDS }}
 
+      - name: Set Configurations for Data Model
+        shell: bash
+        run: |
+          source .venv/bin/activate
+          # download the data models and create config.json
+          python3 .github/config_schema.py \
+            -c schematic_config.yml \
+            --service_repo 'Sage-Bionetworks/schematic' \
+            --overwrite
+
       - name: zip virtual env
         shell: bash
         # ShinyApps has a limit of 7000 files, far exceeded by the many Python dependencies
