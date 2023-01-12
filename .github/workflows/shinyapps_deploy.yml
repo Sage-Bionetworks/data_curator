@@ -83,9 +83,8 @@ jobs:
         id: create-json
         uses: jsdaniell/create-json@1.1.2
         with:
-          name: "schematic_service_account_creds.json"
+          name: 'schematic_service_account_creds.json'
           json: ${{ secrets.SCHEMATIC_SERVICE_ACCT_CREDS }}
-
 
       - name: Set Configurations for Data Model
         shell: bash

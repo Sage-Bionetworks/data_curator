@@ -1,4 +1,9 @@
 # Do not change the 'definitions' section unless you know what you're doing
+schematic:
+  branch: 'empty'
+  sha: 'empty'
+  release_version: 'empty'
+
 definitions:
   synapse_config: '.synapseConfig'
   creds_path: 'credentials.json'
