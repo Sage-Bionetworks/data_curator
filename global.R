@@ -62,7 +62,8 @@ update_logo <- function(project = "sage") {
 }
 
 syn_themes <- c(
-  "syn20446927" = "htan"
+  "syn20446927" = "www/dca_themes/htan_theme_config.rds",
+  "syn27210848" = "www/dca_themes/mc2_theme_config.rds"
 )
 
 message(Sys.getenv()) # Test to see env variables in log
