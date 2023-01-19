@@ -97,6 +97,7 @@ ui <- shinydashboardPlus::dashboardPage(
     # load dependencies
     use_notiflix_report(width = "400px"),
     use_waiter(),
+    dcamodules::use_dca("www/dca_themes/synapse_theme_config.rds"),
     tabItems(
       # First tab content
       # tabItem(
@@ -292,8 +293,6 @@ ui <- shinydashboardPlus::dashboardPage(
 )
 
 uiFunc <- function(req) {
-  shinyjs::useShinyjs()
-  
   if (!has_auth_code(parseQueryString(req$QUERY_STRING))) {
     authorization_url <- oauth2.0_authorize_url(api, app, scope = scope)
     return(tags$script(HTML(sprintf(
