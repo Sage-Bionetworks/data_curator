@@ -37,6 +37,8 @@ shinyServer(function(input, output, session) {
   template_namedList <- reactiveVal()
   #master_fileview <- schematic_config$synapse$master_fileview
   #master_fileview <- Sys.getenv("DCA_SYNAPSE_MASTER_FILEVIEW")
+  all_asset_views <- parse_env_var(Sys.getenv("DCA_SYNAPSE_MASTER_FILEVIEW"))
+  asset_views <- reactiveVal(c("mock dca fileview (syn33715412)"="syn33715412"))
   
   # Set data_model to a URL to jsonld after choosing asset view
   data_model_options <- Sys.getenv("DCA_MODEL_INPUT_DOWNLOAD_URL")
@@ -72,6 +74,9 @@ shinyServer(function(input, output, session) {
   ######## Initiate Login Process ########
   # synapse cookies
   session$sendCustomMessage(type = "readCookie", message = list())
+  
+  shinyjs::useShinyjs()
+  shinyjs::hide(selector = ".sidebar-menu")
 
   # initial loading page
   #
@@ -88,6 +93,7 @@ shinyServer(function(input, output, session) {
     # work in any domain and is scoped to the access required by the
     # Shiny app'
     #
+    
     access_token <- session$userData$access_token
     
     user_name <- datacurator::synapse_user_profile(auth=access_token)[["userName"]]
@@ -97,6 +103,15 @@ shinyServer(function(input, output, session) {
     } else {
       # update waiter loading screen once login successful
       dcWaiter("update", landing = TRUE, userName = user_name)
+      
+      has_access <- vapply(all_asset_views, function(x) {
+        synapse_access(id=x, access="DOWNLOAD", auth=access_token)
+      }, 1L)
+      asset_views(all_asset_views[has_access==1])
+      if (length(asset_views) == 0) stop("You do not have DOWNLOAD access to any supported Asset Views.")
+      updateSelectInput(session, "dropdown_asset_view",
+                        choices = asset_views())
+      
     }
     
     ######## Arrow Button ########
@@ -182,6 +197,8 @@ shinyServer(function(input, output, session) {
          )
        })
      })
+     
+     shinyjs::show(selector = ".sidebar-menu")
      
      dcWaiter("hide")
      
