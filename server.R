@@ -300,11 +300,11 @@ shinyServer(function(input, output, session) {
       }
       data_list$files <<- list2Vector(file_list)
       dcWaiter("hide")
-      
       if (Sys.getenv("DCA_MANIFEST_OUTPUT_FORMAT") == "excel") {
         dcWaiter("show", msg = "Downloading data from Synapse...")
         #schematic rest api to generate manifest
         manifest_url(manifest_generate(url=file.path(api_uri, "v1/manifest/generate"),
+                                       schema_url = data_model(),
                                        title = input$dropdown_template,
                                        data_type = selected$schema(), dataset_id = selected$folder(),
                                        asset_view=selected$master_fileview(),
@@ -476,13 +476,13 @@ shinyServer(function(input, output, session) {
     dcWaiter("show", msg = "Submitting...")
 
     dir.create("./manifests", showWarnings = FALSE)
-
     # reads file csv again
     submit_data <- csvInfileServer("inputFile")$data()
 
     # If a file-based component selected (define file-based components) note for future
     # the type to filter (eg file-based) on could probably also be a config choice
-    display_names <- config_schema$manifest_schemas$display_name[config_schema$manifest_schemas$type == "file"]
+    #display_names <- config_schema()$manifest_schemas$display_name[config_schema()$manifest_schemas$type == "file"]
+    display_names <- config_schema()$display_name
     # if folder_ID has not been updated yet
     if (is.null(selected$folder())) selected$folder(data_list$folders()[[input$dropdown_folder]])
 
@@ -496,14 +496,14 @@ shinyServer(function(input, output, session) {
         )
       } else {
         file_list <- storage_dataset_files(url=file.path(api_uri, "v1/storage/dataset/files"),
-                                           asset_view = project_synID,
+                                           asset_view = selected$master_fileview(),
                                             dataset_id = selected$folder(),
                                             input_token=access_token)
         data_list$files <<- list2Vector(file_list)
 
         # better filename checking is needed
         # TODO: crash if no file existing
-        files_df <- stack(data_list$files())
+        files_df <- stack(data_list$files)
         # adds entityID, saves it as synapse_storage_manifest.csv, then associates with synapse files
         colnames(files_df) <- c("entityId", "Filename")
         files_entity <- inner_join(submit_data, files_df, by = "Filename")
@@ -513,7 +513,6 @@ shinyServer(function(input, output, session) {
           quote = TRUE, row.names = FALSE, na = ""
         )
       }
-      
       # schematic rest api to submit metadata
       # This validates AND submits the data to Synapse
       # Returns synapse table ID if successful
