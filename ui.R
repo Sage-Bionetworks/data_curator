@@ -148,8 +148,8 @@ ui <- shinydashboardPlus::dashboardPage(
           #                class = "btn-primary-color"
           #                )
           # )
-        ),
-        switchTabUI("switchTab1", direction = "right")
+        )#,
+        #switchTabUI("switchTab1", direction = "right") # remove arrow from assetview page.
       ),
       tabItem(
         tabName = "tab_data",
