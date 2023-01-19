@@ -130,7 +130,7 @@ shinyServer(function(input, output, session) {
     # Update logo and theme
     dca_theme <- ifelse(selected$master_fileview() %in% names(syn_themes),
                         syn_themes[selected$master_fileview()],
-                        "sage")
+                        "www/dca_themes/sage_theme_config.rds")
     insertUI(
       selector = "div",
       where = "beforeBegin",
@@ -171,7 +171,6 @@ shinyServer(function(input, output, session) {
         update_logo(selected$master_fileview())
       )
     )
-    
     config_ops <- parse_env_var(Sys.getenv("DCA_TEMPLATE_MENU_CONFIG"))
     config_name <- reactiveVal(config_ops[names(config_ops) %in% selected$master_fileview()])
     config(jsonlite::fromJSON(file.path("www", config_name())))
@@ -183,11 +182,14 @@ shinyServer(function(input, output, session) {
     data_model(data_model_options[selected$master_fileview()])
     #names(template_namedList()) <- config_schema()$display_name
   #  
+    dcWaiter("hide")
+    dcWaiter("show", msg = paste0("Getting data from ", selected$master_fileview(), "..."))
      # updating syn storage
      projects_list <- storage_projects(url=file.path(api_uri, "v1/storage/projects"),
                                        asset_view = selected$master_fileview(),
                                        input_token = access_token)
      data_list$project(list2Vector(projects_list))
+     dcWaiter("hide")
      
      # updates project dropdown
      lapply(c("header_dropdown_", "dropdown_"), function(x) {
@@ -199,6 +201,38 @@ shinyServer(function(input, output, session) {
      })
      
      shinyjs::show(selector = ".sidebar-menu")
+     
+     ######## Update Folder List ########
+     
+     
+     lapply(c("header_dropdown_", "dropdown_"), function(x) {
+       observeEvent(ignoreInit = TRUE, input[[paste0(x, "project")]], {
+         # get synID of selected project
+         project_id <- data_list$project()[input[[paste0(x, "project")]]]
+         
+         # gets folders per project
+         dcWaiter("show", msg = paste0("Getting data from ", selected$master_fileview(), "..."))
+         folder_list <- storage_project_datasets(url=file.path(api_uri, "v1/storage/project/datasets"),
+                                                 asset_view = selected$master_fileview(),
+                                                 project_id=project_id,
+                                                 input_token=access_token) %>% list2Vector()
+         
+         # update folder names
+         updateSelectInput(session, paste0(x, "folder"), choices = sort(names(folder_list)))
+         
+         if (x == "dropdown_") {
+           selected$project(project_id)
+           data_list$folders(folder_list)
+         }
+         
+         if (isUpdateFolder()) {
+           # sync with header dropdown
+           updateSelectInput(session, "dropdown_folder", selected = input[["header_dropdown_folder"]])
+           isUpdateFolder(FALSE)
+         }
+         dcWaiter("hide")
+       })
+     })
      
      dcWaiter("hide")
      
@@ -241,34 +275,6 @@ shinyServer(function(input, output, session) {
       updateSelectInput(session, paste0("dropdown_", x),
         selected = input[[paste0("header_dropdown_", x)]]
       )
-    })
-  })
-
-  ######## Update Folder List ########
-  lapply(c("header_dropdown_", "dropdown_"), function(x) {
-    observeEvent(ignoreInit = TRUE, input[[paste0(x, "project")]], {
-      # get synID of selected project
-      project_id <- data_list$project()[input[[paste0(x, "project")]]]
-
-      # gets folders per project
-      folder_list <- storage_project_datasets(url=file.path(api_uri, "v1/storage/project/datasets"),
-                                              asset_view = selected$master_fileview(),
-                                              project_id=project_id,
-                                              input_token=access_token) %>% list2Vector()
-
-      # update folder names
-      updateSelectInput(session, paste0(x, "folder"), choices = sort(names(folder_list)))
-
-      if (x == "dropdown_") {
-        selected$project(project_id)
-        data_list$folders(folder_list)
-      }
-
-      if (isUpdateFolder()) {
-        # sync with header dropdown
-        updateSelectInput(session, "dropdown_folder", selected = input[["header_dropdown_folder"]])
-        isUpdateFolder(FALSE)
-      }
     })
   })
 
