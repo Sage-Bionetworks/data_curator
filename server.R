@@ -130,7 +130,7 @@ shinyServer(function(input, output, session) {
     # Update logo and theme
     dca_theme <- ifelse(selected$master_fileview() %in% names(syn_themes),
                         syn_themes[selected$master_fileview()],
-                        "www/dca_themes/sage_theme_config.rds")
+                        "www/dca_themes/synapse_theme_config.rds")
     insertUI(
       selector = "div",
       where = "beforeBegin",
@@ -189,7 +189,6 @@ shinyServer(function(input, output, session) {
                                        asset_view = selected$master_fileview(),
                                        input_token = access_token)
      data_list$project(list2Vector(projects_list))
-     dcWaiter("hide")
      
      # updates project dropdown
      lapply(c("header_dropdown_", "dropdown_"), function(x) {
@@ -209,9 +208,10 @@ shinyServer(function(input, output, session) {
        observeEvent(ignoreInit = TRUE, input[[paste0(x, "project")]], {
          # get synID of selected project
          project_id <- data_list$project()[input[[paste0(x, "project")]]]
-         
+         if (!is.na(project_id)){
          # gets folders per project
-         dcWaiter("show", msg = paste0("Getting data from ", selected$master_fileview(), "..."))
+         dcWaiter("show", msg = paste0("Getting project data ", project_id, "..."))
+         
          folder_list <- storage_project_datasets(url=file.path(api_uri, "v1/storage/project/datasets"),
                                                  asset_view = selected$master_fileview(),
                                                  project_id=project_id,
@@ -219,6 +219,7 @@ shinyServer(function(input, output, session) {
          
          # update folder names
          updateSelectInput(session, paste0(x, "folder"), choices = sort(names(folder_list)))
+         }
          
          if (x == "dropdown_") {
            selected$project(project_id)
@@ -233,6 +234,9 @@ shinyServer(function(input, output, session) {
          dcWaiter("hide")
        })
      })
+     
+     updateTabsetPanel(session, "tabs",
+                       selected = "tab_data")
      
      dcWaiter("hide")
      
