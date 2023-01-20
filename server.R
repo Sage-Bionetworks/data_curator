@@ -296,7 +296,8 @@ shinyServer(function(input, output, session) {
                                                     data_type = selected$schema(),
                                                     dataset_id = selected$folder(),
                                                     asset_view = asset_view,
-                                                    output_format = "google_sheet")
+                                                    output_format = "google_sheet",
+                                                    input_token=access_token)
                            )
 
     # generate link
@@ -387,14 +388,13 @@ shinyServer(function(input, output, session) {
   observeEvent(input$btn_val_gsheet, {
     # loading screen for Google link generation
     dcWaiter("show", msg = "Generating link...")
-    
     filled_manifest <- switch(dca_schematic_api,
                               reticulate = manifest_populate_py(paste0(config$community, " ", input$dropdown_datatype),
                                                                 inFile$raw()$datapath,
                                                                 selected$schema()),
                               rest = manifest_populate(url=file.path(api_uri, "v1/manifest/populate"),
                                                        schema_url = data_model,
-                                                       title = "Test Populate Patient - REST API",
+                                                       title = paste0(config$community, " ", input$dropdown_datatype),
                                                        data_type = selected$schema(),
                                                        return_excel = FALSE,
                                                        csv_file = inFile$raw()$datapath))
