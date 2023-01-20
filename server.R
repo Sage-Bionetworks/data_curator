@@ -106,7 +106,7 @@ shinyServer(function(input, output, session) {
 
       user_name <- switch(dca_schematic_api,
                           reticulate = synapse_user_profile_py(),
-                          rest = synapse_user_profile(auth=Sys.getenv("SYNAPSE_PAT"))$userName
+                          rest = synapse_user_profile(auth=access_token)$userName
       )
 
       is_certified <- switch(dca_schematic_api,
