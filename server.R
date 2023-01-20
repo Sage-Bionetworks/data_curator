@@ -336,7 +336,7 @@ shinyServer(function(input, output, session) {
                                        data_type = selected$schema(), dataset_id = selected$folder(),
                                        asset_view=selected$master_fileview(),
                                        output_format = Sys.getenv("DCA_MANIFEST_OUTPUT_FORMAT"),
-                                       input_token=input_token))
+                                       input_token=access_token))
         
         dcWaiter("hide", sleep = 1)
       }
@@ -378,7 +378,7 @@ shinyServer(function(input, output, session) {
                       data_type = selected$schema(), dataset_id = selected$folder(),
                       asset_view=selected$master_fileview(),
                       output_format = Sys.getenv("DCA_MANIFEST_OUTPUT_FORMAT"),
-                      input_token=input_token))
+                      input_token=access_token))
     # generate link
     output$text_template <- renderUI(
       tags$a(id = "template_link", href = manifest_url(), list(icon("hand-point-right"), manifest_url()), target = "_blank")
@@ -489,7 +489,7 @@ shinyServer(function(input, output, session) {
       " ", input$dropdown_template),
       title=selected$schema,
       csv_file=inFile$raw()$datapath,
-      input_token = input_token)
+      input_token = access_token)
 
     # rerender and change button to link
     output$val_gsheet <- renderUI({
