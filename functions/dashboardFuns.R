@@ -91,7 +91,6 @@ get_dataset_metadata <- function(syn.store, datasets, ncores = 1, access_token, 
 #' @return data frame contains required data types for tree plot
 validate_metadata <- function(metadata, project.scope) {
   stopifnot(is.list(project.scope))
-
   if (nrow(metadata) == 0) {
     return(metadata)
   }
