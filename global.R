@@ -40,7 +40,10 @@ schematic_config <- yaml.load_file("schematic_config.yml")
 dca_schematic_api <- schematic_config$api$type
 asset_view <- schematic_config$synapse$master_fileview
 data_model <- schematic_config$model$input$download_url
-api_uri <- paste(schematic_config$api$host, schematic_config$api$port, sep=":")
+api_uri <- ifelse(is.null(schematic_config$ap$port),
+  schematic_config$api$host,
+  paste(schematic_config$api$host, schematic_config$api$port, sep=":")
+)
 
 # update port if running app locally
 if (interactive()) {
