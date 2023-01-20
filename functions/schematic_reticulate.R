@@ -97,4 +97,4 @@ model_submit_py <- function(SchemaGenerator, metadataManifestPath, datasetId, ma
   )
 }
 
-synase_user_profile_py <- function() syn$getUserProfile()$userName
+synapse_user_profile_py <- function() syn$getUserProfile()$userName
