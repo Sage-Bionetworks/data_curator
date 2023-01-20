@@ -35,6 +35,13 @@ if (is.null(client_id) || nchar(client_id) == 0) stop("oauth_config.yml is missi
 if (is.null(client_secret) || nchar(client_secret) == 0) stop("oauth_config.yml is missing CLIENT_SECRET")
 if (is.null(app_url) || nchar(app_url) == 0) stop("oauth_config.yml is missing APP_URL")
 
+# Read schematic_config
+schematic_config <- yaml.load_file("schematic_config.yml")
+dca_schematic_api <- schematic_config$api$type
+asset_view <- schematic_config$synapse$master_fileview
+data_model <- schematic_config$model$input$download_url
+api_uri <- paste(schematic_config$api$host, schematic_config$api$port, sep=":")
+
 # update port if running app locally
 if (interactive()) {
   port <- httr::parse_url(app_url)$port
@@ -85,38 +92,34 @@ api <- oauth_endpoint(
 # The 'openid' scope is required by the protocol for retrieving user information.
 scope <- "openid view download modify"
 
-## Set Up Virtual Environment
-# ShinyAppys has a limit of 7000 files which this app' grossly exceeds
-# due to its Python dependencies.  To get around the limit we zip up
-# the virtual environment before deployment and unzip it here.
-
-# unzip virtual environment, named as ".venv.zip"
-if (!file.exists(".venv")) utils::unzip(".venv.zip")
-
-# We get a '126' error (non-executable) if we don't do this:
-system("chmod -R +x .venv")
-
-# Don't necessarily have to set `RETICULATE_PYTHON` env variable
-Sys.unsetenv("RETICULATE_PYTHON")
-reticulate::use_virtualenv(file.path(getwd(), ".venv"), required = TRUE)
-
-## Import functions/modules
-# import synapse client
-syn <- import("synapseclient")$Synapse()
-# import schematic modules
-source_python("functions/metadataModel.py")
 # import R files
 source_files <- list.files(c("functions", "modules"), pattern = "*\\.R$", recursive = TRUE, full.names = TRUE) %>%
   .[!grepl("dashboard", .)]
 sapply(source_files, FUN = source)
 
-## Read config.json
-if (!file.exists("www/config.json")) {
-  system(
-    "python3 .github/config_schema.py -c schematic_config.yml --service_repo 'Sage-Bionetworks/schematic' --overwrite"
-  )
+## Set Up Virtual Environment
+# ShinyAppys has a limit of 7000 files which this app' grossly exceeds
+# due to its Python dependencies.  To get around the limit we zip up
+# the virtual environment before deployment and unzip it here.
+# unzip virtual environment, named as ".venv.zip"
+if (dca_schematic_api == "reticulate"){
+  if (!file.exists(".venv")) utils::unzip(".venv.zip")
+  
+  # We get a '126' error (non-executable) if we don't do this:
+  system("chmod -R +x .venv")
+  # Don't necessarily have to set `RETICULATE_PYTHON` env variable
+  Sys.unsetenv("RETICULATE_PYTHON")
+  setup_synapse_driver()
+  
+  ## Read config.json
+  if (!file.exists("www/config.json")) {
+    system(
+      "python3 .github/config_schema.py -c schematic_config.yml --service_repo 'Sage-Bionetworks/schematic' --overwrite"
+    )
+  }
 }
 config_file <- fromJSON("www/config.json")
+
 
 ## Global variables
 dropdown_types <- c("project", "folder", "datatype")
