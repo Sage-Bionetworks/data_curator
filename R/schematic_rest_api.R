@@ -33,7 +33,7 @@ manifest_generate <- function(url="http://localhost:3001/v1/manifest/generate",
                               schema_url="https://raw.githubusercontent.com/ncihtan/data-models/main/HTAN.model.jsonld", #nolint
                               title, data_type, oauth="true",
                               use_annotations="false", dataset_id=NULL,
-                              asset_view, output_format) {
+                              asset_view, output_format, input_token = NULL) {
   
   req <- httr::GET(url,
                    query = list(
@@ -44,7 +44,8 @@ manifest_generate <- function(url="http://localhost:3001/v1/manifest/generate",
                      use_annotations=use_annotations,
                      dataset_id=dataset_id,
                      asset_view=asset_view,
-                     output_format=output_format
+                     output_format=output_format,
+                     input_token = input_token
                    ))
   
   manifest_url <- httr::content(req)
