@@ -61,14 +61,15 @@ manifest_generate <- function(url="http://localhost:3001/v1/manifest/generate",
 #' @export
 manifest_populate <- function(url="http://localhost:3001/v1/manifest/populate",
                               schema_url="https://raw.githubusercontent.com/ncihtan/data-models/main/HTAN.model.jsonld", #notlint
-                              data_type, title, csv_file) {
+                              data_type, title, return_excel=FALSE, csv_file) {
   
   req <- httr::POST(url,
                     query=list(
                       schema_url=schema_url,
                       data_type=data_type,
-                      title=title),
-                    body=list(csv_file=httr::upload_file(csv_file))
+                      title=title,
+                      return_excel=return_excel),
+                    body=list(csv_file=httr::upload_file(csv_file, type = "text/csv"))
   )
   req
   
