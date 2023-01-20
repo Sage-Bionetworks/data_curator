@@ -47,6 +47,6 @@ style:
     strict_validation: true
 
 api:
-  type: 'rest'
+  type: 'reticulate'
   host: "https://schematic.dnt-dev.sagebase.org"
   #port: "3001"
