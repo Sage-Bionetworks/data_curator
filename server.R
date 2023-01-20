@@ -25,8 +25,6 @@ shinyServer(function(input, output, session) {
 
   session$userData$access_token <- access_token
 
-  synapse_driver <- import("schematic.store.synapse")$SynapseStorage
-
   ######## session global variables ########
   # read config in
   config <- config_file
@@ -80,24 +78,19 @@ shinyServer(function(input, output, session) {
     # Shiny app'
     #
     access_token <- session$userData$access_token
+    
+    if (dca_schematic_api == "reticulate") {
+      syn$login(authToken = access_token, rememberMe = FALSE)
+    }
 
-    syn$login(authToken = access_token, rememberMe = FALSE)
-
-    data_list$projects(
-      tryCatch(
-        {
-          # get syn storage
-          syn_store <<- synapse_driver(access_token = access_token)
-          # get user's common projects
-          list2Vector(syn_store$getStorageProjects())
-        },
-        error = function(e) {
-          message(e$message)
-          return(NULL)
-        }
-      )
+        data_list_raw <- switch(dca_schematic_api,
+           reticulate  = storage_projects_py(synapse_driver, access_token),
+           rest = storage_projects(url=file.path(api_uri, "v1/storage/projects"),
+                                   asset_view = asset_view,
+                                   input_token = access_token)
     )
-
+    data_list$projects(list2Vector(data_list_raw))
+    
     if (is.null(data_list$projects()) || length(data_list$projects()) == 0) {
       dcWaiter("update", landing = TRUE, isPermission = FALSE)
     } else {
@@ -111,9 +104,15 @@ shinyServer(function(input, output, session) {
         })
       })
 
-      user_name <- syn$getUserProfile()$userName
+      user_name <- switch(dca_schematic_api,
+                          reticulate = synapse_user_profile_py(),
+                          rest = synapse_user_profile(auth=Sys.getenv("SYNAPSE_PAT"))$userName
+      )
 
-      if (!syn$is_certified(user_name)) {
+      is_certified <- switch(dca_schematic_api,
+                             reticulate = syn$is_certified(user_name),
+                             rest = synapse_is_certified(auth=access_token))
+      if (!is_certified) {
         dcWaiter("update", landing = TRUE, isCertified = FALSE)
       } else {
         # update waiter loading screen once login successful
@@ -175,7 +174,13 @@ shinyServer(function(input, output, session) {
       project_id <- data_list$projects()[input[[paste0(x, "project")]]]
 
       # gets folders per project
-      folder_list <- syn_store$getStorageDatasetsInProject(project_id) %>% list2Vector()
+      folder_list_raw <- switch(dca_schematic_api,
+                            reticulate = storage_projects_datasets_py(synapse_driver, project_id),
+                            rest = storage_project_datasets(url=file.path(api_uri, "v1/storage/project/datasets"),
+                                                            asset_view = asset_view,
+                                                            project_id=project_id,
+                                                            input_token=access_token))
+      folder_list <- list2Vector(folder_list_raw)
 
       if (length(folder_list) > 0) folder_names <- sort(names(folder_list)) else folder_names <- " "
 
@@ -244,7 +249,12 @@ shinyServer(function(input, output, session) {
 
       dcWaiter("show", msg = paste0("Getting files in ", input$dropdown_folder, "..."))
       # get file list in selected folder
-      file_list <- syn_store$getFilesInStorageDataset(selected$folder())
+      file_list <- switch(dca_schematic_api,
+                          reticulate = storage_dataset_files_py(selected$folder()),
+                          rest = storage_dataset_files(url=file.path(api_uri, "v1/storage/dataset/files"),
+                                                                  asset_view = asset_view,
+                                                                  dataset_id = selected$folder(),
+                                                                  input_token=access_token))
 
       # update files list in the folder
       data_list$files(list2Vector(file_list))
@@ -276,17 +286,18 @@ shinyServer(function(input, output, session) {
 
     # loading screen for template link generation
     dcWaiter("show", msg = "Generating link...")
-
-    manifest_url <-
-      metadata_model$getModelManifest(
-        title = paste0(config$community, " ", input$dropdown_datatype),
-        rootNode = selected$schema(),
-        filenames = switch((selected$schema_type() == "file") + 1,
-          NULL,
-          as.list(names(data_list$files()))
-        ),
-        datasetId = selected$folder()
-      )
+    manifest_url <- switch(dca_schematic_api,
+                           reticulate =  manifest_generate_py(title = paste0(config$community, " ", input$dropdown_datatype),
+                                                              rootNode = selected$schema(),
+                                                              datasetId = selected$folder()),
+                           rest = manifest_generate(url=file.path(api_uri, "v1/manifest/generate"),
+                                                    schema_url = data_model,
+                                                    title = paste0(config$community, " ", input$dropdown_datatype),
+                                                    data_type = selected$schema(),
+                                                    dataset_id = selected$folder(),
+                                                    asset_view = asset_view,
+                                                    output_format = "google_sheet")
+                           )
 
     # generate link
     output$text_template <- renderUI(
@@ -326,20 +337,16 @@ shinyServer(function(input, output, session) {
 
     # loading screen for validating metadata
     dcWaiter("show", msg = "Validating...")
-
-    annotation_status <-
-      tryCatch(
-        metadata_model$validateModelManifest(
-          manifestPath = inFile$raw()$datapath,
-          rootNode = selected$schema(),
-          restrict_rules = TRUE, # set true to disable great expectation
-          project_scope = list(selected$project())
-        ),
-        error = function(e) {
-          message("'validateModelManifest' failed:\n", e$message)
-          return(NULL)
-        }
-      )
+    annotation_status <- switch(dca_schematic_api,
+                                reticulate = manifest_validate_py(inFile$raw()$datapath,
+                                                                  selected$schema(),
+                                                                  TRUE,
+                                                                  list(selected$project())),
+                                rest = manifest_validate(url=file.path(api_uri, "v1/model/validate"),
+                                                         schema_url=data_model,
+                                                         data_type=selected$schema(),
+                                                         json_str=jsonlite::toJSON(read_csv(inFile$raw()$datapath)))
+                                )
 
     # validation messages
     validation_res <- validationResult(annotation_status, input$dropdown_datatype, inFile$data())
@@ -380,12 +387,18 @@ shinyServer(function(input, output, session) {
   observeEvent(input$btn_val_gsheet, {
     # loading screen for Google link generation
     dcWaiter("show", msg = "Generating link...")
+    
+    filled_manifest <- switch(dca_schematic_api,
+                              reticulate = manifest_populate_py(paste0(config$community, " ", input$dropdown_datatype),
+                                                                inFile$raw()$datapath,
+                                                                selected$schema()),
+                              rest = manifest_populate(url=file.path(api_uri, "v1/manifest/populate"),
+                                                       schema_url = data_model,
+                                                       title = "Test Populate Patient - REST API",
+                                                       data_type = selected$schema(),
+                                                       return_excel = FALSE,
+                                                       csv_file = inFile$raw()$datapath))
 
-    filled_manifest <- metadata_model$populateModelManifest(
-      title = paste0(config$community, " ", input$dropdown_datatype),
-      manifestPath = inFile$raw()$datapath,
-      rootNode = selected$schema()
-    )
 
     # rerender and change button to link
     output$val_gsheet <- renderUI({
@@ -430,8 +443,13 @@ shinyServer(function(input, output, session) {
           quote = TRUE, row.names = FALSE, na = ""
         )
       } else {
-        file_list <- syn_store$getFilesInStorageDataset(selected$folder())
-        data_list$files(list2Vector(file_list))
+        file_list_raw <- switch(dca_schematic_api,
+                            reticulate = storage_dataset_files_py(selected$folder()),
+                            rest = storage_dataset_files(url=file.path(api_uri, "v1/storage/dataset/files"),
+                                                         asset_view = asset_view,
+                                                         dataset_id = selected$folder(),
+                                                         input_token=access_token))
+        data_list$files(list2Vector(file_list_raw))
 
         # better filename checking is needed
         # TODO: crash if no file existing
@@ -445,15 +463,23 @@ shinyServer(function(input, output, session) {
           quote = TRUE, row.names = FALSE, na = ""
         )
       }
-
+      
       # associates metadata with data and returns manifest id
-      manifest_id <- syn_store$associateMetadataWithFiles(
-        schemaGenerator = schema_generator,
-        metadataManifestPath = tmp_file_path,
-        datasetId = selected$folder(),
-        manifest_record_type = "table",
-        restrict_manifest = FALSE
-      )
+      manifest_id <- switch(dca_schematic_api,
+                            reticulate = model_submit_py(schema_generator,
+                                                         tmp_file_path,
+                                                         selected$folder(),
+                                                         "table",
+                                                         FALSE),
+                            rest = model_submit(url=file.path(api_uri, "v1/model/submit"),
+                                                             schema_url = data_model,
+                                                             data_type = selected$schema(),
+                                                             dataset_id = selected$folder(),
+                                                             input_token = access_token,
+                                                             restrict_rules = FALSE,
+                                                             json_str = jsonlite::toJSON(read_csv(tmp_file_path)),
+                                                             asset_view = asset_view)
+                            )
       manifest_path <- tags$a(href = paste0("https://www.synapse.org/#!Synapse:", manifest_id), manifest_id, target = "_blank")
 
       # add log message
@@ -483,12 +509,20 @@ shinyServer(function(input, output, session) {
       )
 
       # associates metadata with data and returns manifest id
-      manifest_id <- syn_store$associateMetadataWithFiles(
-        schemaGenerator = schema_generator,
-        metadataManifestPath = tmp_file_path,
-        datasetId = selected$folder(),
-        manifest_record_type = "table",
-        restrict_manifest = FALSE
+      manifest_id <- switch(dca_schematic_api,
+                            reticulate = model_submit_py(schema_generator,
+                                                         tmp_file_path,
+                                                         selected$folder(),
+                                                         "table",
+                                                         FALSE),
+                            rest = model_submit(url=file.path(api_uri, "v1/model/submit"),
+                                                schema_url = data_model,
+                                                data_type = selected$schema(),
+                                                dataset_id = selected$folder(),
+                                                input_token = access_token,
+                                                restrict_rules = FALSE,
+                                                json_str = jsonlite::toJSON(read_csv(tmp_file_path)),
+                                                asset_view = asset_view)
       )
       manifest_path <- tags$a(href = paste0("https://www.synapse.org/#!Synapse:", manifest_id), manifest_id, target = "_blank")
 
