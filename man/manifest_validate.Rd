@@ -9,7 +9,7 @@ manifest_validate(
   schema_url =
     "https://raw.githubusercontent.com/ncihtan/data-models/main/HTAN.model.jsonld",
   data_type,
-  csv_file
+  json_str
 )
 }
 \arguments{

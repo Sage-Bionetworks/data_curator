@@ -7,7 +7,8 @@
 get_asset_view_table(
   url = "http://localhost:3001/v1/storage/assets/tables",
   input_token,
-  asset_view
+  asset_view,
+  return_type = "json"
 )
 }
 \arguments{

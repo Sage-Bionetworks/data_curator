@@ -10,8 +10,10 @@ model_submit(
     "https://raw.githubusercontent.com/ncihtan/data-models/main/HTAN.model.jsonld",
   data_type,
   dataset_id,
+  restrict_rules = FALSE,
   input_token,
-  csv_file
+  json_str,
+  asset_view
 )
 }
 \arguments{

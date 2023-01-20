@@ -12,7 +12,9 @@ manifest_generate(
   data_type,
   oauth = "true",
   use_annotations = "false",
-  dataset_id
+  dataset_id = NULL,
+  asset_view,
+  output_format
 )
 }
 \arguments{
