@@ -8,7 +8,7 @@ setup_synapse_driver <- function(){
   
   # new way
   reticulate::use_virtualenv(file.path(getwd(), ".venv"), required = TRUE)
-  syn <- reticulate::import("synapseclient")$Synapse()
+  syn <<- reticulate::import("synapseclient")$Synapse()
   
   MetadataModel <<- reticulate::import("schematic.models.metadata")$MetadataModel
   CONFIG <<- reticulate::import("schematic")$CONFIG
