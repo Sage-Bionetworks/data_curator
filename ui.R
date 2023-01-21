@@ -21,7 +21,7 @@ ui <- shinydashboardPlus::dashboardPage(
       dropdownBlock(
         id = "header_selection_dropdown",
         title = "Selection",
-        icon = icon("sliders"),
+        icon = icon("sliders-h"),
         badgeStatus = "info",
         fluidRow(
           lapply(dropdown_types, function(x) {
@@ -34,30 +34,41 @@ ui <- shinydashboardPlus::dashboardPage(
               )
             )
           }),
-          actionButton("btn_header_update", NULL, icon("rotate"), class = "btn-shiny-effect")
+          actionButton("btn_header_update", NULL, icon("sync-alt"), class = "btn-shiny-effect")
         )
       )
-    ),
-    tags$li(
-      class = "dropdown", id = "HTAN_logo",
-      tags$a(
-        href = "https://synapse.org/",
-        target = "_blank",
-        tags$img(
-          height = "40px", alt = "SYNAPSE LOGO",
-          src = "img/synapse_logo.png"
-        )
-      )
-    )
+    )#,
+    # tags$li(
+    #   class = "dropdown", id = "HTAN_logo",
+    #   tags$a(
+    #     href = "https://humantumoratlas.org/",
+    #     target = "_blank",
+    #     tags$img(
+    #       height = "40px", alt = "HTAN LOGO",
+    #       src = "img/HTAN_text_logo.png"
+    #     )
+    #   )
+    # )
   ),
   dashboardSidebar(
     width = 250,
     sidebarMenu(
       id = "tabs",
+      # uiOutput("title"),
+      # menuItem(
+      #   "Instructions",
+      #   tabName = "tab_instructions",
+      #   icon = icon("book-open")
+      # ),
+      menuItem(
+        "Select your Asset View",
+        tabName = "tab_asset_view",
+        icon = icon("mouse-pointer")
+      ),
       menuItem(
         "Select your Dataset",
         tabName = "tab_data",
-        icon = icon("arrow-pointer")
+        icon = icon("mouse-pointer")
       ),
       menuItem(
         "Get Metadata Template",
@@ -86,8 +97,60 @@ ui <- shinydashboardPlus::dashboardPage(
     # load dependencies
     use_notiflix_report(width = "400px"),
     use_waiter(),
+    dcamodules::use_dca(),
     tabItems(
-      # data selection & dashboard tab content
+      # First tab content
+      # tabItem(
+      #   tabName = "tab_instructions",
+      #   h2("Instructions for the Data Curator App (DCA):"),
+      #   h3(
+      #     "1. Go to",
+      #     strong("Select your Dataset"),
+      #     "tab - select your project; choose your folder and metadata template type matching your metadata."
+      #   ),
+      #   h3(
+      #     "2. Go to",
+      #     strong("Get Metadata Template"),
+      #     "tab - click on the link to generate the metadata template, then fill out and download the file as a CSV. If you already have an annotated metadata template, you may skip this step."
+      #   ),
+      #   h3(
+      #     "3. Go to",
+      #     strong("Submit and Validate Metadata"),
+      #     "tab - upload your filled CSV and validate your metadata. If you receive errors correct them, reupload your CSV, and revalidate until you receive no more errors. When your metadata is valid, you will be able to see a 'Submit' button. Press it to submit your metadata."
+      #   ),
+      #   switchTabUI("switchTab1", direction = "right")
+      # ),
+      # second tab content
+      tabItem(
+        tabName = "tab_asset_view",
+        #h2("Select the asset view"),
+        fluidRow(
+          box(
+            id = "box_pick_asset_view",
+            status = "primary",
+            width = 6,
+            title = "Select a DCC: ",
+            selectInput(
+              inputId = "dropdown_asset_view",
+              label = NULL, #"Asset View:",
+              choices = parse_env_var(Sys.getenv("DCA_SYNAPSE_MASTER_FILEVIEW"))#"Generating..."
+            ),
+            actionButton("btn_asset_view", "Click to confirm",
+                         class = "btn-primary-color"
+            )
+          )
+          ,
+          # box(
+          #   #title = "Confirm choice",
+          #   status = "primary",
+          #   width = 6,
+          #   actionButton("btn_asset_view", "Click to confirm",
+          #                class = "btn-primary-color"
+          #                )
+          # )
+        )#,
+        #switchTabUI("switchTab1", direction = "right") # remove arrow from assetview page.
+      ),
       tabItem(
         tabName = "tab_data",
         h2("Set Dataset and Data Type for Curation"),
@@ -117,20 +180,21 @@ ui <- shinydashboardPlus::dashboardPage(
             width = 6,
             title = "Choose a Data Type: ",
             selectInput(
-              inputId = "dropdown_datatype",
-              label = "Data Type:",
+              inputId = "dropdown_template",
+              label = "Data Type Template:",
               choices = "Generating..."
             )
           )#,
           #dashboardUI("dashboard")
         ),
-        switchTabUI("switchTab1", direction = "right")
+        switchTabUI("switchTab2", direction = "right")
       ),
-      # template tab item
+      # Third tab item
       tabItem(
         tabName = "tab_template",
         useShinyjs(),
         h2("Download Template for Selected Folder"),
+        if (Sys.getenv("DCA_MANIFEST_OUTPUT_FORMAT") != "excel") {
         fluidRow(
           box(
             title = "Get Link, Annotate, and Download Template as CSV",
@@ -153,10 +217,31 @@ ui <- shinydashboardPlus::dashboardPage(
             ),
             helpText("This link will leads to an empty template or your previously submitted template with new files if applicable.")
           )
-        ),
-        switchTabUI("switchTab2", direction = "both")
+        )}else{
+        fluidRow(
+          box(
+            title = "Or download data as an Excel sheet",
+            status = "primary",
+            width = 12,
+            downloadButton("downloadData", "Download Excel Spreadsheet."),
+            hidden(
+              div(
+                id = "div_template_warn_xls",
+                height = "100%",
+                htmlOutput("text_template_warn_xls")
+              ),
+              div(
+                id = "div_template_xls",
+                height = "100%",
+                htmlOutput("text_template_xls")
+              )
+            ),
+            helpText("This link will leads to an empty template or your previously submitted template with new files if applicable.")
+          )
+        )},
+        switchTabUI("switchTab3", direction = "both")
       ),
-      # upload & submit tab content
+      # Fourth tab content
       tabItem(
         tabName = "tab_upload",
         h2("Submit & Validate a Filled Metadata Template"),
@@ -199,7 +284,7 @@ ui <- shinydashboardPlus::dashboardPage(
             uiOutput("submit")
           )
         ),
-        switchTabUI("switchTab3", direction = "left")
+        switchTabUI("switchTab4", direction = "left")
       )
     ),
     # waiter loading screen
