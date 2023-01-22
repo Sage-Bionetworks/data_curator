@@ -132,22 +132,12 @@ ui <- shinydashboardPlus::dashboardPage(
             title = "Select a DCC: ",
             selectInput(
               inputId = "dropdown_asset_view",
-              label = NULL, #"Asset View:",
-              choices = parse_env_var(Sys.getenv("DCA_SYNAPSE_MASTER_FILEVIEW"))#"Generating..."
+              label = NULL, 
+              choices = all_asset_views)
             ),
             actionButton("btn_asset_view", "Click to confirm",
                          class = "btn-primary-color"
             )
-          )
-          ,
-          # box(
-          #   #title = "Confirm choice",
-          #   status = "primary",
-          #   width = 6,
-          #   actionButton("btn_asset_view", "Click to confirm",
-          #                class = "btn-primary-color"
-          #                )
-          # )
         )#,
         #switchTabUI("switchTab1", direction = "right") # remove arrow from assetview page.
       ),
