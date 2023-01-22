@@ -36,6 +36,8 @@ shinyServer(function(input, output, session) {
 
   # data available to the user
   syn_store <- NULL # gets list of projects they have access to
+  
+  asset_views <- reactiveVal(c("mock dca fileview (syn33715412)"="syn33715412"))
 
   data_list <- list(
     projects = reactiveVal(NULL), folders = reactiveVal(NULL),
@@ -78,6 +80,14 @@ shinyServer(function(input, output, session) {
     # Shiny app'
     #
     access_token <- session$userData$access_token
+    
+    has_access <- vapply(all_asset_views, function(x) {
+      synapse_access(id=x, access="DOWNLOAD", auth=access_token)
+    }, 1L)
+    asset_views(all_asset_views[has_access==1])
+    if (length(asset_views) == 0) stop("You do not have DOWNLOAD access to any supported Asset Views.")
+    updateSelectInput(session, "dropdown_asset_view",
+                      choices = asset_views())
     
     if (dca_schematic_api == "reticulate") {
       syn$login(authToken = access_token, rememberMe = FALSE)
