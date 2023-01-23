@@ -94,8 +94,8 @@ jobs:
       - name: Write R environmental variables
         shell: bash
         run: |
-          echo Sys.setenv(DCA_MODEL_INPUT_DOWNLOAD_URL="${{ secrets.DCA_MODEL_INPUT_DOWNLOAD_URL }}") >> .Renviron
-          echo Sys.setenv(DCA_SYNAPSE_MASTER_FILEVIEW="${{ secrets.DCA_SYNAPSE_MASTER_FILEVIEW }}") >> .Renviron
+          echo 'Sys.setenv(DCA_MODEL_INPUT_DOWNLOAD_URL="${{ secrets.DCA_MODEL_INPUT_DOWNLOAD_URL }}")' >> .Renviron
+          echo 'Sys.setenv(DCA_SYNAPSE_MASTER_FILEVIEW="${{ secrets.DCA_SYNAPSE_MASTER_FILEVIEW }}")' >> .Renviron
           
       - name: zip virtual env
         shell: bash
