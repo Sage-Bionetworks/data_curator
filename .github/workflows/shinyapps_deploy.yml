@@ -23,6 +23,8 @@ jobs:
     env:
       # This should not be necessary for installing from public repo's however remotes::install_github() fails without it.
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      DCA_MODEL_INPUT_DOWNLOAD_URL: ${{ secrets.DCA_MODEL_INPUT_DOWNLOAD_URL }}
+      DCA_SYNAPSE_MASTER_FILEVIEW: ${{ secrets.DCA_SYNAPSE_MASTER_FILEVIEW }}
 
     steps:
       - name: Install System Dependencies
