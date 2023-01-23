@@ -129,9 +129,9 @@ if (dca_schematic_api == "reticulate"){
   
   ## Read config.json
   if (!file.exists("www/config.json")) {
-    system(
-      "python3 .github/config_schema.py -c schematic_config.yml --service_repo 'Sage-Bionetworks/schematic' --overwrite"
-    )
+#    system(
+#      "python3 .github/config_schema.py -c schematic_config.yml --service_repo 'Sage-Bionetworks/schematic' --overwrite"
+#    )
   }
 }
 config_file <- fromJSON("www/config.json")
