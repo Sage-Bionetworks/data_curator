@@ -95,6 +95,18 @@ api <- oauth_endpoint(
 # The 'openid' scope is required by the protocol for retrieving user information.
 scope <- "openid view download modify"
 
+# parse environment variables for configuration
+parse_env_var <- function(x, el_delim=",", kv_delim=":"){
+  # assume string of key-value pairs
+  elements <- stringr::str_split(x, el_delim, simplify = TRUE)
+  unlist(lapply(elements, function(y){
+    kv <- stringr::str_split(y, kv_delim, n=2)
+    setNames(kv[[1]][[2]], kv[[1]][[1]])
+  }))
+}
+
+all_asset_views <- parse_env_var(Sys.getenv("DCA_SYNAPSE_MASTER_FILEVIEW"))
+
 # import R files
 source_files <- list.files(c("functions", "modules"), pattern = "*\\.R$", recursive = TRUE, full.names = TRUE) %>%
   .[!grepl("dashboard", .)]
@@ -112,7 +124,7 @@ if (dca_schematic_api == "reticulate"){
   system("chmod -R +x .venv")
   # Don't necessarily have to set `RETICULATE_PYTHON` env variable
   Sys.unsetenv("RETICULATE_PYTHON")
-  setup_synapse_driver()
+  #setup_synapse_driver()
   
   ## Read config.json
   if (!file.exists("www/config.json")) {
