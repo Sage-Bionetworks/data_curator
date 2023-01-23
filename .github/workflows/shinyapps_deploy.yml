@@ -23,9 +23,7 @@ jobs:
     env:
       # This should not be necessary for installing from public repo's however remotes::install_github() fails without it.
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
-      DCA_MODEL_INPUT_DOWNLOAD_URL: ${{ secrets.DCA_MODEL_INPUT_DOWNLOAD_URL }}
-      DCA_SYNAPSE_MASTER_FILEVIEW: ${{ secrets.DCA_SYNAPSE_MASTER_FILEVIEW }}
-
+      
     steps:
       - name: Install System Dependencies
         run: |
@@ -93,6 +91,12 @@ jobs:
             --service_repo 'Sage-Bionetworks/schematic' \
             --overwrite
 
+      - name: Write R environmental variables
+        shell: bash
+        run: |
+          echo Sys.setenv(DCA_MODEL_INPUT_DOWNLOAD_URL="${{ secrets.DCA_MODEL_INPUT_DOWNLOAD_URL }}") >> .Renviron
+          echo Sys.setenv(DCA_SYNAPSE_MASTER_FILEVIEW="${{ secrets.DCA_SYNAPSE_MASTER_FILEVIEW }}") >> .Renviron
+          
       - name: zip virtual env
         shell: bash
         # ShinyApps has a limit of 7000 files, far exceeded by the many Python dependencies
@@ -104,8 +108,6 @@ jobs:
       - name: Authorize and deploy app
         shell: Rscript {0}
         run: |
-          Sys.setenv(DCA_MODEL_INPUT_DOWNLOAD_URL="${{ secrets.DCA_MODEL_INPUT_DOWNLOAD_URL }}")
-          Sys.setenv(DCA_SYNAPSE_MASTER_FILEVIEW="${{ secrets.DCA_SYNAPSE_MASTER_FILEVIEW }}")
           # if there is a tag, 'refName' will be tag name
           repo <- Sys.getenv("GITHUB_REPOSITORY")
           appName <- strsplit(repo, "/")[[1]][2]
