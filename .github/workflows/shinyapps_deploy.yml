@@ -104,6 +104,8 @@ jobs:
       - name: Authorize and deploy app
         shell: Rscript {0}
         run: |
+          Sys.setenv(DCA_MODEL_INPUT_DOWNLOAD_URL="${{ secrets.DCA_MODEL_INPUT_DOWNLOAD_URL }}")
+          Sys.setenv(DCA_SYNAPSE_MASTER_FILEVIEW="${{ secrets.DCA_SYNAPSE_MASTER_FILEVIEW }}")
           # if there is a tag, 'refName' will be tag name
           repo <- Sys.getenv("GITHUB_REPOSITORY")
           appName <- strsplit(repo, "/")[[1]][2]
