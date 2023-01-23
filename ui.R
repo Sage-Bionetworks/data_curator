@@ -97,7 +97,7 @@ ui <- shinydashboardPlus::dashboardPage(
     # load dependencies
     use_notiflix_report(width = "400px"),
     use_waiter(),
-    dcamodules::use_dca(),
+    #dcamodules::use_dca(),
     tabItems(
       # First tab content
       # tabItem(
