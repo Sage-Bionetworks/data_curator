@@ -95,9 +95,10 @@ shinyServer(function(input, output, session) {
     
     user_name <- synapse_user_profile(auth=access_token)$userName
 
-    is_certified <- switch(dca_schematic_api,
-                           reticulate = syn$is_certified(user_name),
-                           rest = synapse_is_certified(auth=access_token))
+    is_certified <- synapse_is_certified(auth=access_token)
+    # is_certified <- switch(dca_schematic_api,
+    #                        reticulate = syn$is_certified(user_name),
+    #                        rest = synapse_is_certified(auth=access_token))
     if (!is_certified) {
       dcWaiter("update", landing = TRUE, isCertified = FALSE)
     } else {
