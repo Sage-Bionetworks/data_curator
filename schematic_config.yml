@@ -8,7 +8,7 @@ definitions:
   token_pickle: token.pickle
   service_acct_creds: schematic_service_account_creds.json
 synapse:
-  master_fileview: syn33715412
+  master_fileview: syn27210848
   manifest_folder: manifests
   manifest_basename: synapse_storage_manifest
   token_creds: syn23643259
@@ -20,7 +20,7 @@ manifest:
   - Patient
 model:
   input:
-    download_url: https://raw.githubusercontent.com/Sage-Bionetworks/data-models/main/example.model.jsonld
+    download_url: https://raw.githubusercontent.com/mc2-center/data-models/main/mc2.model.jsonld
     location: data-models/example.model.jsonld
     file_type: local
 style:
@@ -36,4 +36,4 @@ style:
     master_template_id: 1LYS5qE4nV9jzcYw5sXwCza25slDfRA1CIg3cs-hCdpU
     strict_validation: yes
 api:
-  type: reticulate
+  type: rest
