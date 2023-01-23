@@ -28,28 +28,32 @@ shinyServer(function(input, output, session) {
   ######## session global variables ########
   # read config in
   config <- config_file
-  config_schema <- as.data.frame(config[[1]])
-
-  # mapping from display name to schema name
-  template_namedList <- config_schema$schema_name
-  names(template_namedList) <- config_schema$display_name
-
-  # data available to the user
-  syn_store <- NULL # gets list of projects they have access to
+  config_schema <- config$manifest_schemas
+  model_ops <- parse_env_var(Sys.getenv("DCA_MODEL_INPUT_DOWNLOAD_URL"))
   
-  asset_views <- reactiveVal(c("mock dca fileview (syn33715412)"="syn33715412"))
-
+  # mapping from display name to schema name
+  template_namedList <- setNames(config_schema$schema_name,
+                                             config_schema$display_name)
+  #names(template_namedList) <- config_schema$display_name
+  
   data_list <- list(
     projects = reactiveVal(NULL), folders = reactiveVal(NULL),
-    schemas = reactiveVal(template_namedList), files = reactiveVal(NULL)
+    schemas = reactiveVal(template_namedList), files = reactiveVal(NULL),
+    master_asset_view = reactiveVal(NULL)
   )
   # synapse ID of selected data
   selected <- list(
     project = reactiveVal(NULL), folder = reactiveVal(""),
-    schema = reactiveVal(NULL), schema_type = reactiveVal(NULL)
+    schema = reactiveVal(NULL), schema_type = reactiveVal(NULL),
+    master_asset_view = reactiveVal(NULL)
   )
-
+  
   isUpdateFolder <- reactiveVal(FALSE)
+  
+  # data available to the user
+  syn_store <- NULL # gets list of projects they have access to
+  
+  asset_views <- reactiveVal(c("mock dca fileview (syn33715412)"="syn33715412"))
 
   tabs_list <- c("tab_data", "tab_template", "tab_upload")
   clean_tags <- c(
@@ -89,50 +93,73 @@ shinyServer(function(input, output, session) {
     updateSelectInput(session, "dropdown_asset_view",
                       choices = asset_views())
     
-    if (dca_schematic_api == "reticulate") {
-      syn$login(authToken = access_token, rememberMe = FALSE)
-    }
+    user_name <- synapse_user_profile(auth=access_token)$userName
 
-        data_list_raw <- switch(dca_schematic_api,
-           reticulate  = storage_projects_py(synapse_driver, access_token),
-           rest = storage_projects(url=file.path(api_uri, "v1/storage/projects"),
-                                   asset_view = asset_view,
-                                   input_token = access_token)
+    is_certified <- switch(dca_schematic_api,
+                           reticulate = syn$is_certified(user_name),
+                           rest = synapse_is_certified(auth=access_token))
+    if (!is_certified) {
+      dcWaiter("update", landing = TRUE, isCertified = FALSE)
+    } else {
+      # update waiter loading screen once login successful
+      dcWaiter("update", landing = TRUE, userName = user_name)
+    }
+    
+  })
+  
+  observeEvent(input$btn_asset_view, {
+    selected$master_asset_view(input$dropdown_asset_view)
+    dcWaiter("show", msg = paste0("Getting data from ", selected$master_asset_view(), "..."))
+    
+    if (dca_schematic_api == "reticulate") {
+      # Update schematic_config and login
+      schematic_config$synapse$master_fileview <- selected$master_asset_view()
+      schematic_config$model$input$download_url <- model_ops[names(model_ops) == selected$master_asset_view()]
+      yaml::write_yaml(schematic_config, "schematic_config.yml")
+      syn$login(authToken = access_token, rememberMe = FALSE)
+      setup_synapse_driver()
+      
+      system(
+        "python3 .github/config_schema.py -c schematic_config.yml --service_repo 'Sage-Bionetworks/schematic' --overwrite"
+      )
+      
+      new_conf <- reactiveVal(fromJSON("www/config.json"))
+      new_conf_schem <- reactiveVal(as.data.frame(new_conf()[[1]]))
+      # mapping from display name to schema name
+      new_templates <- reactiveVal(setNames(new_conf_schem()$schema_name, new_conf_schem()$display_name))
+      data_list$schemas(new_templates())
+      
+    }
+    
+    data_list_raw <- switch(dca_schematic_api,
+                            reticulate  = storage_projects_py(synapse_driver, access_token),
+                            rest = storage_projects(url=file.path(api_uri, "v1/storage/projects"),
+                                                    asset_view = selected$master_asset_view(),
+                                                    input_token = access_token)
     )
     data_list$projects(list2Vector(data_list_raw))
     
     if (is.null(data_list$projects()) || length(data_list$projects()) == 0) {
       dcWaiter("update", landing = TRUE, isPermission = FALSE)
     } else {
-
+      
       # updates project dropdown
       lapply(c("header_dropdown_", "dropdown_"), function(x) {
         lapply(c(1, 3), function(i) {
           updateSelectInput(session, paste0(x, dropdown_types[i]),
-            choices = sort(names(data_list[[i]]()))
+                            choices = sort(names(data_list[[i]]()))
           )
         })
       })
-
-      user_name <- switch(dca_schematic_api,
-                          reticulate = synapse_user_profile_py(),
-                          rest = synapse_user_profile(auth=access_token)$userName
-      )
-
-      is_certified <- switch(dca_schematic_api,
-                             reticulate = syn$is_certified(user_name),
-                             rest = synapse_is_certified(auth=access_token))
-      if (!is_certified) {
-        dcWaiter("update", landing = TRUE, isCertified = FALSE)
-      } else {
-        # update waiter loading screen once login successful
-        dcWaiter("update", landing = TRUE, userName = user_name)
-      }
     }
+    updateTabsetPanel(session, "tabs",
+                      selected = "tab_data")
+    
+    dcWaiter("hide")
   })
 
   ######## Arrow Button ########
-  lapply(1:3, function(i) {
+  lapply(1:4, function(i) {
     switchTabServer(id = paste0("switchTab", i), tabId = "tabs", tab = reactive(input$tabs)(), tabList = tabs_list, parent = session)
   })
 
@@ -187,7 +214,7 @@ shinyServer(function(input, output, session) {
       folder_list_raw <- switch(dca_schematic_api,
                             reticulate = storage_projects_datasets_py(synapse_driver, project_id),
                             rest = storage_project_datasets(url=file.path(api_uri, "v1/storage/project/datasets"),
-                                                            asset_view = asset_view,
+                                                            asset_view = selected$master_asset_view(),
                                                             project_id=project_id,
                                                             input_token=access_token))
       folder_list <- list2Vector(folder_list_raw)
