@@ -139,7 +139,7 @@ shinyServer(function(input, output, session) {
                                                     input_token = access_token)
     )
     data_list$projects(list2Vector(data_list_raw))
-    
+
     if (is.null(data_list$projects()) || length(data_list$projects()) == 0) {
       dcWaiter("update", landing = TRUE, isPermission = FALSE)
     } else {
@@ -272,7 +272,6 @@ shinyServer(function(input, output, session) {
   # validate before generating template
   observeEvent(c(selected$folder(), selected$schema(), input$tabs), {
     req(input$tabs %in% c("tab_template", "tab_validate"))
-
     warn_text <- NULL
 
     if (length(data_list$folder()) == 0) {
@@ -290,7 +289,7 @@ shinyServer(function(input, output, session) {
       file_list <- switch(dca_schematic_api,
                           reticulate = storage_dataset_files_py(selected$folder()),
                           rest = storage_dataset_files(url=file.path(api_uri, "v1/storage/dataset/files"),
-                                                                  asset_view = asset_view,
+                                                                  asset_view = selected$master_asset_view(),
                                                                   dataset_id = selected$folder(),
                                                                   input_token=access_token))
 
@@ -333,7 +332,7 @@ shinyServer(function(input, output, session) {
                                                     title = paste0(config$community, " ", input$dropdown_datatype),
                                                     data_type = selected$schema(),
                                                     dataset_id = selected$folder(),
-                                                    asset_view = asset_view,
+                                                    asset_view = selected$master_asset_view(),
                                                     output_format = "google_sheet",
                                                     input_token=access_token)
                            )
@@ -484,7 +483,7 @@ shinyServer(function(input, output, session) {
         file_list_raw <- switch(dca_schematic_api,
                             reticulate = storage_dataset_files_py(selected$folder()),
                             rest = storage_dataset_files(url=file.path(api_uri, "v1/storage/dataset/files"),
-                                                         asset_view = asset_view,
+                                                         asset_view = selected$master_asset_view(),
                                                          dataset_id = selected$folder(),
                                                          input_token=access_token))
         data_list$files(list2Vector(file_list_raw))
@@ -516,7 +515,7 @@ shinyServer(function(input, output, session) {
                                                              input_token = access_token,
                                                              restrict_rules = FALSE,
                                                              json_str = jsonlite::toJSON(read_csv(tmp_file_path)),
-                                                             asset_view = asset_view)
+                                                             asset_view = selected$master_asset_view())
                             )
       manifest_path <- tags$a(href = paste0("https://www.synapse.org/#!Synapse:", manifest_id), manifest_id, target = "_blank")
 
@@ -560,7 +559,7 @@ shinyServer(function(input, output, session) {
                                                 input_token = access_token,
                                                 restrict_rules = FALSE,
                                                 json_str = jsonlite::toJSON(read_csv(tmp_file_path)),
-                                                asset_view = asset_view)
+                                                asset_view = selected$master_asset_view())
       )
       manifest_path <- tags$a(href = paste0("https://www.synapse.org/#!Synapse:", manifest_id), manifest_id, target = "_blank")
 
