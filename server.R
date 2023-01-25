@@ -145,6 +145,8 @@ shinyServer(function(input, output, session) {
       sidebar_col="#191919",
       sass_file("www/scss/main.scss")))
     })
+    
+    output$logo <- renderUI({update_logo(selected$master_fileview())})
     # removeUI("header")
     # insertUI(
     #   selector = "div",
