@@ -1,8 +1,8 @@
 /*** Global Variables ***/
 
 // basic color
-$primary_col: #605ca8;
-$htan_col: rgb(95, 0, 140);
+$primary_col: #605ca8 !default;
+$htan_col: rgb(95, 0, 140) !default;
 $light: #f8f9fa;
 $light2: #f4f4f4;
 $dark: #343a40;
@@ -11,8 +11,8 @@ $organe_red: #e55a17;
 
 // section color
 $bg_primary_col: $light;
-$sidebar_col: #191919;
-$sidebar_pink: #a63faa;
+$sidebar_col: #191919 !default;
+$sidebar_pink: #a63faa !default;
 $footer_col: #878787;
 $footer_bg_col: #202020;
 
@@ -42,12 +42,12 @@ $tablet: 768px;
 $desktop: 1024px;
 
 // mixin
-@mixin header_bg {
+@mixin header_bg($left_col, $mid_col, $right_col) {
   background-image: linear-gradient(
     450deg,
-    $sidebar_col,
-    $htan_col,
+    $left_col,
+    $mid_col,
     transparent
   );
-  background-color: $primary_col;
+  background-color: $right_col;
 }
