@@ -44,6 +44,8 @@ update_logo <- function(project = "sage") {
   img <- switch(project,
                 syn20446927 = list(href = "https://humantumoratlas.org/",
                                    img_src = "img/HTAN_text_logo.png"),
+                syn27210848 = list(href = "https://cancercomplexity.synapse.org/",
+                                   img_src = "img/INCLUDE DCC Logo-01.png"),
                 list(href = "https://synapse.org",
                      img_src = "img/synapse_logo.png")
   )
