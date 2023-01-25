@@ -140,10 +140,18 @@ shinyServer(function(input, output, session) {
       tags$head(tags$style(css()))
     })
     css <- reactive({
-      sass(input = list(primary_col="#407BA0",
-      htan_col="#5BB0B5",
-      sidebar_col="#191919",
-      sass_file("www/scss/main.scss")))
+      dca_theme_file <- ifelse(selected$master_fileview() %in% names(syn_themes),
+                          syn_themes[selected$master_fileview()],
+                          "www/dca_themes/sage_theme_config.rds")
+      dca_theme <- readRDS(dca_theme_file)
+      
+      # Don't change theme for default projects
+      if (dca_theme_file != "www/dca_themes/sage_theme_config.rds") {
+        sass(input = list(primary_col=dca_theme$primary_col,
+        htan_col=dca_theme$htan_col,
+        sidebar_col=dca_theme$sidebar_col,
+        sass_file("www/scss/main.scss")))
+      }
     })
     
     output$logo <- renderUI({update_logo(selected$master_fileview())})
