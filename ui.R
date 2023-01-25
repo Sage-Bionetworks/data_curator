@@ -37,18 +37,8 @@ ui <- shinydashboardPlus::dashboardPage(
           actionButton("btn_header_update", NULL, icon("sync-alt"), class = "btn-shiny-effect")
         )
       )
-    )#,
-    # tags$li(
-    #   class = "dropdown", id = "HTAN_logo",
-    #   tags$a(
-    #     href = "https://humantumoratlas.org/",
-    #     target = "_blank",
-    #     tags$img(
-    #       height = "40px", alt = "HTAN LOGO",
-    #       src = "img/HTAN_text_logo.png"
-    #     )
-    #   )
-    # )
+    ),
+    uiOutput("logo")
   ),
   dashboardSidebar(
     width = 250,
@@ -61,9 +51,9 @@ ui <- shinydashboardPlus::dashboardPage(
       #   icon = icon("book-open")
       # ),
       menuItem(
-        "Select your Asset View",
+        "Select DCC",
         tabName = "tab_asset_view",
-        icon = icon("mouse-pointer")
+        icon = icon("database")
       ),
       menuItem(
         "Select your Dataset",
@@ -94,6 +84,7 @@ ui <- shinydashboardPlus::dashboardPage(
       singleton(includeScript("www/js/readCookie.js")),
       tags$script(htmlwidgets::JS("setTimeout(function(){history.pushState({}, 'Data Curator', window.location.pathname);},2000);"))
     ),
+    uiOutput("sass"),
     # load dependencies
     use_notiflix_report(width = "400px"),
     use_waiter(),
@@ -133,7 +124,7 @@ ui <- shinydashboardPlus::dashboardPage(
             selectInput(
               inputId = "dropdown_asset_view",
               label = NULL, 
-              choices = all_asset_views)
+              choices = parse_env_var(Sys.getenv("DCA_SYNAPSE_MASTER_FILEVIEW")))
             ),
             actionButton("btn_asset_view", "Click to confirm",
                          class = "btn-primary-color"
@@ -170,7 +161,7 @@ ui <- shinydashboardPlus::dashboardPage(
             width = 6,
             title = "Choose a Data Type: ",
             selectInput(
-              inputId = "dropdown_datatype",
+              inputId = "dropdown_template",
               label = "Data Type Template:",
               choices = "Generating..."
             )
