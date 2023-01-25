@@ -128,49 +128,57 @@ shinyServer(function(input, output, session) {
     dcWaiter("show", msg = paste0("Getting data from ", selected$master_fileview(), "..."))
     
     # Update logo and theme
-    dca_theme <- ifelse(selected$master_fileview() %in% names(syn_themes),
-                        syn_themes[selected$master_fileview()],
-                        "www/dca_themes/synapse_theme_config.rds")
-    insertUI(
-      selector = "div",
-      where = "beforeBegin",
-      dcamodules::use_dca(theme=dca_theme)
-    )
-    
-    removeUI("header")
-    insertUI(
-      selector = "div",
-      where = "beforeBegin",
-      dashboardHeader(
-        titleWidth = 250,
-        title = tagList(
-          span(class = "logo-lg", "Data Curator"),
-          span(class = "logo-mini", "DCA")
-        ),
-        leftUi = tagList(
-          dropdownBlock(
-            id = "header_selection_dropdown",
-            title = "Selection",
-            icon = icon("sliders-h"),
-            badgeStatus = "info",
-            fluidRow(
-              lapply(dropdown_types, function(x) {
-                div(
-                  id = paste0("header_content_", x),
-                  selectInput(
-                    inputId = paste0("header_dropdown_", x),
-                    label = NULL,
-                    choices = character(0)
-                  )
-                )
-              }),
-              actionButton("btn_header_update", NULL, icon("sync-alt"), class = "btn-shiny-effect")
-            )
-          )
-        ),
-        update_logo(selected$master_fileview())
-      )
-    )
+    # dca_theme <- ifelse(selected$master_fileview() %in% names(syn_themes),
+    #                     syn_themes[selected$master_fileview()],
+    #                     "www/dca_themes/ht.rds")
+    # insertUI(
+    #   selector = "div",
+    #   where = "beforeBegin",
+    #   dcamodules::use_dca(theme=dca_theme)
+    # )
+    output$sass <- renderUI({
+      tags$head(tags$style(css()))
+    })
+    css <- reactive({
+      sass(input = list(primary_col="#407BA0",
+      htan_col="#5BB0B5",
+      sidebar_col="#191919",
+      sass_file("www/scss/main.scss")))
+    })
+    # removeUI("header")
+    # insertUI(
+    #   selector = "div",
+    #   where = "beforeBegin",
+    #   dashboardHeader(
+    #     titleWidth = 250,
+    #     title = tagList(
+    #       span(class = "logo-lg", "Data Curator"),
+    #       span(class = "logo-mini", "DCA")
+    #     ),
+    #     leftUi = tagList(
+    #       dropdownBlock(
+    #         id = "header_selection_dropdown",
+    #         title = "Selection",
+    #         icon = icon("sliders-h"),
+    #         badgeStatus = "info",
+    #         fluidRow(
+    #           lapply(dropdown_types, function(x) {
+    #             div(
+    #               id = paste0("header_content_", x),
+    #               selectInput(
+    #                 inputId = paste0("header_dropdown_", x),
+    #                 label = NULL,
+    #                 choices = character(0)
+    #               )
+    #             )
+    #           }),
+    #           actionButton("btn_header_update", NULL, icon("sync-alt"), class = "btn-shiny-effect")
+    #         )
+    #       )
+    #     ),
+    #     update_logo(selected$master_fileview())
+    #   )
+    # )
     config_ops <- parse_env_var(Sys.getenv("DCA_TEMPLATE_MENU_CONFIG"))
     config_name <- reactiveVal(config_ops[names(config_ops) %in% selected$master_fileview()])
     config(jsonlite::fromJSON(file.path("www", config_name())))
