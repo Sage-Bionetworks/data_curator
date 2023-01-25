@@ -51,9 +51,9 @@ ui <- shinydashboardPlus::dashboardPage(
       #   icon = icon("book-open")
       # ),
       menuItem(
-        "Select your Asset View",
+        "Select DCC",
         tabName = "tab_asset_view",
-        icon = icon("mouse-pointer")
+        icon = icon("database")
       ),
       menuItem(
         "Select your Dataset",
