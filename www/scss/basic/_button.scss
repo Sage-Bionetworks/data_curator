@@ -4,7 +4,7 @@
 // refer to https://paigen11.medium.com/
 .btn-shiny-effect {
   position: relative;
-  background: #27022d;
+  background: $primary_col;
   color: #fff;
   text-decoration: none;
   letter-spacing: 1px;
@@ -13,7 +13,7 @@
   transition: 500ms;
   overflow: hidden;
   // for background color shift
-  background-image: linear-gradient(270deg, #8e9ac2, #42579a);
+  background-image: linear-gradient(270deg, $primary_col, #htan_col);
   background-size: 400% 400%;
   animation: TransitioningBackground 10s ease infinite;
   outline: none !important;
@@ -21,7 +21,7 @@
   &:hover,
   &:focus {
     color: #fff;
-    background-image: linear-gradient(to left, #2d8fe5, #d155b8);
+    background-image: linear-gradient(to left, $primary_col, #htan_col);
     transform: scale(1.05);
     cursor: pointer;
   }
