@@ -40,6 +40,8 @@ shinyServer(function(input, output, session) {
   all_asset_views <- parse_env_var(Sys.getenv("DCA_SYNAPSE_MASTER_FILEVIEW"))
   asset_views <- reactiveVal(c("mock dca fileview (syn33715412)"="syn33715412"))
   
+  dca_theme <- reactiveVal()
+  
   # Set data_model to a URL to jsonld after choosing asset view
   data_model_options <- Sys.getenv("DCA_MODEL_INPUT_DOWNLOAD_URL")
   data_model_options <- parse_env_var(data_model_options) 
@@ -125,25 +127,27 @@ shinyServer(function(input, output, session) {
   observeEvent(input$btn_asset_view, {
     selected$master_fileview(input$dropdown_asset_view)
     
-    dcWaiter("show", msg = paste0("Getting data from ", selected$master_fileview(), "..."))
+    dcWaiter("show", msg = paste0("Getting data from ", selected$master_fileview(), "..."), color = "grey")
+    
+    dca_theme_file <- ifelse(selected$master_fileview() %in% names(syn_themes),
+                             syn_themes[selected$master_fileview()],
+                             "www/dca_themes/sage_theme_config.rds")
+    dca_theme(readRDS(dca_theme_file))
     
     output$sass <- renderUI({
       tags$head(tags$style(css()))
     })
     css <- reactive({
-      dca_theme_file <- ifelse(selected$master_fileview() %in% names(syn_themes),
-                          syn_themes[selected$master_fileview()],
-                          "www/dca_themes/sage_theme_config.rds")
-      dca_theme <- readRDS(dca_theme_file)
-      
       # Don't change theme for default projects
       if (dca_theme_file != "www/dca_themes/sage_theme_config.rds") {
-        sass(input = list(primary_col=dca_theme$primary_col,
-        htan_col=dca_theme$htan_col,
-        sidebar_col=dca_theme$sidebar_col,
+        sass(input = list(primary_col=dca_theme()$primary_col,
+        htan_col=dca_theme()$htan_col,
+        sidebar_col=dca_theme()$sidebar_col,
         sass_file("www/scss/main.scss")))
       }
     })
+    
+    dcWaiter("show", color = dca_theme()$primary_col)
     
     output$logo <- renderUI({update_logo(selected$master_fileview())})
 
@@ -159,7 +163,7 @@ shinyServer(function(input, output, session) {
     #names(template_namedList()) <- config_schema()$display_name
   #  
     dcWaiter("hide")
-    dcWaiter("show", msg = paste0("Getting data from ", selected$master_fileview(), "..."))
+    dcWaiter("show", msg = paste0("Getting data from ", selected$master_fileview(), "..."), color = dca_theme()$primary_col)
      # updating syn storage
      projects_list <- storage_projects(url=file.path(api_uri, "v1/storage/projects"),
                                        asset_view = selected$master_fileview(),
@@ -186,7 +190,7 @@ shinyServer(function(input, output, session) {
          project_id <- data_list$project()[input[[paste0(x, "project")]]]
          if (!is.na(project_id)){
          # gets folders per project
-         dcWaiter("show", msg = paste0("Getting project data ", project_id, "..."))
+         dcWaiter("show", msg = paste0("Getting project data ", project_id, "..."), color = dca_theme()$primary_col)
          
          folder_list <- storage_project_datasets(url=file.path(api_uri, "v1/storage/project/datasets"),
                                                  asset_view = selected$master_fileview(),
@@ -291,7 +295,7 @@ shinyServer(function(input, output, session) {
       req(tmp_folder_id != selected$folder())
       selected$folder(tmp_folder_id)
 
-      dcWaiter("show", msg = paste0("Getting files in ", input$dropdown_folder, "..."))
+      dcWaiter("show", msg = paste0("Getting files in ", input$dropdown_folder, "..."), color = dca_theme()$primary_col)
       # get file list in selected folder
       file_list <- storage_dataset_files(url=file.path(api_uri, "v1/storage/dataset/files"),
                                          asset_view = selected$master_fileview(),
@@ -304,7 +308,7 @@ shinyServer(function(input, output, session) {
       data_list$files <<- list2Vector(file_list)
       dcWaiter("hide")
       if (Sys.getenv("DCA_MANIFEST_OUTPUT_FORMAT") == "excel") {
-        dcWaiter("show", msg = "Downloading data from Synapse...")
+        dcWaiter("show", msg = "Downloading data from Synapse...", color = dca_theme()$primary_col)
         #schematic rest api to generate manifest
         manifest_url(manifest_generate(url=file.path(api_uri, "v1/manifest/generate"),
                                        schema_url = data_model(),
@@ -347,7 +351,7 @@ shinyServer(function(input, output, session) {
   observeEvent(input$btn_template, {
 
     # loading screen for template link generation
-    dcWaiter("show", msg = "Generating link...")
+    dcWaiter("show", msg = "Generating link...", color = dca_theme()$primary_col)
     #schematic rest api to generate manifest
     manifest_url(manifest_generate(url=file.path(api_uri, "v1/manifest/generate"),
                                       title = input$dropdown_template,
@@ -410,7 +414,7 @@ shinyServer(function(input, output, session) {
   observeEvent(input$btn_validate, {
 
     # loading screen for validating metadata
-    dcWaiter("show", msg = "Validating...")
+    dcWaiter("show", msg = "Validating...", color = dca_theme()$primary_col)
 
     # schematic rest api to validate metadata
     annotation_status <- manifest_validate(url=file.path(api_uri, "v1/model/validate"),
@@ -458,7 +462,7 @@ shinyServer(function(input, output, session) {
   # if user click gsheet_btn, generating gsheet
   observeEvent(input$btn_val_gsheet, {
     # loading screen for Google link generation
-    dcWaiter("show", msg = "Generating link...")
+    dcWaiter("show", msg = "Generating link...", color = dca_theme()$primary_col)
     
     filled_manifest <- manifest_generate(url=file.path(api_uri, "v1/manifest/generate"),
                                          data_type=paste0(config$community,
@@ -479,7 +483,7 @@ shinyServer(function(input, output, session) {
   ######## Submission Section ########
   observeEvent(input$btn_submit, {
     # loading screen for submitting data
-    dcWaiter("show", msg = "Submitting...")
+    dcWaiter("show", msg = "Submitting...", color = dca_theme()$primary_col)
 
     dir.create("./manifests", showWarnings = FALSE)
     # reads file csv again
