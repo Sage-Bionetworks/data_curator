@@ -4,7 +4,7 @@ dcWaiter <- function(stage = c("show", "update", "hide"),
                      isLogin = TRUE, isCertified = TRUE, isPermission = TRUE,
                      sleep = 2, msg = NULL, style = NULL,
                      spin = NULL, custom_spinner = FALSE, url = "",
-                     color = "rgba(66, 72, 116, .9)") {
+                     color = "#2a668d") {
   # validate arguments
   if (!is.logical(landing)) stop("landing must be a boolean")
   if (!is.logical(isLogin)) stop("isLogin must be a boolean")
@@ -29,7 +29,7 @@ dcWaiter <- function(stage = c("show", "update", "hide"),
           img(src = "img/loading.gif"),
           h4("Retrieving Synapse information...")
         ),
-        color = "#424874"
+        color = "#2a668d"
       )
       # } else if (!isLogin) {
       #   # when user is not login
