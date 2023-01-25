@@ -45,6 +45,8 @@ update_logo <- function(project = "sage") {
                 syn20446927 = list(href = "https://humantumoratlas.org/",
                                    img_src = "img/HTAN_text_logo.png"),
                 syn27210848 = list(href = "https://cancercomplexity.synapse.org/",
+                                   img_src = "img/cckp_logo.png"),
+                syn30109515 = list(href = "https://https://includedcc.org/",
                                    img_src = "img/INCLUDE DCC Logo-01.png"),
                 list(href = "https://synapse.org",
                      img_src = "img/synapse_logo.png")
@@ -65,7 +67,8 @@ update_logo <- function(project = "sage") {
 
 syn_themes <- c(
   "syn20446927" = "www/dca_themes/htan_theme_config.rds",
-  "syn27210848" = "www/dca_themes/mc2_theme_config.rds"
+  "syn27210848" = "www/dca_themes/mc2_theme_config.rds",
+  "syn30109515" = "www/dca_themes/include_theme_config.rds"
 )
 
 message(Sys.getenv()) # Test to see env variables in log
