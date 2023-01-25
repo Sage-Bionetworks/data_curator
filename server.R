@@ -27,18 +27,22 @@ shinyServer(function(input, output, session) {
 
   ######## session global variables ########
   # read config in
-  config <- config_file
-  config_schema <- config$manifest_schemas
+  config <- reactiveVal()
+  config_schema <- reactiveVal()
   model_ops <- parse_env_var(Sys.getenv("DCA_MODEL_INPUT_DOWNLOAD_URL"))
   
   # mapping from display name to schema name
-  template_namedList <- setNames(config_schema$schema_name,
-                                             config_schema$display_name)
+  template_namedList <- reactiveVal()
   #names(template_namedList) <- config_schema$display_name
+  
+  all_asset_views <- parse_env_var(Sys.getenv("DCA_SYNAPSE_MASTER_FILEVIEW"))
+  asset_views <- reactiveVal(c("mock dca fileview (syn33715412)"="syn33715412"))
+  
+  dca_theme <- reactiveVal()
   
   data_list <- list(
     projects = reactiveVal(NULL), folders = reactiveVal(NULL),
-    schemas = reactiveVal(template_namedList), files = reactiveVal(NULL),
+    schemas = reactiveVal(), files = reactiveVal(NULL),
     master_asset_view = reactiveVal(NULL)
   )
   # synapse ID of selected data
@@ -49,6 +53,10 @@ shinyServer(function(input, output, session) {
   )
   
   isUpdateFolder <- reactiveVal(FALSE)
+  
+  data_model_options <- Sys.getenv("DCA_MODEL_INPUT_DOWNLOAD_URL")
+  data_model_options <- parse_env_var(data_model_options)
+  data_model = reactiveVal(NULL)
   
   # data available to the user
   syn_store <- NULL # gets list of projects they have access to
@@ -68,6 +76,9 @@ shinyServer(function(input, output, session) {
   # synapse cookies
   session$sendCustomMessage(type = "readCookie", message = list())
 
+  shinyjs::useShinyjs()
+  shinyjs::hide(selector = ".sidebar-menu")
+  
   # initial loading page
   #
   # TODO:  If we don't use cookies, then what event should trigger this?
@@ -84,7 +95,6 @@ shinyServer(function(input, output, session) {
     # Shiny app'
     #
     access_token <- session$userData$access_token
-    
     has_access <- vapply(all_asset_views, function(x) {
       synapse_access(id=x, access="DOWNLOAD", auth=access_token)
     }, 1L)
@@ -110,7 +120,29 @@ shinyServer(function(input, output, session) {
   
   observeEvent(input$btn_asset_view, {
     selected$master_asset_view(input$dropdown_asset_view)
-    dcWaiter("show", msg = paste0("Getting data from ", selected$master_asset_view(), "..."))
+    dcWaiter("show", msg = paste0("Getting data from ", selected$master_asset_view(), "..."), color="grey")
+    
+    dca_theme_file <- ifelse(selected$master_asset_view() %in% names(syn_themes),
+                             syn_themes[selected$master_asset_view()],
+                             "www/dca_themes/sage_theme_config.rds")
+    dca_theme(readRDS(dca_theme_file))
+
+    output$sass <- renderUI({
+        tags$head(tags$style(css()))
+    })
+    css <- reactive({
+      # Don't change theme for default projects
+      if (dca_theme_file != "www/dca_themes/sage_theme_config.rds") {
+          sass(input = list(primary_col=dca_theme()$primary_col,
+                             htan_col=dca_theme()$htan_col,
+                             sidebar_col=dca_theme()$sidebar_col,
+                             sass_file("www/scss/main.scss")))
+        }
+      })
+
+      dcWaiter("show", color = dca_theme()$primary_col)
+
+    output$logo <- renderUI({update_logo(selected$master_asset_view())})
     
     if (dca_schematic_api == "reticulate") {
       # Update schematic_config and login
@@ -129,6 +161,9 @@ shinyServer(function(input, output, session) {
       # mapping from display name to schema name
       new_templates <- reactiveVal(setNames(new_conf_schem()$schema_name, new_conf_schem()$display_name))
       data_list$schemas(new_templates())
+      
+      template_namedList(setNames(new_conf_schem()$schema_name, new_conf_schem()$display_name))
+      data_list$schemas(template_namedList())
       
     }
     
@@ -155,6 +190,8 @@ shinyServer(function(input, output, session) {
     }
     updateTabsetPanel(session, "tabs",
                       selected = "tab_data")
+    
+    shinyjs::show(selector = ".sidebar-menu")
     
     dcWaiter("hide")
   })
@@ -248,10 +285,10 @@ shinyServer(function(input, output, session) {
 
   ######## Update Template ########
   # update selected schema template name
-  observeEvent(input$dropdown_datatype, {
+  observeEvent(input$dropdown_template, {
     # update reactive selected values for schema
-    selected$schema(data_list$schemas()[input$dropdown_datatype])
-    schema_type <- config_schema$type[which(config_schema$display_name == input$dropdown_datatype)]
+    selected$schema(data_list$schemas()[input$dropdown_template])
+    schema_type <- config_schema()$type[which(config_schema()$display_name == input$dropdown_template)]
     selected$schema_type(schema_type)
     # clean all tags related with selected template
     sapply(clean_tags, FUN = hide)
@@ -324,12 +361,12 @@ shinyServer(function(input, output, session) {
     # loading screen for template link generation
     dcWaiter("show", msg = "Generating link...")
     manifest_url <- switch(dca_schematic_api,
-                           reticulate =  manifest_generate_py(title = paste0(config$community, " ", input$dropdown_datatype),
+                           reticulate =  manifest_generate_py(title = paste0(config$community, " ", input$dropdown_template),
                                                               rootNode = selected$schema(),
                                                               datasetId = selected$folder()),
                            rest = manifest_generate(url=file.path(api_uri, "v1/manifest/generate"),
                                                     schema_url = data_model,
-                                                    title = paste0(config$community, " ", input$dropdown_datatype),
+                                                    title = paste0(config$community, " ", input$dropdown_template),
                                                     data_type = selected$schema(),
                                                     dataset_id = selected$folder(),
                                                     asset_view = selected$master_asset_view(),
@@ -347,7 +384,7 @@ shinyServer(function(input, output, session) {
     nx_confirm(
       inputId = "btn_template_confirm",
       title = "Go to the template now?",
-      message = paste0("click 'Go' to edit your ", sQuote(input$dropdown_datatype), " template on the google sheet"),
+      message = paste0("click 'Go' to edit your ", sQuote(input$dropdown_template), " template on the google sheet"),
       button_ok = "Go",
     )
 
@@ -387,7 +424,7 @@ shinyServer(function(input, output, session) {
                                 )
 
     # validation messages
-    validation_res <- validationResult(annotation_status, input$dropdown_datatype, inFile$data())
+    validation_res <- validationResult(annotation_status, input$dropdown_template, inFile$data())
     ValidationMsgServer("text_validate", validation_res)
 
     # if there is a file uploaded
@@ -426,12 +463,12 @@ shinyServer(function(input, output, session) {
     # loading screen for Google link generation
     dcWaiter("show", msg = "Generating link...")
     filled_manifest <- switch(dca_schematic_api,
-                              reticulate = manifest_populate_py(paste0(config$community, " ", input$dropdown_datatype),
+                              reticulate = manifest_populate_py(paste0(config$community, " ", input$dropdown_template),
                                                                 inFile$raw()$datapath,
                                                                 selected$schema()),
                               rest = manifest_populate(url=file.path(api_uri, "v1/manifest/populate"),
                                                        schema_url = data_model,
-                                                       title = paste0(config$community, " ", input$dropdown_datatype),
+                                                       title = paste0(config$community, " ", input$dropdown_template),
                                                        data_type = selected$schema(),
                                                        return_excel = FALSE,
                                                        csv_file = inFile$raw()$datapath))
@@ -472,7 +509,7 @@ shinyServer(function(input, output, session) {
     # the type to filter (eg file-based) on could probably also be a config choice
     display_names <- config_schema$manifest_schemas$display_name[config_schema$manifest_schemas$type == "file"]
 
-    if (input$dropdown_datatype %in% display_names) {
+    if (input$dropdown_template %in% display_names) {
       # make into a csv or table for file-based components already has entityId
       if ("entityId" %in% colnames(submit_data)) {
         write.csv(submit_data,
