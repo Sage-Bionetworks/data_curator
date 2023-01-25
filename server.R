@@ -42,7 +42,7 @@ shinyServer(function(input, output, session) {
   
   data_list <- list(
     projects = reactiveVal(NULL), folders = reactiveVal(NULL),
-    schemas = reactiveVal(), files = reactiveVal(NULL),
+    template = reactiveVal(), files = reactiveVal(NULL),
     master_asset_view = reactiveVal(NULL)
   )
   # synapse ID of selected data
@@ -158,12 +158,14 @@ shinyServer(function(input, output, session) {
       
       new_conf <- reactiveVal(fromJSON("www/config.json"))
       new_conf_schem <- reactiveVal(as.data.frame(new_conf()[[1]]))
+      config(new_conf)
+      config_schema(new_conf_schem())
       # mapping from display name to schema name
       new_templates <- reactiveVal(setNames(new_conf_schem()$schema_name, new_conf_schem()$display_name))
-      data_list$schemas(new_templates())
+      data_list$template(new_templates())
       
       template_namedList(setNames(new_conf_schem()$schema_name, new_conf_schem()$display_name))
-      data_list$schemas(template_namedList())
+      data_list$template(template_namedList())
       
     }
     
@@ -188,6 +190,41 @@ shinyServer(function(input, output, session) {
         })
       })
     }
+    
+    ######## Update Folder List ########
+    lapply(c("header_dropdown_", "dropdown_"), function(x) {
+      observeEvent(ignoreInit = TRUE, input[[paste0(x, "project")]], {
+        
+        # get synID of selected project
+        project_id <- data_list$projects()[input[[paste0(x, "project")]]]
+        
+        # gets folders per project
+        folder_list_raw <- switch(dca_schematic_api,
+                                  reticulate = storage_projects_datasets_py(synapse_driver, project_id),
+                                  rest = storage_project_datasets(url=file.path(api_uri, "v1/storage/project/datasets"),
+                                                                  asset_view = selected$master_asset_view(),
+                                                                  project_id=project_id,
+                                                                  input_token=access_token))
+        folder_list <- list2Vector(folder_list_raw)
+        
+        if (length(folder_list) > 0) folder_names <- sort(names(folder_list)) else folder_names <- " "
+        
+        # update folder names
+        updateSelectInput(session, paste0(x, "folder"), choices = folder_names)
+        
+        if (x == "dropdown_") {
+          selected$project(project_id)
+          data_list$folders(folder_list)
+        }
+        
+        if (isUpdateFolder()) {
+          # sync with header dropdown
+          updateSelectInput(session, "dropdown_folder", selected = input[["header_dropdown_folder"]])
+          isUpdateFolder(FALSE)
+        }
+      })
+    })
+    
     updateTabsetPanel(session, "tabs",
                       selected = "tab_data")
     
@@ -241,40 +278,6 @@ shinyServer(function(input, output, session) {
     })
   })
 
-  ######## Update Folder List ########
-  lapply(c("header_dropdown_", "dropdown_"), function(x) {
-    observeEvent(ignoreInit = TRUE, input[[paste0(x, "project")]], {
-
-      # get synID of selected project
-      project_id <- data_list$projects()[input[[paste0(x, "project")]]]
-
-      # gets folders per project
-      folder_list_raw <- switch(dca_schematic_api,
-                            reticulate = storage_projects_datasets_py(synapse_driver, project_id),
-                            rest = storage_project_datasets(url=file.path(api_uri, "v1/storage/project/datasets"),
-                                                            asset_view = selected$master_asset_view(),
-                                                            project_id=project_id,
-                                                            input_token=access_token))
-      folder_list <- list2Vector(folder_list_raw)
-
-      if (length(folder_list) > 0) folder_names <- sort(names(folder_list)) else folder_names <- " "
-
-      # update folder names
-      updateSelectInput(session, paste0(x, "folder"), choices = folder_names)
-
-      if (x == "dropdown_") {
-        selected$project(project_id)
-        data_list$folders(folder_list)
-      }
-
-      if (isUpdateFolder()) {
-        # sync with header dropdown
-        updateSelectInput(session, "dropdown_folder", selected = input[["header_dropdown_folder"]])
-        isUpdateFolder(FALSE)
-      }
-    })
-  })
-
   ######## Update Folder ########
   # update selected folder synapse id and name
   observeEvent(input$dropdown_folder, {
@@ -287,12 +290,12 @@ shinyServer(function(input, output, session) {
   # update selected schema template name
   observeEvent(input$dropdown_template, {
     # update reactive selected values for schema
-    selected$schema(data_list$schemas()[input$dropdown_template])
+    selected$schema(data_list$template()[input$dropdown_template])
     schema_type <- config_schema()$type[which(config_schema()$display_name == input$dropdown_template)]
     selected$schema_type(schema_type)
     # clean all tags related with selected template
     sapply(clean_tags, FUN = hide)
-  })
+  }, ignoreInit = TRUE)
 
   ######## Dashboard ########
 #  dashboard(
@@ -310,15 +313,15 @@ shinyServer(function(input, output, session) {
   observeEvent(c(selected$folder(), selected$schema(), input$tabs), {
     req(input$tabs %in% c("tab_template", "tab_validate"))
     warn_text <- NULL
-
-    if (length(data_list$folder()) == 0) {
+    
+    if (length(data_list$folders()) == 0) {
       # add warning if there is no folder in the selected project
       warn_text <- paste0(
         "please create a folder in the ",
         strong(sQuote(input$dropdown_project)),
         " prior to submitting templates."
       )
-    } else if (selected$schema_type() == "file") {
+    } else if (selected$schema_type() %in% c("record", "file")) {
       # check number of files if it's file-based template
 
       dcWaiter("show", msg = paste0("Getting files in ", input$dropdown_folder, "..."))
@@ -334,8 +337,8 @@ shinyServer(function(input, output, session) {
       data_list$files(list2Vector(file_list))
 
       dcWaiter("hide")
-
-      if (length(data_list$files()) == 0) {
+      
+      if (is.null(data_list$files())) {
         # display warning message if folder is empty and data type is file-based
         warn_text <- paste0(
           strong(sQuote(input$dropdown_folder)), " folder is empty,
@@ -361,12 +364,12 @@ shinyServer(function(input, output, session) {
     # loading screen for template link generation
     dcWaiter("show", msg = "Generating link...")
     manifest_url <- switch(dca_schematic_api,
-                           reticulate =  manifest_generate_py(title = paste0(config$community, " ", input$dropdown_template),
+                           reticulate =  manifest_generate_py(title = input$dropdown_template,
                                                               rootNode = selected$schema(),
                                                               datasetId = selected$folder()),
                            rest = manifest_generate(url=file.path(api_uri, "v1/manifest/generate"),
                                                     schema_url = data_model,
-                                                    title = paste0(config$community, " ", input$dropdown_template),
+                                                    title = input$dropdown_template,
                                                     data_type = selected$schema(),
                                                     dataset_id = selected$folder(),
                                                     asset_view = selected$master_asset_view(),
