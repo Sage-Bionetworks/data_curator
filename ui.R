@@ -37,18 +37,8 @@ ui <- shinydashboardPlus::dashboardPage(
           actionButton("btn_header_update", NULL, icon("sync-alt"), class = "btn-shiny-effect")
         )
       )
-    )#,
-    # tags$li(
-    #   class = "dropdown", id = "HTAN_logo",
-    #   tags$a(
-    #     href = "https://humantumoratlas.org/",
-    #     target = "_blank",
-    #     tags$img(
-    #       height = "40px", alt = "HTAN LOGO",
-    #       src = "img/HTAN_text_logo.png"
-    #     )
-    #   )
-    # )
+    ),
+    uiOutput("logo")
   ),
   dashboardSidebar(
     width = 250,
