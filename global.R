@@ -44,7 +44,39 @@ if (schematic_config$api$type == "rest") {
   api_uri <- ifelse(is.null(schematic_config$ap$port),
                schematic_config$api$host,
                paste(schematic_config$api$host, schematic_config$api$port, sep=":")
-)}
+  )}
+
+update_logo <- function(project = "sage") {
+  
+  img <- switch(project,
+                 syn20446927 = list(href = "https://humantumoratlas.org/",
+                                    img_src = "img/HTAN_text_logo.png"),
+                 syn27210848 = list(href = "https://cancercomplexity.synapse.org/",
+                                    img_src = "img/cckp_logo.png"),
+                 syn30109515 = list(href = "https://https://includedcc.org/",
+                                    img_src = "img/INCLUDE DCC Logo-01.png"),
+                 list(href = "https://synapse.org",
+                      img_src = "img/synapse_logo.png")
+   )
+
+  tags$li(
+      class = "dropdown", id = "logo",
+      tags$a(
+          href = img$href,
+          target = "_blank",
+          tags$img(
+              height = "40px", alt = "LOGO",
+              src = img$img_src
+            )
+        )
+    )
+}
+
+syn_themes <- c(
+    "syn20446927" = "www/dca_themes/htan_theme_config.rds",
+    "syn27210848" = "www/dca_themes/mc2_theme_config.rds",
+    "syn30109515" = "www/dca_themes/include_theme_config.rds"
+  )
 
 # update port if running app locally
 if (interactive()) {
@@ -138,6 +170,6 @@ config_file <- fromJSON("www/config.json")
 
 
 ## Global variables
-dropdown_types <- c("project", "folder", "datatype")
+dropdown_types <- c("project", "folder", "template")
 # set up cores used for parallelization
 ncores <- parallel::detectCores() - 1
