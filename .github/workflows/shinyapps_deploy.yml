@@ -19,7 +19,7 @@ jobs:
   shiny-deploy:
     runs-on: ubuntu-latest
     # This image seems to be based on rocker/r-ver which in turn is based on debian
-    container: rocker/rstudio:4.1.2
+    container: rocker/rstudio:latest
     env:
       # This should not be necessary for installing from public repo's however remotes::install_github() fails without it.
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
@@ -35,7 +35,6 @@ jobs:
       - name: Create and Activate Python Virtual Environment
         shell: bash
         run: |
-          python3.10 --version
           python3.10 -m venv .venv
           chmod 755 .venv/bin/activate
           source .venv/bin/activate
