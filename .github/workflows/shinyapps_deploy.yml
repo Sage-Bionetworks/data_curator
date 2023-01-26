@@ -133,5 +133,7 @@ jobs:
             writeLines(config, configFileConn),
             finally=close(configFileConn)
           )
+          renviron <- readLines(".Renviron")
+          renviron <- c(renviron, sprintf("DCA_APP_URL=%s", appUrl)
           rsconnect::setAccountInfo(rsConnectUser, rsConnectToken, rsConnectSecret)
           rsconnect::deployApp(appName = appName)
