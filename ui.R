@@ -124,7 +124,7 @@ ui <- shinydashboardPlus::dashboardPage(
             selectInput(
               inputId = "dropdown_asset_view",
               label = NULL, 
-              choices = parse_env_var(Sys.getenv("DCA_SYNAPSE_MASTER_FILEVIEW")))
+              choices = "Generating...")
             ),
             actionButton("btn_asset_view", "Click to confirm",
                          class = "btn-primary-color"
