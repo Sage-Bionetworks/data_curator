@@ -25,26 +25,23 @@ suppressPackageStartupMessages({
 })
 
 ## Set Up OAuth
-oauth_client <- yaml.load_file("oauth_config.yml")
+client_id <- Sys.getenv("DCA_CLIENT_ID")
+client_secret <- Sys.getenv("DCA_CLIENT_SECRET")
+app_url <- Sys.getenv("DCA_APP_URL")
 
-client_id <- toString(oauth_client$CLIENT_ID)
-client_secret <- toString(oauth_client$CLIENT_SECRET)
-app_url <- toString(oauth_client$APP_URL)
+if (is.null(client_id) || nchar(client_id) == 0) stop("missing DCA_CLIENT_ID environmental variable")
+if (is.null(client_secret) || nchar(client_secret) == 0) stop("missing DCA_CLIENT_SECRET environmental variable")
+if (is.null(app_url) || nchar(app_url) == 0) stop("missing DCA_APP_URL environmental variable")
 
-if (is.null(client_id) || nchar(client_id) == 0) stop("oauth_config.yml is missing CLIENT_ID")
-if (is.null(client_secret) || nchar(client_secret) == 0) stop("oauth_config.yml is missing CLIENT_SECRET")
-if (is.null(app_url) || nchar(app_url) == 0) stop("oauth_config.yml is missing APP_URL")
-
-# Read schematic_config
-schematic_config <- yaml.load_file("schematic_config.yml")
-dca_schematic_api <- schematic_config$api$type
-asset_view <- schematic_config$synapse$master_fileview
-data_model <- schematic_config$model$input$download_url
-if (schematic_config$api$type == "rest") {
-  api_uri <- ifelse(is.null(schematic_config$ap$port),
-               schematic_config$api$host,
-               paste(schematic_config$api$host, schematic_config$api$port, sep=":")
-  )}
+dca_schematic_api <- Sys.getenv("DCA_SCHEMATIC_API_TYPE")
+if (dca_schematic_api == "rest") {
+  api_uri <- ifelse(Sys.getenv("DCA_API_PORT") == "",
+                    Sys.getenv("DCA_API_HOST"),
+                      paste(Sys.getenv("DCA_API_HOST"),
+                        Sys.getenv("DCA_API_PORT"),
+                        sep = ":")
+  )
+}
 
 update_logo <- function(project = "sage") {
   
@@ -137,8 +134,6 @@ parse_env_var <- function(x, el_delim=",", kv_delim=":"){
     setNames(kv[[1]][[2]], kv[[1]][[1]])
   }))
 }
-
-all_asset_views <- parse_env_var(Sys.getenv("DCA_SYNAPSE_MASTER_FILEVIEW"))
 
 # import R files
 source_files <- list.files(c("functions", "modules"), pattern = "*\\.R$", recursive = TRUE, full.names = TRUE) %>%
