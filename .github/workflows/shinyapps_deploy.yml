@@ -35,8 +35,8 @@ jobs:
       - name: Create and Activate Python Virtual Environment
         shell: bash
         run: |
-          python3 --version
-          python3 -m venv .venv
+          python3.10 --version
+          python3.10 -m venv .venv
           chmod 755 .venv/bin/activate
           source .venv/bin/activate
 
@@ -87,7 +87,7 @@ jobs:
         run: |
           source .venv/bin/activate
           # download the data models and create config.json
-          python3 .github/config_schema.py \
+          python3.10 .github/config_schema.py \
             -c schematic_config.yml \
             --service_repo 'Sage-Bionetworks/schematic' \
             --overwrite
