@@ -147,6 +147,7 @@ sapply(source_files, FUN = source)
 if (dca_schematic_api == "reticulate"){
   if (!file.exists(".venv")) utils::unzip(".venv.zip")
   
+  Sys.unsetenv("RETICULATE_PYTHON")
   # We get a '126' error (non-executable) if we don't do this:
   system("chmod -R +x .venv")
   #setup_synapse_driver()
