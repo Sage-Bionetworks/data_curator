@@ -96,6 +96,13 @@ jobs:
         run: |
           echo 'DCA_MODEL_INPUT_DOWNLOAD_URL="${{ secrets.DCA_MODEL_INPUT_DOWNLOAD_URL }}"' >> .Renviron
           echo 'DCA_SYNAPSE_MASTER_FILEVIEW="${{ secrets.DCA_SYNAPSE_MASTER_FILEVIEW }}"' >> .Renviron
+          echo 'DCA_CLIENT_ID="${{ secrets.OAUTH_CLIENT_ID }}"' >> .Renviron
+          echo 'DCA_CLIENT_SECRET="${{ secrets.OAUTH_CLIENT_SECRET }}"' >> .Renviron
+          
+          echo 'DCA_SCHEMATIC_API_TYPE="reticulate" >> .Renviron
+          echo 'DCA_APP_URL=""' >> .Renviron
+          echo 'DCA_API_PORT=""' >> .Renviron
+          echo 'DCA_API_HOST=""' >> .Renviron
           
       - name: zip virtual env
         shell: bash
