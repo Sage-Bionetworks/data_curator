@@ -155,13 +155,13 @@ if (dca_schematic_api == "reticulate"){
   #setup_synapse_driver()
   
   ## Read config.json
-  if (!file.exists("www/config.json")) {
+#  if (!file.exists("www/config.json")) {
 #    system(
-#      "python3 .github/config_schema.py -c schematic_config.yml --service_repo 'Sage-Bionetworks/schematic' --overwrite"
+#      "python3.10 .github/config_schema.py -c schematic_config.yml --service_repo 'Sage-Bionetworks/schematic' --overwrite"
 #    )
-  }
-}
-config_file <- fromJSON("www/config.json")
+#  }
+#}
+#config_file <- fromJSON("www/config.json")
 
 
 ## Global variables
