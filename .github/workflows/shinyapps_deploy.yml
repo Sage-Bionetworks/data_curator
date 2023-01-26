@@ -29,6 +29,8 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y pip python3.10 python3-venv libcurl4-openssl-dev
+          sudo apt-get uninstall python3.8
+          
       - uses: actions/checkout@v2
       - uses: r-lib/actions/setup-pandoc@v1
 
@@ -93,7 +95,7 @@ jobs:
           echo 'DCA_APP_URL=""' >> .Renviron
           echo 'DCA_API_PORT=""' >> .Renviron
           echo 'DCA_API_HOST=""' >> .Renviron
-          echo 'RETICULATE_PYTHON=".venv/bin/python3.10"' >> .Renviron
+          echo RETICULATE_PYTHON="${PWD}/.venv/bin/python3.10" >> .Renviron
           
       - name: zip virtual env
         shell: bash
