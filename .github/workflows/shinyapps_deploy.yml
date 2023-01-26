@@ -99,7 +99,7 @@ jobs:
           echo 'DCA_CLIENT_ID="${{ secrets.OAUTH_CLIENT_ID }}"' >> .Renviron
           echo 'DCA_CLIENT_SECRET="${{ secrets.OAUTH_CLIENT_SECRET }}"' >> .Renviron
           
-          echo 'DCA_SCHEMATIC_API_TYPE="reticulate" >> .Renviron
+          echo 'DCA_SCHEMATIC_API_TYPE="reticulate"' >> .Renviron
           echo 'DCA_APP_URL=""' >> .Renviron
           echo 'DCA_API_PORT=""' >> .Renviron
           echo 'DCA_API_HOST=""' >> .Renviron
