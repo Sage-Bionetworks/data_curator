@@ -154,7 +154,7 @@ shinyServer(function(input, output, session) {
       syn$login(authToken = access_token, rememberMe = FALSE)
       
       system(
-        "python3 .github/config_schema.py -c schematic_config.yml --service_repo 'Sage-Bionetworks/schematic' --overwrite"
+        "python3.10 .github/config_schema.py -c schematic_config.yml --service_repo 'Sage-Bionetworks/schematic' --overwrite"
       )
       
       new_conf <- reactiveVal(fromJSON("www/config.json"))
