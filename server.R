@@ -146,6 +146,7 @@ shinyServer(function(input, output, session) {
     
     if (dca_schematic_api == "reticulate") {
       # Update schematic_config and login
+      schematic_config <- yaml::read_yaml("schematic_config.yml")
       schematic_config$synapse$master_fileview <- selected$master_asset_view()
       schematic_config$model$input$download_url <- model_ops[names(model_ops) == selected$master_asset_view()]
       yaml::write_yaml(schematic_config, "schematic_config.yml")
