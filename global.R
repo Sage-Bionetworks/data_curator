@@ -28,6 +28,9 @@ client_id <- Sys.getenv("DCA_CLIENT_ID")
 client_secret <- Sys.getenv("DCA_CLIENT_SECRET")
 app_url <- Sys.getenv("DCA_APP_URL")
 
+message(Sys.getenv("DCA_SCHEMATIC_API_TYPE"))
+message(paste(readLines(".Renviron"), collapse="\n"))
+
 if (is.null(client_id) || nchar(client_id) == 0) stop("missing DCA_CLIENT_ID environmental variable")
 if (is.null(client_secret) || nchar(client_secret) == 0) stop("missing DCA_CLIENT_SECRET environmental variable")
 if (is.null(app_url) || nchar(app_url) == 0) stop("missing DCA_APP_URL environmental variable")
