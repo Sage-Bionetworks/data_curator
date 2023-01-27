@@ -157,6 +157,8 @@ if (dca_schematic_api == "reticulate"){
   py_env <- file.path(getwd(), ".venv")
   message(py_env)
   message(sprintf("File exists %s: %s", py_env, file.exists(py_env)))
+  message(Sys.getenv("RETICULATE_PYTHON"))
+  reticulate::py_available()
   use_virtualenv(py_env, required=TRUE)
   syn <<- reticulate::import("synapseclient")$Synapse()
   #reticulate::use_virtualenv(file.path(getwd(), ".venv"), required = TRUE)
