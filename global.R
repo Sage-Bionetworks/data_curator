@@ -154,7 +154,7 @@ if (dca_schematic_api == "reticulate"){
   system("chmod -R +x .venv")
   
   library(reticulate)
-  reticulate::use_virtualenv(file.path(getwd(), ".venv"), required = TRUE)
+  #reticulate::use_virtualenv(file.path(getwd(), ".venv"), required = TRUE)
   # syn <<- reticulate::import("synapseclient")$Synapse()
   # 
   # MetadataModel <<- reticulate::import("schematic.models.metadata")$MetadataModel
