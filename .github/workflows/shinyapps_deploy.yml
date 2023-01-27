@@ -56,16 +56,17 @@ jobs:
             git clone --single-branch --branch main https://github.com/Sage-Bionetworks/schematic.git
             cp schematic_config.yml schematic/config.yml
             cd schematic
-            pip3 install schematicpy
+            pip install schematicpy
           else
-            pip3 install poetry
+            pip install --upgrade pip
+            pip install poetry
             echo Installing develop branch of schematic from github
             git clone --single-branch --branch develop https://github.com/Sage-Bionetworks/schematic.git
             cp schematic_config.yml schematic/config.yml
             cd schematic
             poetry config virtualenvs.create false
             poetry build
-            pip3 install dist/schematicpy-1.0.0-py3-none-any.whl
+            pip install dist/schematicpy-1.0.0-py3-none-any.whl
           fi
 
       - name: Set Configurations for Schematic
