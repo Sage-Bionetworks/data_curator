@@ -41,7 +41,7 @@ jobs:
 
       - name: Install R Packages Dependencies
         run: |
-          Rscript -e 'install.packages(c("remotes", "renv"), repos = "https://cloud.r-project.org/"); source("renv/activate.R"); renv::restore()' 
+          R -f install-pkgs.R
 
       - name: Install Schematic
         shell: bash
