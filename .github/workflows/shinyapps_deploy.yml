@@ -23,7 +23,7 @@ jobs:
     env:
       # This should not be necessary for installing from public repo's however remotes::install_github() fails without it.
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
-      POETRY_VERSION: 1.2.0rc1
+      RETICULATE_PYTHON: /srv/connect/apps/data_curator-testing1/data_curator/.venv/bin/python3
       
     steps:
       - name: Install System Dependencies
@@ -49,6 +49,7 @@ jobs:
         shell: bash
         run: |
           # has to activate each bash step
+          source .venv/bin/activate
           # use 'poetry' to install schematic dev schematic
           # If commit is tagged for release or in main branch, install schematic from pypi
           if [[ $GITHUB_REF_NAME == v*.*.* ]] || [[ $GITHUB_REF_NAME == main ]]; then
@@ -58,13 +59,13 @@ jobs:
             cd schematic
             pip3 install schematicpy
           else
-            pip3 install --no-cache-dir "poetry==$POETRY_VERSION"
+            pip3 install poetry
             echo Installing develop branch of schematic from github
             git clone --single-branch --branch develop https://github.com/Sage-Bionetworks/schematic.git
             cp schematic_config.yml schematic/config.yml
             cd schematic
-            poetry config virtualenvs.create false
-            poetry install
+            poetry build
+            pip3 install dist/schematicpy-1.0.0-py3-none-any.whl
           fi
 
       - name: Set Configurations for Schematic
@@ -138,4 +139,4 @@ jobs:
           renviron <- c(renviron, sprintf("DCA_APP_URL=%s", appUrl))
           writeLines(renviron, ".Renviron")
           rsconnect::setAccountInfo(rsConnectUser, rsConnectToken, rsConnectSecret)
-          rsconnect::deployApp(appName = appName)
+          rsconnect::deployApp(appName = appName, python="/srv/connect/apps/data_curator-testing1/data_curator/.venv/bin/python3")
