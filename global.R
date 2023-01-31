@@ -1,5 +1,6 @@
 suppressPackageStartupMessages({
   library(yaml)
+  library(reticulate)
   library(httr)
   library(shiny)
   library(shinyjs)
