@@ -23,7 +23,6 @@ jobs:
     env:
       # This should not be necessary for installing from public repo's however remotes::install_github() fails without it.
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
-      RETICULATE_PYTHON: ./.venv/bin/python3
       
     steps:
       - name: Install System Dependencies
@@ -139,4 +138,4 @@ jobs:
           renviron <- c(renviron, sprintf("DCA_APP_URL=%s", appUrl))
           writeLines(renviron, ".Renviron")
           rsconnect::setAccountInfo(rsConnectUser, rsConnectToken, rsConnectSecret)
-          rsconnect::deployApp(appName = appName)
+          rsconnect::deployApp(appName = appName, python = "./.venv/bin/python3")
