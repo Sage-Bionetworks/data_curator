@@ -140,7 +140,7 @@ shinyServer(function(input, output, session) {
         }
       })
 
-      dcWaiter("show", msg = paste0("Getting data from ", selected$master_asset_view(), "..."), color = dca_theme()$primary_col)
+      dcWaiter("show", color = dca_theme()$primary_col)
 
     output$logo <- renderUI({update_logo(selected$master_asset_view())})
     
