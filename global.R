@@ -150,7 +150,8 @@ if (dca_schematic_api == "reticulate"){
   
   # We get a '126' error (non-executable) if we don't do this:
   system("chmod -R +x .venv")
-  Sys.setenv("RETICULATE_PYTHON"=file.path(getwd(), ".venv", "bin", "python3.10"))
+  # Don't necessarily have to set `RETICULATE_PYTHON` env variable
+  Sys.unsetenv("RETICULATE_PYTHON")
   #setup_synapse_driver()
   
   ## Read config.json
