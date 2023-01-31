@@ -154,7 +154,7 @@ if (dca_schematic_api == "reticulate"){
   system("chmod -R +x .venv")
   
   library(reticulate)
-  py_env <- file.path(getwd(), ".venv", "bin", "python3")
+  py_env <- file.path(getwd(), ".venv")
   message(py_env)
   message(sprintf("File exists %s: %s", py_env, file.exists(py_env)))
   message(Sys.getenv("RETICULATE_PYTHON"))
