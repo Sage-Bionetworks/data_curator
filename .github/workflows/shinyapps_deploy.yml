@@ -19,7 +19,7 @@ jobs:
   shiny-deploy:
     runs-on: ubuntu-latest
     # This image seems to be based on rocker/r-ver which in turn is based on debian
-    container: rocker/rstudio:4.1.2
+    container: rocker/rstudio:latest
     env:
       # This should not be necessary for installing from public repo's however remotes::install_github() fails without it.
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
@@ -28,14 +28,14 @@ jobs:
       - name: Install System Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y pip python3.8-venv libcurl4-openssl-dev
+          sudo apt-get install -y pip python3.10 python3-venv libcurl4-openssl-dev
       - uses: actions/checkout@v2
       - uses: r-lib/actions/setup-pandoc@v1
 
       - name: Create and Activate Python Virtual Environment
         shell: bash
         run: |
-          python3 -m venv .venv
+          python3.10 -m venv .venv
           chmod 755 .venv/bin/activate
           source .venv/bin/activate
 
@@ -81,16 +81,6 @@ jobs:
           name: 'schematic_service_account_creds.json'
           json: ${{ secrets.SCHEMATIC_SERVICE_ACCT_CREDS }}
 
-      - name: Set Configurations for Data Model
-        shell: bash
-        run: |
-          source .venv/bin/activate
-          # download the data models and create config.json
-          python3 .github/config_schema.py \
-            -c schematic_config.yml \
-            --service_repo 'Sage-Bionetworks/schematic' \
-            --overwrite
-
       - name: Write R environmental variables
         shell: bash
         run: |
@@ -99,7 +89,7 @@ jobs:
           echo 'DCA_CLIENT_ID="${{ secrets.OAUTH_CLIENT_ID }}"' >> .Renviron
           echo 'DCA_CLIENT_SECRET="${{ secrets.OAUTH_CLIENT_SECRET }}"' >> .Renviron
           
-          echo 'DCA_SCHEMATIC_API_TYPE="reticulate" >> .Renviron
+          echo 'DCA_SCHEMATIC_API_TYPE="reticulate"' >> .Renviron
           echo 'DCA_APP_URL=""' >> .Renviron
           echo 'DCA_API_PORT=""' >> .Renviron
           echo 'DCA_API_HOST=""' >> .Renviron
@@ -143,5 +133,8 @@ jobs:
             writeLines(config, configFileConn),
             finally=close(configFileConn)
           )
+          renviron <- readLines(".Renviron")
+          renviron <- c(renviron, sprintf("DCA_APP_URL=%s", appUrl))
+          writeLines(renviron, ".Renviron")
           rsconnect::setAccountInfo(rsConnectUser, rsConnectToken, rsConnectSecret)
           rsconnect::deployApp(appName = appName)

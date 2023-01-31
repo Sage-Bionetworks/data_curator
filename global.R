@@ -150,18 +150,17 @@ if (dca_schematic_api == "reticulate"){
   
   # We get a '126' error (non-executable) if we don't do this:
   system("chmod -R +x .venv")
-  # Don't necessarily have to set `RETICULATE_PYTHON` env variable
-  Sys.unsetenv("RETICULATE_PYTHON")
+  Sys.setenv("RETICULATE_PYTHON"=file.path(getwd(), ".venv", "bin", "python3.10"))
   #setup_synapse_driver()
   
   ## Read config.json
-  if (!file.exists("www/config.json")) {
+#  if (!file.exists("www/config.json")) {
 #    system(
-#      "python3 .github/config_schema.py -c schematic_config.yml --service_repo 'Sage-Bionetworks/schematic' --overwrite"
+#      "python3.10 .github/config_schema.py -c schematic_config.yml --service_repo 'Sage-Bionetworks/schematic' --overwrite"
 #    )
-  }
+#  }
 }
-config_file <- fromJSON("www/config.json")
+#config_file <- fromJSON("www/config.json")
 
 
 ## Global variables

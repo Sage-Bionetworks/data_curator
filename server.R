@@ -140,7 +140,7 @@ shinyServer(function(input, output, session) {
         }
       })
 
-      dcWaiter("show", color = dca_theme()$primary_col)
+      dcWaiter("show", msg = paste0("Getting data from ", selected$master_asset_view(), "..."), color = dca_theme()$primary_col)
 
     output$logo <- renderUI({update_logo(selected$master_asset_view())})
     
@@ -154,7 +154,7 @@ shinyServer(function(input, output, session) {
       syn$login(authToken = access_token, rememberMe = FALSE)
       
       system(
-        "python3 .github/config_schema.py -c schematic_config.yml --service_repo 'Sage-Bionetworks/schematic' --overwrite"
+        "python3.10 .github/config_schema.py -c schematic_config.yml --service_repo 'Sage-Bionetworks/schematic' --overwrite"
       )
       
       new_conf <- reactiveVal(fromJSON("www/config.json"))
