@@ -160,7 +160,7 @@ if (dca_schematic_api == "reticulate"){
 #      "python3.10 .github/config_schema.py -c schematic_config.yml --service_repo 'Sage-Bionetworks/schematic' --overwrite"
 #    )
 #  }
-}
+#}
 #config_file <- fromJSON("www/config.json")
 
 
