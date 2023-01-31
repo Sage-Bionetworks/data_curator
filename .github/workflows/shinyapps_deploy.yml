@@ -93,7 +93,6 @@ jobs:
           echo 'DCA_APP_URL=""' >> .Renviron
           echo 'DCA_API_PORT=""' >> .Renviron
           echo 'DCA_API_HOST=""' >> .Renviron
-          echo 'RETICULATE_PYTHON=".venv/bin/python3.10"' >> .Renviron
           
       - name: zip virtual env
         shell: bash
