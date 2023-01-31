@@ -12,7 +12,7 @@ cran <- c(
   "stringr==1.4.0",
   "DT==0.20",
   "jsonlite==1.7.3",
-  "reticulate",
+  "reticulate==1.23",
   # "shinydashboardPlus==2.0.3",
   "waiter==0.2.5",
   "readr==2.1.1",
