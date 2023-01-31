@@ -29,7 +29,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y pip python3.10 python3-venv libcurl4-openssl-dev
-          sudo apt-get remove python3.8
+          sudo apt-get uninstall python3.8
           
       - uses: actions/checkout@v2
       - uses: r-lib/actions/setup-pandoc@v1
