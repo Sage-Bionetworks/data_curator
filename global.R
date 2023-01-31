@@ -154,11 +154,11 @@ if (dca_schematic_api == "reticulate"){
   system("chmod -R +x .venv")
   
   library(reticulate)
-  py_env <- file.path(getwd(), ".venv")
+  py_env <- file.path(getwd(), ".venv", "bin", "python3")
   message(py_env)
   message(sprintf("File exists %s: %s", py_env, file.exists(py_env)))
   message(Sys.getenv("RETICULATE_PYTHON"))
-  Sys.setenv(RETICULATE_PYTHON=file.path(py_env, "bin", "python3"))
+  Sys.setenv(RETICULATE_PYTHON=py_env)
   reticulate::py_available()
   use_virtualenv(py_env, required=TRUE)
   syn <<- reticulate::import("synapseclient")$Synapse()
