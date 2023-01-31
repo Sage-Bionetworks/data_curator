@@ -152,29 +152,6 @@ if (dca_schematic_api == "reticulate"){
   
   # We get a '126' error (non-executable) if we don't do this:
   system("chmod -R +x .venv")
-  
-  library(reticulate)
-  reticulate::use_virtualenv(file.path(getwd(), ".venv"), required = TRUE)
-  syn <<- reticulate::import("synapseclient")$Synapse()
-  
-  MetadataModel <<- reticulate::import("schematic.models.metadata")$MetadataModel
-  CONFIG <<- reticulate::import("schematic")$CONFIG
-  SchemaGenerator <<- reticulate::import("schematic.schemas.generator")$SchemaGenerator
-  
-  config = CONFIG$load_config("schematic_config.yml")
-  
-  inputMModelLocation = config$model$input$location
-  inputMModelLocationType = config$model$input$file_type
-  
-  manifest_title = config$manifest$title
-  manifest_data_type = config$manifest$data_type[1]
-  
-  metadata_model <<- MetadataModel(inputMModelLocation, inputMModelLocationType)
-  
-  # create schema generator object for associateMetadataWithFiles
-  schema_generator <<- SchemaGenerator(inputMModelLocation)
-  
-  synapse_driver <<- reticulate::import("schematic.store.synapse")$SynapseStorage
   #setup_synapse_driver()
   
   ## Read config.json

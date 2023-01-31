@@ -150,12 +150,12 @@ shinyServer(function(input, output, session) {
       schematic_config$synapse$master_fileview <- selected$master_asset_view()
       schematic_config$model$input$download_url <- model_ops[names(model_ops) == selected$master_asset_view()]
       yaml::write_yaml(schematic_config, "schematic_config.yml")
-      #setup_synapse_driver()
-      #syn$login(authToken = access_token, rememberMe = FALSE)
+      setup_synapse_driver()
+      syn$login(authToken = access_token, rememberMe = FALSE)
       
-      #system(
-      #  "python3.10 .github/config_schema.py -c schematic_config.yml --service_repo 'Sage-Bionetworks/schematic' --overwrite"
-      #)
+      system(
+        "python3.10 .github/config_schema.py -c schematic_config.yml --service_repo 'Sage-Bionetworks/schematic' --overwrite"
+      )
       
       new_conf <- reactiveVal(fromJSON("www/config.json"))
       new_conf_schem <- reactiveVal(as.data.frame(new_conf()[[1]]))
