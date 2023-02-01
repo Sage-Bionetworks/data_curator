@@ -36,7 +36,7 @@ shinyServer(function(input, output, session) {
   # read config in
   def_config <- fromJSON("www/config_offline.json")[[1]]
   config <- reactiveVal()
-  config_schema <- reactiveVal()
+  config_schema <- reactiveVal(def_config)
   model_ops <- parse_env_var(Sys.getenv("DCA_MODEL_INPUT_DOWNLOAD_URL"))
   
   # mapping from display name to schema name
@@ -223,7 +223,7 @@ shinyServer(function(input, output, session) {
                                                                   asset_view = selected$master_asset_view(),
                                                                   project_id=project_id,
                                                                   input_token=access_token),
-                                  list(list("Datatype A", "Datatype A"), list("Datatype B","Datatype B"))
+                                  list(list("DatatypeA", "DatatypeA"), list("DatatypeB","DatatypeB"))
         )
         folder_list <- list2Vector(folder_list_raw)
         
@@ -351,7 +351,8 @@ shinyServer(function(input, output, session) {
                           rest = storage_dataset_files(url=file.path(api_uri, "v1/storage/dataset/files"),
                                                                   asset_view = selected$master_asset_view(),
                                                                   dataset_id = selected$folder(),
-                                                                  input_token=access_token))
+                                                                  input_token=access_token),
+                          list(list("DatatypeA", "DatatypeA"), list("DatatypeB", "DatatypeB")))
 
       # update files list in the folder
       data_list$files(list2Vector(file_list))
@@ -394,7 +395,8 @@ shinyServer(function(input, output, session) {
                                                     dataset_id = selected$folder(),
                                                     asset_view = selected$master_asset_view(),
                                                     output_format = "google_sheet",
-                                                    input_token=access_token)
+                                                    input_token=access_token),
+                           "offline-no-gsheet-url"
                            )
 
     # generate link
