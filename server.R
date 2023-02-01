@@ -34,6 +34,7 @@ shinyServer(function(input, output, session) {
   
   ######## session global variables ########
   # read config in
+  def_config <- fromJSON("www/config_offline.json")[[1]]
   config <- reactiveVal()
   config_schema <- reactiveVal()
   model_ops <- parse_env_var(Sys.getenv("DCA_MODEL_INPUT_DOWNLOAD_URL"))
@@ -49,7 +50,8 @@ shinyServer(function(input, output, session) {
   
   data_list <- list(
     projects = reactiveVal(NULL), folders = reactiveVal(NULL),
-    template = reactiveVal(), files = reactiveVal(NULL),
+    template = reactiveVal(setNames(def_config$schema_name, def_config$display_name)),
+    files = reactiveVal(NULL),
     master_asset_view = reactiveVal(NULL)
   )
   # synapse ID of selected data
