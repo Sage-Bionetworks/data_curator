@@ -103,17 +103,16 @@ shinyServer(function(input, output, session) {
     #
     
     if (dca_mode == "online") {
-    access_token <- session$userData$access_token
-    has_access <- vapply(all_asset_views, function(x) {
-      synapse_access(id=x, access="DOWNLOAD", auth=access_token)
-    }, 1L)
-    asset_views(all_asset_views[has_access==1])
-    }
-    if (length(asset_views) == 0) stop("You do not have DOWNLOAD access to any supported Asset Views.")
-    updateSelectInput(session, "dropdown_asset_view",
+      access_token <- session$userData$access_token
+      has_access <- vapply(all_asset_views, function(x) {
+        synapse_access(id=x, access="DOWNLOAD", auth=access_token)
+      }, 1L)
+      asset_views(all_asset_views[has_access==1])
+    
+      if (length(asset_views) == 0) stop("You do not have DOWNLOAD access to any supported Asset Views.")
+      updateSelectInput(session, "dropdown_asset_view",
                       choices = asset_views())
     
-    if (dca_mode == "online") {
       user_name <- synapse_user_profile(auth=access_token)$userName
   
       is_certified <- synapse_is_certified(auth=access_token)
@@ -126,8 +125,11 @@ shinyServer(function(input, output, session) {
         # update waiter loading screen once login successful
         dcWaiter("update", landing = TRUE, userName = user_name)
       }
-    } else dcWaiter("hide")
-      
+    } else {
+      updateSelectInput(session, "dropdown_asset_view",
+                        choices = c("Offline mock data (synXXXXXX)"="synXXXXXX"))
+      dcWaiter("hide")
+    }
   })
   
   observeEvent(input$btn_asset_view, {
@@ -186,7 +188,8 @@ shinyServer(function(input, output, session) {
                             reticulate  = storage_projects_py(synapse_driver, access_token),
                             rest = storage_projects(url=file.path(api_uri, "v1/storage/projects"),
                                                     asset_view = selected$master_asset_view(),
-                                                    input_token = access_token)
+                                                    input_token = access_token),
+                            list(list("Offline Project A", "Offline Project"))
     )
     data_list$projects(list2Vector(data_list_raw))
 
@@ -217,7 +220,9 @@ shinyServer(function(input, output, session) {
                                   rest = storage_project_datasets(url=file.path(api_uri, "v1/storage/project/datasets"),
                                                                   asset_view = selected$master_asset_view(),
                                                                   project_id=project_id,
-                                                                  input_token=access_token))
+                                                                  input_token=access_token),
+                                  list(list("Datatype A", "Datatype A"), list("Datatype B","Datatype B"))
+        )
         folder_list <- list2Vector(folder_list_raw)
         
         if (length(folder_list) > 0) folder_names <- sort(names(folder_list)) else folder_names <- " "
