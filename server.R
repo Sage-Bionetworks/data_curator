@@ -8,23 +8,30 @@ shinyServer(function(input, output, session) {
   options(shiny.reactlog = TRUE)
   params <- parseQueryString(isolate(session$clientData$url_search))
   if (!has_auth_code(params)) {
-    return()
+    message("No auth code in params. Running in offline mode.")
   }
+  
   redirect_url <- paste0(
     api$access, "?", "redirect_uri=", app_url, "&grant_type=",
     "authorization_code", "&code=", params$code
   )
   # get the access_token and userinfo token
-  req <- POST(redirect_url, encode = "form", body = "", authenticate(app$key, app$secret,
+  req <- try(POST(redirect_url, encode = "form", body = "", authenticate(app$key, app$secret,
     type = "basic"
-  ), config = list())
-  # Stop the code if anything other than 2XX status code is returned
-  stop_for_status(req, task = "get an access token")
-  token_response <- content(req, type = NULL)
-  access_token <- token_response$access_token
-
-  session$userData$access_token <- access_token
-
+  ), config = list()), silent = TRUE)
+  
+  if (!inherits(req, "try-error")) {
+    # Stop the code if anything other than 2XX status code is returned
+    stop_for_status(req, task = "get an access token")
+    token_response <- content(req, type = NULL)
+    access_token <- token_response$access_token
+    
+    session$userData$access_token <- access_token
+  } else {
+    dca_mode <- "offline"
+    dcWaiter("show", "Cannot connect to Synapse. Running in offline mode.")
+  }
+  
   ######## session global variables ########
   # read config in
   config <- reactiveVal()
@@ -94,28 +101,33 @@ shinyServer(function(input, output, session) {
     # work in any domain and is scoped to the access required by the
     # Shiny app'
     #
+    
+    if (dca_mode == "online") {
     access_token <- session$userData$access_token
     has_access <- vapply(all_asset_views, function(x) {
       synapse_access(id=x, access="DOWNLOAD", auth=access_token)
     }, 1L)
     asset_views(all_asset_views[has_access==1])
+    }
     if (length(asset_views) == 0) stop("You do not have DOWNLOAD access to any supported Asset Views.")
     updateSelectInput(session, "dropdown_asset_view",
                       choices = asset_views())
     
-    user_name <- synapse_user_profile(auth=access_token)$userName
-
-    is_certified <- synapse_is_certified(auth=access_token)
-    # is_certified <- switch(dca_schematic_api,
-    #                        reticulate = syn$is_certified(user_name),
-    #                        rest = synapse_is_certified(auth=access_token))
-    if (!is_certified) {
-      dcWaiter("update", landing = TRUE, isCertified = FALSE)
-    } else {
-      # update waiter loading screen once login successful
-      dcWaiter("update", landing = TRUE, userName = user_name)
-    }
-    
+    if (dca_mode == "online") {
+      user_name <- synapse_user_profile(auth=access_token)$userName
+  
+      is_certified <- synapse_is_certified(auth=access_token)
+      # is_certified <- switch(dca_schematic_api,
+      #                        reticulate = syn$is_certified(user_name),
+      #                        rest = synapse_is_certified(auth=access_token))
+      if (!is_certified) {
+        dcWaiter("update", landing = TRUE, isCertified = FALSE)
+      } else {
+        # update waiter loading screen once login successful
+        dcWaiter("update", landing = TRUE, userName = user_name)
+      }
+    } else dcWaiter("hide")
+      
   })
   
   observeEvent(input$btn_asset_view, {
