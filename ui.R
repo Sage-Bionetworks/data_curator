@@ -276,10 +276,16 @@ ui <- shinydashboardPlus::dashboardPage(
 uiFunc <- function(req) {
   if (!has_auth_code(parseQueryString(req$QUERY_STRING))) {
     authorization_url <- oauth2.0_authorize_url(api, app, scope = scope)
-    return(tags$script(HTML(sprintf(
-      "location.replace(\"%s\");",
-      authorization_url
-    ))))
+    r <- try(GET(authorization_url), silent = TRUE)
+    if (!inherits(r, "try-error")) {
+      return(tags$script(HTML(sprintf(
+        "location.replace(\"%s\");",
+        authorization_url
+      ))))
+    } else {
+      message("Cannot access OAuth URL. Running in offline mode.")
+      ui
+    }
   } else {
     ui
   }
