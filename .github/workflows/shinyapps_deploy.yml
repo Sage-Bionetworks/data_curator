@@ -118,5 +118,5 @@ jobs:
             finally=close(configFileConn)
           )
           rsconnect::setAccountInfo(rsConnectUser, rsConnectToken, rsConnectSecret)
-          rsconnect::deployApp(appName = appName)
+          rsconnect::deployApp(appName = appName, upload = FALSE)
           rsconnect::configureApp(appName = appName, size = "xxxlarge", logLevel = "verbose")
