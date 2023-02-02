@@ -100,7 +100,7 @@ jobs:
             appName <- paste(appName, "staging", sep = "-")
             message("Deploying staging version of app")
           } else {
-            appName <- paste(appName, "testing1", sep = "-")
+            appName <- paste(appName, "testingXXX", sep = "-")
             message("Deploying testing version of app")
           }
           message(sprintf("Deploying to %s instance.", appName))
