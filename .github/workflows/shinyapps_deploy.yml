@@ -125,6 +125,9 @@ jobs:
           config <- "CLIENT_ID: ${{ secrets.OAUTH_CLIENT_ID }}"
           config <- c(config, "CLIENT_SECRET: ${{ secrets.OAUTH_CLIENT_SECRET }}")
           appUrl <- sprintf("https://%s.shinyapps.io/%s", rsConnectUser, appName)
+          renviron <- readLines(".Renviron)
+          renviron <- c(renviron, sprintf("DCA_APP_URL=%s", appUrl))
+          writeLines(renviron, ".Renviron") 
           config <- c(config, sprintf("APP_URL: %s", appUrl))
           configFileConn <- file("oauth_config.yml")
           tryCatch(
