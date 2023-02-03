@@ -1,0 +1,16 @@
+{
+  "manifest_schemas": [
+    {
+      "display_name": "Datatype A - record",
+      "schema_name": "DatatypeA",
+      "type": "record"
+    },
+    {
+      "display_name": "Datatype B - file",
+      "schema_name": "DatatypeB",
+      "type": "file"
+    }
+  ],
+  "service_version": "v23.1.1",
+  "schema_version": ""
+}
