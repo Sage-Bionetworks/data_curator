@@ -318,15 +318,15 @@ shinyServer(function(input, output, session) {
   }, ignoreInit = TRUE)
 
   ######## Dashboard ########
-#  dashboard(
-#    id = "dashboard",
-#    syn.store = syn_store,
-#    project.scope = selected$project,
-#    schema = selected$schema,
-#    schema.display.name = reactive(input$dropdown_datatype),
-#    disable.ids = c("box_pick_project", "box_pick_manifest"),
-#    ncores = ncores
-#  )
+  dashboard(
+    id = "dashboard",
+    syn.store = syn_store,
+    project.scope = selected$project,
+    schema = selected$schema,
+    schema.display.name = reactive(input$dropdown_datatype),
+    disable.ids = c("box_pick_project", "box_pick_manifest"),
+    ncores = ncores
+  )
 
   ######## Template Google Sheet Link ########
   # validate before generating template
