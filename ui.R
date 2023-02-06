@@ -165,8 +165,8 @@ ui <- shinydashboardPlus::dashboardPage(
               label = "Data Type Template:",
               choices = "Generating..."
             )
-          )#,
-          #dashboardUI("dashboard")
+          ),
+          dashboardUI("dashboard")
         ),
         switchTabUI("switchTab2", direction = "right")
       ),
