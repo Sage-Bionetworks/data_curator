@@ -98,3 +98,8 @@ model_submit_py <- function(SchemaGenerator, metadataManifestPath, datasetId, ma
 }
 
 synapse_user_profile_py <- function() syn$getUserProfile()$userName
+
+get_component_requirements_py <- function(schema, as_graph) {
+  metadata_model$get_component_requirements(schema, as_graph = as_graph)
+}
+
