@@ -34,7 +34,10 @@ shinyServer(function(input, output, session) {
   
   ######## session global variables ########
   # read config in
-  def_config <- fromJSON("www/config_offline.json")[[1]]
+  def_config <- ifelse(dca_schematic_api == "offline",
+                       fromJSON("www/config_offline.json")[[1]],
+                       fromJSON("www/config.json")[[1]]
+  )
   config <- reactiveVal()
   config_schema <- reactiveVal(def_config)
   model_ops <- parse_env_var(Sys.getenv("DCA_MODEL_INPUT_DOWNLOAD_URL"))
@@ -174,18 +177,18 @@ shinyServer(function(input, output, session) {
         "python3 .github/config_schema.py -c schematic_config.yml --service_repo 'Sage-Bionetworks/schematic' --overwrite"
       )
       
-      new_conf <- reactiveVal(fromJSON("www/config.json"))
-      new_conf_schem <- reactiveVal(as.data.frame(new_conf()[[1]]))
-      config(new_conf)
-      config_schema(new_conf_schem())
-      # mapping from display name to schema name
-      new_templates <- reactiveVal(setNames(new_conf_schem()$schema_name, new_conf_schem()$display_name))
-      data_list$template(new_templates())
-      
-      template_namedList(setNames(new_conf_schem()$schema_name, new_conf_schem()$display_name))
-      data_list$template(template_namedList())
-      
     }
+    
+    new_conf <- reactiveVal(fromJSON("www/config.json"))
+    new_conf_schem <- reactiveVal(as.data.frame(new_conf()[[1]]))
+    config(new_conf)
+    config_schema(new_conf_schem())
+    # mapping from display name to schema name
+    new_templates <- reactiveVal(setNames(new_conf_schem()$schema_name, new_conf_schem()$display_name))
+    data_list$template(new_templates())
+    
+    template_namedList(setNames(new_conf_schem()$schema_name, new_conf_schem()$display_name))
+    data_list$template(template_namedList())
     
     data_list_raw <- switch(dca_schematic_api,
                             reticulate  = storage_projects_py(synapse_driver, access_token),
