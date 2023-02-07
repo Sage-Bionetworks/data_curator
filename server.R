@@ -262,7 +262,7 @@ shinyServer(function(input, output, session) {
   ######## Header Dropdown Button ########
   # Adjust header selection dropdown based on tabs
   observe({
-    if (input[["tabs"]] == "tab_data") {
+    if (input[["tabs"]] %in% c("tab_data", "tab_asset_view")) {
       hide("header_selection_dropdown")
     } else {
       show("header_selection_dropdown")
