@@ -168,6 +168,7 @@ shinyServer(function(input, output, session) {
       yaml::write_yaml(schematic_config, "schematic_config.yml")
       setup_synapse_driver()
       syn$login(authToken = access_token, rememberMe = FALSE)
+      syn_store <<- synapse_driver(access_token = access_token)
       
       system(
         "python3 .github/config_schema.py -c schematic_config.yml --service_repo 'Sage-Bionetworks/schematic' --overwrite"
