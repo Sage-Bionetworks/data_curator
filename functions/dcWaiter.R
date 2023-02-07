@@ -29,7 +29,7 @@ dcWaiter <- function(stage = c("show", "update", "hide"),
           img(src = "img/loading.gif"),
           h4("Retrieving Synapse information...")
         ),
-        color = "#424874"
+        color = rgb(66, 72, 116, alpha=0.9, maxColorValue = 255)
       )
     } else if (!isCertified) {
       # when user is not certified synapse user
