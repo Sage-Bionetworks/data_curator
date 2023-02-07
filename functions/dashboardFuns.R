@@ -147,7 +147,7 @@ validate_metadata <- function(metadata, project.scope) {
 #' @return list of requirements for \code{schema} or string of \code{schema} if no requirements found
 get_schema_nodes <- function(schema) {
   requirement <- tryCatch(
-    metadata_model$get_component_requirements(schema, as_graph = TRUE),
+    get_component_requirements_py(schema, as_graph = TRUE),
     error = function(e) {
       warning("'get_schema_nodes' failed: ", sQuote(schema), ":\n", e$message)
       return(list())
