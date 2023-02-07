@@ -524,8 +524,9 @@ shinyServer(function(input, output, session) {
     # abort submission if no folder selected
     req(selected$folder())
 
+    manifest_filename <- sprintf("%s_%s.csv", manifest_basename, tolower(selected$schema()))
     tmp_out_dir <- "./manifest"
-    tmp_file_path <- file.path(tmp_out_dir, "synapse_storage_manifest.csv")
+    tmp_file_path <- file.path(tmp_out_dir, manifest_filename)
     dir.create(tmp_out_dir, showWarnings = FALSE)
 
     # reads file csv again
