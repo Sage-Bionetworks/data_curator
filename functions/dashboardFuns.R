@@ -9,7 +9,7 @@ get_dataset_metadata <- function(syn.store, datasets, ncores = 1) {
   # remove codes to download all manifests
   # get data for all manifests within the specified datasets
   file_view <- syn.store$storageFileviewTable %>%
-    filter(name == "synapse_storage_manifest.csv" & parentId %in% datasets)
+    filter(grepl("synapse_storage_manifest", name) & parentId %in% datasets)
 
   # datasets don't have a manifest
   ds_no_manifest <- datasets[which(!datasets %in% file_view$parentId)]
