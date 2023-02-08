@@ -1,0 +1,232 @@
+Notes:
+manifest/generate - manifest_generator.getManifest
+manifest/populate
+model/validate
+model/submit
+storage/project/datasets
+storage/projects
+storage/dataset/files
+The following are part of the dashboard
+TODO model/component-requirements
+TODO storage/assets/tables
+TODO manifest/download - store.getDatasetManifest - is this really?
+
+```{r, compare_output}
+library(waldo)
+library(datacurator)
+
+#source("~/work/shinyapps/data_curator/functions/schematic_rest_api.R")
+#source("~/work/shinyapps/data_curator/functions/synapse_rest_api.R")
+#source("~/work/shinyapps/data_curator/functions/schematic_reticulate.R")
+
+api_uri <- "http://0.0.0.0:3001/"
+access_token <- Sys.getenv("SYNAPSE_PAT")
+
+asset_view <- "syn33715412" # mock dca asset view
+project_id <- "syn33715357" # FAIR Data Demo
+dataset_id <- "syn36003517" # Patient
+
+data_type <- "Patient"
+data_model <- "https://raw.githubusercontent.com/Sage-Bionetworks/data-models/main/example.model.jsonld"
+
+good_manifest_path <- system.file("testdata", "example-patient-pass.csv",
+                                  package = "datacurator")
+good_manifest <- readr::read_csv(good_manifest_path)
+
+# set up reticulate
+setup_synapse_driver()
+
+### Storage Projects ----
+# reticulate
+project_py <- storage_projects_py(synapse_driver, access_token)
+
+# REST API
+project_rest <- 
+  storage_projects(url=file.path(api_uri, "v1/storage/projects"),
+                 asset_view = asset_view,
+                 input_token = access_token)
+
+
+compare(project_rest, project_py)
+
+### Storage Projects Datasets ---
+# reticulate
+folder_list_py <- storage_projects_datasets_py(synapse_driver, project_id)
+
+# REST API
+folder_list_rest <- storage_project_datasets(url=file.path(api_uri, "v1/storage/project/datasets"),
+                         asset_view = asset_view,
+                         project_id=project_id,
+                         input_token=access_token) #%>% list2Vector()
+
+compare(folder_list_rest, folder_list_py)
+
+### Storage Dataset Files ---
+# reticulate
+file_list_py <- storage_dataset_files_py(project_id)
+
+# REST API
+file_list_rest <- storage_dataset_files(url=file.path(api_uri, "v1/storage/dataset/files"),
+                                   asset_view = asset_view,
+                                   dataset_id = project_id,
+                                   input_token=access_token)
+
+compare(file_list_py, file_list_rest)
+
+### Manifest Generate ---
+# reticulate
+# Using filenames as 'patient', "Patient", or parent_id causes a bug
+#Error in py_call_impl(callable, dots$args, dots$keywords) :
+#  HttpError: <HttpError 400 when requesting https://sheets.googleapis.com/v4/spreadsheets/1pVb4g_fbZbY8v5AeYjAe55TMcgackD-ttQ8-4Q114_Q/values:batchUpdate?alt=json returned "Invalid value at 'data[1].values[0]' (type.googleapis.com/google.protobuf.ListValue), "Patient"". Details: "[{'@type': 'type.googleapis.com/google.rpc.BadRequest', 'fieldViolations': [{'field': 'data[1].values[0]', 'description': 'Invalid value at \'data[1].values[0]\' (type.googleapis.com/google.protobuf.ListValue), "Patient"'}]}]">
+manifest_url_py <- manifest_generate_py(title = "Test Patient - reticulate",
+                                        rootNode = data_type,
+                                        datasetId=project_id)
+
+# REST API
+manifest_url_rest <- manifest_generate(url=file.path(api_uri, "v1/manifest/generate"),
+                  schema_url = data_model,
+                  title = "Test Patient - REST API",
+                  data_type =data_type,
+                  dataset_id = project_id,
+                  asset_view = asset_view,
+                  output_format = "google_sheet",
+                  input_token=access_token)
+
+# Both are empty manifests
+compare(unlist(manifest_url_rest), manifest_url_py)
+
+###  Validate Manifest ---
+# reticulate
+annotation_status_py <- manifest_validate_py(good_manifest_path, "Patient", TRUE, project_id)
+
+# REST API
+annotation_status_rest <- manifest_validate(url=file.path(api_uri, "v1/model/validate"),
+                                       schema_url=data_model,
+                                       data_type=data_type,
+                                       json_str=jsonlite::toJSON(good_manifest))
+
+compare(annotation_status_rest, annotation_status_py)
+
+### Populate manifest ---
+# reticulate
+filled_manifest_py <- manifest_populate_py("Test Populate Patient - reticulate", good_manifest_path, data_type)
+
+# REST API
+filled_manifest_rest <- manifest_populate(url=file.path(api_uri, "v1/manifest/populate"),
+                  schema_url = data_model,
+                  title = "Test Populate Patient - REST API",
+                  data_type = data_type,
+                  return_excel = FALSE,
+                  csv_file = good_manifest_path)
+
+# both are filled manifests
+compare(filled_manifest_rest, filled_manifest_py)
+
+### Submit manifest ---
+# reticulate
+manifest_id_py <- model_submit_py(schema_generator, good_manifest_path, dataset_id, "table", FALSE)
+
+# REST API
+manifest_id_rest <- model_submit(url=file.path(api_uri, "v1/model/submit"),
+                            schema_url = data_model,
+                            data_type = data_type,
+                            dataset_id = dataset_id,
+                            input_token = access_token,
+                            restrict_rules = FALSE,
+                            json_str = jsonlite::toJSON(good_manifest),
+                            asset_view = asset_view)
+
+compare(manifest_id_py, manifest_id_rest)
+
+### Get user name
+#reticulate
+user_name_py <- synapse_user_profile_py()
+
+# REST API
+user_name_rest <- synapse_user_profile(auth=Sys.getenv("SYNAPSE_PAT"))$userName
+
+compare(user_name_py, user_name_rest)
+
+### Model component requirements
+# reticulate
+gcr_py <- get_component_requirements_py("Biospecimen", as_graph=FALSE)
+
+# REST API
+gcr_rest <- model_component_requirements(url=file.path(api_uri, "v1/model/component-requirements"),                                           schema_url=data_model,
+               source_component="Biospecimen", as_graph = FALSE)
+
+compare(gcr_py, gcr_rest)
+```
+
+```{r, time}
+system.time(setup_synapse_driver())
+
+### Storage Projects ----
+system.time(storage_projects_py(synapse_driver, access_token))
+system.time(storage_projects(url=file.path(api_uri, "v1/storage/projects"),
+                 asset_view = asset_view,
+                 input_token = access_token))
+
+### Storage Projects Datasets ---
+system.time(storage_projects_datasets_py(synapse_driver, project_id))
+system.time(storage_project_datasets(url=file.path(api_uri, "v1/storage/project/datasets"),
+                         asset_view = asset_view,
+                         project_id=project_id,
+                         input_token=access_token))
+### Storage Dataset Files ---
+system.time(storage_dataset_files_py(project_id))
+system.time(storage_dataset_files(url=file.path(api_uri, "v1/storage/dataset/files"),
+                                   asset_view = asset_view,
+                                   dataset_id = project_id,
+                                   input_token=access_token))
+### Manifest Generate ---
+system.time(manifest_generate_py(title = "Test Patient - reticulate",
+                                        rootNode = data_type,
+                                        datasetId=project_id))
+system.time(manifest_generate(url=file.path(api_uri, "v1/manifest/generate"),
+                  schema_url = data_model,
+                  title = "Test Patient - REST API",
+                  data_type =data_type,
+                  dataset_id = project_id,
+                  asset_view = asset_view,
+                  output_format = "google_sheet",
+                  input_token=access_token))
+
+###  Validate Manifest ---
+system.time(manifest_validate_py(good_manifest_path, "Patient", TRUE, project_id))
+system.time(manifest_validate(url=file.path(api_uri, "v1/model/validate"),
+                                       schema_url=data_model,
+                                       data_type=data_type,
+                                       json_str=jsonlite::toJSON(good_manifest)))
+
+### Populate manifest ---
+system.time(manifest_populate_py("Test Populate Patient - reticulate", good_manifest_path, data_type))
+system.time(manifest_populate(url=file.path(api_uri, "v1/manifest/populate"),
+                  schema_url = data_model,
+                  title = "Test Populate Patient - REST API",
+                  data_type = data_type,
+                  return_excel = FALSE,
+                  csv_file = good_manifest_path))
+
+### Submit manifest ---
+system.time(model_submit_py(schema_generator, good_manifest_path, dataset_id, "table", FALSE))
+system.time(model_submit(url=file.path(api_uri, "v1/model/submit"),
+                            schema_url = data_model,
+                            data_type = data_type,
+                            dataset_id = dataset_id,
+                            input_token = access_token,
+                            restrict_rules = FALSE,
+                            json_str = jsonlite::toJSON(good_manifest),
+                            asset_view = asset_view))
+
+### Get user name
+system.time(synapse_user_profile_py())
+system.time(synapse_user_profile(auth=Sys.getenv("SYNAPSE_PAT"))$userName)
+
+### Model component requirements
+system.time(get_component_requirements_py("Biospecimen", as_graph=FALSE))
+system.time(model_component_requirements(url=file.path(api_uri, "v1/model/component-requirements"),                                           schema_url=data_model,
+               source_component="Biospecimen", as_graph = FALSE))
+
+
+```
