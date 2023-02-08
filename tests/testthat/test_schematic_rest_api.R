@@ -136,7 +136,6 @@ test_that("asset_tables returns a data.frame", {
   
   tst2 <- get_asset_view_table(url=file.path(schem_url, "v1/storage/assets/tables"),
                                   asset_view = "syn28559058",
-                                  input_token = Sys.getenv("SYNAPSE_TOKEN"),
-                                  as_json=FALSE)
+                                  input_token = Sys.getenv("SYNAPSE_TOKEN"))
   expect_identical(nrow(tst2), 3L)
 })
