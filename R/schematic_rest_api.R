@@ -99,7 +99,9 @@ manifest_validate <- function(url="http://localhost:3001/v1/model/validate",
                     #body=list(file_name=file_name)
   )
   
-  if (httr::http_status(req)$category == "Server error") return(list(list(), list()))
+  if (httr::http_status(req)$category == "Server error"){
+    return(list(error=list(httr::http_status(req)$message), warning=list()))
+  }
   annotation_status <- httr::content(req)
   annotation_status
 }
