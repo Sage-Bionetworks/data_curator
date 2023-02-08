@@ -1,0 +1,4 @@
+Patient ID,Sex,Year of Birth,Diagnosis,Component,Cancer Type,Family History,Uuid,entityId
+1,Female,,Healthy,Patient,Breast,"Breast, Colorectal",591a79bf-1f33-45df-a9f6-0580f3995cb4,
+2,Male,,Healthy,Patient,Breast,"Breast, Colorectal",5e1b71de-ae3b-471e-bcdb-5722ddd65716,
+3,Female,,Healthy,Patient,Breast,"Breast, Colorectal",27b155e2-c836-4670-b1db-8c584dfcfeec,
