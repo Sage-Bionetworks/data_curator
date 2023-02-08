@@ -141,6 +141,8 @@ shinyServer(function(input, output, session) {
     selected$master_asset_view(input$dropdown_asset_view)
     dcWaiter("show", msg = paste0("Getting data from ", selected$master_asset_view(), "..."), color="grey")
     
+    data_model(data_model_options[selected$master_asset_view()])
+    
     dca_theme_file <- ifelse(selected$master_asset_view() %in% names(syn_themes),
                              syn_themes[selected$master_asset_view()],
                              "www/dca_themes/sage_theme_config.rds")
@@ -198,7 +200,7 @@ shinyServer(function(input, output, session) {
                             list(list("Offline Project A", "Offline Project"))
     )
     data_list$projects(list2Vector(data_list_raw))
-
+    
     if (is.null(data_list$projects()) || length(data_list$projects()) == 0) {
       dcWaiter("update", landing = TRUE, isPermission = FALSE)
     } else {
@@ -329,7 +331,12 @@ shinyServer(function(input, output, session) {
     schema = selected$schema,
     schema.display.name = reactive(input$dropdown_datatype),
     disable.ids = c("box_pick_project", "box_pick_manifest"),
-    ncores = ncores
+    ncores = ncores,
+    access_token = access_token,
+    fileview = selected$master_asset_view(),
+    folder = selected$project(),
+    schematic_api = dca_schematic_api,
+    schema_url = data_model()
   )
 
   ######## Template Google Sheet Link ########
@@ -393,7 +400,7 @@ shinyServer(function(input, output, session) {
                                                               rootNode = selected$schema(),
                                                               datasetId = selected$folder()),
                            rest = manifest_generate(url=file.path(api_uri, "v1/manifest/generate"),
-                                                    schema_url = data_model,
+                                                    schema_url = data_model(),
                                                     title = input$dropdown_template,
                                                     data_type = selected$schema(),
                                                     dataset_id = selected$folder(),
@@ -447,7 +454,7 @@ shinyServer(function(input, output, session) {
                                                                   TRUE,
                                                                   list(selected$project())),
                                 rest = manifest_validate(url=file.path(api_uri, "v1/model/validate"),
-                                                         schema_url=data_model,
+                                                         schema_url=data_model(),
                                                          data_type=selected$schema(),
                                                          json_str=jsonlite::toJSON(read_csv(inFile$raw()$datapath)))
                                 )
@@ -496,7 +503,7 @@ shinyServer(function(input, output, session) {
                                                                 inFile$raw()$datapath,
                                                                 selected$schema()),
                               rest = manifest_populate(url=file.path(api_uri, "v1/manifest/populate"),
-                                                       schema_url = data_model,
+                                                       schema_url = data_model(),
                                                        title = paste0(config$community, " ", input$dropdown_template),
                                                        data_type = selected$schema(),
                                                        return_excel = FALSE,
@@ -576,7 +583,7 @@ shinyServer(function(input, output, session) {
                                                          "table",
                                                          FALSE),
                             rest = model_submit(url=file.path(api_uri, "v1/model/submit"),
-                                                             schema_url = data_model,
+                                                             schema_url = data_model(),
                                                              data_type = selected$schema(),
                                                              dataset_id = selected$folder(),
                                                              input_token = access_token,
@@ -620,7 +627,7 @@ shinyServer(function(input, output, session) {
                                                          "table",
                                                          FALSE),
                             rest = model_submit(url=file.path(api_uri, "v1/model/submit"),
-                                                schema_url = data_model,
+                                                schema_url = data_model(),
                                                 data_type = selected$schema(),
                                                 dataset_id = selected$folder(),
                                                 input_token = access_token,
