@@ -33,6 +33,9 @@ if (is.null(client_id) || nchar(client_id) == 0) stop("missing DCA_CLIENT_ID env
 if (is.null(client_secret) || nchar(client_secret) == 0) stop("missing DCA_CLIENT_SECRET environmental variable")
 if (is.null(app_url) || nchar(app_url) == 0) stop("missing DCA_APP_URL environmental variable")
 
+schematic_config <- yaml.load_file("schematic_config.yml")
+manifest_basename <- schematic_config$synapse$manifest_basename
+
 dca_schematic_api <- Sys.getenv("DCA_SCHEMATIC_API_TYPE")
 if (dca_schematic_api == "rest") {
   api_uri <- ifelse(Sys.getenv("DCA_API_PORT") == "",
