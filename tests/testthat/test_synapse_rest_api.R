@@ -37,3 +37,21 @@ test_that("get returns a tibble or error", {
   expect_error(synapse_get(id="bad", auth="bad"))
   
 })
+
+test_that("synapse_access returns TRUE/FALSE or server error", {
+  
+  can_access <- synapse_access(id = "syn20977135",
+                               access = "DOWNLOAD",
+                               auth=Sys.getenv("SYNAPSE_PAT"))
+  expect_true(can_access)
+  
+  cannot_access <- synapse_access(id = "syn18824583",
+                                  access = "MODERATE",
+                                  auth=Sys.getenv("SYNAPSE_PAT"))
+  expect_false(cannot_access)
+  
+  bad_permissions <- expect_error(synapse_access(id = "syn20977135",
+                                    access = "BADCODE",
+                                    auth=Sys.getenv("SYNAPSE_PAT")))
+  
+})
