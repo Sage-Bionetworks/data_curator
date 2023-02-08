@@ -40,9 +40,12 @@ jobs:
           source .venv/bin/activate
 
       - name: Install R Packages Dependencies
+        shell: Rscript {0}
         run: |
-          R -f install-pkgs.R
-
+          install.packages(c("remotes", "renv"), repos = "https://cloud.r-project.org/")
+          source("renv/activate.R")
+          renv::restore()
+         
       - name: Install Schematic
         shell: bash
         run: |
