@@ -53,7 +53,7 @@ test_that("manifest_validate passes and fails correctly", {
   expect_identical(pass, list(errors=list(), warnings=list()))
   
   fail <- manifest_validate(data_type="Biospecimen",
-                            schema_url = "https://raw.githubusercontent.com/Sage-Bionetworks/data-models/main/example.model.jsonld", #nolint
+                            schema_url = "https://raw.githubusercontent.com/ncihtan/data-models/main/HTAN.model.jsonld", #nolint
                             json_str=jsonlite::toJSON(fail_file))
   expect_true(length(unlist(fail)) > 0L)
 })
@@ -65,8 +65,8 @@ test_that("model_submit successfully uploads to synapse", {
                       schema_url = "https://raw.githubusercontent.com/Sage-Bionetworks/data-models/main/example.model.jsonld", #nolint
                       asset_view = "syn20446927",
                       input_token=Sys.getenv("SYNAPSE_PAT"),
-                      json_str=jsonlite::toJSON(pass_file))
-  expect_true(submit)
+                      json_str=jsonlite::toJSON(fail_file))
+  expect_true(grepl("^syn", submit))
 })
 
 test_that("storage_project_datasets returns available datasets", {
@@ -131,8 +131,7 @@ test_that("asset_tables returns a data.frame", {
   skip_it()
   tst <- get_asset_view_table(url=file.path(schem_url, "v1/storage/assets/tables"),
                        asset_view = "syn28559058",
-                       input_token = Sys.getenv("SYNAPSE_TOKEN"),
-                       as_json=TRUE)
+                       input_token = Sys.getenv("SYNAPSE_TOKEN"))
   expect_identical(nrow(tst), 3L)
   
   tst2 <- get_asset_view_table(url=file.path(schem_url, "v1/storage/assets/tables"),
