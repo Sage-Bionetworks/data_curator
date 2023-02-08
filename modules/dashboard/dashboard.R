@@ -122,14 +122,7 @@ dashboard <- function(id, syn.store, project.scope, schema, schema.display.name,
       # get requirements for selected data type
       selected_datatype_requirement <- eventReactive(c(schema(), input$box$visible), {
         req(input$box$visible)
-        switch(schematic_api,
-               reticulate = get_schema_nodes(schema()),
-               rest = model_component_requirements(
-                 url = file.path(api_uri, "v1/model/component-requirements"),
-                 schema_url = schema_url,
-                 source_component = schema()
-               )
-      )
+        get_schema_nodes(schema(), schematic_api = schematic_api)
       })
 
       # get requirements for all uploaded manifests
@@ -165,7 +158,7 @@ dashboard <- function(id, syn.store, project.scope, schema, schema.display.name,
         req(input$box$visible)
         req(uploaded_manifests())
         user_name <- switch(schematic_api,
-                            reticulate = synapse_user_profile_py,
+                            reticulate = synapse_user_profile_py(),
                             rest = synapse_user_profile(auth=access_token)[["userName"]])
         # remove rows with invalid component name
         metadata <- uploaded_manifests() %>% filter(!is.na(Component), Component != "Unknown")
