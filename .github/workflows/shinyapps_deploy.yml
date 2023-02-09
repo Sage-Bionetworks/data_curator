@@ -17,7 +17,7 @@ on:
 
 jobs:
   shiny-deploy:
-    runs-on: ubuntu:focal
+    runs-on: ubuntu-20.04
     # This image seems to be based on rocker/r-ver which in turn is based on debian
     container: rocker/rstudio:4.1.2
     env:
