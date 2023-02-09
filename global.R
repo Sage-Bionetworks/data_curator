@@ -1,3 +1,4 @@
+renv::activate()
 suppressPackageStartupMessages({
   library(yaml)
   library(reticulate)
