@@ -92,6 +92,7 @@ jobs:
       - name: Authorize and deploy app
         shell: Rscript {0}
         run: |
+          renv::activate()
           # if there is a tag, 'refName' will be tag name
           repo <- Sys.getenv("GITHUB_REPOSITORY")
           appName <- strsplit(repo, "/")[[1]][2]
