@@ -82,13 +82,13 @@ jobs:
         run: |
           zip -rm .venv.zip .venv
 
+      - name: Install R Packages Dependencies
+        run: |
+          R -f install-pkgs.R
+          
       - name: Authorize and deploy app
         shell: Rscript {0}
         run: |
-          install.packages(c("renv", "rsconnect"), repos = "https://packagemanager.rstudio.com/all/__linux__/focal/latest")
-          renv::activate()
-          renv::restore(repos="https://packagemanager.rstudio.com/all/__linux__/focal/latest")
-          renv::isolate()
           # if there is a tag, 'refName' will be tag name
           repo <- Sys.getenv("GITHUB_REPOSITORY")
           appName <- strsplit(repo, "/")[[1]][2]
