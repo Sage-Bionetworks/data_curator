@@ -23,20 +23,14 @@ jobs:
     env:
       # This should not be necessary for installing from public repo's however remotes::install_github() fails without it.
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
-      RENV_PATHS_ROOT: ~/.local/share/renv
 
     steps:
       - name: Install System Dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y pip python3.8-venv libcurl4-openssl-dev
-          
       - uses: actions/checkout@v2
-      - uses: r-lib/actions/setup-pandoc@v2
-      
-      - name: Install R Packages Dependencies
-        run: |
-          R -f install-pkgs.R
+      - uses: r-lib/actions/setup-pandoc@v1
 
       - name: Create and Activate Python Virtual Environment
         shell: bash
@@ -44,6 +38,10 @@ jobs:
           python3 -m venv .venv
           chmod 755 .venv/bin/activate
           source .venv/bin/activate
+
+      - name: Install R Packages Dependencies
+        run: |
+          R -f install-pkgs.R
 
       - name: Install Schematic
         shell: bash
@@ -91,6 +89,7 @@ jobs:
       - name: Authorize and deploy app
         shell: Rscript {0}
         run: |
+          # if there is a tag, 'refName' will be tag name
           repo <- Sys.getenv("GITHUB_REPOSITORY")
           appName <- strsplit(repo, "/")[[1]][2]
           refName <- Sys.getenv("GITHUB_REF_NAME")
@@ -119,5 +118,14 @@ jobs:
             finally=close(configFileConn)
           )
           rsconnect::setAccountInfo(rsConnectUser, rsConnectToken, rsConnectSecret)
-          rsconnect::deployApp(appName = appName)
+          # Get app names. If app exists, configure then deploy. Otherwise
+          # deploy then configure
+          apps <- rsconnect::applications()$name
+          if (appName %in% apps) {
+            rsconnect::configureApp(appName = appName, size = "xxxlarge", logLevel = "verbose")
+            rsconnect::deployApp(appName = appName)
+          } else {
+            rsconnect::deployApp(appName = appName)
+            rsconnect::configureApp(appName = appName, size = "xxxlarge", logLevel = "verbose")
+          }
           
