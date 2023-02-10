@@ -91,7 +91,6 @@ jobs:
       - name: Authorize and deploy app
         shell: Rscript {0}
         run: |
-          # if there is a tag, 'refName' will be tag name
           repo <- Sys.getenv("GITHUB_REPOSITORY")
           appName <- strsplit(repo, "/")[[1]][2]
           refName <- Sys.getenv("GITHUB_REF_NAME")
@@ -120,14 +119,5 @@ jobs:
             finally=close(configFileConn)
           )
           rsconnect::setAccountInfo(rsConnectUser, rsConnectToken, rsConnectSecret)
-          # Get app names. If app exists, configure then deploy. Otherwise
-          # deploy then configure
-          apps <- rsconnect::applications()$name
-         # if (appName %in% apps) {
-         #   rsconnect::configureApp(appName = appName, size = "xxxlarge", logLevel = "verbose")
-            rsconnect::deployApp(appName = appName)
-         # } else {
-         #   rsconnect::deployApp(appName = appName)
-         #   rsconnect::configureApp(appName = appName, size = "xxxlarge", logLevel = "verbose")
-         # }
+          rsconnect::deployApp(appName = appName)
           
