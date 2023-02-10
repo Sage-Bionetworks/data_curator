@@ -1,4 +1,3 @@
-source("renv/activate.R")
 .First <- function() {
   options(
     repos = c(
