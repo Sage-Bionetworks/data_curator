@@ -40,7 +40,9 @@ jobs:
           chmod 755 .venv/bin/activate
           source .venv/bin/activate
           
-      - uses: r-lib/actions/setup-renv@v2
+      - name: Install R packages
+        run: |
+          R -f install-pkgs.R
 
       - name: Install Schematic
         shell: bash
