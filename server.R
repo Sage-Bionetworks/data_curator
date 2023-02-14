@@ -643,7 +643,6 @@ shinyServer(function(input, output, session) {
                                                              json_str = jsonlite::toJSON(read_csv(tmp_file_path)),
                                                              asset_view = selected$master_asset_view())
                             )
-      browser()
       manifest_path <- tags$a(href = paste0("https://www.synapse.org/#!Synapse:", manifest_id), manifest_id, target = "_blank")
 
       # add log message
@@ -689,7 +688,6 @@ shinyServer(function(input, output, session) {
                                                 json_str = jsonlite::toJSON(read_csv(tmp_file_path)),
                                                 asset_view = selected$master_asset_view())
       )
-      browser()
       manifest_path <- tags$a(href = paste0("https://www.synapse.org/#!Synapse:", manifest_id), manifest_id, target = "_blank")
 
       # add log message
