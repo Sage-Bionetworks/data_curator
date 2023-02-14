@@ -170,3 +170,5 @@ config_file <- fromJSON("www/config.json")
 dropdown_types <- c("project", "folder", "template")
 # set up cores used for parallelization
 ncores <- parallel::detectCores() - 1
+datatypes <- c("project", "folder", "template")
+options(sass.cache = FALSE)

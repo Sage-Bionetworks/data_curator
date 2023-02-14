@@ -77,7 +77,6 @@ dashboard <- function(id, syn.store, project.scope, schema, schema.display.name,
         hide("toggle-btn-container")
         shinydashboardPlus::updateBox("box", action = "restore")
       })
-
       # retrieving data progress for dashboard should not be executed until dashboard visiable
       # get all uploaded manifests once the project/folder changed
       observeEvent(c(project.scope(), input$box$visible), {
@@ -86,7 +85,7 @@ dashboard <- function(id, syn.store, project.scope, schema, schema.display.name,
         dcWaiter(
           "show",
           id = ns("tab-container"), url = "www/img/logo.svg", custom_spinner = TRUE,
-          msg = "Loading, please wait...", style = "color: #000;", color = transparent(1)
+          msg = "Loading, please wait...", style = "color: #000;", color = transparent(0.95)
         )
 
         # disable selection to prevent changes until all uploaded manifests are queried
@@ -122,7 +121,9 @@ dashboard <- function(id, syn.store, project.scope, schema, schema.display.name,
       # get requirements for selected data type
       selected_datatype_requirement <- eventReactive(c(schema(), input$box$visible), {
         req(input$box$visible)
-        get_schema_nodes(schema(), schematic_api = schematic_api)
+        get_schema_nodes(schema(), schematic_api = schematic_api,
+                    url=file.path(api_uri, "v1/model/component-requirements"),
+                    schema_url = schema_url)
       })
 
       # get requirements for all uploaded manifests

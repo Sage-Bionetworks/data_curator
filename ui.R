@@ -123,12 +123,13 @@ ui <- shinydashboardPlus::dashboardPage(
             title = "Select a DCC: ",
             selectInput(
               inputId = "dropdown_asset_view",
-              label = NULL, 
-              choices = "Generating...")
+              label = NULL, #"Asset View:",
+              choices = parse_env_var(Sys.getenv("DCA_SYNAPSE_MASTER_FILEVIEW"))#"Generating..."
             ),
             actionButton("btn_asset_view", "Click to confirm",
                          class = "btn-primary-color"
             )
+        )
         )#,
         #switchTabUI("switchTab1", direction = "right") # remove arrow from assetview page.
       ),
@@ -175,7 +176,7 @@ ui <- shinydashboardPlus::dashboardPage(
         tabName = "tab_template",
         useShinyjs(),
         h2("Download Template for Selected Folder"),
-        #if (Sys.getenv("DCA_MANIFEST_OUTPUT_FORMAT") != "excel") {
+        if (Sys.getenv("DCA_MANIFEST_OUTPUT_FORMAT") != "excel") {
         fluidRow(
           box(
             title = "Get Link, Annotate, and Download Template as CSV",
@@ -198,28 +199,28 @@ ui <- shinydashboardPlus::dashboardPage(
             ),
             helpText("This link will leads to an empty template or your previously submitted template with new files if applicable.")
           )
-        ),#}else{
-        # fluidRow(
-        #   box(
-        #     title = "Or download data as an Excel sheet",
-        #     status = "primary",
-        #     width = 12,
-        #     downloadButton("downloadData", "Download Excel Spreadsheet."),
-        #     hidden(
-        #       div(
-        #         id = "div_template_warn_xls",
-        #         height = "100%",
-        #         htmlOutput("text_template_warn_xls")
-        #       ),
-        #       div(
-        #         id = "div_template_xls",
-        #         height = "100%",
-        #         htmlOutput("text_template_xls")
-        #       )
-        #     ),
-        #     helpText("This link will leads to an empty template or your previously submitted template with new files if applicable.")
-        #   )
-        # )},
+        )}else{
+        fluidRow(
+          box(
+            title = "Or download data as an Excel sheet",
+            status = "primary",
+            width = 12,
+            downloadButton("downloadData", "Download Excel Spreadsheet."),
+            hidden(
+              div(
+                id = "div_template_warn_xls",
+                height = "100%",
+                htmlOutput("text_template_warn_xls")
+              ),
+              div(
+                id = "div_template_xls",
+                height = "100%",
+                htmlOutput("text_template_xls")
+              )
+            ),
+            helpText("This link will leads to an empty template or your previously submitted template with new files if applicable.")
+          )
+        )},
         switchTabUI("switchTab3", direction = "both")
       ),
       # Fourth tab content

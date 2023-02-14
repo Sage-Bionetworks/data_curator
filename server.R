@@ -87,6 +87,9 @@ shinyServer(function(input, output, session) {
   ######## Initiate Login Process ########
   # synapse cookies
   session$sendCustomMessage(type = "readCookie", message = list())
+  
+  shinyjs::useShinyjs()
+  shinyjs::hide(selector = ".sidebar-menu")
 
   shinyjs::useShinyjs()
   shinyjs::hide(selector = ".sidebar-menu")
@@ -135,6 +138,12 @@ shinyServer(function(input, output, session) {
                         choices = c("Offline mock data (synXXXXXX)"="synXXXXXX"))
       dcWaiter("hide")
     }
+    
+    ######## Arrow Button ########
+    lapply(1:4, function(i) {
+      switchTabServer(id = paste0("switchTab", i), tabId = "tabs", tab = reactive(input$tabs)(), tabList = tabs_list, parent = session)
+    })
+    
   })
   
   observeEvent(input$btn_asset_view, {
@@ -274,7 +283,7 @@ shinyServer(function(input, output, session) {
       addClass(id = "header_selection_dropdown", class = "open")
     }
   })
-
+  
   # sync header dropdown with main dropdown
   lapply(dropdown_types, function(x) {
     observeEvent(input[[paste0("dropdown_", x)]], {
@@ -339,6 +348,8 @@ shinyServer(function(input, output, session) {
     schema_url = data_model()
   )
 
+  manifest_url <- reactiveVal(NULL)
+  
   ######## Template Google Sheet Link ########
   # validate before generating template
   observeEvent(c(selected$folder(), selected$schema(), input$tabs), {
@@ -389,10 +400,50 @@ shinyServer(function(input, output, session) {
     output$text_template_warn <- renderUI(tagList(br(), span(class = "warn_msg", HTML(warn_text))))
     show("div_template_warn")
   })
+    
+  observeEvent(input$downloadData, {
+    if (input$tabs == "tab_template") {
+    if (Sys.getenv("DCA_MANIFEST_OUTPUT_FORMAT") == "excel") {
+      dcWaiter("show", msg = "Downloading data from Synapse...", color = dca_theme()$primary_col)
+      #schematic rest api to generate manifest
+      manifest_data <- switch(dca_schematic_api,
+                              reticulate =  manifest_generate_py(title = input$dropdown_template,
+                                                                 rootNode = selected$schema(),
+                                                                 datasetId = selected$folder()),
+                              rest = manifest_generate(url=file.path(api_uri, "v1/manifest/generate"),
+                                                       schema_url = data_model(),
+                                                       title = input$dropdown_template,
+                                                       data_type = selected$schema(),
+                                                       dataset_id = selected$folder(),
+                                                       asset_view = selected$master_asset_view(),
+                                                       output_format = Sys.getenv("DCA_MANIFEST_OUTPUT_FORMAT"),
+                                                       input_token=access_token),
+                              "offline-no-gsheet-url"
+      )
+      manifest_url(manifest_data)
+      
+      # Bookmarking this thread in case we can't use writeBin...
+      # Use a db connection instead
+      # https://community.rstudio.com/t/how-to-let-download-button-work-with-eventreactive/20937
+      output$downloadData <- downloadHandler(
+        filename = function() sprintf("%s.xlsx", input$dropdown_template),
+        content = function(file) {
+          writeBin(manifest_url(), file)
+          #capture.output(print(manifest_url()), file=file) # actually kinda works
+          # Just shows NULL
+          # sink(file)
+          # print(manifest_url())
+          # sink()
+        }
+      )
+      
+      dcWaiter("hide", sleep = 1)
+    }
+    }
+  })
 
   # generate template
   observeEvent(input$btn_template, {
-
     # loading screen for template link generation
     dcWaiter("show", msg = "Generating link...")
     manifest_url <- switch(dca_schematic_api,
@@ -405,14 +456,14 @@ shinyServer(function(input, output, session) {
                                                     data_type = selected$schema(),
                                                     dataset_id = selected$folder(),
                                                     asset_view = selected$master_asset_view(),
-                                                    output_format = "google_sheet",
+                                                    output_format = Sys.getenv("DCA_MANIFEST_OUTPUT_FORMAT"),
                                                     input_token=access_token),
                            "offline-no-gsheet-url"
                            )
 
     # generate link
     output$text_template <- renderUI(
-      tags$a(id = "template_link", href = manifest_url, list(icon("hand-point-right"), manifest_url), target = "_blank")
+      tags$a(id = "template_link", href = manifest_url(), list(icon("hand-point-right"), manifest_url()), target = "_blank")
     )
 
     dcWaiter("hide", sleep = 1)
@@ -427,13 +478,14 @@ shinyServer(function(input, output, session) {
     # display link
     show("div_template") # TODO: add progress bar on (loading) screen
   })
-
+  
   observeEvent(input$btn_template_confirm, {
     req(input$btn_template_confirm == TRUE)
     runjs("$('#template_link')[0].click();")
   })
 
   ######## Reads .csv File ########
+  # Check out module and don't use filepath. Keep file in memory
   inFile <- csvInfileServer("inputFile", colsAsCharacters = TRUE, keepBlank = TRUE)
 
   observeEvent(inFile$data(), {
@@ -525,7 +577,6 @@ shinyServer(function(input, output, session) {
     dcWaiter("show", msg = "Submitting...")
 
 
-
     if (is.null(selected$folder())) {
       # add waiter if no folder selected
       dcWaiter("update", msg = paste0("Please select a folder to submit"), spin = spin_pulsar(), sleep = 2.5)
@@ -544,11 +595,12 @@ shinyServer(function(input, output, session) {
 
     # If a file-based component selected (define file-based components) note for future
     # the type to filter (eg file-based) on could probably also be a config choice
-    display_names <- config_schema$manifest_schemas$display_name[config_schema$manifest_schemas$type == "file"]
+    display_names <- config_schema()$manifest_schemas$display_name[config_schema()$manifest_schemas$type == "file"]
 
     if (input$dropdown_template %in% display_names) {
       # make into a csv or table for file-based components already has entityId
       if ("entityId" %in% colnames(submit_data)) {
+        # Convert this to JSON instead and submit
         write.csv(submit_data,
           file = tmp_file_path,
           quote = TRUE, row.names = FALSE, na = ""
@@ -568,7 +620,7 @@ shinyServer(function(input, output, session) {
         # adds entityID, saves it as synapse_storage_manifest.csv, then associates with synapse files
         colnames(files_df) <- c("entityId", "Filename")
         files_entity <- inner_join(submit_data, files_df, by = "Filename")
-
+        # convert this to JSON instead and submit
         write.csv(files_entity,
           file = tmp_file_path,
           quote = TRUE, row.names = FALSE, na = ""
@@ -591,6 +643,7 @@ shinyServer(function(input, output, session) {
                                                              json_str = jsonlite::toJSON(read_csv(tmp_file_path)),
                                                              asset_view = selected$master_asset_view())
                             )
+      browser()
       manifest_path <- tags$a(href = paste0("https://www.synapse.org/#!Synapse:", manifest_id), manifest_id, target = "_blank")
 
       # add log message
@@ -600,7 +653,7 @@ shinyServer(function(input, output, session) {
       if (startsWith(manifest_id, "syn") == TRUE) {
         dcWaiter("hide")
         nx_report_success("Success!", HTML(paste0("Manifest submitted to: ", manifest_path)))
-
+  
         # clean up old inputs/results
         sapply(clean_tags, FUN = hide)
         reset("inputFile-file")
@@ -614,6 +667,7 @@ shinyServer(function(input, output, session) {
       }
     } else {
       # if not file-based type template
+      # convert this to JSON and submit
       write.csv(submit_data,
         file = tmp_file_path, quote = TRUE,
         row.names = FALSE, na = ""
@@ -635,6 +689,7 @@ shinyServer(function(input, output, session) {
                                                 json_str = jsonlite::toJSON(read_csv(tmp_file_path)),
                                                 asset_view = selected$master_asset_view())
       )
+      browser()
       manifest_path <- tags$a(href = paste0("https://www.synapse.org/#!Synapse:", manifest_id), manifest_id, target = "_blank")
 
       # add log message

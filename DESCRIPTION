@@ -1,0 +1,11 @@
+Package: datacurator
+Version: 1.0.0
+Title: HTAN Metadata Ingress Shiny App
+Description: This Shiny app allows users to validate metadata files and upload to Synapse.
+Authors: Rongrong Chai, Xengie Doan, Milen Nikolov, Sujay Patil, Robert Allaway, Bruno Grande, Anthony Williams, Lauren Wolfe
+License: file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.1
+Suggests: 
+    covr

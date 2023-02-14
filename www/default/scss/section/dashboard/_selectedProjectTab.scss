@@ -1,0 +1,33 @@
+.selectedProjectTab-container {
+  .banner-container {
+    display: flex;
+    align-items: center;
+  }
+}
+
+@media (max-width: $desktop) {
+  .selectedDataTypeTab-container {
+    .summary-box {
+      flex-direction: column;
+
+      .progress-group {
+        margin-top: 20px;
+      }
+    }
+  }
+}
+
+@media (max-width: $tablet) {
+  .selectedDataTypeTab-container {
+    .top-container {
+      flex-direction: column;
+    }
+  }
+}
+
+@media (max-width: $desktop) {
+  .progress-box,
+  .tree-bpx {
+    width: 100%;
+  }
+}

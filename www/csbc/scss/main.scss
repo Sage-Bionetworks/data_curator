@@ -1,0 +1,21 @@
+// global variables
+@import 'basic/variables';
+
+// dashboard sections
+@import 'section/header';
+@import 'section/sidebar';
+@import 'section/content';
+@import 'section/footer';
+
+// feature styles
+@import 'basic/animation';
+@import 'basic/button';
+@import 'basic/box';
+@import 'basic/message';
+
+// fonts
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@300;400&display=swap');
+
+body {
+    font-family: 'Lato', sans-serif;
+}
