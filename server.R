@@ -231,6 +231,8 @@ shinyServer(function(input, output, session) {
         # get synID of selected project
         project_id <- data_list$projects()[input[[paste0(x, "project")]]]
         
+        dcWaiter("show", msg = paste0("Getting project data ", project_id, "..."), color = dca_theme()$primary_col)
+        
         # gets folders per project
         folder_list_raw <- switch(dca_schematic_api,
                                   reticulate = storage_projects_datasets_py(synapse_driver, project_id),
@@ -257,6 +259,9 @@ shinyServer(function(input, output, session) {
           updateSelectInput(session, "dropdown_folder", selected = input[["header_dropdown_folder"]])
           isUpdateFolder(FALSE)
         }
+        
+        dcWaiter("hide")
+        
       })
     })
     
