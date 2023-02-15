@@ -665,7 +665,8 @@ shinyServer(function(input, output, session) {
                                                              input_token = access_token,
                                                              restrict_rules = FALSE,
                                                              json_str = jsonlite::toJSON(read_csv(tmp_file_path)),
-                                                             asset_view = selected$master_asset_view())
+                                                             asset_view = selected$master_asset_view(),
+                                                use_schema_label=Sys.getenv("DCA_SCHEMATIC_SUBMIT_USE_SCHEMA_LABEL"))
                             )
       manifest_path <- tags$a(href = paste0("https://www.synapse.org/#!Synapse:", manifest_id), manifest_id, target = "_blank")
 
@@ -710,7 +711,8 @@ shinyServer(function(input, output, session) {
                                                 input_token = access_token,
                                                 restrict_rules = FALSE,
                                                 json_str = jsonlite::toJSON(read_csv(tmp_file_path)),
-                                                asset_view = selected$master_asset_view())
+                                                asset_view = selected$master_asset_view(),
+                                                use_schema_label=Sys.getenv("DCA_SCHEMATIC_SUBMIT_USE_SCHEMA_LABEL"))
       )
       manifest_path <- tags$a(href = paste0("https://www.synapse.org/#!Synapse:", manifest_id), manifest_id, target = "_blank")
 
