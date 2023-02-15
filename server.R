@@ -407,9 +407,41 @@ shinyServer(function(input, output, session) {
   })
     
   observeEvent(c(input$dropdown_folder, input$tabs), {
-    if (input$tabs == "tab_template" && Sys.getenv("DCA_MANIFEST_OUTPUT_FORMAT") == "excel") {
+    # if (input$tabs == "tab_template" && Sys.getenv("DCA_MANIFEST_OUTPUT_FORMAT") == "excel") {
+    #   dcWaiter("show", msg = "Downloading data from Synapse...", color = dca_theme()$primary_col)
+    #   #schematic rest api to generate manifest
+    #   manifest_data <- switch(dca_schematic_api,
+    #                           reticulate =  manifest_generate_py(title = input$dropdown_template,
+    #                                                              rootNode = selected$schema(),
+    #                                                              datasetId = selected$folder()),
+    #                           rest = manifest_generate(url=file.path(api_uri, "v1/manifest/generate"),
+    #                                                    schema_url = data_model(),
+    #                                                    title = input$dropdown_template,
+    #                                                    data_type = selected$schema(),
+    #                                                    dataset_id = selected$folder(),
+    #                                                    asset_view = selected$master_asset_view(),
+    #                                                    output_format = Sys.getenv("DCA_MANIFEST_OUTPUT_FORMAT"),
+    #                                                    input_token=access_token),
+    #                           "offline-no-gsheet-url"
+    #   )
+    #   manifest_url(manifest_data)
+    #   
+    #   dcWaiter("hide", sleep = 1)
+    #   
+    # }
+  })
+  
+  # Bookmarking this thread in case we can't use writeBin...
+  # Use a db connection instead
+  # https://community.rstudio.com/t/how-to-let-download-button-work-with-eventreactive/20937
+  
+  # The giant anonymous content function lets users click through the app and
+  # only download the manifest if they need to. Originally, this was in the
+  # observeEvent above.
+  output$downloadData <- downloadHandler(
+    filename = function() sprintf("%s.xlsx", input$dropdown_template),
+    content = function(file) {
       dcWaiter("show", msg = "Downloading data from Synapse...", color = dca_theme()$primary_col)
-      #schematic rest api to generate manifest
       manifest_data <- switch(dca_schematic_api,
                               reticulate =  manifest_generate_py(title = input$dropdown_template,
                                                                  rootNode = selected$schema(),
@@ -424,20 +456,8 @@ shinyServer(function(input, output, session) {
                                                        input_token=access_token),
                               "offline-no-gsheet-url"
       )
-      manifest_url(manifest_data)
-      
       dcWaiter("hide", sleep = 1)
-      
-    }
-  })
-  
-  # Bookmarking this thread in case we can't use writeBin...
-  # Use a db connection instead
-  # https://community.rstudio.com/t/how-to-let-download-button-work-with-eventreactive/20937
-  output$downloadData <- downloadHandler(
-    filename = function() sprintf("%s.xlsx", input$dropdown_template),
-    content = function(file) {
-      writeBin(manifest_url(), file)
+      writeBin(manifest_data, file)
       #capture.output(print(manifest_url()), file=file) # actually kinda works
       # Just shows NULL
       # sink(file)
