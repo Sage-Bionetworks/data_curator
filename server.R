@@ -91,9 +91,6 @@ shinyServer(function(input, output, session) {
   shinyjs::useShinyjs()
   shinyjs::hide(selector = ".sidebar-menu")
 
-  shinyjs::useShinyjs()
-  shinyjs::hide(selector = ".sidebar-menu")
-  
   # initial loading page
   #
   # TODO:  If we don't use cookies, then what event should trigger this?
@@ -543,7 +540,13 @@ shinyServer(function(input, output, session) {
                                                          schema_url=data_model(),
                                                          data_type=selected$schema(),
                                                          json_str=jsonlite::toJSON(read_csv(inFile$raw()$datapath))),
-                                list(errors=list(), warnings=list()))
+                                list(list(
+                                    "errors" = list(
+                                     Row = NA, Column = NA, Value = NA,
+                                     Error = "Mock error for offline mode."
+                                    )
+                                ))
+                              )
 
     # validation messages
     validation_res <- validationResult(annotation_status, input$dropdown_template, inFile$data())
@@ -568,11 +571,15 @@ shinyServer(function(input, output, session) {
         output$submit <- renderUI(actionButton("btn_submit", "Submit to Synapse", class = "btn-primary-color"))
         dcWaiter("update", msg = paste0(validation_res$error_type, " Found !!! "), spin = spin_inner_circles(), sleep = 2.5)
       } else {
-        output$val_gsheet <- renderUI(
-          actionButton("btn_val_gsheet", "  Generate Google Sheet Link", icon = icon("table"), class = "btn-primary-color")
-        )
-        dcWaiter("update", msg = paste0(validation_res$error_type, " Found !!! "), spin = spin_pulsar(), sleep = 2.5)
-      }
+          if (dca_schematic_api != "offline") {
+            output$val_gsheet <- renderUI(
+              actionButton("btn_val_gsheet", "  Generate Google Sheet Link", icon = icon("table"), class = "btn-primary-color")
+            )
+          } else output$dl_manifest <- renderUI({
+              downloadButton("downloadData_good", "Download Corrected Data")
+            })
+          dcWaiter("update", msg = paste0(validation_res$error_type, " Found !!! "), spin = spin_pulsar(), sleep = 2.5)
+        }
     } else {
       dcWaiter("hide")
     }
@@ -593,16 +600,27 @@ shinyServer(function(input, output, session) {
                                                        title = paste0(config$community, " ", input$dropdown_template),
                                                        data_type = selected$schema(),
                                                        return_excel = FALSE,
-                                                       csv_file = inFile$raw()$datapath))
+                                                       csv_file = inFile$raw()$datapath),
+                              "offline-no-gsheet-url")
 
 
     # rerender and change button to link
-    output$val_gsheet <- renderUI({
-      HTML(paste0("<a target=\"_blank\" href=\"", filled_manifest, "\">Edit on the Google Sheet.</a>"))
-    })
-
+    if (dca_schematic_api != "offline") {
+      output$val_gsheet <- renderUI({
+          HTML(paste0("<a target=\"_blank\" href=\"", filled_manifest, "\">Edit on the Google Sheet.</a>"))
+      })
+    }
     dcWaiter("hide")
   })
+  
+    # Offline version of downloading a failed manifest
+    mock_offline_manifest_2 <- tibble("column1"="fixed offline data")
+    output$downloadData_good <- downloadHandler(
+      filename = function() sprintf("%s.csv", input$dropdown_template),
+      content = function(file) {
+        write_csv(mock_offline_manifest_2, file)
+      }
+    )
 
 
   ######## Submission Section ########
