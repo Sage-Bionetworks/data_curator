@@ -167,7 +167,7 @@ ui <- shinydashboardPlus::dashboardPage(
               choices = "Generating..."
             )
           ),
-          dashboardUI("dashboard")
+          if (dca_schematic_api != "offline") dashboardUI("dashboard")
         ),
         switchTabUI("switchTab2", direction = "right")
       ),
