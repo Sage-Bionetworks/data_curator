@@ -465,6 +465,16 @@ shinyServer(function(input, output, session) {
       # sink()
     }
   )
+  
+  if (dca_schematic_api == "offline") {
+    mock_offline_manifest <- tibble("column1"="mock offline data")
+    output$downloadData <- downloadHandler(
+      filename = function() sprintf("%s.csv", input$dropdown_template),
+      content = function(file) {
+        write_csv(mock_offline_manifest, file)
+      }
+    )
+  }
 
   # generate template
   observeEvent(input$btn_template, {
@@ -532,8 +542,8 @@ shinyServer(function(input, output, session) {
                                 rest = manifest_validate(url=file.path(api_uri, "v1/model/validate"),
                                                          schema_url=data_model(),
                                                          data_type=selected$schema(),
-                                                         json_str=jsonlite::toJSON(read_csv(inFile$raw()$datapath)))
-                                )
+                                                         json_str=jsonlite::toJSON(read_csv(inFile$raw()$datapath))),
+                                list(errors=list(), warnings=list()))
 
     # validation messages
     validation_res <- validationResult(annotation_status, input$dropdown_template, inFile$data())
