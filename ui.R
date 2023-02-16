@@ -73,8 +73,7 @@ ui <- shinydashboardPlus::dashboardPage(
       # add sidebar footer here
       tags$a(
         id = "sidebar_footer", `data-toggle` = "tab",
-        tags$div(icon("heart")),
-        tags$footer(HTML('Powered by <i class="far fa-heart"></i> and Sage Bionetworks'))
+        tags$footer(HTML(' Powered by <i class="far fa-heart"></i> and Sage Bionetworks'))
       )
     )
   ),
