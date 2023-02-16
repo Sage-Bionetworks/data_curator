@@ -47,7 +47,7 @@ shinyServer(function(input, output, session) {
   #names(template_namedList) <- config_schema$display_name
   
   all_asset_views <- parse_env_var(Sys.getenv("DCA_SYNAPSE_MASTER_FILEVIEW"))
-  asset_views <- reactiveVal(c("mock dca fileview (syn33715412)"="syn33715412"))
+  asset_views <- reactiveVal(c("mock dca fileview"="syn33715412"))
   
   dca_theme <- reactiveVal()
   
@@ -61,7 +61,8 @@ shinyServer(function(input, output, session) {
   selected <- list(
     project = reactiveVal(NULL), folder = reactiveVal(""),
     schema = reactiveVal(NULL), schema_type = reactiveVal(NULL),
-    master_asset_view = reactiveVal(NULL)
+    master_asset_view = reactiveVal(NULL),
+    master_asset_view_label = reactiveVal(NULL)
   )
   
   isUpdateFolder <- reactiveVal(FALSE)
@@ -145,7 +146,9 @@ shinyServer(function(input, output, session) {
   
   observeEvent(input$btn_asset_view, {
     selected$master_asset_view(input$dropdown_asset_view)
-    dcWaiter("show", msg = paste0("Getting data from ", selected$master_asset_view(), "..."), color="grey")
+    av_names <- names(asset_views()[asset_views() %in% selected$master_asset_view()])
+    selected$master_asset_view_label(av_names)
+    dcWaiter("show", msg = paste0("Getting data from ", selected$master_asset_view_label(), "..."), color="grey")
     
     data_model(data_model_options[selected$master_asset_view()])
     
@@ -167,7 +170,7 @@ shinyServer(function(input, output, session) {
         }
       })
 
-      dcWaiter("show", msg = paste0("Getting data from ", selected$master_asset_view(), "..."), color = dca_theme()$primary_col)
+      dcWaiter("show", msg = paste0("Getting data from ", selected$master_asset_view_label(), "..."), color = dca_theme()$primary_col)
 
     output$logo <- renderUI({update_logo(selected$master_asset_view())})
     
@@ -228,7 +231,7 @@ shinyServer(function(input, output, session) {
         # get synID of selected project
         project_id <- data_list$projects()[input[[paste0(x, "project")]]]
         
-        dcWaiter("show", msg = paste0("Getting project data ", project_id, "..."), color = dca_theme()$primary_col)
+        dcWaiter("show", msg = paste0("Getting project data from ", selected$master_asset_view_label(), "..."), color = dca_theme()$primary_col)
         
         # gets folders per project
         folder_list_raw <- switch(dca_schematic_api,
