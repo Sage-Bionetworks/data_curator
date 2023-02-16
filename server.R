@@ -35,8 +35,8 @@ shinyServer(function(input, output, session) {
   ######## session global variables ########
   # read config in
   def_config <- ifelse(dca_schematic_api == "offline",
-                       fromJSON("www/config_offline.json")[[1]],
-                       fromJSON("www/config.json")[[1]]
+                       fromJSON("www/config_offline.json"),
+                       fromJSON("www/config.json")
   )
   config <- reactiveVal()
   config_schema <- reactiveVal(def_config)
@@ -190,9 +190,9 @@ shinyServer(function(input, output, session) {
       
     }
     
-    new_conf <- reactiveVal(fromJSON("www/config.json"))
+    new_conf <- reactiveVal(def_config)
     new_conf_schem <- reactiveVal(as.data.frame(new_conf()[[1]]))
-    config(new_conf)
+    config(new_conf())
     config_schema(new_conf_schem())
     # mapping from display name to schema name
     new_templates <- reactiveVal(setNames(new_conf_schem()$schema_name, new_conf_schem()$display_name))
