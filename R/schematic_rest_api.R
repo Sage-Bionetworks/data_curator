@@ -94,11 +94,22 @@ manifest_validate <- function(url="http://localhost:3001/v1/model/validate",
                        schema_url=schema_url,
                        data_type=data_type,
                        json_str=json_str)
-                     #body=list(csv_file=httr::upload_file(csv_file))
-                    #body=list(file_name=file_name)
   )
   
-  if (httr::http_status(req)$category == "Server error") return(list(list(), list()))
+  # Format server error in a way validationResult can handle
+  if (httr::http_status(req)$category == "Server error") {
+    return(
+      list(
+        list(
+          "errors" = list(
+             Row = NA, Column = NA, Value = NA,
+             Error = sprintf("Cannot validate manifest: %s",
+                             httr::http_status(req)$message)
+          )
+       )
+     )
+    )
+  }
   annotation_status <- httr::content(req)
   annotation_status
 }
