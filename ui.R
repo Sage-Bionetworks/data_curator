@@ -167,7 +167,7 @@ ui <- shinydashboardPlus::dashboardPage(
               choices = "Generating..."
             )
           ),
-          dashboardUI("dashboard")
+          if (dca_schematic_api != "offline") dashboardUI("dashboard")
         ),
         switchTabUI("switchTab2", direction = "right")
       ),
@@ -254,6 +254,7 @@ ui <- shinydashboardPlus::dashboardPage(
             ),
             DTableUI("tbl_validate"),
             uiOutput("val_gsheet"),
+            uiOutput("dl_manifest"),
             helpText(
               HTML("If you have an error, please try editing locally or on google sheet.
                   Reupload your CSV and press the validate button as needed.")
