@@ -196,7 +196,7 @@ ui <- shinydashboardPlus::dashboardPage(
                 htmlOutput("text_template")
               )
             ),
-            helpText("This link will leads to an empty template or your previously submitted template with new files if applicable.")
+            helpText("This link will lead to an empty template or your previously submitted template with new files if applicable.")
           )
         )}else{
         fluidRow(
