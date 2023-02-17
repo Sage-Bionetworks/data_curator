@@ -144,7 +144,6 @@ get_dataset_metadata <- function(syn.store, datasets, ncores = 1, schematic_api=
 #' @return data frame contains required data types for tree plot
 validate_metadata <- function(metadata, project.scope, schematic_api, schema_url) {
   stopifnot(is.list(project.scope))
-
   if (nrow(metadata) == 0) {
     return(metadata)
   }
@@ -185,8 +184,8 @@ validate_metadata <- function(metadata, project.scope, schematic_api, schema_url
         Result = clean_res$result,
         # change wrong schema to out-of-date type
         ErrorType = if_else(clean_res$error_type == "Wrong Schema", "Out of Date", clean_res$error_type),
-        errorMsg = if_else(is.null(clean_res$error_msg[1]), "Valid", clean_res$error_msg[1]),
-        WarnMsg = if_else(length(clean_res$warning_msg) == 0, "Valid", clean_res$warning_msg[1])
+        errorMsg = if_else(is.null(clean_res$error_msg[1]), "Valid", paste(clean_res$error_msg[1], collapse="; ")),
+        WarnMsg = if_else(is.null(clean_res$warning_msg[1]), "Valid", paste(clean_res$warning_msg[1], collapse = "; "))
       )
     }
   }) %>%
