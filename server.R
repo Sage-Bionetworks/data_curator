@@ -574,15 +574,17 @@ shinyServer(function(input, output, session) {
         output$submit <- renderUI(actionButton("btn_submit", "Submit to Synapse", class = "btn-primary-color"))
         dcWaiter("update", msg = paste0(validation_res$error_type, " Found !!! "), spin = spin_inner_circles(), sleep = 2.5)
       } else {
-          if (dca_schematic_api != "offline") {
+          if (dca_schematic_api != "offline" & Sys.getenv("DCA_MANIFEST_OUTPUT_FORMAT") == "google_sheet") {
             output$val_gsheet <- renderUI(
               actionButton("btn_val_gsheet", "  Generate Google Sheet Link", icon = icon("table"), class = "btn-primary-color")
             )
-          } else output$dl_manifest <- renderUI({
+          } else if (dca_schematic_api == "offline") {
+            output$dl_manifest <- renderUI({
               downloadButton("downloadData_good", "Download Corrected Data")
             })
+          }
           dcWaiter("update", msg = paste0(validation_res$error_type, " Found !!! "), spin = spin_pulsar(), sleep = 2.5)
-        }
+      }
     } else {
       dcWaiter("hide")
     }
