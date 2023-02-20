@@ -93,6 +93,8 @@ jobs:
           echo DCA_API_PORT="" >> .Renviron
           echo DCA_API_HOST="" >> .Renviron
           
+          echo 'GITHUB_PAT="${{ secrets.GITHUB_TOKEN }}"' >> .Renviron
+
       - name: zip virtual env
         shell: bash
         # ShinyApps has a limit of 7000 files, far exceeded by the many Python dependencies
