@@ -1,6 +1,121 @@
 {
   "manifest_schemas": [
     {
+      "display_name": "Patient",
+      "schema_name": "Patient",
+      "type": "record"
+    },
+    {
+      "display_name": "Demographics",
+      "schema_name": "Demographics",
+      "type": "record"
+    },
+    {
+      "display_name": "Family History",
+      "schema_name": "FamilyHistory",
+      "type": "record"
+    },
+    {
+      "display_name": "Exposure",
+      "schema_name": "Exposure",
+      "type": "record"
+    },
+    {
+      "display_name": "Follow Up",
+      "schema_name": "FollowUp",
+      "type": "record"
+    },
+    {
+      "display_name": "Diagnosis",
+      "schema_name": "Diagnosis",
+      "type": "record"
+    },
+    {
+      "display_name": "Therapy",
+      "schema_name": "Therapy",
+      "type": "record"
+    },
+    {
+      "display_name": "Molecular Test",
+      "schema_name": "MolecularTest",
+      "type": "record"
+    },
+    {
+      "display_name": "Biospecimen",
+      "schema_name": "Biospecimen",
+      "type": "record"
+    },
+    {
+      "display_name": "Clinical Data Tier 2",
+      "schema_name": "ClinicalDataTier2",
+      "type": "record"
+    },
+    {
+      "display_name": "SRRS Clinical Data Tier 2",
+      "schema_name": "SRRSClinicalDataTier2",
+      "type": "record"
+    },
+    {
+      "display_name": "Lung Cancer Tier 3",
+      "schema_name": "LungCancerTier3",
+      "type": "record"
+    },
+    {
+      "display_name": "Colorectal Cancer Tier 3",
+      "schema_name": "ColorectalCancerTier3",
+      "type": "record"
+    },
+    {
+      "display_name": "Breast Cancer Tier 3",
+      "schema_name": "BreastCancerTier3",
+      "type": "record"
+    },
+    {
+      "display_name": "Neuroblastoma and Glioma Tier 3",
+      "schema_name": "NeuroblastomaandGliomaTier3",
+      "type": "record"
+    },
+    {
+      "display_name": "Acute Lymphoblastic Leukemia Tier 3",
+      "schema_name": "AcuteLymphoblasticLeukemiaTier3",
+      "type": "record"
+    },
+    {
+      "display_name": "Ovarian Cancer Tier 3",
+      "schema_name": "OvarianCancerTier3",
+      "type": "record"
+    },
+    {
+      "display_name": "Prostate Cancer Tier 3",
+      "schema_name": "ProstateCancerTier3",
+      "type": "record"
+    },
+    {
+      "display_name": "Sarcoma Tier 3",
+      "schema_name": "SarcomaTier3",
+      "type": "record"
+    },
+    {
+      "display_name": "Pancreatic Cancer Tier 3",
+      "schema_name": "PancreaticCancerTier3",
+      "type": "record"
+    },
+    {
+      "display_name": "Melanoma Tier 3",
+      "schema_name": "MelanomaTier3",
+      "type": "record"
+    },
+    {
+      "display_name": "SRRS Biospecimen",
+      "schema_name": "SRRSBiospecimen",
+      "type": "record"
+    },
+    {
+      "display_name": "Other Assay",
+      "schema_name": "OtherAssay",
+      "type": "file"
+    },
+    {
       "display_name": "scRNA-seq Level 1",
       "schema_name": "ScRNA-seqLevel1",
       "type": "file"
@@ -18,16 +133,6 @@
     {
       "display_name": "scRNA-seq Level 4",
       "schema_name": "ScRNA-seqLevel4",
-      "type": "file"
-    },
-    {
-      "display_name": "scATAC-seq Level 1",
-      "schema_name": "ScATAC-seqLevel1",
-      "type": "file"
-    },
-    {
-      "display_name": "scATAC-seq Level 4",
-      "schema_name": "ScATAC-seqLevel4",
       "type": "file"
     },
     {
@@ -61,6 +166,61 @@
       "type": "file"
     },
     {
+      "display_name": "scATAC-seq Level 1",
+      "schema_name": "ScATAC-seqLevel1",
+      "type": "file"
+    },
+    {
+      "display_name": "scATAC-seq Level 2",
+      "schema_name": "ScATAC-seqLevel2",
+      "type": "file"
+    },
+    {
+      "display_name": "scATAC-seq Level 3",
+      "schema_name": "ScATAC-seqLevel3",
+      "type": "file"
+    },
+    {
+      "display_name": "scmC-seq Level 1",
+      "schema_name": "ScmC-seqLevel1",
+      "type": "file"
+    },
+    {
+      "display_name": "scmC-seq Level 2",
+      "schema_name": "ScmC-seqLevel2",
+      "type": "file"
+    },
+    {
+      "display_name": "scATAC-seq Level 4",
+      "schema_name": "ScATAC-seqLevel4",
+      "type": "file"
+    },
+    {
+      "display_name": "scDNA-seq Level 1",
+      "schema_name": "ScDNA-seqLevel1",
+      "type": "file"
+    },
+    {
+      "display_name": "scDNA-seq Level 2",
+      "schema_name": "ScDNA-seqLevel2",
+      "type": "file"
+    },
+    {
+      "display_name": "Bulk Methylation-seq Level 1",
+      "schema_name": "BulkMethylation-seqLevel1",
+      "type": "file"
+    },
+    {
+      "display_name": "Bulk Methylation-seq Level 2",
+      "schema_name": "BulkMethylation-seqLevel2",
+      "type": "file"
+    },
+    {
+      "display_name": "Bulk Methylation-seq Level 3",
+      "schema_name": "BulkMethylation-seqLevel3",
+      "type": "file"
+    },
+    {
       "display_name": "Imaging Level 1",
       "schema_name": "ImagingLevel1",
       "type": "file"
@@ -80,125 +240,35 @@
       "schema_name": "ImagingLevel3Image",
       "type": "file"
     },
-{
+    {
       "display_name": "Imaging Level 3 Channels",
       "schema_name": "ImagingLevel3Channels",
       "type": "record"
     },
     {
+      "display_name": "10x Visium Spatial Transcriptomics - RNA-seq Level 1",
+      "schema_name": "10xVisiumSpatialTranscriptomics-RNA-seqLevel1",
+      "type": "file"
+    },
+    {
+      "display_name": "10x Visium Spatial Transcriptomics - RNA-seq Level 2",
+      "schema_name": "10xVisiumSpatialTranscriptomics-RNA-seqLevel2",
+      "type": "file"
+    },
+    {
+      "display_name": "10x Visium Spatial Transcriptomics - Auxiliary Files Level 2",
+      "schema_name": "10xVisiumSpatialTranscriptomics-AuxiliaryFilesLevel2",
+      "type": "file"
+    },
+    {
+      "display_name": "10x Visium Spatial Transcriptomics - RNA-seq Level 3",
+      "schema_name": "10xVisiumSpatialTranscriptomics-RNA-seqLevel3",
+      "type": "file"
+    },
+    {
       "display_name": "Imaging Level 4",
       "schema_name": "ImagingLevel4",
       "type": "file"
-    },
-    {
-      "display_name": "Clinical Tier 1: Demographics",
-      "schema_name": "Demographics",
-      "type": "record"
-    },
-    {
-      "display_name": "Clinical Tier 1: Diagnosis",
-      "schema_name": "Diagnosis",
-      "type": "record"
-    },
-    {
-      "display_name": "Clinical Tier 1: FamilyHistory",
-      "schema_name": "FamilyHistory",
-      "type": "record"
-    },
-    {
-      "display_name": "Clinical Tier 1: Exposure",
-      "schema_name": "Exposure",
-      "type": "record"
-    },
-    {
-      "display_name": "Clinical Tier 1: FollowUp",
-      "schema_name": "FollowUp",
-      "type": "record"
-    },
-    {
-      "display_name": "Clinical Tier 1: Molecular Test",
-      "schema_name": "MolecularTest",
-      "type": "record"
-    },
-    {
-      "display_name": "Clinical Tier 1: Therapy",
-      "schema_name": "Therapy",
-      "type": "record"
-    },
-    {
-      "display_name": "Clinical Tier 2",
-      "schema_name": "ClinicalDataTier2",
-      "type": "record"
-    },
-    {
-      "display_name": "Clinical Tier 3: Acute Lymphoblastic Leukemia",
-      "schema_name": "AcuteLymphoblasticLeukemiaTier3",
-      "type": "record"
-    },
-    {
-      "display_name": "Clinical Tier 3: Breast Precancer and Cancer ",
-      "schema_name": "BreastCancerTier3",
-      "type": "record"
-    },
-    {
-      "display_name": "Clinical Tier 3: Colorectal Precancer and Cancer",
-      "schema_name": "ColorectalCancerTier3",
-      "type": "record"
-    },
-    {
-      "display_name": "Clinical Tier 3: Lung Precancer and Cancer",
-      "schema_name": "LungCancerTier3",
-      "type": "record"
-    },
-    {
-      "display_name": "Clinical Tier 3: Neuroblastoma and Glioma",
-      "schema_name": "BrainCancerTier3",
-      "type": "record"
-    },
-    {
-      "display_name": "Clinical Tier 3: Melanoma",
-      "schema_name": "MelanomaTier3",
-      "type": "record"
-    },
-    {
-      "display_name": "Clinical Tier 3: Ovarian Precancer and Cancer ",
-      "schema_name": "OvarianCancerTier3",
-      "type": "record"
-    },
-    {
-      "display_name": "Clinical Tier 3: Pancreatic Precancer and Cancer",
-      "schema_name": "PancreaticCancerTier3",
-      "type": "record"
-    },
-    {
-      "display_name": "Clinical Tier 3: Prostate Precancer and Cancer",
-      "schema_name": "ProstateCancerTier3",
-      "type": "record"
-    },
-    {
-      "display_name": "Clinical Tier 3: Sarcoma",
-      "schema_name": "SarcomaTier3",
-      "type": "record"
-    },
-    {
-      "display_name": "Biospecimen Tier 1 & 2",
-      "schema_name": "Biospecimen",
-      "type": "record"
-    },
-    {
-      "display_name": "Other Assay (Minimal Metadata)",
-      "schema_name": "OtherAssay",
-      "type": "file"
-    },
-    {
-      "display_name": "SRRS Biospecimen Tier 1 & 2",
-      "schema_name": "SRRSBiospecimen",
-      "type": "record"
-    },
-    {
-      "display_name": "SRRS Clinical Tier 2",
-      "schema_name": "SRRSClinicalDataTier2",
-      "type": "record"
     },
     {
       "display_name": "SRRS Imaging Level 2",
@@ -213,7 +283,12 @@
     {
       "display_name": "HTAN RPPA Antibody Table",
       "schema_name": "HTANRPPAAntibodyTable",
-      "type": "record"
+      "type": "file"
+    },
+    {
+      "display_name": "Mass Spectrometry Level 1",
+      "schema_name": "MassSpectrometryLevel1",
+      "type": "file"
     },
     {
       "display_name": "RPPA Level 3",
@@ -224,41 +299,8 @@
       "display_name": "RPPA Level 4",
       "schema_name": "RPPALevel4",
       "type": "file"
-    },
-    {
-      "display_name": "Publication Manifest",
-      "schema_name": "PublicationManifest",
-      "type": "record"
-    } 
-    {
-      "display_name": "scmC-seq Level 1",
-      "schema_name": "ScmC-seqLevel1",
-      "type": "file"
-    } 
-    {
-      "display_name": "scmC-seq Level 2",
-      "schema_name": "ScmC-seqLevel2",
-      "type": "file"
-    } 
-    {
-      "display_name": "scDNA-seq Level 1",
-      "schema_name": "ScDNA-seqLevel1",
-      "type": "file"
-    } 
-    {
-      "display_name": "scDNA-seq Level 2",
-      "schema_name": "ScDNA-seqLevel2",
-      "type": "file"
-    } 
-    {
-      "display_name": "scDNA-seq Level 2",
-      "schema_name": "ScDNA-seqLevel2",
-      "type": "file"
-    } 
+    }
   ],
-
-  "community": "HTAN",
-  "schema": "v22.11.1",
-  "schematic_service": "v1",
-  "schematic": "v22.11.3"
+  "service_version": "v23.1.1",
+  "schema_version": ""
 }
