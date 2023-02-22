@@ -165,7 +165,7 @@ if (dca_schematic_api == "reticulate"){
 #    )
   }
 }
-config_file <- fromJSON("www/config.json")
+config_file <- fromJSON("www/template_config/config.json")
 
 
 ## Global variables
