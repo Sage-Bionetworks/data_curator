@@ -138,6 +138,8 @@ parse_env_var <- function(x, el_delim=",", kv_delim=":"){
   }))
 }
 
+template_config_files <- parse_env_var(Sys.getenv("DCA_TEMPLATE_MENU_CONFIG"))
+
 # import R files
 source_files <- list.files(c("functions", "modules"), pattern = "*\\.R$", recursive = TRUE, full.names = TRUE)
 sapply(source_files, FUN = source)
