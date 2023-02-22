@@ -14,8 +14,18 @@
       "display_name": "Bulk RNA-seq Assay",
       "schema_name": "BulkRNA-seqAssay",
       "type": "file"
+    },
+    {
+      "display_name": "Other Assay",
+      "schema_name": "OtherAssay",
+      "type": "file"
+    },
+    {
+      "display_name": "MockComponent",
+      "schema_name": "MockComponent",
+      "type": "record"
     }
   ],
-  "service_version": "",
+  "service_version": "v23.1.1",
   "schema_version": ""
 }
