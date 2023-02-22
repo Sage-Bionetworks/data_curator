@@ -190,16 +190,13 @@ shinyServer(function(input, output, session) {
       
     }
     
-    new_conf <- reactiveVal(def_config)
-    new_conf_schem <- reactiveVal(as.data.frame(new_conf()[[1]]))
-    config(new_conf())
-    config_schema(new_conf_schem())
-    # mapping from display name to schema name
-    new_templates <- reactiveVal(setNames(new_conf_schem()$schema_name, new_conf_schem()$display_name))
-    data_list$template(new_templates())
+    conf_file <- reactiveVal(template_config_files[input$dropdown_asset_view])
+    config_df <- jsonlite::fromJSON(conf_file())
     
-    template_namedList(setNames(new_conf_schem()$schema_name, new_conf_schem()$display_name))
-    data_list$template(template_namedList())
+    conf_template <- setNames(config_df[[1]]$schema_name, config_df[[1]]$display_name)
+    config(config_df)
+    config_schema(config_df)
+    data_list$template(conf_template)
     
     data_list_raw <- switch(dca_schematic_api,
                             reticulate  = storage_projects_py(synapse_driver, access_token),
@@ -331,7 +328,7 @@ shinyServer(function(input, output, session) {
   observeEvent(input$dropdown_template, {
     # update reactive selected values for schema
     selected$schema(data_list$template()[input$dropdown_template])
-    schema_type <- config_schema()$type[which(config_schema()$display_name == input$dropdown_template)]
+    schema_type <- config_schema()[[1]]$type[which(config_schema()[[1]]$display_name == input$dropdown_template)]
     selected$schema_type(schema_type)
     # clean all tags related with selected template
     sapply(clean_tags, FUN = hide)
@@ -360,7 +357,6 @@ shinyServer(function(input, output, session) {
   observeEvent(c(selected$folder(), selected$schema(), input$tabs), {
     req(input$tabs %in% c("tab_template", "tab_validate"))
     warn_text <- NULL
-    
     if (length(data_list$folders()) == 0) {
       # add warning if there is no folder in the selected project
       warn_text <- paste0(
