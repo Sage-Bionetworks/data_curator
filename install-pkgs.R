@@ -26,7 +26,9 @@ cran <- c(
   "networkD3==0.4",
   "data.tree==1.0.0",
   "r2d3==0.2.6",
-  "xml2"
+  "xml2",
+  "covr",
+  "rex"
 )
 gh <- c(
   "dreamRs/shinypop",
