@@ -98,7 +98,7 @@ jobs:
         shell: bash
         run: |
           cp R/* functions/
-          rm -r R/
+          rm -r R/ DESCRIPTION NAMESPACE
 
       - name: zip virtual env
         shell: bash
