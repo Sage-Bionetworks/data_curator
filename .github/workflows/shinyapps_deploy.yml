@@ -9,6 +9,7 @@ on:
       - main
       - develop*
       - feat-UI-dashboard
+      - beta-schematic-rest-api
     tags:
       - v[0-9]+.[0-9]+.[0-9]+
     paths-ignore:
@@ -94,6 +95,12 @@ jobs:
           echo DCA_API_HOST="" >> .Renviron
           
           echo 'GITHUB_PAT="${{ secrets.GITHUB_TOKEN }}"' >> .Renviron
+          
+      - name: shinyapps.io R pkg hack
+        shell: bash
+        run: |
+          cp R/* functions/
+          rm -r R/
 
       - name: zip virtual env
         shell: bash
