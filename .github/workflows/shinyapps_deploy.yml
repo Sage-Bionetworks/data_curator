@@ -112,6 +112,7 @@ jobs:
         shell: Rscript {0}
         run: |
           # if there is a tag, 'refName' will be tag name
+          install.packages("rsconnect")
           repo <- Sys.getenv("GITHUB_REPOSITORY")
           appName <- strsplit(repo, "/")[[1]][2]
           refName <- Sys.getenv("GITHUB_REF_NAME")
