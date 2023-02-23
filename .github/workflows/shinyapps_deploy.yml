@@ -43,7 +43,7 @@ jobs:
 
       - name: Install R Packages Dependencies
         run: |
-          R -f install-pkgs.R
+          R --no-environ -f install-pkgs.R
 
       - name: Install Schematic
         shell: bash
