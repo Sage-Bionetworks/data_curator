@@ -132,7 +132,7 @@ jobs:
           } else if (refName == 'feat-UI-dashboard') { # tmp
             appName <- paste(appName, "demo", sep = "-")
           } else {
-            appName <- paste(appName, "testing", sep = "-")
+            appName <- paste(appName, "testing1", sep = "-")
             message("Deploying testing version of app")
           }
           message(sprintf("Deploying to %s instance.", appName))
