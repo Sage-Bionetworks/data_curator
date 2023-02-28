@@ -94,6 +94,10 @@ jobs:
           echo DCA_API_PORT="" >> .Renviron
           echo DCA_API_HOST="" >> .Renviron
           
+          echo DCA_MANIFEST_OUTPUT_FORMAT="google_sheet" >> .Renviron
+          echo DCA_COMPLIANCE_DASHBOARD=FALSE >> .Renviron
+          echo DCA_SCHEMATIC_SUBMIT_USE_SCHEMA_LABEL=FALSE >> .Renviron
+          
           echo 'GITHUB_PAT="${{ secrets.GITHUB_TOKEN }}"' >> .Renviron
           
       - name: shinyapps.io R pkg hack
