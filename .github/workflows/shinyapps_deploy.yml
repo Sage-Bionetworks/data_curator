@@ -97,6 +97,7 @@ jobs:
           echo DCA_MANIFEST_OUTPUT_FORMAT="google_sheet" >> .Renviron
           echo DCA_COMPLIANCE_DASHBOARD=FALSE >> .Renviron
           echo DCA_SCHEMATIC_SUBMIT_USE_SCHEMA_LABEL=FALSE >> .Renviron
+          echo DCA_TEMPLATE_MENU_CONFIG='syn27210848:www/template_config/csbc_config.json,syn30109515:www/template_config/include_config.json,syn33715412:www/template_config/example_config.json,syn36744684:www/template_config/example_config.json,syn20446927:www/template_config/htan_config.json,syn23643253:www/template_config/example_config.json' >> .Renviron
           
           echo 'GITHUB_PAT="${{ secrets.GITHUB_TOKEN }}"' >> .Renviron
           
