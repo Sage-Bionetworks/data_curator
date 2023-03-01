@@ -1,5 +1,3 @@
-message(paste(list.files(), collapse =", ")) #debug
-
 suppressPackageStartupMessages({
   library(yaml)
   library(reticulate)
