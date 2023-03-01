@@ -8,8 +8,7 @@ on:
     branches:
       - main
       - develop*
-      - feat-UI-dashboard
-      - beta-shinyapps-deploy
+      - beta-schematic-rest-api
     tags:
       - v[0-9]+.[0-9]+.[0-9]+
     paths-ignore:
