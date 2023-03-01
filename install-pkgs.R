@@ -28,7 +28,17 @@ cran <- c(
   "r2d3==0.2.6",
   "xml2",
   "covr",
-  "rex"
+  "rex",
+  "brio",
+  "callr",
+  "desc",
+  "diffobj",
+  "pkgload",
+  "praise",
+  "processx",
+  "ps",
+  "rematch2",
+  "testthat"
 )
 gh <- c(
   "dreamRs/shinypop",
