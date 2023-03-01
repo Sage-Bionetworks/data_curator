@@ -94,10 +94,10 @@ jobs:
           echo DCA_API_HOST="" >> .Renviron
           
           echo DCA_MANIFEST_OUTPUT_FORMAT="google_sheet" >> .Renviron
-          echo DCA_COMPLIANCE_DASHBOARD=FALSE >> .Renviron
+          echo DCA_COMPLIANCE_DASHBOARD=TRUE >> .Renviron
           echo DCA_SCHEMATIC_SUBMIT_USE_SCHEMA_LABEL=FALSE >> .Renviron
-          echo DCA_TEMPLATE_MENU_CONFIG='syn27210848:www/template_config/csbc_config.json,syn30109515:www/template_config/include_config.json,syn33715412:www/template_config/example_config.json,syn36744684:www/template_config/example_config.json,syn20446927:www/template_config/htan_config.json,syn23643253:www/template_config/example_config.json' >> .Renviron
-          echo DCA_MODEL_INPUT_DOWNLOAD_URL='syn27210848:https://raw.githubusercontent.com/mc2-center/data-models/main/mc2.model.jsonld,syn30109515:https://raw.githubusercontent.com/include-dcc/include-linkml/schematic-updates/src/schematic/include_schematic_linkml.jsonld,syn20446927:https://raw.githubusercontent.com/ncihtan/data-models/main/HTAN.model.jsonld,syn36744684:https://raw.githubusercontent.com/Sage-Bionetworks/data-models/main/example.model.jsonld,syn33715412:https://raw.githubusercontent.com/Sage-Bionetworks/data-models/main/example.model.jsonld,syn23643253:https://raw.githubusercontent.com/Sage-Bionetworks/schematic/develop/tests/data/example.model.jsonld' >> .Renviron
+          echo DCA_TEMPLATE_MENU_CONFIG='syn33715412:www/template_config/example_config.json' >> .Renviron
+          echo DCA_MODEL_INPUT_DOWNLOAD_URL='syn33715412:https://raw.githubusercontent.com/Sage-Bionetworks/data-models/main/example.model.jsonld' >> .Renviron
           
           echo 'GITHUB_PAT="${{ secrets.GITHUB_TOKEN }}"' >> .Renviron
           
