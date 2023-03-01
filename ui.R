@@ -51,22 +51,22 @@ ui <- shinydashboardPlus::dashboardPage(
       #   icon = icon("book-open")
       # ),
       menuItem(
-        "Select DCC",
+        "Step 1: Select DCC",
         tabName = "tab_asset_view",
         icon = icon("database")
       ),
       menuItem(
-        "Select your Dataset",
+        "Step 2: Select your Dataset",
         tabName = "tab_data",
         icon = icon("mouse-pointer")
       ),
       menuItem(
-        "Get Metadata Template",
+        "Step 3: Get Metadata Template",
         tabName = "tab_template",
         icon = icon("table")
       ),
       menuItem(
-        "Submit & Validate Metadata",
+        "Step 4: Submit & Validate Metadata",
         tabName = "tab_upload",
         icon = icon("upload")
       ),
