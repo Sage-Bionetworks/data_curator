@@ -121,7 +121,7 @@ jobs:
           # if there is a tag, 'refName' will be tag name
           install.packages("rsconnect")
           repo <- Sys.getenv("GITHUB_REPOSITORY")
-          appName <- "afw-test-dca"
+          appName <- strsplit(repo, "/")[[1]][2]
           refName <- Sys.getenv("GITHUB_REF_NAME")
           message(sprintf("Deploying to %s instance.", appName))
           rsConnectUser <- "${{ secrets.RSCONNECT_USER }}"
