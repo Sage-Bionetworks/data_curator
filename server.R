@@ -477,7 +477,7 @@ shinyServer(function(input, output, session) {
   observeEvent(input$btn_template, {
     # loading screen for template link generation
     dcWaiter("show", msg = "Generating link...", color = dca_theme()$primary_col)
-    manifest_url <- switch(dca_schematic_api,
+    manifest_url(switch(dca_schematic_api,
                            reticulate =  manifest_generate_py(title = input$dropdown_template,
                                                               rootNode = selected$schema(),
                                                               datasetId = selected$folder()),
@@ -491,6 +491,7 @@ shinyServer(function(input, output, session) {
                                                     input_token=access_token),
                            "offline-no-gsheet-url"
                            )
+    )
 
     # generate link
     output$text_template <- renderUI(

@@ -36,3 +36,41 @@ addTooltip <- function(.data, message, position = c("top")) {
     tagAppendAttributes(`aria-label` = message) %>%
     tagAppendAttributes(class = tooltip_class)
 }
+
+# parse environment variables for configuration
+parse_env_var <- function(x, el_delim=",", kv_delim=":"){
+  if (!grepl(kv_delim, x)) stop(sprintf("%s delimiter not in %s", kv_delim, x))
+  # assume string of key-value pairs
+  elements <- stringr::str_split(x, el_delim, simplify = TRUE)
+  unlist(lapply(elements, function(y){
+    kv <- stringr::str_split(y, kv_delim, n=2)
+    setNames(kv[[1]][[2]], kv[[1]][[1]])
+  }))
+}
+
+# Map logo information for each synapse ID.
+update_logo <- function(project = "sage") {
+  
+  img <- switch(project,
+                syn20446927 = list(href = "https://humantumoratlas.org/",
+                                   img_src = "img/HTAN_text_logo.png"),
+                syn27210848 = list(href = "https://cancercomplexity.synapse.org/",
+                                   img_src = "img/cckp_logo.png"),
+                syn30109515 = list(href = "https://https://includedcc.org/",
+                                   img_src = "img/INCLUDE DCC Logo-01.png"),
+                list(href = "https://synapse.org",
+                     img_src = "img/Logo_Sage_Logomark.png")
+  )
+  
+  tags$li(
+    class = "dropdown", id = "logo",
+    tags$a(
+      href = img$href,
+      target = "_blank",
+      tags$img(
+        height = "40px", alt = "LOGO",
+        src = img$img_src
+      )
+    )
+  )
+}
