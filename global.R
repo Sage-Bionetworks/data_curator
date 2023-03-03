@@ -24,6 +24,10 @@ suppressPackageStartupMessages({
   library(r2d3)
 })
 
+# import R files
+source_files <- list.files(c("functions", "modules"), pattern = "*\\.R$", recursive = TRUE, full.names = TRUE)
+sapply(source_files, FUN = source)
+
 ## Set Up OAuth
 client_id <- Sys.getenv("DCA_CLIENT_ID")
 client_secret <- Sys.getenv("DCA_CLIENT_SECRET")
@@ -44,32 +48,6 @@ if (dca_schematic_api == "rest") {
                         Sys.getenv("DCA_API_PORT"),
                         sep = ":")
   )
-}
-
-update_logo <- function(project = "sage") {
-  
-  img <- switch(project,
-                 syn20446927 = list(href = "https://humantumoratlas.org/",
-                                    img_src = "img/HTAN_text_logo.png"),
-                 syn27210848 = list(href = "https://cancercomplexity.synapse.org/",
-                                    img_src = "img/cckp_logo.png"),
-                 syn30109515 = list(href = "https://https://includedcc.org/",
-                                    img_src = "img/INCLUDE DCC Logo-01.png"),
-                 list(href = "https://synapse.org",
-                      img_src = "img/Logo_Sage_Logomark.png")
-   )
-
-  tags$li(
-      class = "dropdown", id = "logo",
-      tags$a(
-          href = img$href,
-          target = "_blank",
-          tags$img(
-              height = "40px", alt = "LOGO",
-              src = img$img_src
-            )
-        )
-    )
 }
 
 syn_themes <- c(
@@ -128,21 +106,7 @@ api <- oauth_endpoint(
 # The 'openid' scope is required by the protocol for retrieving user information.
 scope <- "openid view download modify"
 
-# parse environment variables for configuration
-parse_env_var <- function(x, el_delim=",", kv_delim=":"){
-  # assume string of key-value pairs
-  elements <- stringr::str_split(x, el_delim, simplify = TRUE)
-  unlist(lapply(elements, function(y){
-    kv <- stringr::str_split(y, kv_delim, n=2)
-    setNames(kv[[1]][[2]], kv[[1]][[1]])
-  }))
-}
-
 template_config_files <- parse_env_var(Sys.getenv("DCA_TEMPLATE_MENU_CONFIG"))
-
-# import R files
-source_files <- list.files(c("functions", "modules"), pattern = "*\\.R$", recursive = TRUE, full.names = TRUE)
-sapply(source_files, FUN = source)
 
 ## Set Up Virtual Environment
 # ShinyAppys has a limit of 7000 files which this app' grossly exceeds
