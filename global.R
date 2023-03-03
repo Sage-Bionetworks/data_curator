@@ -24,6 +24,10 @@ suppressPackageStartupMessages({
   library(r2d3)
 })
 
+# import R files
+source_files <- list.files(c("functions", "modules"), pattern = "*\\.R$", recursive = TRUE, full.names = TRUE)
+sapply(source_files, FUN = source)
+
 ## Set Up OAuth
 client_id <- Sys.getenv("DCA_CLIENT_ID")
 client_secret <- Sys.getenv("DCA_CLIENT_SECRET")
@@ -103,10 +107,6 @@ api <- oauth_endpoint(
 scope <- "openid view download modify"
 
 template_config_files <- parse_env_var(Sys.getenv("DCA_TEMPLATE_MENU_CONFIG"))
-
-# import R files
-source_files <- list.files(c("functions", "modules"), pattern = "*\\.R$", recursive = TRUE, full.names = TRUE)
-sapply(source_files, FUN = source)
 
 ## Set Up Virtual Environment
 # ShinyAppys has a limit of 7000 files which this app' grossly exceeds
