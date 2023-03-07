@@ -540,7 +540,8 @@ shinyServer(function(input, output, session) {
                                 rest = manifest_validate(url=file.path(api_uri, "v1/model/validate"),
                                                          schema_url=data_model(),
                                                          data_type=selected$schema(),
-                                                         json_str=jsonlite::toJSON(read_csv(inFile$raw()$datapath))),
+                                                         file_name=inFile$raw()$datapath),
+                                                         #json_str=jsonlite::toJSON(read_csv(inFile$raw()$datapath))),
                                 list(list(
                                     "errors" = list(
                                      Row = NA, Column = NA, Value = NA,
@@ -695,7 +696,8 @@ shinyServer(function(input, output, session) {
                                                              dataset_id = selected$folder(),
                                                              input_token = access_token,
                                                              restrict_rules = FALSE,
-                                                             json_str = jsonlite::toJSON(read_csv(tmp_file_path)),
+                                                             file_name = tmp_file_path,
+                                                             #json_str = jsonlite::toJSON(read_csv(tmp_file_path)),
                                                              asset_view = selected$master_asset_view(),
                                                 use_schema_label=Sys.getenv("DCA_SCHEMATIC_SUBMIT_USE_SCHEMA_LABEL"))
                             )
@@ -741,7 +743,8 @@ shinyServer(function(input, output, session) {
                                                 dataset_id = selected$folder(),
                                                 input_token = access_token,
                                                 restrict_rules = FALSE,
-                                                json_str = jsonlite::toJSON(read_csv(tmp_file_path)),
+                                                file_name = tmp_file_path,
+                                                #json_str = jsonlite::toJSON(read_csv(tmp_file_path)),
                                                 asset_view = selected$master_asset_view(),
                                                 use_schema_label=Sys.getenv("DCA_SCHEMATIC_SUBMIT_USE_SCHEMA_LABEL"))
       )
