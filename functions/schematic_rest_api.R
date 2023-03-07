@@ -33,7 +33,7 @@ manifest_generate <- function(url="http://localhost:3001/v1/manifest/generate",
                               schema_url="https://raw.githubusercontent.com/ncihtan/data-models/main/HTAN.model.jsonld", #nolint
                               title, data_type, oauth="true",
                               use_annotations="false", dataset_id=NULL,
-                              asset_view, output_format, input_token=NULL) {
+                              asset_view, output_format, input_token = NULL) {
   
   req <- httr::GET(url,
                    query = list(
@@ -45,7 +45,7 @@ manifest_generate <- function(url="http://localhost:3001/v1/manifest/generate",
                      dataset_id=dataset_id,
                      asset_view=asset_view,
                      output_format=output_format,
-                     input_token=input_token
+                     input_token = input_token
                    ))
   
   manifest_url <- httr::content(req)
@@ -88,17 +88,29 @@ manifest_populate <- function(url="http://localhost:3001/v1/manifest/populate",
 #' @export
 manifest_validate <- function(url="http://localhost:3001/v1/model/validate",
                               schema_url="https://raw.githubusercontent.com/ncihtan/data-models/main/HTAN.model.jsonld", #nolint
-                              data_type, json_str) {
+                              data_type, json_str=NULL, file_name) {
   req <- httr::POST(url,
                      query=list(
                        schema_url=schema_url,
                        data_type=data_type,
-                       json_str=json_str)
-                     #body=list(csv_file=httr::upload_file(csv_file))
-                    #body=list(file_name=file_name)
+                       json_str=json_str),
+                    body=list(file_name=httr::upload_file(file_name))
   )
   
-  if (httr::http_status(req)$category == "Server error") return(list(list(), list()))
+  # Format server error in a way validationResult can handle
+  if (httr::http_status(req)$category == "Server error") {
+    return(
+      list(
+        list(
+          "errors" = list(
+             Row = NA, Column = NA, Value = NA,
+             Error = sprintf("Cannot validate manifest: %s",
+                             httr::http_status(req)$message)
+          )
+       )
+     )
+    )
+  }
   annotation_status <- httr::content(req)
   annotation_status
 }
@@ -117,7 +129,8 @@ manifest_validate <- function(url="http://localhost:3001/v1/model/validate",
 #' @export
 model_submit <- function(url="http://localhost:3001/v1/model/submit",
                          schema_url="https://raw.githubusercontent.com/ncihtan/data-models/main/HTAN.model.jsonld", #notlint
-                         data_type, dataset_id, restrict_rules=FALSE, input_token, json_str, asset_view) {
+                         data_type, dataset_id, restrict_rules=FALSE, input_token, json_str=NULL, asset_view,
+                         use_schema_label=TRUE, manifest_record_type="table", file_name) {
   req <- httr::POST(url,
                     #add_headers(Authorization=paste0("Bearer ", pat)),
                     query=list(
@@ -127,8 +140,10 @@ model_submit <- function(url="http://localhost:3001/v1/model/submit",
                       input_token=input_token,
                       restrict_rules=restrict_rules,
                       json_str=json_str,
-                      asset_view=asset_view),
-                    #body=list(file_name=httr::upload_file(file_name))
+                      asset_view=asset_view,
+                      use_schema_label=use_schema_label,
+                      manifest_record_type=manifest_record_type),
+                    body=list(file_name=httr::upload_file(file_name))
                     #body=list(file_name=file_name)
   )
   
@@ -267,5 +282,4 @@ get_asset_view_table <- function(url="http://localhost:3001/v1/storage/assets/ta
   } else stop("File could not be downloaded from Synapse.")
   
 }
-
 
