@@ -1084,9 +1084,15 @@
     },
     "shinydashboardPlus": {
       "Package": "shinydashboardPlus",
-      "Version": "2.0.3",
-      "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Version": "2.0.4.9000",
+      "Source": "GitHub",
+      "RemoteType": "github",
+      "RemoteHost": "api.github.com",
+      "RemoteRepo": "shinydashboardPlus",
+      "RemoteUsername": "RinteRface",
+      "RemoteRef": "HEAD",
+      "RemoteSha": "c8c7b13046d408201ec87016e382fc7b0d8227d5",
+      "Hash": "c5e57f590bdfd8d91275d984f905476f",
       "Requirements": [
         "fresh",
         "htmltools",
@@ -1094,8 +1100,7 @@
         "shiny",
         "shinydashboard",
         "waiter"
-      ],
-      "Hash": "5045276dcad7ad9b785d593b1a710681"
+      ]
     },
     "shinyjs": {
       "Package": "shinyjs",
