@@ -5,7 +5,6 @@ WORKDIR /srv/shiny-server/app
 COPY --chown=shiny ./ ./
 
 # set up r packages via renv
-RUN Rscript -e 'install.packages(c("remotes", "renv"), repos = "https://cloud.r-project.org/"); source("renv/activate.R"); renv::restore(); remotes::install_github("https://github.com/sage-bionetworks/data_curator", ref="beta-schematic-rest-api")'
+RUN Rscript -e 'source("renv/activate.R"); renv::restore(repos="https://packagemanager.rstudio.com/all/__linux__/jammy/latest"); renv::install("./")'
 
 CMD ["./dca_startup.sh"]
-
