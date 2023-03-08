@@ -1,4 +1,4 @@
-FROM ghcr.io/afwillia/shiny-base:release-0.3
+FROM ghcr.io/afwillia/shiny-base:release-0.4
 LABEL maintainer="Anthony anthony.williams@sagebase.org"
 
 WORKDIR /srv/shiny-server/app
