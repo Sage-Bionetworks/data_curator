@@ -18,9 +18,9 @@ on:
 
 jobs:
   shiny-deploy:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     # This image seems to be based on rocker/r-ver which in turn is based on debian
-    container: rocker/rstudio:4.1.2
+    container: rocker/rstudio:4.2.2
     env:
       # This should not be necessary for installing from public repo's however remotes::install_github() fails without it.
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
@@ -42,13 +42,9 @@ jobs:
           chmod 755 .venv/bin/activate
           source .venv/bin/activate
           
-      - name: Set R repo for renv
-        run: |
-          echo RENV_CONFIG_REPOS_OVERRIDE='https://packagemanager.rstudio.com/all/__linux__/focal/latest' >> .Renviron
-
-      - uses: r-lib/actions/setup-renv@v2
-        with:
-          bypass-cache: true
+       - name: Install R Packages Dependencies
+         run: |
+           R -f install-pkgs.R 
 
       - name: Install Schematic
         shell: bash
