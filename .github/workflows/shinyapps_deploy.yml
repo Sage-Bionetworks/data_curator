@@ -18,9 +18,9 @@ on:
 
 jobs:
   shiny-deploy:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     # This image seems to be based on rocker/r-ver which in turn is based on debian
-    container: rocker/rstudio:4.2.2
+    container: rocker/rstudio:4.1.2
     env:
       # This should not be necessary for installing from public repo's however remotes::install_github() fails without it.
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
@@ -30,9 +30,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y pip python3.8-venv libcurl4-openssl-dev libpng-dev libxml2-dev
-          
       - uses: actions/checkout@v3
-      
       - uses: r-lib/actions/setup-pandoc@v2
 
       - name: Create and Activate Python Virtual Environment
@@ -41,11 +39,9 @@ jobs:
           python3 -m venv .venv
           chmod 755 .venv/bin/activate
           source .venv/bin/activate
-          
       - name: Install R Packages Dependencies
         run: |
           R -f install-pkgs.R 
-
       - name: Install Schematic
         shell: bash
         run: |
@@ -57,7 +53,6 @@ jobs:
             git clone --single-branch --branch main https://github.com/Sage-Bionetworks/schematic.git
             cp schematic_config.yml schematic/config.yml
             pip3 install schematicpy
-
       - name: Set Configurations for Schematic
         shell: bash
         run: |
@@ -65,7 +60,6 @@ jobs:
           echo "${{ secrets.SCHEMATIC_SYNAPSE_CONFIG }}" > .synapseConfig
           echo "${{ secrets.SCHEMATIC_CREDS_PATH }}" > credentials.json
           echo "${{ secrets.SCHEMATIC_TOKEN_PICKLE }}" | base64 -d > token.pickle
-
       - name: Save service account credentials for Schematic
         id: create-json
         uses: jsdaniell/create-json@1.1.2
@@ -82,7 +76,6 @@ jobs:
             -c schematic_config.yml \
             --service_repo 'Sage-Bionetworks/schematic' \
             --overwrite
-
       - name: Write R environmental variables
         shell: bash
         run: |
@@ -108,7 +101,6 @@ jobs:
         run: |
           cp R/* functions/
           rm -r R/ DESCRIPTION NAMESPACE
-
       - name: zip virtual env
         shell: bash
         # ShinyApps has a limit of 7000 files, far exceeded by the many Python dependencies
@@ -116,7 +108,6 @@ jobs:
         # unzip it in 'global.R'
         run: |
           zip -rm .venv.zip .venv
-
       - name: Authorize and deploy app
         shell: Rscript {0}
         run: |
