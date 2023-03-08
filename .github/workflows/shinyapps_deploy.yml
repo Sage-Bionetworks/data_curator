@@ -45,6 +45,8 @@ jobs:
           echo RENV_CONFIG_REPOS_OVERRIDE='https://packagemanager.rstudio.com/all/__linux__/focal/latest' >> .Renviron
 
       - uses: r-lib/actions/setup-renv@v2
+        with:
+          bypass-cache: true
 
       - name: Install Schematic
         shell: bash
@@ -122,7 +124,6 @@ jobs:
         run: |
           # if there is a tag, 'refName' will be tag name
           install.packages("rsconnect")
-          renv::isolate()
           repo <- Sys.getenv("GITHUB_REPOSITORY")
           appName <- strsplit(repo, "/")[[1]][2]
           refName <- Sys.getenv("GITHUB_REF_NAME")
@@ -159,10 +160,10 @@ jobs:
           # Get app names. If app exists, configure then deploy. Otherwise
           # deploy then configure
           apps <- rsconnect::applications()$name
-          #if (appName %in% apps) {
-          #  rsconnect::configureApp(appName = appName, size = "xxxlarge", logLevel = "verbose")
+          if (appName %in% apps) {
+            rsconnect::configureApp(appName = appName, size = "xxxlarge", logLevel = "verbose")
             rsconnect::deployApp(appName = appName)
-          #} else {
-          #  rsconnect::deployApp(appName = appName)
-          #  rsconnect::configureApp(appName = appName, size = "xxxlarge", logLevel = "verbose")
-          #}
+          } else {
+            rsconnect::deployApp(appName = appName)
+            rsconnect::configureApp(appName = appName, size = "xxxlarge", logLevel = "verbose")
+          }
