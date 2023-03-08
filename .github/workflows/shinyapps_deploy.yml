@@ -39,10 +39,12 @@ jobs:
           python3 -m venv .venv
           chmod 755 .venv/bin/activate
           source .venv/bin/activate
-
-      - name: Install R Packages Dependencies
+          
+      - name: Set R repo for renv
         run: |
-          R -f install-pkgs.R 
+          echo RENV_CONFIG_REPOS_OVERRIDE='https://packagemanager.rstudio.com/all/__linux__/focal/latest' >> .Renviron
+
+      - uses: r-lib/actions/setup-renv@v2
 
       - name: Install Schematic
         shell: bash
