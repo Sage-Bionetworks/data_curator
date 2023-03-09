@@ -6,6 +6,7 @@ RUN apt-get update
 RUN apt-get install -y libxml2 libglpk-dev libicu-dev libicu70 curl
 
 # Update node. https://github.com/nodesource/distributions
+RUN apt-get remove nodejs
 RUN curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash - && apt-get install -y nodejs
 
 USER shiny
