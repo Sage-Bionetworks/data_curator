@@ -65,8 +65,8 @@ jobs:
           source .venv/bin/activate
      
       - uses: r-lib/actions/setup-renv@v2
-          with:
-            bypass-cache: "true"
+        with:
+          bypass-cache: "true"
 
       - name: Install Schematic
         shell: bash
