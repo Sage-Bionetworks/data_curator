@@ -21,7 +21,7 @@
       "Package": "DT",
       "Version": "0.27",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "crosstalk",
         "htmltools",
@@ -37,7 +37,7 @@
       "Package": "Matrix",
       "Version": "1.5-3",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "R",
         "graphics",
@@ -53,7 +53,7 @@
       "Package": "R6",
       "Version": "2.5.1",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "R"
       ],
@@ -63,7 +63,7 @@
       "Package": "Rcpp",
       "Version": "1.0.10",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "methods",
         "utils"
@@ -74,7 +74,7 @@
       "Package": "RcppTOML",
       "Version": "0.2.2",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "R",
         "Rcpp"
@@ -85,7 +85,7 @@
       "Package": "askpass",
       "Version": "1.1",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "sys"
       ],
@@ -95,7 +95,7 @@
       "Package": "base64enc",
       "Version": "0.1-3",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "R"
       ],
@@ -105,7 +105,7 @@
       "Package": "bit",
       "Version": "4.0.5",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "R"
       ],
@@ -115,7 +115,7 @@
       "Package": "bit64",
       "Version": "4.0.5",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "R",
         "bit",
@@ -129,14 +129,14 @@
       "Package": "brio",
       "Version": "1.1.3",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Hash": "976cf154dfb043c012d87cddd8bca363"
     },
     "bslib": {
       "Package": "bslib",
       "Version": "0.4.2",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "R",
         "base64enc",
@@ -156,7 +156,7 @@
       "Package": "cachem",
       "Version": "1.0.7",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "fastmap",
         "rlang"
@@ -167,7 +167,7 @@
       "Package": "callr",
       "Version": "3.7.3",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "R",
         "R6",
@@ -180,7 +180,7 @@
       "Package": "cli",
       "Version": "3.6.0",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "R",
         "utils"
@@ -191,7 +191,7 @@
       "Package": "clipr",
       "Version": "0.8.0",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "utils"
       ],
@@ -201,14 +201,14 @@
       "Package": "commonmark",
       "Version": "1.8.1",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Hash": "b6e3e947d1d7ebf3d2bdcea1bde63fe7"
     },
     "covr": {
       "Package": "covr",
       "Version": "3.6.1",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "R",
         "crayon",
@@ -228,14 +228,14 @@
       "Package": "cpp11",
       "Version": "0.4.3",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Hash": "ed588261931ee3be2c700d22e94a29ab"
     },
     "crayon": {
       "Package": "crayon",
       "Version": "1.5.2",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "grDevices",
         "methods",
@@ -247,7 +247,7 @@
       "Package": "crosstalk",
       "Version": "1.2.0",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "R6",
         "htmltools",
@@ -260,7 +260,7 @@
       "Package": "curl",
       "Version": "5.0.0",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "R"
       ],
@@ -270,7 +270,7 @@
       "Package": "data.table",
       "Version": "1.14.8",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "R",
         "methods"
@@ -281,7 +281,7 @@
       "Package": "data.tree",
       "Version": "1.0.0",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "R",
         "R6",
@@ -294,7 +294,7 @@
       "Package": "desc",
       "Version": "1.4.2",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "R",
         "R6",
@@ -308,7 +308,7 @@
       "Package": "diffobj",
       "Version": "0.3.5",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "R",
         "crayon",
@@ -323,7 +323,7 @@
       "Package": "digest",
       "Version": "0.6.31",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "R",
         "utils"
@@ -334,7 +334,7 @@
       "Package": "dplyr",
       "Version": "1.1.0",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "R",
         "R6",
@@ -357,7 +357,7 @@
       "Package": "ellipsis",
       "Version": "0.3.2",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "R",
         "rlang"
@@ -368,7 +368,7 @@
       "Package": "evaluate",
       "Version": "0.20",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "R",
         "methods"
@@ -379,7 +379,7 @@
       "Package": "fansi",
       "Version": "1.0.4",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "R",
         "grDevices",
@@ -391,14 +391,14 @@
       "Package": "fastmap",
       "Version": "1.1.1",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Hash": "f7736a18de97dea803bde0a2daaafb27"
     },
     "fontawesome": {
       "Package": "fontawesome",
       "Version": "0.5.0",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "R",
         "htmltools",
@@ -410,7 +410,7 @@
       "Package": "fresh",
       "Version": "0.2.0",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "htmltools",
         "rstudioapi",
@@ -423,7 +423,7 @@
       "Package": "fs",
       "Version": "1.6.1",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "R",
         "methods"
@@ -434,7 +434,7 @@
       "Package": "generics",
       "Version": "0.1.3",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "R",
         "methods"
@@ -445,7 +445,7 @@
       "Package": "glue",
       "Version": "1.6.2",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "R",
         "methods"
@@ -456,7 +456,7 @@
       "Package": "here",
       "Version": "1.0.1",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "rprojroot"
       ],
@@ -466,7 +466,7 @@
       "Package": "highr",
       "Version": "0.10",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "R",
         "xfun"
@@ -477,7 +477,7 @@
       "Package": "hms",
       "Version": "1.1.2",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "ellipsis",
         "lifecycle",
@@ -492,7 +492,7 @@
       "Package": "htmltools",
       "Version": "0.5.4",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "R",
         "base64enc",
@@ -509,7 +509,7 @@
       "Package": "htmlwidgets",
       "Version": "1.6.1",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "grDevices",
         "htmltools",
@@ -524,7 +524,7 @@
       "Package": "httpuv",
       "Version": "1.6.9",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "R",
         "R6",
@@ -539,7 +539,7 @@
       "Package": "httr",
       "Version": "1.4.5",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "R",
         "R6",
@@ -554,7 +554,7 @@
       "Package": "igraph",
       "Version": "1.4.1",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "Matrix",
         "grDevices",
@@ -572,7 +572,7 @@
       "Package": "jquerylib",
       "Version": "0.1.4",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "htmltools"
       ],
@@ -582,7 +582,7 @@
       "Package": "jsonlite",
       "Version": "1.8.4",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "methods"
       ],
@@ -592,7 +592,7 @@
       "Package": "knitr",
       "Version": "1.42",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "R",
         "evaluate",
@@ -608,7 +608,7 @@
       "Package": "later",
       "Version": "1.3.0",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "Rcpp",
         "rlang"
@@ -619,7 +619,7 @@
       "Package": "lattice",
       "Version": "0.20-45",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "R",
         "grDevices",
@@ -634,7 +634,7 @@
       "Package": "lazyeval",
       "Version": "0.2.2",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "R"
       ],
@@ -644,7 +644,7 @@
       "Package": "lifecycle",
       "Version": "1.0.3",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "R",
         "cli",
@@ -657,7 +657,7 @@
       "Package": "magrittr",
       "Version": "2.0.3",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "R"
       ],
@@ -667,7 +667,7 @@
       "Package": "memoise",
       "Version": "2.0.1",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "cachem",
         "rlang"
@@ -678,7 +678,7 @@
       "Package": "mime",
       "Version": "0.12",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "tools"
       ],
@@ -688,7 +688,7 @@
       "Package": "networkD3",
       "Version": "0.4",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "R",
         "htmlwidgets",
@@ -701,7 +701,7 @@
       "Package": "openssl",
       "Version": "2.0.5",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "askpass"
       ],
@@ -711,7 +711,7 @@
       "Package": "pillar",
       "Version": "1.8.1",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "cli",
         "fansi",
@@ -728,7 +728,7 @@
       "Package": "pkgconfig",
       "Version": "2.0.3",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "utils"
       ],
@@ -738,7 +738,7 @@
       "Package": "pkgload",
       "Version": "1.3.2",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "R",
         "cli",
@@ -758,7 +758,7 @@
       "Package": "png",
       "Version": "0.1-8",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "R"
       ],
@@ -768,21 +768,21 @@
       "Package": "praise",
       "Version": "1.0.0",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Hash": "a555924add98c99d2f411e37e7d25e9f"
     },
     "prettyunits": {
       "Package": "prettyunits",
       "Version": "1.1.1",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Hash": "95ef9167b75dde9d2ccc3c7528393e7e"
     },
     "processx": {
       "Package": "processx",
       "Version": "3.8.0",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "R",
         "R6",
@@ -795,7 +795,7 @@
       "Package": "progress",
       "Version": "1.2.2",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "R6",
         "crayon",
@@ -808,7 +808,7 @@
       "Package": "promises",
       "Version": "1.2.0.1",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "R6",
         "Rcpp",
@@ -823,7 +823,7 @@
       "Package": "ps",
       "Version": "1.7.2",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "R",
         "utils"
@@ -834,7 +834,7 @@
       "Package": "purrr",
       "Version": "1.0.1",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "R",
         "cli",
@@ -849,7 +849,7 @@
       "Package": "r2d3",
       "Version": "0.2.6",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "R",
         "htmltools",
@@ -863,7 +863,7 @@
       "Package": "rappdirs",
       "Version": "0.3.3",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "R"
       ],
@@ -873,7 +873,7 @@
       "Package": "readr",
       "Version": "2.1.4",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "R",
         "R6",
@@ -896,7 +896,7 @@
       "Package": "rematch2",
       "Version": "2.1.2",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "tibble"
       ],
@@ -906,7 +906,7 @@
       "Package": "renv",
       "Version": "0.17.0",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "utils"
       ],
@@ -916,7 +916,7 @@
       "Package": "reticulate",
       "Version": "1.28",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "Matrix",
         "R",
@@ -937,7 +937,7 @@
       "Package": "rex",
       "Version": "1.2.1",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "lazyeval"
       ],
@@ -947,7 +947,7 @@
       "Package": "rlang",
       "Version": "1.0.6",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "R",
         "utils"
@@ -958,7 +958,7 @@
       "Package": "rmarkdown",
       "Version": "2.20",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "R",
         "bslib",
@@ -981,7 +981,7 @@
       "Package": "rprojroot",
       "Version": "2.0.3",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "R"
       ],
@@ -991,14 +991,14 @@
       "Package": "rstudioapi",
       "Version": "0.14",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Hash": "690bd2acc42a9166ce34845884459320"
     },
     "sass": {
       "Package": "sass",
       "Version": "0.4.5",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "R6",
         "fs",
@@ -1012,7 +1012,7 @@
       "Package": "shiny",
       "Version": "1.7.4",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "R",
         "R6",
@@ -1046,7 +1046,7 @@
       "Package": "shinydashboard",
       "Version": "0.7.2",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "R",
         "htmltools",
@@ -1080,7 +1080,7 @@
       "Package": "shinyjs",
       "Version": "2.1.0",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "R",
         "digest",
@@ -1111,7 +1111,7 @@
       "Package": "shinythemes",
       "Version": "1.2.0",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "R",
         "shiny"
@@ -1122,7 +1122,7 @@
       "Package": "sourcetools",
       "Version": "0.1.7-1",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "R"
       ],
@@ -1132,7 +1132,7 @@
       "Package": "stringi",
       "Version": "1.7.12",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "R",
         "stats",
@@ -1145,7 +1145,7 @@
       "Package": "stringr",
       "Version": "1.5.0",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "R",
         "cli",
@@ -1162,14 +1162,14 @@
       "Package": "sys",
       "Version": "3.4.1",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Hash": "34c16f1ef796057bfa06d3f4ff818a5d"
     },
     "testthat": {
       "Package": "testthat",
       "Version": "3.1.6",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "R",
         "R6",
@@ -1199,7 +1199,7 @@
       "Package": "tibble",
       "Version": "3.1.8",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "R",
         "fansi",
@@ -1218,7 +1218,7 @@
       "Package": "tidyr",
       "Version": "1.3.0",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "R",
         "cli",
@@ -1241,7 +1241,7 @@
       "Package": "tidyselect",
       "Version": "1.2.0",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "R",
         "cli",
@@ -1257,7 +1257,7 @@
       "Package": "tinytex",
       "Version": "0.44",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "xfun"
       ],
@@ -1267,7 +1267,7 @@
       "Package": "tzdb",
       "Version": "0.3.0",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "R",
         "cpp11"
@@ -1278,7 +1278,7 @@
       "Package": "utf8",
       "Version": "1.2.3",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "R"
       ],
@@ -1288,7 +1288,7 @@
       "Package": "vctrs",
       "Version": "0.5.2",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "R",
         "cli",
@@ -1302,7 +1302,7 @@
       "Package": "vroom",
       "Version": "1.6.1",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "R",
         "bit64",
@@ -1328,7 +1328,7 @@
       "Package": "waiter",
       "Version": "0.2.5",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "R6",
         "htmltools",
@@ -1340,7 +1340,7 @@
       "Package": "waldo",
       "Version": "0.4.0",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "cli",
         "diffobj",
@@ -1357,7 +1357,7 @@
       "Package": "withr",
       "Version": "2.5.0",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "R",
         "grDevices",
@@ -1370,7 +1370,7 @@
       "Package": "xfun",
       "Version": "0.37",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "stats",
         "tools"
@@ -1381,7 +1381,7 @@
       "Package": "xml2",
       "Version": "1.3.3",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "R",
         "methods"
@@ -1392,7 +1392,7 @@
       "Package": "xtable",
       "Version": "1.8-4",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Requirements": [
         "R",
         "stats",
@@ -1404,7 +1404,7 @@
       "Package": "yaml",
       "Version": "2.3.7",
       "Source": "Repository",
-      "Repository": "Rstudio-binaries",
+      "Repository": "CRAN",
       "Hash": "0d0056cc5383fbc240ccd0cb584bf436"
     }
   }
