@@ -707,12 +707,6 @@
       ],
       "Hash": "b04c27110bf367b4daa93f34f3d58e75"
     },
-    "packrat": {
-      "Package": "packrat",
-      "Version": "0.9.1",
-      "Source": "Repository",
-      "Repository": "Rstudio-binaries"
-    },
     "pillar": {
       "Package": "pillar",
       "Version": "1.8.1",
@@ -908,20 +902,6 @@
       ],
       "Hash": "76c9e04c712a05848ae7a23d2f170a40"
     },
-    "remotes": {
-      "Package": "remotes",
-      "Version": "2.4.2",
-      "Source": "Repository",
-      "Repository": "Rstudio-binaries",
-      "Requirements": [
-        "R",
-        "methods",
-        "stats",
-        "tools",
-        "utils"
-      ],
-      "Hash": "227045be9aee47e6dda9bb38ac870d67"
-    },
     "renv": {
       "Package": "renv",
       "Version": "0.17.0",
@@ -1006,12 +986,6 @@
         "R"
       ],
       "Hash": "1de7ab598047a87bba48434ba35d497d"
-    },
-    "rsconnect": {
-      "Package": "rsconnect",
-      "Version": "0.8.29",
-      "Source": "Repository",
-      "Repository": "Rstudio-binaries"
     },
     "rstudioapi": {
       "Package": "rstudioapi",
