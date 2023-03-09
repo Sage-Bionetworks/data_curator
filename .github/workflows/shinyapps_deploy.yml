@@ -55,8 +55,6 @@ jobs:
           
           echo 'GITHUB_PAT="${{ secrets.GITHUB_TOKEN }}"' >> .Renviron
           
-          echo RENV_CONFIG_REPOS_OVERRIDE='https://packagemanager.rstudio.com/all/__linux__/jammy/latest' >> .Renviron
-
       - name: Create and Activate Python Virtual Environment
         shell: bash
         run: |
@@ -65,8 +63,6 @@ jobs:
           source .venv/bin/activate
      
       - uses: r-lib/actions/setup-renv@v2
-        with:
-          bypass-cache: "true"
 
       - name: Install Schematic
         shell: bash
