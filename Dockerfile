@@ -9,7 +9,8 @@ USER shiny
 WORKDIR /srv/shiny-server/app
 COPY --chown=shiny ./ ./
 
-# set up r packages via renv
-RUN Rscript -e 'renv::restore(); renv::install("./")'
+# set up r packages via renv. Use binary lib matching the shiny-base ubuntu version
+# to speed up installatioon.
+RUN Rscript -e 'renv::restore(repos="https://packagemanager.rstudio.com/all/__linux__/jammy/latest"); renv::install("./")'
 
 CMD ["./dca_startup.sh"]
