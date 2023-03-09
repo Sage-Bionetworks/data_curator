@@ -118,6 +118,7 @@ jobs:
       - name: Authorize and deploy app
         shell: Rscript {0}
         run: |
+          renv::restore()
           repo <- Sys.getenv("GITHUB_REPOSITORY")
           appName <- strsplit(repo, "/")[[1]][2]
           refName <- Sys.getenv("GITHUB_REF_NAME")
