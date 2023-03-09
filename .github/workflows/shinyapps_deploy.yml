@@ -34,6 +34,28 @@ jobs:
       - uses: actions/checkout@v3
 
       - uses: r-lib/actions/setup-pandoc@v2
+      
+      - name: Write R environmental variables
+        shell: bash
+        run: |
+          echo 'DCA_MODEL_INPUT_DOWNLOAD_URL="${{ secrets.DCA_MODEL_INPUT_DOWNLOAD_URL }}"' >> .Renviron
+          echo 'DCA_SYNAPSE_MASTER_FILEVIEW="${{ secrets.DCA_SYNAPSE_MASTER_FILEVIEW }}"' >> .Renviron
+          echo 'DCA_CLIENT_ID="${{ secrets.OAUTH_CLIENT_ID }}"' >> .Renviron
+          echo 'DCA_CLIENT_SECRET="${{ secrets.OAUTH_CLIENT_SECRET }}"' >> .Renviron
+          
+          echo DCA_SCHEMATIC_API_TYPE="reticulate" >> .Renviron
+          echo DCA_API_PORT="" >> .Renviron
+          echo DCA_API_HOST="" >> .Renviron
+          
+          echo DCA_MANIFEST_OUTPUT_FORMAT="google_sheet" >> .Renviron
+          echo DCA_COMPLIANCE_DASHBOARD=TRUE >> .Renviron
+          echo DCA_SCHEMATIC_SUBMIT_USE_SCHEMA_LABEL=FALSE >> .Renviron
+          echo DCA_TEMPLATE_MENU_CONFIG='syn33715412:www/template_config/example_config.json' >> .Renviron
+          echo DCA_MODEL_INPUT_DOWNLOAD_URL='syn33715412:https://raw.githubusercontent.com/Sage-Bionetworks/data-models/main/example.model.jsonld' >> .Renviron
+          
+          echo 'GITHUB_PAT="${{ secrets.GITHUB_TOKEN }}"' >> .Renviron
+          
+          echo RENV_CONFIG_REPOS_OVERRIDE='https://packagemanager.rstudio.com/all/__linux__/jammy/latest' >> .Renviron
 
       - name: Create and Activate Python Virtual Environment
         shell: bash
@@ -81,26 +103,6 @@ jobs:
             --service_repo 'Sage-Bionetworks/schematic' \
             --overwrite
 
-      - name: Write R environmental variables
-        shell: bash
-        run: |
-          echo 'DCA_MODEL_INPUT_DOWNLOAD_URL="${{ secrets.DCA_MODEL_INPUT_DOWNLOAD_URL }}"' >> .Renviron
-          echo 'DCA_SYNAPSE_MASTER_FILEVIEW="${{ secrets.DCA_SYNAPSE_MASTER_FILEVIEW }}"' >> .Renviron
-          echo 'DCA_CLIENT_ID="${{ secrets.OAUTH_CLIENT_ID }}"' >> .Renviron
-          echo 'DCA_CLIENT_SECRET="${{ secrets.OAUTH_CLIENT_SECRET }}"' >> .Renviron
-          
-          echo DCA_SCHEMATIC_API_TYPE="reticulate" >> .Renviron
-          echo DCA_API_PORT="" >> .Renviron
-          echo DCA_API_HOST="" >> .Renviron
-          
-          echo DCA_MANIFEST_OUTPUT_FORMAT="google_sheet" >> .Renviron
-          echo DCA_COMPLIANCE_DASHBOARD=TRUE >> .Renviron
-          echo DCA_SCHEMATIC_SUBMIT_USE_SCHEMA_LABEL=FALSE >> .Renviron
-          echo DCA_TEMPLATE_MENU_CONFIG='syn33715412:www/template_config/example_config.json' >> .Renviron
-          echo DCA_MODEL_INPUT_DOWNLOAD_URL='syn33715412:https://raw.githubusercontent.com/Sage-Bionetworks/data-models/main/example.model.jsonld' >> .Renviron
-          
-          echo 'GITHUB_PAT="${{ secrets.GITHUB_TOKEN }}"' >> .Renviron
-          
       - name: shinyapps.io R pkg hack
         shell: bash
         run: |
