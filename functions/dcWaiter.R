@@ -33,7 +33,7 @@ dcWaiter <- function(stage = c("show", "update", "hide"),
       waiter_show_on_load(
         html = tagList(
           img(src = "img/Logo_Sage_Logomark.png"),
-          h4("Retrieving Synapse information...")
+          h4("Logging into Data Curator App")
         ),
         color = col2rgba("#2a668d", 255*0.9)
       )
