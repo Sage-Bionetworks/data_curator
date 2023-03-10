@@ -153,7 +153,8 @@ shinyServer(function(input, output, session) {
     
     dcc_config_react(dcc_config[dcc_config$synapse_asset_view == selected$master_asset_view(), ])
     
-    dcWaiter("show", msg = paste0("Getting data from ", selected$master_asset_view_label(), "..."), color=col2rgba(col2rgb("#CD0BBC01")))
+    dcWaiter("show", msg = paste0("Getting data from ", selected$master_asset_view_label(),". This may take a minute."),
+             color=col2rgba(col2rgb("#CD0BBC01")))
     
     data_model(data_model_options[selected$master_asset_view()])
 
@@ -170,7 +171,8 @@ shinyServer(function(input, output, session) {
         #}
       })
 
-      dcWaiter("show", msg = paste0("Getting data from ", selected$master_asset_view_label(), "..."), color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
+      dcWaiter("show", msg = paste0("Getting data from ", selected$master_asset_view_label(), ". This may take a minute."),
+               color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
 
     output$logo <- renderUI({update_logo(selected$master_asset_view())})
     
@@ -229,7 +231,8 @@ shinyServer(function(input, output, session) {
         # get synID of selected project
         project_id <- data_list$projects()[input[[paste0(x, "project")]]]
         
-        dcWaiter("show", msg = paste0("Getting project data from ", selected$master_asset_view_label(), "..."), color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
+        dcWaiter("show", msg = paste0("Getting project data from ", selected$master_asset_view_label(), ". This may take a minute."),
+                 color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
         
         # gets folders per project
         folder_list_raw <- switch(dca_schematic_api,
@@ -368,7 +371,7 @@ shinyServer(function(input, output, session) {
     } else if (selected$schema_type() %in% c("record", "file")) {
       # check number of files if it's file-based template
 
-      dcWaiter("show", msg = paste0("Getting files in ", input$dropdown_folder, "..."), color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
+      dcWaiter("show", msg = paste0("Getting files in ", input$dropdown_folder, "."), color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
       # get file list in selected folder
       file_list <- switch(dca_schematic_api,
                           reticulate = storage_dataset_files_py(selected$folder()),
@@ -438,7 +441,7 @@ shinyServer(function(input, output, session) {
   output$downloadData <- downloadHandler(
     filename = function() sprintf("%s.xlsx", input$dropdown_template),
     content = function(file) {
-      dcWaiter("show", msg = "Downloading data from Synapse...", color = dcc_config_react()$primary_col)
+      dcWaiter("show", msg = "Downloading manifest. This may take a minute.", color = dcc_config_react()$primary_col)
       manifest_data <- switch(dca_schematic_api,
                               reticulate =  manifest_generate_py(title = input$dropdown_template,
                                                                  rootNode = selected$schema(),
@@ -531,7 +534,7 @@ shinyServer(function(input, output, session) {
   observeEvent(input$btn_validate, {
 
     # loading screen for validating metadata
-    dcWaiter("show", msg = "Validating...", color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
+    dcWaiter("show", msg = "Validating manifest...", color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
     annotation_status <- switch(dca_schematic_api,
                                 reticulate = manifest_validate_py(inFile$raw()$datapath,
                                                                   selected$schema(),
@@ -630,7 +633,7 @@ shinyServer(function(input, output, session) {
   ######## Submission Section ########
   observeEvent(input$btn_submit, {
     # loading screen for submitting data
-    dcWaiter("show", msg = "Submitting...", color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
+    dcWaiter("show", msg = "Submitting to Synapse. This may take a minute.", color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
 
 
     if (is.null(selected$folder())) {
