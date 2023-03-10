@@ -40,16 +40,20 @@ shinyServer(function(input, output, session) {
   )
   config <- reactiveVal()
   config_schema <- reactiveVal(def_config)
-  model_ops <- parse_env_var(Sys.getenv("DCA_MODEL_INPUT_DOWNLOAD_URL"))
+  model_ops <- setNames(dcc_config$data_model_url,
+                        dcc_config$synapse_asset_view)
   
   # mapping from display name to schema name
   template_namedList <- reactiveVal()
   #names(template_namedList) <- config_schema$display_name
   
-  all_asset_views <- parse_env_var(Sys.getenv("DCA_SYNAPSE_MASTER_FILEVIEW"))
+  all_asset_views <- setNames(dcc_config$synapse_asset_view,
+                              dcc_config$project_name)
   asset_views <- reactiveVal(c("mock dca fileview"="syn33715412"))
   
   dca_theme <- reactiveVal()
+  
+  dcc_config_react <- reactiveVal(dcc_config)
   
   data_list <- list(
     projects = reactiveVal(NULL), folders = reactiveVal(NULL),
@@ -67,8 +71,8 @@ shinyServer(function(input, output, session) {
   
   isUpdateFolder <- reactiveVal(FALSE)
   
-  data_model_options <- Sys.getenv("DCA_MODEL_INPUT_DOWNLOAD_URL")
-  data_model_options <- parse_env_var(data_model_options)
+  data_model_options <- setNames(dcc_config$data_model_url,
+                                 dcc_config$synapse_asset_view)
   data_model = reactiveVal(NULL)
   
   # data available to the user
@@ -148,6 +152,9 @@ shinyServer(function(input, output, session) {
     selected$master_asset_view(input$dropdown_asset_view)
     av_names <- names(asset_views()[asset_views() %in% selected$master_asset_view()])
     selected$master_asset_view_label(av_names)
+    
+    dcc_config_react(dcc_config[dcc_config$synapse_asset_view == selected$master_asset_view(), ])
+    
     dcWaiter("show", msg = paste0("Getting data from ", selected$master_asset_view_label(), "..."), color="grey")
     
     data_model(data_model_options[selected$master_asset_view()])
