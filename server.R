@@ -121,7 +121,7 @@ shinyServer(function(input, output, session) {
       updateSelectInput(session, "dropdown_asset_view",
                       choices = asset_views())
     
-      user_name <- synapse_user_profile(auth=access_token)$userName
+      user_name <- synapse_user_profile(auth=access_token)$firstName
   
       is_certified <- synapse_is_certified(auth=access_token)
       # is_certified <- switch(dca_schematic_api,
