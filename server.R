@@ -153,7 +153,7 @@ shinyServer(function(input, output, session) {
     
     dcc_config_react(dcc_config[dcc_config$synapse_asset_view == selected$master_asset_view(), ])
     
-    dcWaiter("show", msg = paste0("Getting data from ", selected$master_asset_view_label(), "..."), color="grey")
+    dcWaiter("show", msg = paste0("Getting data from ", selected$master_asset_view_label(), "..."), color=col2rgba(col2rgb("#CD0BBC01")))
     
     data_model(data_model_options[selected$master_asset_view()])
 
@@ -170,7 +170,7 @@ shinyServer(function(input, output, session) {
         #}
       })
 
-      dcWaiter("show", msg = paste0("Getting data from ", selected$master_asset_view_label(), "..."), color = dcc_config_react()$primary_col)
+      dcWaiter("show", msg = paste0("Getting data from ", selected$master_asset_view_label(), "..."), color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
 
     output$logo <- renderUI({update_logo(selected$master_asset_view())})
     
@@ -229,7 +229,7 @@ shinyServer(function(input, output, session) {
         # get synID of selected project
         project_id <- data_list$projects()[input[[paste0(x, "project")]]]
         
-        dcWaiter("show", msg = paste0("Getting project data from ", selected$master_asset_view_label(), "..."), color = dcc_config_react()$primary_col)
+        dcWaiter("show", msg = paste0("Getting project data from ", selected$master_asset_view_label(), "..."), color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
         
         # gets folders per project
         folder_list_raw <- switch(dca_schematic_api,
@@ -368,7 +368,7 @@ shinyServer(function(input, output, session) {
     } else if (selected$schema_type() %in% c("record", "file")) {
       # check number of files if it's file-based template
 
-      dcWaiter("show", msg = paste0("Getting files in ", input$dropdown_folder, "..."), color = dcc_config_react()$primary_col)
+      dcWaiter("show", msg = paste0("Getting files in ", input$dropdown_folder, "..."), color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
       # get file list in selected folder
       file_list <- switch(dca_schematic_api,
                           reticulate = storage_dataset_files_py(selected$folder()),
@@ -476,7 +476,7 @@ shinyServer(function(input, output, session) {
   # generate template
   observeEvent(input$btn_template, {
     # loading screen for template link generation
-    dcWaiter("show", msg = "Generating link...", color = dcc_config_react()$primary_col)
+    dcWaiter("show", msg = "Generating link...", color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
     manifest_url(switch(dca_schematic_api,
                            reticulate =  manifest_generate_py(title = input$dropdown_template,
                                                               rootNode = selected$schema(),
@@ -531,7 +531,7 @@ shinyServer(function(input, output, session) {
   observeEvent(input$btn_validate, {
 
     # loading screen for validating metadata
-    dcWaiter("show", msg = "Validating...", color = dcc_config_react()$primary_col)
+    dcWaiter("show", msg = "Validating...", color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
     annotation_status <- switch(dca_schematic_api,
                                 reticulate = manifest_validate_py(inFile$raw()$datapath,
                                                                   selected$schema(),
@@ -594,7 +594,7 @@ shinyServer(function(input, output, session) {
   # if user click gsheet_btn, generating gsheet
   observeEvent(input$btn_val_gsheet, {
     # loading screen for Google link generation
-    dcWaiter("show", msg = "Generating link...", color = dcc_config_react()$primary_col)
+    dcWaiter("show", msg = "Generating link...", color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
     filled_manifest <- switch(dca_schematic_api,
                               reticulate = manifest_populate_py(paste0(config$community, " ", input$dropdown_template),
                                                                 inFile$raw()$datapath,
@@ -630,7 +630,7 @@ shinyServer(function(input, output, session) {
   ######## Submission Section ########
   observeEvent(input$btn_submit, {
     # loading screen for submitting data
-    dcWaiter("show", msg = "Submitting...", color = dcc_config_react()$primary_col)
+    dcWaiter("show", msg = "Submitting...", color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
 
 
     if (is.null(selected$folder())) {
