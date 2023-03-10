@@ -40,16 +40,18 @@ shinyServer(function(input, output, session) {
   )
   config <- reactiveVal()
   config_schema <- reactiveVal(def_config)
-  model_ops <- parse_env_var(Sys.getenv("DCA_MODEL_INPUT_DOWNLOAD_URL"))
+  model_ops <- setNames(dcc_config$data_model_url,
+                        dcc_config$synapse_asset_view)
   
   # mapping from display name to schema name
   template_namedList <- reactiveVal()
   #names(template_namedList) <- config_schema$display_name
   
-  all_asset_views <- parse_env_var(Sys.getenv("DCA_SYNAPSE_MASTER_FILEVIEW"))
+  all_asset_views <- setNames(dcc_config$synapse_asset_view,
+                              dcc_config$project_name)
   asset_views <- reactiveVal(c("mock dca fileview"="syn33715412"))
   
-  dca_theme <- reactiveVal()
+  dcc_config_react <- reactiveVal(dcc_config)
   
   data_list <- list(
     projects = reactiveVal(NULL), folders = reactiveVal(NULL),
@@ -67,8 +69,8 @@ shinyServer(function(input, output, session) {
   
   isUpdateFolder <- reactiveVal(FALSE)
   
-  data_model_options <- Sys.getenv("DCA_MODEL_INPUT_DOWNLOAD_URL")
-  data_model_options <- parse_env_var(data_model_options)
+  data_model_options <- setNames(dcc_config$data_model_url,
+                                 dcc_config$synapse_asset_view)
   data_model = reactiveVal(NULL)
   
   # data available to the user
@@ -148,29 +150,29 @@ shinyServer(function(input, output, session) {
     selected$master_asset_view(input$dropdown_asset_view)
     av_names <- names(asset_views()[asset_views() %in% selected$master_asset_view()])
     selected$master_asset_view_label(av_names)
-    dcWaiter("show", msg = paste0("Getting data from ", selected$master_asset_view_label(), "..."), color="grey")
+    
+    dcc_config_react(dcc_config[dcc_config$synapse_asset_view == selected$master_asset_view(), ])
+    
+    dcWaiter("show", msg = paste0("Getting data from ", selected$master_asset_view_label(),". This may take a minute."),
+             color=col2rgba(col2rgb("#CD0BBC01")))
     
     data_model(data_model_options[selected$master_asset_view()])
-    
-    dca_theme_file <- ifelse(selected$master_asset_view() %in% names(syn_themes),
-                             syn_themes[selected$master_asset_view()],
-                             "www/dca_themes/sage_theme_config.rds")
-    dca_theme(readRDS(dca_theme_file))
 
     output$sass <- renderUI({
         tags$head(tags$style(css()))
     })
     css <- reactive({
       # Don't change theme for default projects
-      if (dca_theme_file != "www/dca_themes/sage_theme_config.rds") {
-          sass(input = list(primary_col=dca_theme()$primary_col,
-                             htan_col=dca_theme()$htan_col,
-                             sidebar_col=dca_theme()$sidebar_col,
+      #if (dca_theme_file != "www/dca_themes/sage_theme_config.rds") {
+          sass(input = list(primary_col=dcc_config_react()$primary_col,
+                             htan_col=dcc_config_react()$secondary_col,
+                             sidebar_col=dcc_config_react()$sidebar_col,
                              sass_file("www/scss/main.scss")))
-        }
+        #}
       })
 
-      dcWaiter("show", msg = paste0("Getting data from ", selected$master_asset_view_label(), "..."), color = dca_theme()$primary_col)
+      dcWaiter("show", msg = paste0("Getting data from ", selected$master_asset_view_label(), ". This may take a minute."),
+               color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
 
     output$logo <- renderUI({update_logo(selected$master_asset_view())})
     
@@ -229,7 +231,8 @@ shinyServer(function(input, output, session) {
         # get synID of selected project
         project_id <- data_list$projects()[input[[paste0(x, "project")]]]
         
-        dcWaiter("show", msg = paste0("Getting project data from ", selected$master_asset_view_label(), "..."), color = dca_theme()$primary_col)
+        dcWaiter("show", msg = paste0("Getting project data from ", selected$master_asset_view_label(), ". This may take a minute."),
+                 color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
         
         # gets folders per project
         folder_list_raw <- switch(dca_schematic_api,
@@ -368,7 +371,7 @@ shinyServer(function(input, output, session) {
     } else if (selected$schema_type() %in% c("record", "file")) {
       # check number of files if it's file-based template
 
-      dcWaiter("show", msg = paste0("Getting files in ", input$dropdown_folder, "..."), color = dca_theme()$primary_col)
+      dcWaiter("show", msg = paste0("Getting files in ", input$dropdown_folder, "."), color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
       # get file list in selected folder
       file_list <- switch(dca_schematic_api,
                           reticulate = storage_dataset_files_py(selected$folder()),
@@ -438,7 +441,7 @@ shinyServer(function(input, output, session) {
   output$downloadData <- downloadHandler(
     filename = function() sprintf("%s.xlsx", input$dropdown_template),
     content = function(file) {
-      dcWaiter("show", msg = "Downloading data from Synapse...", color = dca_theme()$primary_col)
+      dcWaiter("show", msg = "Downloading manifest. This may take a minute.", color = dcc_config_react()$primary_col)
       manifest_data <- switch(dca_schematic_api,
                               reticulate =  manifest_generate_py(title = input$dropdown_template,
                                                                  rootNode = selected$schema(),
@@ -476,7 +479,7 @@ shinyServer(function(input, output, session) {
   # generate template
   observeEvent(input$btn_template, {
     # loading screen for template link generation
-    dcWaiter("show", msg = "Generating link...", color = dca_theme()$primary_col)
+    dcWaiter("show", msg = "Generating link...", color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
     manifest_url(switch(dca_schematic_api,
                            reticulate =  manifest_generate_py(title = input$dropdown_template,
                                                               rootNode = selected$schema(),
@@ -531,7 +534,7 @@ shinyServer(function(input, output, session) {
   observeEvent(input$btn_validate, {
 
     # loading screen for validating metadata
-    dcWaiter("show", msg = "Validating...", color = dca_theme()$primary_col)
+    dcWaiter("show", msg = "Validating manifest...", color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
     annotation_status <- switch(dca_schematic_api,
                                 reticulate = manifest_validate_py(inFile$raw()$datapath,
                                                                   selected$schema(),
@@ -594,7 +597,7 @@ shinyServer(function(input, output, session) {
   # if user click gsheet_btn, generating gsheet
   observeEvent(input$btn_val_gsheet, {
     # loading screen for Google link generation
-    dcWaiter("show", msg = "Generating link...", color = dca_theme()$primary_col)
+    dcWaiter("show", msg = "Generating link...", color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
     filled_manifest <- switch(dca_schematic_api,
                               reticulate = manifest_populate_py(paste0(config$community, " ", input$dropdown_template),
                                                                 inFile$raw()$datapath,
@@ -630,7 +633,7 @@ shinyServer(function(input, output, session) {
   ######## Submission Section ########
   observeEvent(input$btn_submit, {
     # loading screen for submitting data
-    dcWaiter("show", msg = "Submitting...", color = dca_theme()$primary_col)
+    dcWaiter("show", msg = "Submitting to Synapse. This may take a minute.", color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
 
 
     if (is.null(selected$folder())) {

@@ -28,6 +28,8 @@ suppressPackageStartupMessages({
 source_files <- list.files(c("functions", "modules"), pattern = "*\\.R$", recursive = TRUE, full.names = TRUE)
 sapply(source_files, FUN = source)
 
+dcc_config <- read_csv("dcc_config.csv")
+
 ## Set Up OAuth
 client_id <- Sys.getenv("DCA_CLIENT_ID")
 client_secret <- Sys.getenv("DCA_CLIENT_SECRET")
@@ -106,7 +108,8 @@ api <- oauth_endpoint(
 # The 'openid' scope is required by the protocol for retrieving user information.
 scope <- "openid view download modify"
 
-template_config_files <- parse_env_var(Sys.getenv("DCA_TEMPLATE_MENU_CONFIG"))
+template_config_files <- setNames(dcc_config$template_menu_config_file,
+                                  dcc_config$synapse_asset_view)
 
 ## Set Up Virtual Environment
 # ShinyAppys has a limit of 7000 files which this app' grossly exceeds
