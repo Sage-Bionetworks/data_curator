@@ -41,8 +41,8 @@ jobs:
           echo 'DCA_CLIENT_ID="${{ secrets.OAUTH_CLIENT_ID }}"' >> .Renviron
           echo 'DCA_CLIENT_SECRET="${{ secrets.OAUTH_CLIENT_SECRET }}"' >> .Renviron
           
-          echo DCA_SCHEMATIC_API_TYPE="reticulate" >> .Renviron
-          echo DCA_API_PORT="" >> .Renviron
+          echo DCA_SCHEMATIC_API_TYPE="rest" >> .Renviron
+          echo DCA_API_PORT="https://schematic.api.sagebionetworks.org" >> .Renviron
           echo DCA_API_HOST="" >> .Renviron
           
           echo DCA_MANIFEST_OUTPUT_FORMAT="google_sheet" >> .Renviron
@@ -122,7 +122,7 @@ jobs:
           # if tag is v*.*.*, deploy to prod, if main to staging, otherwise to test
           if (grepl("v[0-9]+.[0-9]+.[0-9]+", refName)) {
             message("Deploying release version of app")
-          } else if (refName == "main") {
+          } else if (refName %in% c("main", "beta-schematic-rest-api")) {
             appName <- paste(appName, "staging", sep = "-")
             message("Deploying staging version of app")
           } else if (refName == 'feat-UI-dashboard') { # tmp
