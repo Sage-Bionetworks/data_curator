@@ -42,8 +42,8 @@ jobs:
           echo 'DCA_CLIENT_SECRET="${{ secrets.OAUTH_CLIENT_SECRET }}"' >> .Renviron
           
           echo DCA_SCHEMATIC_API_TYPE="rest" >> .Renviron
-          echo DCA_API_PORT="https://schematic.api.sagebionetworks.org" >> .Renviron
-          echo DCA_API_HOST="" >> .Renviron
+          echo DCA_API_PORT="" >> .Renviron
+          echo DCA_API_HOST="https://schematic.api.sagebionetworks.org" >> .Renviron
           
           echo DCA_MANIFEST_OUTPUT_FORMAT="google_sheet" >> .Renviron
           echo DCA_COMPLIANCE_DASHBOARD=TRUE >> .Renviron
