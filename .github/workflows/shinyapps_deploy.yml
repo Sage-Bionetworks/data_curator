@@ -51,26 +51,26 @@ jobs:
           
           echo 'GITHUB_PAT="${{ secrets.GITHUB_TOKEN }}"' >> .Renviron
           
-      - name: Create and Activate Python Virtual Environment
-        shell: bash
-        run: |
-          python3 -m venv .venv
-          chmod 755 .venv/bin/activate
-          source .venv/bin/activate
-     
+#      - name: Create and Activate Python Virtual Environment
+#        shell: bash
+#        run: |
+#          python3 -m venv .venv
+#          chmod 755 .venv/bin/activate
+#          source .venv/bin/activate
+#     
       - uses: r-lib/actions/setup-renv@v2
-
-      - name: Install Schematic
-        shell: bash
-        run: |
-          # has to activate each bash step
-          source .venv/bin/activate
-          # use 'poetry' to install schematic dev schematic
-          # If commit is tagged for release or in main branch, install schematic from pypi
-            echo Installing pypi version of schematic
-            git clone --single-branch --branch main https://github.com/Sage-Bionetworks/schematic.git
-            cp schematic_config.yml schematic/config.yml
-            pip3 install schematicpy
+#
+#      - name: Install Schematic
+#        shell: bash
+#        run: |
+#          # has to activate each bash step
+#          source .venv/bin/activate
+#          # use 'poetry' to install schematic dev schematic
+#          # If commit is tagged for release or in main branch, install schematic from pypi
+#            echo Installing pypi version of schematic
+#            git clone --single-branch --branch main https://github.com/Sage-Bionetworks/schematic.git
+#            cp schematic_config.yml schematic/config.yml
+#            pip3 install schematicpy
 
       - name: Set Configurations for Schematic
         shell: bash
@@ -103,13 +103,13 @@ jobs:
           cp R/* functions/
           rm -r R/ DESCRIPTION NAMESPACE
 
-      - name: zip virtual env
-        shell: bash
-        # ShinyApps has a limit of 7000 files, far exceeded by the many Python dependencies
-        # that this app' has.  As a workaround we zip the virtual environment and later
-        # unzip it in 'global.R'
-        run: |
-          zip -rm .venv.zip .venv
+#      - name: zip virtual env
+#        shell: bash
+#        # ShinyApps has a limit of 7000 files, far exceeded by the many Python dependencies
+#        # that this app' has.  As a workaround we zip the virtual environment and later
+#        # unzip it in 'global.R'
+#        run: |
+#          zip -rm .venv.zip .venv
 
       - name: Authorize and deploy app
         shell: Rscript {0}
