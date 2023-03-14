@@ -35,54 +35,61 @@ For more customization, you can also provide:
 
 ## Setup a local instance of DCA
 
-### 1.  Clone this repo.
+### 1.  Clone this repo and install required R packages.
 
-        git clone https://github.com/Sage-Bionetworks/data_curator.git
-        cd data_curator
+```
+git clone https://github.com/Sage-Bionetworks/data_curator.git
+cd data_curator
+R -e "renv::restore()"
+```
         
-### 2. Install required R packages
-
-        R -e "renv::restore()"
-      
-### 3. Set up [schematic](github.com/sage-Bionetworks/schematic/)
+### 2. Set up [schematic](github.com/sage-Bionetworks/schematic/)
 
 DCA can use Schematic through [reticulate](https://rstudio.github.io/reticulate/) or a REST API.
 
 Using Schematic with reticulate requires python 3.9 or greater. Create a python virtual environment named `.venv` and install schematicpy through [pypi](https://pypi.org/project/schematicpy/) or from [GitHub](github.com/sage-Bionetworks/schematic/)  using [poetry](https://python-poetry.org/docs/). Follow the links to Schematic for more details on installation.
 
-        # python virtual env must be named .venv
-        `python3 -m venv .venv`
-        
-        # For pypi release of schematic, run this line
-        `pip3 install schematicpy` 
-        
-        # Or for development schematic, run the following. Note you'll need to install poetry.
-        `git clone https://github.com/Sage-Bionetworks/schematic.git`
-        `cd schematic`
-        `poetry shell`
-        `poetry install`
-        
-        # At this point you can also run the REST API service locally
-        # This will be accessible at http://0.0.0.0:3001
-        `poetry run python3 run_api.py`
-        
+```
+# python virtual env must be named .venv
+python3 -m venv .venv
+
+# For pypi release of schematic, run this line
+pip3 install schematicpy 
+
+# Or for development schematic, run the following. Note you'll need to install poetry.
+git clone https://github.com/Sage-Bionetworks/schematic.git
+cd schematic
+poetry shell
+poetry install
+
+# At this point you can also run the REST API service locally
+# This will be accessible at http://0.0.0.0:3001
+poetry run python3 run_api.py
+```
+
 To use Schematic through its REST API, run the service locally using the commands above. Or access [Schematic hosted by Sage Bionetwork](link TBD).
 
-### 4. Configure App {#configureapp}
+### 3. Configure App
 
 Many app and schematic configurations are set in `dcc_config.yml` as described in [Quickstart](#quickstart). The following are stored as environment variables. Add these to `.Renviron`.
 
-**Schematic configurations**  
+Schematic configurations  
+```
 **DCA_SCHEMATIC_API_TYPE**: "rest", "reticulate", or "offline"  
 **DCA_API_HOST**: "" (blank string) if not using the REST API, otherwise URL to schematic service  
 **DCA_API_PORT**: "" (blank string) if not using the REST API **LOCALLY**, otherwise the port. Usually 3001.  
-        
-**OAuth-related variables**  
+```
+
+OAuth-related variables
+```
 **DCA_CLIENT_ID**: OAuth client ID  
 **DCA_CLIENT_SECRET**: OAuth client secret  
-**DCA_APP_URL**: OAuth redirect URL  
-        
-### Data Model Configuration {#datamodel}
+**DCA_APP_URL**: OAuth redirect URL
+```
+
+--- 
+
+### Data Model Configuration
 
 The app configuration file `www/config.json` will be used to adapt the schema dropdown menu in the app. The `config.json` file will be automatically created in the deployment workflow.
 
@@ -92,15 +99,18 @@ For local testing, run below snippet to generate `www/config.json` and check the
 
 2.  Clone your data model repo, i.e:
 
-        git clone https://github.com/Sage-Bionetworks/data-models
+```
+git clone https://github.com/Sage-Bionetworks/data-models
+```
 
 3.  Create `config.json` and placed it in the `www` folder
 
-        python3 .github/generate_config_json.py \
-          -jd data-models/example.model.jsonld \
-          -schema 'Sage-Bionetworks/data-models' \
-          -service Sage-Bionetworks/schematic'
-
+```
+python3 .github/generate_config_json.py \
+  -jd data-models/example.model.jsonld \
+  -schema 'Sage-Bionetworks/data-models' \
+  -service Sage-Bionetworks/schematic'
+```
 
 ## Authentication
 
