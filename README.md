@@ -70,7 +70,7 @@ To use Schematic through its REST API, run the service locally using the command
 
 ### 4. Configure App {#configureapp}
 
-Many app and schematic configurations are set in `dcc_config.yml` as described in [Quickstart](#quickstart). The following are stored as environment variables. Add these to `.Rprofile`.
+Many app and schematic configurations are set in `dcc_config.yml` as described in [Quickstart](#quickstart). The following are stored as environment variables. Add these to `.Renviron`.
 
 **Schematic configurations**  
 **DCA_SCHEMATIC_API_TYPE**: "rest", "reticulate", or "offline"  
