@@ -1,59 +1,88 @@
 # Data Curator App
 
-<!-- badges: start -->
-[![Codecov test coverage](https://codecov.io/gh/Sage-Bionetworks/data_curator/branch/main/graph/badge.svg)](https://app.codecov.io/gh/Sage-Bionetworks/data_curator?branch=main)
-<!-- badges: end -->
-
 ## Introduction
 
-The _Data Curator App_ is an R Shiny app that serves as the _frontend_ to the schematic Python package. It allows data contributors to easily annotate, validate and submit their metadata.
+The _Data Curator App_ is an R Shiny app that serves as the _frontend_ to the [schematic Python package](github.com/sage-Bionetworks/schematic/). It allows data contributors to easily annotate, validate and submit their metadata.
 
----
 
-## Get Started and Installation
+## Quickstart {#quickstart}
 
-Follow the steps below to make sure the _Data Curator App_ is fully setup to work with the [schematic]:
+Sage Bionetworks hosts a version of Data Curator App for its collaborators. [Access it here](link TBD).  
+To configure your project for this version, edit `dcc_config.csv` and submit a pull request.
+`dcc_config.csv` contains the following. **Bold fields** are required:
 
-### Data Curator App Setup
+**project_name**: The display name of your project  
+**synapse_asset_view**: The synapse ID of your project's asset view  
+**data_model_url**: A URL to your data model. Must be the **raw** file if using GitHub  
+**template_menu_config_file**: www/template_config/<your-project>_config.json  
+**manifest_output_format**: "excel"  
+**submit_use_schema_labels**: (default TRUE) TRUE or FALSE  
+**submit_table_manipulation**: (default "replace") "replace" or "upsert"  
+**use_compliance_dashboard**: (default FALSE) TRUE or FALSE  
+primary_col: (default Sage theme) hexadecimal color code  
+secondary_col; (default Sage theme) hexadecimal color code  
+sidebar_col: (default Sage theme) hexadecimal color code  
+        
+You will need:  
+- A Synapse asset view for you project  
+- A [data model](#datamodel)  
 
-1.  Clone this repo (front-end) with one single branch (i.e., _main_):
+For more customization, you can also provide:  
+- A json file for manifest templates  
+- Schematic options  
+- Display the compliance dashboard  
+- A custom logo and color scheme  
 
-        git clone --single-branch --branch main https://github.com/Sage-Bionetworks/data_curator.git
+## Setup a local instance of DCA
 
-2.  Set environmental variables to configure app:
+### 1.  Clone this repo.
 
-        `DCA_MANIFEST_OUTPUT_FORMAT` = "google_sheet" or "excel" - control whether templates can be exported as 
-google sheets or excel documents. 
+        git clone https://github.com/Sage-Bionetworks/data_curator.git
+        cd data_curator
+        
+### 2. Install required R packages
 
-3.  Set environmental variable to schematic's REST API service
+        R -e "renv::restore()"
+      
+### 3. Set up [schematic](github.com/sage-Bionetworks/schematic/)
 
-    If running schematic locally with a Flask server:  
-    `DCA_API_HOST`="http://0.0.0.0" 
-    `DCA_API_PORT`="3001"
+DCA can use Schematic through [reticulate](https://rstudio.github.io/reticulate/) or a REST API.
 
-4.  Install required R pacakges dependencies:
+Using Schematic with reticulate requires python 3.9 or greater. Create a python virtual environment named `.venv` and install schematicpy through [pypi](https://pypi.org/project/schematicpy/) or from [GitHub](github.com/sage-Bionetworks/schematic/)  using [poetry](https://python-poetry.org/docs/). Follow the links to Schematic for more details on installation.
 
-        R -f install-pkgs.R
+        # python virtual env must be named .venv
+        `python3 -m venv .venv`
+        
+        # For pypi release of schematic, run this line
+        `pip3 install schematicpy` 
+        
+        # Or for development schematic, run the following. Note you'll need to install poetry.
+        `git clone https://github.com/Sage-Bionetworks/schematic.git`
+        `cd schematic`
+        `poetry shell`
+        `poetry install`
+        
+        # At this point you can also run the REST API service locally
+        # This will be accessible at http://0.0.0.0:3001
+        `poetry run python3 run_api.py`
+        
+To use Schematic through its REST API, run the service locally using the commands above. Or access [Schematic hosted by Sage Bionetwork](link TBD).
 
-### Schematic Setup
+### 4. Configure App {#configureapp}
 
-1.  Clone the [schematic] (backend) as a folder `schematic` inside the `data_curator` folder:
+Many app and schematic configurations are set in `dcc_config.yml` as described in [Quickstart](#quickstart). The following are stored as environment variables. Add these to `.Rprofile`.
 
-        git clone --single-branch --branch develop https://github.com/Sage-Bionetworks/schematic.git
-
-2.  Install the latest release of the `schematic` via `pip`. IF NOT USING CONDA, install the devel version below:
-
-        python -m pip install schematicpy
-
-    For development and test with the latest update from `schematic`, install the `schematic` via [poetry]:
-
-        cd schematic
-        poetry build
-        pip install dist/schematicpy-1.0.0-py3-none-any.whl
-
-3.  Modify the `schematic_config.yml` to set up schematic configuration. To do so, follow the instructions on the [schematic's documentation](https://sage-schematic.readthedocs.io/en/develop/index.html#package-installation-and-setup)
-
-### Data Model Configuration
+**Schematic configurations**  
+**DCA_SCHEMATIC_API_TYPE**: "rest", "reticulate", or "offline"  
+**DCA_API_HOST**: "" (blank string) if not using the REST API, otherwise URL to schematic service  
+**DCA_API_PORT**: "" (blank string) if not using the REST API **LOCALLY**, otherwise the port. Usually 3001.  
+        
+**OAuth-related variables**  
+**DCA_CLIENT_ID**: OAuth client ID  
+**DCA_CLIENT_SECRET**: OAuth client secret  
+**DCA_APP_URL**: OAuth redirect URL  
+        
+### Data Model Configuration {#datamodel}
 
 The app configuration file `www/config.json` will be used to adapt the schema dropdown menu in the app. The `config.json` file will be automatically created in the deployment workflow.
 
@@ -72,16 +101,11 @@ For local testing, run below snippet to generate `www/config.json` and check the
           -schema 'Sage-Bionetworks/data-models' \
           -service Sage-Bionetworks/schematic'
 
----
 
 ## Authentication
 
-This utilizes a Synapse Authentication (OAuth) client (code motivated by [ShinyOAuthExample](https://github.com/brucehoff/ShinyOAuthExample) and [app.R](https://gist.github.com/jcheng5/44bd750764713b5a1df7d9daf5538aea). Each application is required to have its own OAuth client as these clients cannot be shared between one another. View instructions [here](https://docs.synapse.org/articles/using_synapse_as_an_oauth_server.html) to learn how to request a client. Once you obtain the client, make sure to add it to the configuration yaml file:
+This utilizes a Synapse Authentication (OAuth) client (code motivated by [ShinyOAuthExample](https://github.com/brucehoff/ShinyOAuthExample) and [app.R](https://gist.github.com/jcheng5/44bd750764713b5a1df7d9daf5538aea). Each application is required to have its own OAuth client as these clients cannot be shared between one another. View instructions [here](https://docs.synapse.org/articles/using_synapse_as_an_oauth_server.html) to learn how to request a client. Once you obtain the client, make sure to add the corresponding [environment variables](#configureapp)
 
-- `CLIENT_ID` and `CLIENT_SECRET`
-- `APP_URL`: the redirection url to your app
-
----
 
 ## Deployment
 
@@ -94,7 +118,7 @@ Main contributors and developers:
 - [Rongrong Chai](https://github.com/rrchai)
 - [Anthony Williams](https://github.com/afwillia)
 - [Milen Nikolov](https://github.com/milen-sage)
-- [Lauren Wolfe](https://github.com/lakikowolfe)
+- [Loren Wolfe](https://github.com/lakikowolfe)
 - [Robert Allaway](https://github.com/allaway)
 - [Bruno Grande](https://github.com/BrunoGrandePhD)
 - [Xengie Doan](https://github.com/xdoan)
