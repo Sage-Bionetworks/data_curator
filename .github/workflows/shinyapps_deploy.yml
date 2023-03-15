@@ -33,11 +33,11 @@ jobs:
       - uses: r-lib/actions/setup-pandoc@v2
           
       - name: Install schematic
--       if: ${{env.DCA_SCHEMATIC_API_TYPE == 'reticulate' }}
--       uses: actions/setup-python@v4
--       with:
--         python-version: '3.8'
--         cache: 'pip'
+        if: ${{env.DCA_SCHEMATIC_API_TYPE == 'reticulate' }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.8'
+          cache: 'pip'
           
       - name: Set up virtual environment
         if: ${{env.DCA_SCHEMATIC_API_TYPE == 'reticulate' }}
