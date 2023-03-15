@@ -23,14 +23,14 @@ jobs:
       DCA_API_HOST: "https://schematic.api.sagebionetworks.org"
       DCA_API_PORT: ""
     steps:
-    
-      - uses: actions/checkout@v3
-
-      - uses: r-lib/actions/setup-pandoc@v2
       - name: Install System Dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y libcurl4-openssl-dev libpng-dev libxml2-dev
+          
+      - uses: actions/checkout@v3
+
+      - uses: r-lib/actions/setup-pandoc@v2
           
       - name: Install python
         if: ${{env.DCA_SCHEMATIC_API_TYPE == 'reticulate' }}
