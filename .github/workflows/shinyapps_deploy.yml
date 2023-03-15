@@ -23,18 +23,6 @@ jobs:
       DCA_API_HOST: "https://schematic.api.sagebionetworks.org"
       DCA_API_PORT: ""
     steps:
-      - name: Write R environmental variables
-        shell: bash
-        run: |
-          echo 'DCA_CLIENT_ID="${{ secrets.OAUTH_CLIENT_ID }}"' >> .Renviron
-          echo 'DCA_CLIENT_SECRET="${{ secrets.OAUTH_CLIENT_SECRET }}"' >> .Renviron
-          
-          echo 'DCA_SCHEMATIC_API_TYPE="${{ env.DCA_SCHEMATIC_API_TYPE }}"' >> .Renviron
-          echo 'DCA_API_PORT="${{ env.DCA_API_PORT }}"' >> .Renviron
-          echo 'DCA_API_HOST="${{ env.DCA_API_HOST }}"' >> .Renviron
-          
-          echo 'GITHUB_PAT="${{ secrets.GITHUB_TOKEN }}"' >> .Renviron
-          
       - name: Install System Dependencies
         run: |
           sudo apt-get update
@@ -92,6 +80,18 @@ jobs:
         run: |
           cp R/* functions/
           rm -r R/ DESCRIPTION NAMESPACE
+          
+      - name: Write R environmental variables
+        shell: bash
+        run: |
+          echo 'DCA_CLIENT_ID="${{ secrets.OAUTH_CLIENT_ID }}"' >> .Renviron
+          echo 'DCA_CLIENT_SECRET="${{ secrets.OAUTH_CLIENT_SECRET }}"' >> .Renviron
+          
+          echo 'DCA_SCHEMATIC_API_TYPE="${{ env.DCA_SCHEMATIC_API_TYPE }}"' >> .Renviron
+          echo 'DCA_API_PORT="${{ env.DCA_API_PORT }}"' >> .Renviron
+          echo 'DCA_API_HOST="${{ env.DCA_API_HOST }}"' >> .Renviron
+          
+          echo 'GITHUB_PAT="${{ secrets.GITHUB_TOKEN }}"' >> .Renviron
 
       - name: Authorize and deploy app
         shell: Rscript {0}
