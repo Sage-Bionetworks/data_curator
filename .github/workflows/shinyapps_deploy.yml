@@ -29,7 +29,7 @@ jobs:
           echo 'DCA_CLIENT_ID="${{ secrets.OAUTH_CLIENT_ID }}"' >> .Renviron
           echo 'DCA_CLIENT_SECRET="${{ secrets.OAUTH_CLIENT_SECRET }}"' >> .Renviron
           
-          echo 'DCA_SCHEMATIC_API_TYPE="$ {{ env.DCA_SCHEMATIC_API_TYPE }}"' >> .Renviron
+          echo 'DCA_SCHEMATIC_API_TYPE="${{ env.DCA_SCHEMATIC_API_TYPE }}"' >> .Renviron
           echo 'DCA_API_PORT="${{ env.DCA_API_PORT }}"' >> .Renviron
           echo 'DCA_API_HOST="${{ env.DCA_API_HOST }}"' >> .Renviron
           
@@ -41,12 +41,12 @@ jobs:
           sudo apt-get install -y libcurl4-openssl-dev libpng-dev libxml2-dev
           
       - name: Install python
-        if: $ {{env.DCA_SCHEMATIC_REST_API == 'reticulate' }}
+        if: ${{env.DCA_SCHEMATIC_REST_API == 'reticulate' }}
         run: |
           sudo apt-get install -y pip python3.8-venv
           
       - name: Set up virtual environment
-        if: $ {{env.DCA_SCHEMATIC_API_TYPE == 'reticulate' }}
+        if: ${{env.DCA_SCHEMATIC_API_TYPE == 'reticulate' }}
         # When shinyapps.io supports python 3.9+ split this into two steps
         # to install schematic from pypi or github
         run: |
@@ -56,7 +56,7 @@ jobs:
           pip3 install schematicpy==23.1.1
           
       - name: zip virtual env
-        if: $ {{env.DCA_SCHEMATIC_API_TYPE == 'reticulate' }}
+        if: ${{env.DCA_SCHEMATIC_API_TYPE == 'reticulate' }}
         shell: bash
         # ShinyApps has a limit of 7000 files, far exceeded by the many Python dependencies
         # that this app' has.  As a workaround we zip the virtual environment and later
@@ -66,13 +66,13 @@ jobs:
           
       - name: Set Configurations for Schematic
       # write out configuration files using github secrets
-        if: $ {{env.DCA_SCHEMATIC_API_TYPE == 'reticulate' }}
+        if: ${{env.DCA_SCHEMATIC_API_TYPE == 'reticulate' }}
         shell: bash
         run: |
           echo "${{ secrets.SCHEMATIC_SYNAPSE_CONFIG }}" > .synapseConfig
 
       - name: Save service account credentials for Schematic
-        if: $ {{env.DCA_SCHEMATIC_API_TYPE == 'reticulate' }}
+        if: ${{env.DCA_SCHEMATIC_API_TYPE == 'reticulate' }}
         id: create-json
         uses: jsdaniell/create-json@1.1.2
         with:
