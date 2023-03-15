@@ -51,8 +51,7 @@ jobs:
             ${{ runner.os }}-
           
       - name: Set up virtual environment
-        if: ${{ steps.cache-venv.outputs.cache-hit != 'true' }}
-        if: ${{env.DCA_SCHEMATIC_API_TYPE == 'reticulate' }}
+        if: ${{env.DCA_SCHEMATIC_API_TYPE == 'reticulate' }} & ${{ steps.cache-venv.outputs.cache-hit != 'true' }}
         # When shinyapps.io supports python 3.9+ split this into two steps
         # to install schematic from pypi or github
         shell: bash
@@ -75,8 +74,7 @@ jobs:
 # - run: poetry run pytest
 #           
       - name: zip virtual env
-        if: ${{ steps.cache-venv.outputs.cache-hit != 'true' }}
-        if: ${{env.DCA_SCHEMATIC_API_TYPE == 'reticulate' }}
+        if: ${{env.DCA_SCHEMATIC_API_TYPE == 'reticulate' }} & ${{ steps.cache-venv.outputs.cache-hit != 'true' }}
         shell: bash
         # ShinyApps has a limit of 7000 files, far exceeded by the many Python dependencies
         # that this app' has.  As a workaround we zip the virtual environment and later
