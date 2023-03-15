@@ -49,6 +49,7 @@ jobs:
         if: ${{env.DCA_SCHEMATIC_API_TYPE == 'reticulate' }}
         # When shinyapps.io supports python 3.9+ split this into two steps
         # to install schematic from pypi or github
+        shell: bash
         run: |
           python3 -m venv .venv
           chmod 755 .venv/bin/activate
