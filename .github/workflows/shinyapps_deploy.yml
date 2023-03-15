@@ -46,8 +46,30 @@ jobs:
           python3 -m venv .venv
           chmod 755 .venv/bin/activate
           source .venv/bin/activate
-          pip3 install schematicpy==23.1.1
+      
+      - name: Install schematic
+        if: ${{env.DCA_SCHEMATIC_API_TYPE == 'reticulate' }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.8'
+          cache: 'pipenv'
           
+      - name: Install schematic
+        if: ${{env.DCA_SCHEMATIC_API_TYPE == 'reticulate' }}
+        run: pip install schematicpy==23.1.1
+
+# https://github.com/actions/setup-python/blob/main/docs/advanced-usage.md#caching-packages
+# For the future, look at poetry install
+# - uses: actions/checkout@v3
+# - name: Install poetry
+#   run: pipx install poetry
+# - uses: actions/setup-python@v4
+#   with:
+#     python-version: '3.9'
+#     cache: 'poetry'
+# - run: poetry install
+# - run: poetry run pytest
+#           
       - name: zip virtual env
         if: ${{env.DCA_SCHEMATIC_API_TYPE == 'reticulate' }}
         shell: bash
