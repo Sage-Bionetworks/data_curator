@@ -119,7 +119,7 @@ This utilizes a Synapse Authentication (OAuth) client (code motivated by [ShinyO
 
 ## Deployment
 
-To deploy the app to shinyapps.io, please follow the instructions in the [shinyapps_deploy.md](./shinyapps_deploy.md).
+To deploy the app to shinyapps.io, please follow the instructions in the [shinyapps_deploy.md](docs/shinyapps_deploy.md).
 
 ## Contributors
 
