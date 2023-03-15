@@ -1,6 +1,3 @@
-# Workflow derived from https://github.com/r-lib/actions/tree/master/examples
-# Need help debugging build failures? Start at https://github.com/r-lib/actions#where-to-find-help
-
 name: shiny-deploy
 
 on:
@@ -8,6 +5,7 @@ on:
     branches:
       - main
       - develop*
+      - develop-*
       - beta-schematic-rest-api
     tags:
       - v[0-9]+.[0-9]+.[0-9]+
@@ -15,142 +13,120 @@ on:
       - '.github/ISSUE_TEMPLATE/**'
       - '**/*.md'
       - '**/.gitignore'
-
 jobs:
   shiny-deploy:
     runs-on: ubuntu-latest
-    # This image seems to be based on rocker/r-ver which in turn is based on debian
     container: rocker/rstudio:4.1.2
     env:
-      # This should not be necessary for installing from public repo's however remotes::install_github() fails without it.
-      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
-      
+      GITHUB_PAT: ${{ github.GITHUB_TOKEN }}
+      DCA_SCHEMATIC_API_TYPE: reticulate
+      DCA_API_HOST: "https://schematic.api.sagebionetworks.org"
+      DCA_API_PORT: ""
     steps:
-      - name: Install System Dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y pip python3.8-venv libcurl4-openssl-dev libpng-dev libxml2-dev
-
-      - uses: actions/checkout@v3
-
-      - uses: r-lib/actions/setup-pandoc@v2
-      
       - name: Write R environmental variables
         shell: bash
         run: |
           echo 'DCA_CLIENT_ID="${{ secrets.OAUTH_CLIENT_ID }}"' >> .Renviron
           echo 'DCA_CLIENT_SECRET="${{ secrets.OAUTH_CLIENT_SECRET }}"' >> .Renviron
           
-          echo DCA_SCHEMATIC_API_TYPE="rest" >> .Renviron
-          echo DCA_API_PORT="" >> .Renviron
-          echo DCA_API_HOST="https://schematic.api.sagebionetworks.org" >> .Renviron
-          
-          echo DCA_MANIFEST_OUTPUT_FORMAT="google_sheet" >> .Renviron
-          echo DCA_COMPLIANCE_DASHBOARD=TRUE >> .Renviron
-          echo DCA_SCHEMATIC_SUBMIT_USE_SCHEMA_LABEL=FALSE >> .Renviron
+          echo 'DCA_SCHEMATIC_API_TYPE="$ {{ env.DCA_SCHEMATIC_API_TYPE }}"' >> .Renviron
+          echo 'DCA_API_PORT="${{ env.DCA_API_PORT }}"' >> .Renviron
+          echo 'DCA_API_HOST="${{ env.DCA_API_HOST }}"' >> .Renviron
           
           echo 'GITHUB_PAT="${{ secrets.GITHUB_TOKEN }}"' >> .Renviron
           
-#      - name: Create and Activate Python Virtual Environment
-#        shell: bash
-#        run: |
-#          python3 -m venv .venv
-#          chmod 755 .venv/bin/activate
-#          source .venv/bin/activate
-#     
-      - uses: r-lib/actions/setup-renv@v2
-#
-#      - name: Install Schematic
-#        shell: bash
-#        run: |
-#          # has to activate each bash step
-#          source .venv/bin/activate
-#          # use 'poetry' to install schematic dev schematic
-#          # If commit is tagged for release or in main branch, install schematic from pypi
-#            echo Installing pypi version of schematic
-#            git clone --single-branch --branch main https://github.com/Sage-Bionetworks/schematic.git
-#            cp schematic_config.yml schematic/config.yml
-#            pip3 install schematicpy
-
+      - name: Install System Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libcurl4-openssl-dev libpng-dev libxml2-dev
+          
+      - name: Install python
+        if: $ {{env.DCA_SCHEMATIC_REST_API == 'reticulate' }}
+        run: |
+          sudo apt-get install -y pip python3.8-venv
+          
+      - name: Set up virtual environment
+        if: $ {{env.DCA_SCHEMATIC_API_TYPE == 'reticulate' }}
+        # When shinyapps.io supports python 3.9+ split this into two steps
+        # to install schematic from pypi or github
+        run: |
+          python3 -m venv .venv
+          chmod 755 .venv/bin/activate
+          source .venv/bin/activate
+          pip3 install schematicpy==23.1.1
+          
+      - name: zip virtual env
+        if: $ {{env.DCA_SCHEMATIC_API_TYPE == 'reticulate' }}
+        shell: bash
+        # ShinyApps has a limit of 7000 files, far exceeded by the many Python dependencies
+        # that this app' has.  As a workaround we zip the virtual environment and later
+        # unzip it in 'global.R'
+        run: |
+          zip -rm .venv.zip .venv
+          
       - name: Set Configurations for Schematic
+      # write out configuration files using github secrets
+        if: $ {{env.DCA_SCHEMATIC_API_TYPE == 'reticulate' }}
         shell: bash
         run: |
-          # write out configuration files using github secrets
           echo "${{ secrets.SCHEMATIC_SYNAPSE_CONFIG }}" > .synapseConfig
-          echo "${{ secrets.SCHEMATIC_CREDS_PATH }}" > credentials.json
-          echo "${{ secrets.SCHEMATIC_TOKEN_PICKLE }}" | base64 -d > token.pickle
 
       - name: Save service account credentials for Schematic
+        if: $ {{env.DCA_SCHEMATIC_API_TYPE == 'reticulate' }}
         id: create-json
         uses: jsdaniell/create-json@1.1.2
         with:
           name: 'schematic_service_account_creds.json'
           json: ${{ secrets.SCHEMATIC_SERVICE_ACCT_CREDS }}
+          
+      - uses: actions/checkout@v3
 
-#      - name: Set Configurations for Data Model
-#        shell: bash
-#        run: |
-#          source .venv/bin/activate
-#          # download the data models and create config.json
-#          python3 .github/config_schema.py \
-#            -c schematic_config.yml \
-#            --service_repo 'Sage-Bionetworks/schematic' \
-#            --overwrite
-
+      - uses: r-lib/actions/setup-pandoc@v2
+      
+      - uses: r-lib/actions/setup-renv@v2
+          
       - name: shinyapps.io R pkg hack
+        # Delete files that makes shinyapps.io treat this like a golem app
         shell: bash
         run: |
           cp R/* functions/
           rm -r R/ DESCRIPTION NAMESPACE
-
-#      - name: zip virtual env
-#        shell: bash
-#        # ShinyApps has a limit of 7000 files, far exceeded by the many Python dependencies
-#        # that this app' has.  As a workaround we zip the virtual environment and later
-#        # unzip it in 'global.R'
-#        run: |
-#          zip -rm .venv.zip .venv
 
       - name: Authorize and deploy app
         shell: Rscript {0}
         run: |
           renv::restore()
           install.packages("rsconnect")
+          
           repo <- Sys.getenv("GITHUB_REPOSITORY")
           appName <- strsplit(repo, "/")[[1]][2]
           refName <- Sys.getenv("GITHUB_REF_NAME")
+          
           # if tag is v*.*.*, deploy to prod, if main to staging, otherwise to test
           if (grepl("v[0-9]+.[0-9]+.[0-9]+", refName)) {
             message("Deploying release version of app")
           } else if (refName %in% c("main", "beta-schematic-rest-api")) {
             appName <- paste(appName, "staging", sep = "-")
             message("Deploying staging version of app")
-          } else if (refName == 'feat-UI-dashboard') { # tmp
-            appName <- paste(appName, "demo", sep = "-")
           } else {
             appName <- paste(appName, "testing1", sep = "-")
             message("Deploying testing version of app")
           }
           message(sprintf("Deploying to %s instance.", appName))
+          
           rsConnectUser <- "${{ secrets.RSCONNECT_USER }}"
           rsConnectToken <- "${{ secrets.RSCONNECT_TOKEN }}"
           rsConnectSecret <- "${{ secrets.RSCONNECT_SECRET }}"
-          # create config file
-          config <- "CLIENT_ID: ${{ secrets.OAUTH_CLIENT_ID }}"
-          config <- c(config, "CLIENT_SECRET: ${{ secrets.OAUTH_CLIENT_SECRET }}")
+          rsconnect::setAccountInfo(rsConnectUser, rsConnectToken, rsConnectSecret)
+          
+          # Set app URL for OAuth
           appUrl <- sprintf("https://%s.shinyapps.io/%s", rsConnectUser, appName)
           renviron <- readLines(".Renviron")
           renviron <- c(renviron, sprintf("DCA_APP_URL=%s", appUrl))
           writeLines(renviron, ".Renviron") 
-          config <- c(config, sprintf("APP_URL: %s", appUrl))
-          configFileConn <- file("oauth_config.yml")
-          tryCatch(
-            writeLines(config, configFileConn),
-            finally=close(configFileConn)
-          )
-          rsconnect::setAccountInfo(rsConnectUser, rsConnectToken, rsConnectSecret)
+          
           # Get app names. If app exists, configure then deploy. Otherwise
-          # deploy then configure
+          # deploy then configure.
           apps <- rsconnect::applications()$name
           if (appName %in% apps) {
             rsconnect::configureApp(appName = appName, size = "xxxlarge", logLevel = "verbose")
