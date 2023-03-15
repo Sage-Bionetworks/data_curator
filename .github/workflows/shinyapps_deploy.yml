@@ -23,6 +23,10 @@ jobs:
       DCA_API_HOST: "https://schematic.api.sagebionetworks.org"
       DCA_API_PORT: ""
     steps:
+    
+      - uses: actions/checkout@v3
+
+      - uses: r-lib/actions/setup-pandoc@v2
       - name: Install System Dependencies
         run: |
           sudo apt-get update
@@ -68,10 +72,6 @@ jobs:
           name: 'schematic_service_account_creds.json'
           json: ${{ secrets.SCHEMATIC_SERVICE_ACCT_CREDS }}
           
-      - uses: actions/checkout@v3
-
-      - uses: r-lib/actions/setup-pandoc@v2
-      
       - uses: r-lib/actions/setup-renv@v2
           
       - name: shinyapps.io R pkg hack
