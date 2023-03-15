@@ -114,7 +114,7 @@ python3 .github/generate_config_json.py \
 
 ## Authentication
 
-This utilizes a Synapse Authentication (OAuth) client (code motivated by [ShinyOAuthExample](https://github.com/brucehoff/ShinyOAuthExample) and [app.R](https://gist.github.com/jcheng5/44bd750764713b5a1df7d9daf5538aea). Each application is required to have its own OAuth client as these clients cannot be shared between one another. View instructions [here](https://docs.synapse.org/articles/using_synapse_as_an_oauth_server.html) to learn how to request a client. Once you obtain the client, make sure to add the corresponding [environment variables](#configureapp)
+This utilizes a Synapse Authentication (OAuth) client (code motivated by [ShinyOAuthExample](https://github.com/brucehoff/ShinyOAuthExample) and [app.R](https://gist.github.com/jcheng5/44bd750764713b5a1df7d9daf5538aea). Each application is required to have its own OAuth client as these clients cannot be shared between one another. View instructions [here](https://help.synapse.org/docs/Using-Synapse-as-an-OAuth-Server.2048327904.html) to learn how to request a client. Once you obtain the client, make sure to add the corresponding [environment variables](#configureapp)
 
 
 ## Deployment
