@@ -75,16 +75,16 @@ Many app and schematic configurations are set in `dcc_config.yml` as described i
 
 Schematic configurations  
 ```
-**DCA_SCHEMATIC_API_TYPE**: "rest", "reticulate", or "offline"  
-**DCA_API_HOST**: "" (blank string) if not using the REST API, otherwise URL to schematic service  
-**DCA_API_PORT**: "" (blank string) if not using the REST API **LOCALLY**, otherwise the port. Usually 3001.  
+DCA_SCHEMATIC_API_TYPE: "rest", "reticulate", or "offline"  
+DCA_API_HOST: "" (blank string) if not using the REST API, otherwise URL to schematic service  
+DCA_API_PORT: "" (blank string) if not using the REST API **LOCALLY**, otherwise the port. Usually 3001.  
 ```
 
 OAuth-related variables
 ```
-**DCA_CLIENT_ID**: OAuth client ID  
-**DCA_CLIENT_SECRET**: OAuth client secret  
-**DCA_APP_URL**: OAuth redirect URL
+DCA_CLIENT_ID: OAuth client ID  
+DCA_CLIENT_SECRET: OAuth client secret  
+DCA_APP_URL: OAuth redirect URL
 ```
 
 --- 
