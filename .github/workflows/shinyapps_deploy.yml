@@ -37,18 +37,14 @@ jobs:
         run: |
           sudo apt-get install -y pip python3.8-venv
           
-      - name: Cache node modules
+      - name: Cache python venv
         id: cache-venv
         uses: actions/cache@v3
         env:
           cache-name: cache-venv
         with:
-          path: .venv
+          path: ./.venv
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-build-${{ env.cache-name }}-
-            ${{ runner.os }}-build-
-            ${{ runner.os }}-
           
       - name: Set up virtual environment
         if: ${{env.DCA_SCHEMATIC_API_TYPE == 'reticulate' }} & ${{ steps.cache-venv.outputs.cache-hit != 'true' }}
