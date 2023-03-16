@@ -20,6 +20,7 @@ jobs:
     env:
       GITHUB_PAT: ${{ github.GITHUB_TOKEN }}
       PIP_CACHE_DIR: ~/.pip
+      PIP_DOWNLOAD_CACHE: ~/.pip_download_cache
       DCA_SCHEMATIC_API_TYPE: reticulate
       DCA_API_HOST: "https://schematic.api.sagebionetworks.org"
       DCA_API_PORT: ""
@@ -37,7 +38,7 @@ jobs:
         name: Install python
         run: |
           sudo apt-get install -y pip python3.8-venv
-          mkdir ${{ env.PIP_CACHE_DIR}}
+          mkdir ${{ env.PIP_CACHE_DIR}} ${{ env.PIP_DOWNLOAD_CACHE }}
           
       - if: ${{env.DCA_SCHEMATIC_API_TYPE == 'reticulate' }}
         name: Get poetry lock
@@ -52,6 +53,7 @@ jobs:
         with:
           path: |
             ${{ env.PIP_CACHE_DIR }}
+            ${{ env.PIP_DOWNLOAD_CACHE }}
             .venv
             .venv.zip
           key: ${{ runner.os }}-build-${{ env.cache-name }}-schematicpy-${{ hashFiles('poetry.lock') }}
