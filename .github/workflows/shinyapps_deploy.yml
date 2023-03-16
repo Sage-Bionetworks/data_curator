@@ -81,15 +81,6 @@ jobs:
 # - run: poetry install
 # - run: poetry run pytest
 #           
-      - if: ${{env.DCA_SCHEMATIC_API_TYPE == 'reticulate' }}
-        name: zip virtual env
-        shell: bash
-        # ShinyApps has a limit of 7000 files, far exceeded by the many Python dependencies
-        # that this app' has.  As a workaround we zip the virtual environment and later
-        # unzip it in 'global.R'
-        run: |
-          zip -rm .venv.zip .venv
-          
       - name: Set Configurations for Schematic
       # write out configuration files using github secrets
         if: ${{env.DCA_SCHEMATIC_API_TYPE == 'reticulate' }}
@@ -104,6 +95,26 @@ jobs:
         with:
           name: 'schematic_service_account_creds.json'
           json: ${{ secrets.SCHEMATIC_SERVICE_ACCT_CREDS }}
+          
+      - if: ${{env.DCA_SCHEMATIC_API_TYPE == 'reticulate' }}
+        name: Set Configurations for Data Model
+        shell: bash
+        run: |
+          source .venv/bin/activate
+          # download the data models and create config.json
+          python3 .github/config_schema.py \
+            -c schematic_config.yml \
+            --service_repo 'Sage-Bionetworks/schematic' \
+            --overwrite
+          
+      - if: ${{env.DCA_SCHEMATIC_API_TYPE == 'reticulate' }}
+        name: zip virtual env
+        shell: bash
+        # ShinyApps has a limit of 7000 files, far exceeded by the many Python dependencies
+        # that this app' has.  As a workaround we zip the virtual environment and later
+        # unzip it in 'global.R'
+        run: |
+          zip -rm .venv.zip .venv
           
       - uses: r-lib/actions/setup-renv@v2
           
