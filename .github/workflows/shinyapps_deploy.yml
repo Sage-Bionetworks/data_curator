@@ -58,6 +58,12 @@ jobs:
           key: ${{ runner.os }}-build-${{ env.cache-name }}-schematicpy-${{ hashFiles('poetry.lock') }}
           
       - if: ${{env.DCA_SCHEMATIC_API_TYPE == 'reticulate' }}
+        name: Install schematic
+        # Try installing schematicpy outside of venv for caching
+        shell: bash
+        run: python3 -m pip install schematicpy==23.1.1    
+          
+      - if: ${{env.DCA_SCHEMATIC_API_TYPE == 'reticulate' }}
         name: Set up virtual environment
         # When shinyapps.io supports python 3.9+ split this into two steps
         # to install schematic from pypi or github
@@ -65,18 +71,10 @@ jobs:
         run: |
           python3 -m venv .venv
           chmod 755 .venv/bin/activate
-          
-      - if: ${{env.DCA_SCHEMATIC_API_TYPE == 'reticulate' }}
-        name: Install schematic
-        # When shinyapps.io supports python 3.9+ split this into two steps
-        # to install schematic from pypi or github
-        shell: bash
-        run: |
           source .venv/bin/activate
-          sudo pip install --upgrade pip
           pip --version
-          sudo pip install schematicpy==23.1.1
-      
+          pip install schematicpy==23.1.1
+          
 # https://github.com/actions/setup-python/blob/main/docs/advanced-usage.md#caching-packages
 # For the future, look at poetry install
 # - uses: actions/checkout@v3
