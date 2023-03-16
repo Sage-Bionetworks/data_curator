@@ -19,7 +19,7 @@ jobs:
     container: rocker/rstudio:4.1.2
     env:
       GITHUB_PAT: ${{ github.GITHUB_TOKEN }}
-      PIP_CACHE_DIR: $GITHUB_WORKSPACE/.pip
+      PIP_CACHE_DIR: ~/.pip
       DCA_SCHEMATIC_API_TYPE: reticulate
       DCA_API_HOST: "https://schematic.api.sagebionetworks.org"
       DCA_API_PORT: ""
@@ -37,6 +37,7 @@ jobs:
         name: Install python
         run: |
           sudo apt-get install -y pip python3.8-venv
+          mkdir ${{ env.PIP_CACHE_DIR}}
           
       - if: ${{env.DCA_SCHEMATIC_API_TYPE == 'reticulate' }}
         name: Get poetry lock
@@ -50,7 +51,7 @@ jobs:
           cache-name: cache-venv
         with:
           path: |
-            $PIP_CACHE_DIR
+            ${{ env.PIP_CACHE_DIR }}
             .venv
             .venv.zip
           key: ${{ runner.os }}-build-${{ env.cache-name }}-schematicpy-${{ hashFiles('poetry.lock') }}
@@ -64,7 +65,7 @@ jobs:
           python3 -m venv .venv
           chmod 755 .venv/bin/activate
           source .venv/bin/activate
-          pip install schematicpy==23.1.1
+          sudo pip install schematicpy==23.1.1
       
 # https://github.com/actions/setup-python/blob/main/docs/advanced-usage.md#caching-packages
 # For the future, look at poetry install
