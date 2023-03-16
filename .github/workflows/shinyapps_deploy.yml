@@ -19,7 +19,7 @@ jobs:
     container: rocker/rstudio:4.1.2
     env:
       GITHUB_PAT: ${{ github.GITHUB_TOKEN }}
-      PIP_CACHE_DIR: ~/.pip
+      PIP_CACHE_DIR: $GITHUB_WORKSPACE/.pip
       DCA_SCHEMATIC_API_TYPE: reticulate
       DCA_API_HOST: "https://schematic.api.sagebionetworks.org"
       DCA_API_PORT: ""
@@ -50,7 +50,7 @@ jobs:
           cache-name: cache-venv
         with:
           path: |
-            ~/.pip
+            $PIP_CACHE_DIR
             .venv
             .venv.zip
           key: ${{ runner.os }}-build-${{ env.cache-name }}-schematicpy-${{ hashFiles('poetry.lock') }}
