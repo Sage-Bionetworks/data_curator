@@ -147,6 +147,9 @@ model_submit <- function(url="http://localhost:3001/v1/model/submit",
                     #body=list(file_name=file_name)
   )
   
+  if (httr::http_status(req) != "success") {
+    stop(sprintf("Error submitting manifest: %s", httr::http_status(req)$reason))
+  }
   manifest_id <- httr::content(req)
   manifest_id
 }
