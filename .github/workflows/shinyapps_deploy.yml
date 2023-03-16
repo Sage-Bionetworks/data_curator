@@ -39,7 +39,7 @@ jobs:
           
       - name: Get poetry lock
         if: ${{env.DCA_SCHEMATIC_API_TYPE == 'reticulate' }}
-        run: curl https://raw.githubusercontent.com/Sage-Bionetworks/schematic/v23.1.1/poetry.lock >> poetry.lock
+        run: wget https://raw.githubusercontent.com/Sage-Bionetworks/schematic/v23.1.1/poetry.lock
         shell: bash
           
       - name: Cache python venv
