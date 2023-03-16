@@ -49,10 +49,11 @@ jobs:
           cache-name: cache-venv
         with:
           path: |
+            .venv
             .venv.zip
           key: ${{ runner.os }}-build-${{ env.cache-name }}-schematicpy-${{ hashFiles('poetry.lock') }}
           
-      - if: ${{env.DCA_SCHEMATIC_API_TYPE == 'reticulate' }} && ${{ steps.cache-venv.outputs.cache-hit != 'true' }}
+      - if: ${{env.DCA_SCHEMATIC_API_TYPE == 'reticulate' }}
         name: Set up virtual environment
         # When shinyapps.io supports python 3.9+ split this into two steps
         # to install schematic from pypi or github
@@ -61,7 +62,7 @@ jobs:
           python3 -m venv .venv
           chmod 755 .venv/bin/activate
           source .venv/bin/activate
-          pip install schematicpy==23.1.1
+          pip install --no-cache-dir --require-virtualenv schematicpy==23.1.1
       
 # https://github.com/actions/setup-python/blob/main/docs/advanced-usage.md#caching-packages
 # For the future, look at poetry install
@@ -75,7 +76,7 @@ jobs:
 # - run: poetry install
 # - run: poetry run pytest
 #           
-      - if: ${{env.DCA_SCHEMATIC_API_TYPE == 'reticulate' }} && ${{ steps.cache-venv.outputs.cache-hit != 'true' }}
+      - if: ${{env.DCA_SCHEMATIC_API_TYPE == 'reticulate' }}
         name: zip virtual env
         shell: bash
         # ShinyApps has a limit of 7000 files, far exceeded by the many Python dependencies
