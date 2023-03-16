@@ -37,7 +37,7 @@ jobs:
       - if: ${{env.DCA_SCHEMATIC_API_TYPE == 'reticulate' }}
         name: Install python
         run: |
-          sudo apt-get install -y python3.8-venv
+          sudo apt-get install -y pip python3.8-venv
           mkdir ${{ env.PIP_CACHE_DIR}} ${{ env.PIP_DOWNLOAD_CACHE }}
           
       - if: ${{env.DCA_SCHEMATIC_API_TYPE == 'reticulate' }}
@@ -55,6 +55,7 @@ jobs:
             ${{ env.PIP_CACHE_DIR }}
             ${{ env.PIP_DOWNLOAD_CACHE }}
             .venv
+            .venv.zip
           key: ${{ runner.os }}-build-${{ env.cache-name }}-schematicpy-${{ hashFiles('poetry.lock') }}
           
       - if: ${{env.DCA_SCHEMATIC_API_TYPE == 'reticulate' }}
@@ -66,8 +67,6 @@ jobs:
           python3 -m venv .venv
           chmod 755 .venv/bin/activate
           source .venv/bin/activate
-          python -m ensurepip --upgrade 
-          pip --version
           pip install schematicpy==23.1.1
           
 # https://github.com/actions/setup-python/blob/main/docs/advanced-usage.md#caching-packages
