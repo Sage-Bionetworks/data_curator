@@ -19,7 +19,7 @@ jobs:
     container: rocker/rstudio:4.1.2
     env:
       GITHUB_PAT: ${{ github.GITHUB_TOKEN }}
-      PIP_CACHE_DIR: ~/.pip
+      PIP_CACHE_DIR: ~/.pip_cache
       PIP_DOWNLOAD_CACHE: ~/.pip_download_cache
       DCA_SCHEMATIC_API_TYPE: reticulate
       DCA_API_HOST: "https://schematic.api.sagebionetworks.org"
@@ -67,6 +67,17 @@ jobs:
           python3 -m venv .venv
           chmod 755 .venv/bin/activate
           source .venv/bin/activate
+          sudo pip install schematicpy==23.1.1
+          
+      - if: ${{env.DCA_SCHEMATIC_API_TYPE == 'reticulate' }}
+        name: Install schematic
+        # When shinyapps.io supports python 3.9+ split this into two steps
+        # to install schematic from pypi or github
+        shell: bash
+        run: |
+          source .venv/bin/activate
+          sudo pip install --upgrade pip
+          pip --version
           sudo pip install schematicpy==23.1.1
       
 # https://github.com/actions/setup-python/blob/main/docs/advanced-usage.md#caching-packages
