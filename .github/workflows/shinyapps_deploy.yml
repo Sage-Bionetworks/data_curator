@@ -49,7 +49,6 @@ jobs:
           cache-name: cache-venv
         with:
           path: |
-            .venv
             .venv.zip
           key: ${{ runner.os }}-build-${{ env.cache-name }}-schematicpy-${{ hashFiles('poetry.lock') }}
           
