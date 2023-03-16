@@ -43,7 +43,7 @@ jobs:
         env:
           cache-name: cache-venv
         with:
-          path: ${{ env.GITHUB_WORKSPACE }}/data_curator/.venv
+          path: $GITHUB_WORKSPACE/data_curator/.venv
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
           
       - name: Set up virtual environment
