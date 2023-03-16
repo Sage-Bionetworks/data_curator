@@ -32,13 +32,13 @@ jobs:
 
       - uses: r-lib/actions/setup-pandoc@v2
           
-      - name: Install python
-        if: ${{env.DCA_SCHEMATIC_API_TYPE == 'reticulate' }}
+      - if: ${{env.DCA_SCHEMATIC_API_TYPE == 'reticulate' }}
+        name: Install python
         run: |
           sudo apt-get install -y pip python3.8-venv
           
-      - name: Get poetry lock
-        if: ${{env.DCA_SCHEMATIC_API_TYPE == 'reticulate' }}
+      - if: ${{env.DCA_SCHEMATIC_API_TYPE == 'reticulate' }}
+        name: Get poetry lock
         run: wget https://raw.githubusercontent.com/Sage-Bionetworks/schematic/v23.1.1/poetry.lock
         shell: bash
           
@@ -52,8 +52,8 @@ jobs:
             .venv.zip
           key: ${{ runner.os }}-build-${{ env.cache-name }}-schematicpy-${{ hashFiles('poetry.lock') }}
           
-      - name: Set up virtual environment
-        if: ${{env.DCA_SCHEMATIC_API_TYPE == 'reticulate' }} && ${{ steps.cache-venv.outputs.cache-hit != 'true' }}
+      - if: ${{env.DCA_SCHEMATIC_API_TYPE == 'reticulate' }} && ${{ steps.cache-venv.outputs.cache-hit != 'true' }}
+        name: Set up virtual environment
         # When shinyapps.io supports python 3.9+ split this into two steps
         # to install schematic from pypi or github
         shell: bash
@@ -75,8 +75,8 @@ jobs:
 # - run: poetry install
 # - run: poetry run pytest
 #           
-      - name: zip virtual env
-        if: ${{env.DCA_SCHEMATIC_API_TYPE == 'reticulate' }} && ${{ steps.cache-venv.outputs.cache-hit != 'true' }}
+      - if: ${{env.DCA_SCHEMATIC_API_TYPE == 'reticulate' }} && ${{ steps.cache-venv.outputs.cache-hit != 'true' }}
+        name: zip virtual env
         shell: bash
         # ShinyApps has a limit of 7000 files, far exceeded by the many Python dependencies
         # that this app' has.  As a workaround we zip the virtual environment and later
