@@ -44,9 +44,9 @@ jobs:
           cache-name: cache-venv
         with:
           path: |
-            ${{ github.github_workspace }}/data_curator/.venv
-            ${{ github.github_workspace }}/data_curator/.venv.zip
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('.venv/lib/python3.10/site-packages') }}
+            .venv
+            .venv.zip
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-schematicpy
           
       - name: Set up virtual environment
         if: ${{env.DCA_SCHEMATIC_API_TYPE == 'reticulate' }} & ${{ steps.cache-venv.outputs.cache-hit != 'true' }}
