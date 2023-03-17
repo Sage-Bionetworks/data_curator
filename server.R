@@ -694,15 +694,16 @@ shinyServer(function(input, output, session) {
                                                          "table",
                                                          FALSE),
                             rest = model_submit(url=file.path(api_uri, "v1/model/submit"),
-                                                             schema_url = data_model(),
-                                                             data_type = selected$schema(),
-                                                             dataset_id = selected$folder(),
-                                                             input_token = access_token,
-                                                             restrict_rules = FALSE,
-                                                             file_name = tmp_file_path,
-                                                             #json_str = jsonlite::toJSON(read_csv(tmp_file_path)),
-                                                             asset_view = selected$master_asset_view(),
-                                                use_schema_label=Sys.getenv("DCA_SCHEMATIC_SUBMIT_USE_SCHEMA_LABEL"))
+                                                schema_url = data_model(),
+                                                data_type = selected$schema(),
+                                                dataset_id = selected$folder(),
+                                                input_token = access_token,
+                                                restrict_rules = FALSE,
+                                                file_name = tmp_file_path,
+                                                asset_view = selected$master_asset_view(),
+                                                use_schema_label=dcc_config_react()$submit_use_schema_labels,
+                                                manifest_record_type="table",
+                                                table_manipulation=dcc_config_react()$submit_table_manipulation)
                             )
       manifest_path <- tags$a(href = paste0("https://www.synapse.org/#!Synapse:", manifest_id), manifest_id, target = "_blank")
 
@@ -747,9 +748,10 @@ shinyServer(function(input, output, session) {
                                                 input_token = access_token,
                                                 restrict_rules = FALSE,
                                                 file_name = tmp_file_path,
-                                                #json_str = jsonlite::toJSON(read_csv(tmp_file_path)),
                                                 asset_view = selected$master_asset_view(),
-                                                use_schema_label=Sys.getenv("DCA_SCHEMATIC_SUBMIT_USE_SCHEMA_LABEL"))
+                                                use_schema_label=dcc_config_react()$submit_use_schema_labels,
+                                                manifest_record_type="table",
+                                                table_manipulation=dcc_config_react()$submit_table_manipulation)
       )
       manifest_path <- tags$a(href = paste0("https://www.synapse.org/#!Synapse:", manifest_id), manifest_id, target = "_blank")
 
