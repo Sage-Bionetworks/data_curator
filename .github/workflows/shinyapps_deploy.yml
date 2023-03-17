@@ -21,7 +21,7 @@ jobs:
       GITHUB_PAT: ${{ github.GITHUB_TOKEN }}
       PIP_CACHE_DIR: ~/.pip_cache
       PIP_DOWNLOAD_CACHE: ~/.pip_download_cache
-      DCA_SCHEMATIC_API_TYPE: rest
+      DCA_SCHEMATIC_API_TYPE: reticulate
       DCA_API_HOST: "https://schematic.api.sagebionetworks.org"
       DCA_API_PORT: ""
     steps:
@@ -150,7 +150,7 @@ jobs:
           # if tag is v*.*.*, deploy to prod, if main to staging, otherwise to test
           if (grepl("v[0-9]+.[0-9]+.[0-9]+", refName)) {
             message("Deploying release version of app")
-          } else if (refName %in% c("main")) {
+          } else if (refName %in% c("main", "beta-schematic-rest-api")) {
             appName <- paste(appName, "staging", sep = "-")
             message("Deploying staging version of app")
           } else {
