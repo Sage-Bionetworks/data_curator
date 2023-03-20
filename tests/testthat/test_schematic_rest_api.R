@@ -1,15 +1,16 @@
 context("test schematic rest api wrappers")
 
-### Test that schematic server is online. Make sure schem_url matches the actual
+### Test that schematic server is online. Make sure schematic_url matches the actual
 ### schematic server URL https://github.com/Sage-Bionetworks/schematic/tree/develop/api
 ### If not available, skip these tests.
 
-schem_url <- "https://schematic.api.sagebionetworks.org"
-ping <- try(httr::GET(schem_url), silent = TRUE)
+schematic_url <- "https://schematic.api.sagebionetworks.org"
+ping <- try(httr::GET(schematic_url), silent = TRUE)
 skip_it <- function(skip=ping) {
-  if (inherits(ping, "try-error")) skip(sprintf("schematic server URL unavailable (%s). Is it running locally?", schem_url)) #nolint
+  if (inherits(ping, "try-error")) skip(sprintf("schematic server URL unavailable (%s). Is it running locally?", schematic_url)) #nolint
 }
 
+schema_url <- "https://raw.githubusercontent.com/Sage-Bionetworks/data-models/main/example.model.jsonld"
 pass_csv <- system.file("testdata", "HTAN-Biospecimen-Tier-1-2-pass.csv",
                         package = "datacurator")
 fail_csv <- system.file("testdata", "HTAN-Biospecimen-Tier-1-2-fail.csv",
@@ -18,8 +19,12 @@ fail_csv <- system.file("testdata", "HTAN-Biospecimen-Tier-1-2-fail.csv",
 test_that("manifest_generate returns a URL if sucessful", {
   skip_it()
   
-  url <- manifest_generate(title="Test biospecimen", data_type="Biospecimen",
-                  dataset_id="syn20977135")
+  url <- manifest_generate(url=file.path(schematic_url, "v1/manifest/generate"),
+    schema_url = schema_url, input_token = Sys.getenv("SNYAPSE_PAT"),
+    title="Test biospecimen", data_type="Biospecimen",
+    use_annotations = FALSE,
+    dataset_id="syn33715357", asset_view="syn33715412",
+    output_format = "google_sheet")
   expect_true(grepl("^https://docs.google", url))
 })
 
@@ -50,8 +55,8 @@ test_that("manifest_validate passes and fails correctly", {
 test_that("model_submit successfully uploads to synapse", {
   skip_it()
   
-  submit <- model_submit(url=file.path(schem_url,"v1/model/submit"),
-                         schema_url = "https://raw.githubusercontent.com/Sage-Bionetworks/data-models/main/example.model.jsonld",
+  submit <- model_submit(url=file.path(schematic_url,"v1/model/submit"),
+                         schema_url = schema_url,
                          data_type="Biospecimen", dataset_id="syn20977135",
                          restrict_rules = FALSE, input_token=Sys.getenv("SYNAPSE_PAT"),
                          asset_view="syn33715412", file_name=pass_csv,
@@ -70,7 +75,7 @@ test_that("storage_project_datasets returns available datasets", {
 
 test_that("storage_projects returns available projects", {
   skip_it()
-  storage_projects(url=file.path(schem_url, "v1/storage/project/datasets"),
+  storage_projects(url=file.path(schematic_url, "v1/storage/project/datasets"),
                    asset_view="syn23643253",
                    input_token=Sys.getenv("SYNAPSE_PAT"))
 })
@@ -117,13 +122,13 @@ test_that("get_asset_view_table returns asset view table", {
 
 test_that("asset_tables returns a data.frame", {
   skip_it()
-  tst <- get_asset_view_table(url=file.path(schem_url, "v1/storage/assets/tables"),
+  tst <- get_asset_view_table(url=file.path(schematic_url, "v1/storage/assets/tables"),
                        asset_view = "syn28559058",
                        input_token = Sys.getenv("SYNAPSE_TOKEN"),
                        as_json=TRUE)
   expect_identical(nrow(tst), 3L)
   
-  tst2 <- get_asset_view_table(url=file.path(schem_url, "v1/storage/assets/tables"),
+  tst2 <- get_asset_view_table(url=file.path(schematic_url, "v1/storage/assets/tables"),
                                   asset_view = "syn28559058",
                                   input_token = Sys.getenv("SYNAPSE_TOKEN"),
                                   as_json=FALSE)
