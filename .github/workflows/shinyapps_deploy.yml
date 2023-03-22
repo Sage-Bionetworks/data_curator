@@ -19,8 +19,6 @@ jobs:
     container: rocker/rstudio:4.1.2
     env:
       GITHUB_PAT: ${{ github.GITHUB_TOKEN }}
-      PIP_CACHE_DIR: ~/.pip_cache
-      PIP_DOWNLOAD_CACHE: ~/.pip_download_cache
       DCA_SCHEMATIC_API_TYPE: reticulate
       DCA_API_HOST: "https://schematic.api.sagebionetworks.org"
       DCA_API_PORT: ""
@@ -38,25 +36,6 @@ jobs:
         name: Install python
         run: |
           sudo apt-get install -y pip python3.8-venv
-          mkdir ${{ env.PIP_CACHE_DIR}} ${{ env.PIP_DOWNLOAD_CACHE }}
-          
-      - if: ${{env.DCA_SCHEMATIC_API_TYPE == 'reticulate' }}
-        name: Get poetry lock
-        run: wget https://raw.githubusercontent.com/Sage-Bionetworks/schematic/v23.1.1/poetry.lock
-        shell: bash
-          
-      - name: Cache python venv
-        id: cache-venv
-        uses: actions/cache@v3
-        env:
-          cache-name: cache-venv
-        with:
-          path: |
-            ${{ env.PIP_CACHE_DIR }}
-            ${{ env.PIP_DOWNLOAD_CACHE }}
-            .venv
-            .venv.zip
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-schematicpy-${{ hashFiles('poetry.lock') }}
           
       - if: ${{env.DCA_SCHEMATIC_API_TYPE == 'reticulate' }}
         name: Set up virtual environment
