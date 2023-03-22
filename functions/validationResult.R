@@ -121,7 +121,7 @@ validationResult <- function(anno.res, template, manifest = NULL, dashboard = FA
       # similar warnings in the same column should be concatenated from backend, like "['value1', 'value2', ...]"
       # extract the single quoted values from the warning string
       if (!is.null(warn[[4]])) {
-        warn_values <- gsub("^[^']*'|'\\],?$", "", strsplit(warn[[4]], "'(?=,)", perl = TRUE)[[1]])
+        warn_values <- gsub("^[^']*'|'\\],?$", "", strsplit(as.character(warn[[4]]), "'(?=,)", perl = TRUE)[[1]])
       } else {
         # if matchExactOne (set) warning exist, highlight entire column
         warn_values <- "ht_entire_column"
