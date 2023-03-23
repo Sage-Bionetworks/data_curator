@@ -48,23 +48,10 @@ jobs:
         run: |
           # has to activate each bash step
           source .venv/bin/activate
-          # use 'poetry' to install schematic dev schematic
-          # If commit is tagged for release or in main branch, install schematic from pypi
-          if [[ $GITHUB_REF_NAME == v*.*.* ]] || [[ $GITHUB_REF_NAME == main ]]; then
-            echo Installing pypi version of schematic
-            git clone --single-branch --branch main https://github.com/Sage-Bionetworks/schematic.git
-            cp schematic_config.yml schematic/config.yml
-            cd schematic
-            pip3 install schematicpy
-          else
-            pip3 install poetry
-            echo Installing develop branch of schematic from github
-            git clone --single-branch --branch develop https://github.com/Sage-Bionetworks/schematic.git
-            cp schematic_config.yml schematic/config.yml
-            cd schematic
-            poetry build
-            pip3 install dist/schematicpy-1.0.0-py3-none-any.whl
-          fi
+          echo Installing pypi version of schematic
+          git clone --single-branch --branch main https://github.com/Sage-Bionetworks/schematic.git
+          cp schematic_config.yml schematic/config.yml
+          pip3 install schematicpy
 
       - name: Set Configurations for Schematic
         shell: bash
@@ -131,4 +118,14 @@ jobs:
             finally=close(configFileConn)
           )
           rsconnect::setAccountInfo(rsConnectUser, rsConnectToken, rsConnectSecret)
-          rsconnect::deployApp(appName = appName)
+          # Get app names. If app exists, configure then deploy. Otherwise
+          # deploy then configure
+          apps <- rsconnect::applications()$name
+          if (appName %in% apps) {
+            rsconnect::configureApp(appName = appName, size = "xxxlarge", logLevel = "verbose")
+            rsconnect::deployApp(appName = appName)
+          } else {
+            rsconnect::deployApp(appName = appName)
+            rsconnect::configureApp(appName = appName, size = "xxxlarge", logLevel = "verbose")
+          }
+          
