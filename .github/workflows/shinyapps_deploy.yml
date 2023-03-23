@@ -46,7 +46,13 @@ jobs:
           python3 -m venv .venv
           chmod 755 .venv/bin/activate
           source .venv/bin/activate
-          pip install schematicpy==23.1.1
+
+      - if: ${{env.DCA_SCHEMATIC_API_TYPE == 'reticulate' }}
+        name: Install schematicpy
+        shell: bash
+        run: |
+          source .venv/bin/activate
+          pip install schematicpy==23.1.1 
           
 # https://github.com/actions/setup-python/blob/main/docs/advanced-usage.md#caching-packages
 # For the future, look at poetry install
