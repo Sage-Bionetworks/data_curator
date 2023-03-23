@@ -1,0 +1,5 @@
+project_name,synapse_asset_view,data_model_url,template_menu_config_file,manifest_output_format,submit_use_schema_labels,submit_table_manipulation,use_compliance_dashboard,primary_col,secondary_col,sidebar_col
+DCA Demo,syn33715412,https://raw.githubusercontent.com/Sage-Bionetworks/data-models/main/example.model.jsonld,www/template_config/example_config.json,excel,TRUE,replace,FALSE,#2a668d,#184e71,#191919
+HTAN All Projects,syn20446927,https://raw.githubusercontent.com/ncihtan/data-models/main/HTAN.model.jsonld,www/template_config/htan_config.json,excel,TRUE,replace,FALSE,#605ca8,#5F008C,#191919
+Cancer Complexity Knowledge Portal - Database,syn27210848,https://raw.githubusercontent.com/mc2-center/data-models/main/mc2.model.jsonld,www/template_config/mc2_config.json,excel,FALSE,upsert,FALSE,#407BA0,#5BB0B5,#191919
+INCLUDE Data Management Core,syn30109515,https://raw.githubusercontent.com/include-dcc/include-linkml/schematic-updates/src/schematic/include_schematic_linkml.jsonld,www/template_config/include_config.json,excel,TRUE,replace,FALSE,#2a668d,#184e71,#191919

@@ -1,18 +1,7 @@
 .selectedDataTypeTab-container {
-  .instruction-container {
+
+  .bottom-title-container {
     display: flex;
-    flex-direction: column;
-    margin-top: 12px;
-
-    li {
-      min-height: 36px;
-      padding: 8px;
-      margin-top: 12px;
-    }
-  }
-
-  .network-container {
-    margin-top: 32px;
   }
 
   .legend-container {
@@ -29,3 +18,4 @@
     }
   }
 }
+

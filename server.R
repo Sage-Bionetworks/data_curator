@@ -7,49 +7,76 @@
 shinyServer(function(input, output, session) {
   options(shiny.reactlog = TRUE)
   params <- parseQueryString(isolate(session$clientData$url_search))
-  if (!has_auth_code(params)) {
+  if (!has_auth_code(params) & dca_schematic_api != "offline") {
     return()
   }
+  
   redirect_url <- paste0(
     api$access, "?", "redirect_uri=", app_url, "&grant_type=",
     "authorization_code", "&code=", params$code
   )
-  # get the access_token and userinfo token
-  req <- POST(redirect_url, encode = "form", body = "", authenticate(app$key, app$secret,
-    type = "basic"
-  ), config = list())
-  # Stop the code if anything other than 2XX status code is returned
-  stop_for_status(req, task = "get an access token")
-  token_response <- content(req, type = NULL)
-  access_token <- token_response$access_token
-
-  session$userData$access_token <- access_token
-
-  synapse_driver <- import("schematic.store.synapse")$SynapseStorage
-
+  
+  if (dca_schematic_api != "offline") {
+    # get the access_token and userinfo token
+    req <- POST(redirect_url, encode = "form", body = "", authenticate(app$key, app$secret,
+      type = "basic"
+    ), config = list())
+  
+    # Stop the code if anything other than 2XX status code is returned
+    stop_for_status(req, task = "get an access token")
+    token_response <- content(req, type = NULL)
+    access_token <- token_response$access_token
+    
+    session$userData$access_token <- access_token
+  } else {
+    dcWaiter("show", "Cannot connect to Synapse. Running in offline mode.")
+  }
+  
   ######## session global variables ########
   # read config in
-  config <- config_file
-  config_schema <- as.data.frame(config[[1]])
-
+  def_config <- ifelse(dca_schematic_api == "offline",
+                       fromJSON("www/template_config/config_offline.json"),
+                       fromJSON("www/template_config/config.json")
+  )
+  config <- reactiveVal()
+  config_schema <- reactiveVal(def_config)
+  model_ops <- setNames(dcc_config$data_model_url,
+                        dcc_config$synapse_asset_view)
+  
   # mapping from display name to schema name
-  template_namedList <- config_schema$schema_name
-  names(template_namedList) <- config_schema$display_name
-
-  # data available to the user
-  syn_store <- NULL # gets list of projects they have access to
-
+  template_namedList <- reactiveVal()
+  #names(template_namedList) <- config_schema$display_name
+  
+  all_asset_views <- setNames(dcc_config$synapse_asset_view,
+                              dcc_config$project_name)
+  asset_views <- reactiveVal(c("mock dca fileview"="syn33715412"))
+  
+  dcc_config_react <- reactiveVal(dcc_config)
+  
   data_list <- list(
     projects = reactiveVal(NULL), folders = reactiveVal(NULL),
-    schemas = reactiveVal(template_namedList), files = reactiveVal(NULL)
+    template = reactiveVal(setNames(def_config$schema_name, def_config$display_name)),
+    files = reactiveVal(NULL),
+    master_asset_view = reactiveVal(NULL)
   )
   # synapse ID of selected data
   selected <- list(
     project = reactiveVal(NULL), folder = reactiveVal(""),
-    schema = reactiveVal(NULL), schema_type = reactiveVal(NULL)
+    schema = reactiveVal(NULL), schema_type = reactiveVal(NULL),
+    master_asset_view = reactiveVal(NULL),
+    master_asset_view_label = reactiveVal(NULL)
   )
-
+  
   isUpdateFolder <- reactiveVal(FALSE)
+  
+  data_model_options <- setNames(dcc_config$data_model_url,
+                                 dcc_config$synapse_asset_view)
+  data_model = reactiveVal(NULL)
+  
+  # data available to the user
+  syn_store <- NULL # gets list of projects they have access to
+  
+  asset_views <- reactiveVal(c("mock dca fileview (syn33715412)"="syn33715412"))
 
   tabs_list <- c("tab_data", "tab_template", "tab_upload")
   clean_tags <- c(
@@ -63,6 +90,9 @@ shinyServer(function(input, output, session) {
   ######## Initiate Login Process ########
   # synapse cookies
   session$sendCustomMessage(type = "readCookie", message = list())
+  
+  shinyjs::useShinyjs()
+  shinyjs::hide(selector = ".sidebar-menu")
 
   # initial loading page
   #
@@ -79,65 +109,187 @@ shinyServer(function(input, output, session) {
     # work in any domain and is scoped to the access required by the
     # Shiny app'
     #
-    access_token <- session$userData$access_token
-
-    syn$login(authToken = access_token, rememberMe = FALSE)
-
-    data_list$projects(
-      tryCatch(
-        {
-          # get syn storage
-          syn_store <<- synapse_driver(access_token = access_token)
-          # get user's common projects
-          list2Vector(syn_store$getStorageProjects())
-        },
-        error = function(e) {
-          message(e$message)
-          return(NULL)
-        }
-      )
-    )
-
-    if (is.null(data_list$projects()) || length(data_list$projects()) == 0) {
-      dcWaiter("update", landing = TRUE, isPermission = FALSE)
-    } else {
-
-      # updates project dropdown
-      lapply(c("header_dropdown_", "dropdown_"), function(x) {
-        lapply(c(1, 3), function(i) {
-          updateSelectInput(session, paste0(x, dropdown_types[i]),
-            choices = sort(names(data_list[[i]]()))
-          )
-        })
-      })
-
-      user_name <- syn$getUserProfile()$userName
-
-      if (!syn$is_certified(user_name)) {
+    
+    if (dca_schematic_api != "offline") {
+      access_token <- session$userData$access_token
+      has_access <- vapply(all_asset_views, function(x) {
+        synapse_access(id=x, access="DOWNLOAD", auth=access_token)
+      }, 1L)
+      asset_views(all_asset_views[has_access==1])
+    
+      if (length(asset_views) == 0) stop("You do not have DOWNLOAD access to any supported Asset Views.")
+      updateSelectInput(session, "dropdown_asset_view",
+                      choices = asset_views())
+    
+      user_name <- synapse_user_profile(auth=access_token)$firstName
+  
+      is_certified <- synapse_is_certified(auth=access_token)
+      # is_certified <- switch(dca_schematic_api,
+      #                        reticulate = syn$is_certified(user_name),
+      #                        rest = synapse_is_certified(auth=access_token))
+      if (!is_certified) {
         dcWaiter("update", landing = TRUE, isCertified = FALSE)
       } else {
         # update waiter loading screen once login successful
         dcWaiter("update", landing = TRUE, userName = user_name)
       }
+    } else {
+      updateSelectInput(session, "dropdown_asset_view",
+                        choices = c("Offline mock data (synXXXXXX)"="synXXXXXX"))
+      dcWaiter("hide")
     }
+    
+    ######## Arrow Button ########
+    lapply(1:4, function(i) {
+      switchTabServer(id = paste0("switchTab", i), tabId = "tabs", tab = reactive(input$tabs)(), tabList = tabs_list, parent = session)
+    })
+    
+  })
+  
+  observeEvent(input$btn_asset_view, {
+    selected$master_asset_view(input$dropdown_asset_view)
+    av_names <- names(asset_views()[asset_views() %in% selected$master_asset_view()])
+    selected$master_asset_view_label(av_names)
+    
+    dcc_config_react(dcc_config[dcc_config$synapse_asset_view == selected$master_asset_view(), ])
+    
+    dcWaiter("show", msg = paste0("Getting data from ", selected$master_asset_view_label(),". This may take a minute."),
+             color=col2rgba(col2rgb("#CD0BBC01")))
+    
+    data_model(data_model_options[selected$master_asset_view()])
+
+    output$sass <- renderUI({
+        tags$head(tags$style(css()))
+    })
+    css <- reactive({
+      # Don't change theme for default projects
+      #if (dca_theme_file != "www/dca_themes/sage_theme_config.rds") {
+          sass(input = list(primary_col=dcc_config_react()$primary_col,
+                             htan_col=dcc_config_react()$secondary_col,
+                             sidebar_col=dcc_config_react()$sidebar_col,
+                             sass_file("www/scss/main.scss")))
+        #}
+      })
+
+      dcWaiter("show", msg = paste0("Getting data from ", selected$master_asset_view_label(), ". This may take a minute."),
+               color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
+
+    output$logo <- renderUI({update_logo(selected$master_asset_view())})
+    
+    if (dca_schematic_api == "reticulate") {
+      # Update schematic_config and login
+      schematic_config <- yaml::read_yaml("schematic_config.yml")
+      schematic_config$synapse$master_fileview <- selected$master_asset_view()
+      schematic_config$model$input$download_url <- model_ops[names(model_ops) == selected$master_asset_view()]
+      yaml::write_yaml(schematic_config, "schematic_config.yml")
+      download.file(schematic_config$model$input$download_url, schematic_config$model$input$location)
+      setup_synapse_driver()
+      syn$login(authToken = access_token, rememberMe = FALSE)
+      syn_store <<- synapse_driver(access_token = access_token)
+      
+      system(
+        "python3 .github/config_schema.py -c schematic_config.yml --service_repo 'Sage-Bionetworks/schematic' --overwrite"
+      )
+      
+    }
+    
+    conf_file <- reactiveVal(template_config_files[input$dropdown_asset_view])
+    config_df <- jsonlite::fromJSON(conf_file())
+    
+    conf_template <- setNames(config_df[[1]]$schema_name, config_df[[1]]$display_name)
+    config(config_df)
+    config_schema(config_df)
+    data_list$template(conf_template)
+    
+    data_list_raw <- switch(dca_schematic_api,
+                            reticulate  = storage_projects_py(synapse_driver, access_token),
+                            rest = storage_projects(url=file.path(api_uri, "v1/storage/projects"),
+                                                    asset_view = selected$master_asset_view(),
+                                                    input_token = access_token),
+                            list(list("Offline Project A", "Offline Project"))
+    )
+    data_list$projects(list2Vector(data_list_raw))
+    
+    if (is.null(data_list$projects()) || length(data_list$projects()) == 0) {
+      dcWaiter("update", landing = TRUE, isPermission = FALSE)
+    } else {
+      
+      # updates project dropdown
+      lapply(c("header_dropdown_", "dropdown_"), function(x) {
+        lapply(c(1, 3), function(i) {
+          updateSelectInput(session, paste0(x, dropdown_types[i]),
+                            choices = sort(names(data_list[[i]]()))
+          )
+        })
+      })
+    }
+    
+    ######## Update Folder List ########
+    lapply(c("header_dropdown_", "dropdown_"), function(x) {
+      observeEvent(ignoreInit = TRUE, input[[paste0(x, "project")]], {
+        
+        # get synID of selected project
+        project_id <- data_list$projects()[input[[paste0(x, "project")]]]
+        
+        dcWaiter("show", msg = paste0("Getting project data from ", selected$master_asset_view_label(), ". This may take a minute."),
+                 color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
+        
+        # gets folders per project
+        folder_list_raw <- switch(dca_schematic_api,
+                                  reticulate = storage_projects_datasets_py(synapse_driver, project_id),
+                                  rest = storage_project_datasets(url=file.path(api_uri, "v1/storage/project/datasets"),
+                                                                  asset_view = selected$master_asset_view(),
+                                                                  project_id=project_id,
+                                                                  input_token=access_token),
+                                  list(list("DatatypeA", "DatatypeA"), list("DatatypeB","DatatypeB"))
+        )
+        folder_list <- list2Vector(folder_list_raw)
+        
+        if (length(folder_list) > 0) folder_names <- sort(names(folder_list)) else folder_names <- " "
+        
+        # update folder names
+        updateSelectInput(session, paste0(x, "folder"), choices = folder_names)
+        
+        if (x == "dropdown_") {
+          selected$project(project_id)
+          data_list$folders(folder_list)
+        }
+        
+        if (isUpdateFolder()) {
+          # sync with header dropdown
+          updateSelectInput(session, "dropdown_folder", selected = input[["header_dropdown_folder"]])
+          isUpdateFolder(FALSE)
+        }
+        
+        dcWaiter("hide")
+        
+      })
+    })
+    
+    updateTabsetPanel(session, "tabs",
+                      selected = "tab_data")
+    
+    shinyjs::show(selector = ".sidebar-menu")
+    
+    dcWaiter("hide")
   })
 
   ######## Arrow Button ########
-  lapply(1:3, function(i) {
+  lapply(1:4, function(i) {
     switchTabServer(id = paste0("switchTab", i), tabId = "tabs", tab = reactive(input$tabs)(), tabList = tabs_list, parent = session)
   })
 
   ######## Header Dropdown Button ########
   # Adjust header selection dropdown based on tabs
   observe({
-    if (input[["tabs"]] == "tab_data") {
+    if (input[["tabs"]] %in% c("tab_data", "tab_asset_view")) {
       hide("header_selection_dropdown")
     } else {
       show("header_selection_dropdown")
       addClass(id = "header_selection_dropdown", class = "open")
     }
   })
-
+  
   # sync header dropdown with main dropdown
   lapply(dropdown_types, function(x) {
     observeEvent(input[[paste0("dropdown_", x)]], {
@@ -167,34 +319,6 @@ shinyServer(function(input, output, session) {
     })
   })
 
-  ######## Update Folder List ########
-  lapply(c("header_dropdown_", "dropdown_"), function(x) {
-    observeEvent(ignoreInit = TRUE, input[[paste0(x, "project")]], {
-
-      # get synID of selected project
-      project_id <- data_list$projects()[input[[paste0(x, "project")]]]
-
-      # gets folders per project
-      folder_list <- syn_store$getStorageDatasetsInProject(project_id) %>% list2Vector()
-
-      if (length(folder_list) > 0) folder_names <- sort(names(folder_list)) else folder_names <- " "
-
-      # update folder names
-      updateSelectInput(session, paste0(x, "folder"), choices = folder_names)
-
-      if (x == "dropdown_") {
-        selected$project(project_id)
-        data_list$folders(folder_list)
-      }
-
-      if (isUpdateFolder()) {
-        # sync with header dropdown
-        updateSelectInput(session, "dropdown_folder", selected = input[["header_dropdown_folder"]])
-        isUpdateFolder(FALSE)
-      }
-    })
-  })
-
   ######## Update Folder ########
   # update selected folder synapse id and name
   observeEvent(input$dropdown_folder, {
@@ -205,53 +329,64 @@ shinyServer(function(input, output, session) {
 
   ######## Update Template ########
   # update selected schema template name
-  observeEvent(input$dropdown_datatype, {
+  observeEvent(input$dropdown_template, {
     # update reactive selected values for schema
-    selected$schema(data_list$schemas()[input$dropdown_datatype])
-    schema_type <- config_schema$type[which(config_schema$display_name == input$dropdown_datatype)]
+    selected$schema(data_list$template()[input$dropdown_template])
+    schema_type <- config_schema()[[1]]$type[which(config_schema()[[1]]$display_name == input$dropdown_template)]
     selected$schema_type(schema_type)
     # clean all tags related with selected template
     sapply(clean_tags, FUN = hide)
-  })
+  }, ignoreInit = TRUE)
 
   ######## Dashboard ########
-#  dashboard(
-#    id = "dashboard",
-#    syn.store = syn_store,
-#    project.scope = selected$project,
-#    schema = selected$schema,
-#    schema.display.name = reactive(input$dropdown_datatype),
-#    disable.ids = c("box_pick_project", "box_pick_manifest"),
-#    ncores = ncores
-#  )
+  dashboard(
+    id = "dashboard",
+    syn.store = syn_store,
+    project.scope = selected$project,
+    schema = selected$schema,
+    schema.display.name = reactive(input$dropdown_datatype),
+    disable.ids = c("box_pick_project", "box_pick_manifest"),
+    ncores = ncores,
+    access_token = access_token,
+    fileview = selected$master_asset_view(),
+    folder = selected$project(),
+    schematic_api = dca_schematic_api,
+    schema_url = data_model()
+  )
 
+  manifest_url <- reactiveVal(NULL)
+  
   ######## Template Google Sheet Link ########
   # validate before generating template
   observeEvent(c(selected$folder(), selected$schema(), input$tabs), {
     req(input$tabs %in% c("tab_template", "tab_validate"))
-
     warn_text <- NULL
-
-    if (length(data_list$folder()) == 0) {
+    if (length(data_list$folders()) == 0) {
       # add warning if there is no folder in the selected project
       warn_text <- paste0(
         "please create a folder in the ",
         strong(sQuote(input$dropdown_project)),
         " prior to submitting templates."
       )
-    } else if (selected$schema_type() == "file") {
+    } else if (selected$schema_type() %in% c("record", "file")) {
       # check number of files if it's file-based template
 
-      dcWaiter("show", msg = paste0("Getting files in ", input$dropdown_folder, "..."))
+      dcWaiter("show", msg = paste0("Getting files in ", input$dropdown_folder, "."), color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
       # get file list in selected folder
-      file_list <- syn_store$getFilesInStorageDataset(selected$folder())
+      file_list <- switch(dca_schematic_api,
+                          reticulate = storage_dataset_files_py(selected$folder()),
+                          rest = storage_dataset_files(url=file.path(api_uri, "v1/storage/dataset/files"),
+                                                                  asset_view = selected$master_asset_view(),
+                                                                  dataset_id = selected$folder(),
+                                                                  input_token=access_token),
+                          list(list("DatatypeA", "DatatypeA"), list("DatatypeB", "DatatypeB")))
 
       # update files list in the folder
       data_list$files(list2Vector(file_list))
 
       dcWaiter("hide")
-
-      if (length(data_list$files()) == 0) {
+      
+      if (is.null(data_list$files())) {
         # display warning message if folder is empty and data type is file-based
         warn_text <- paste0(
           strong(sQuote(input$dropdown_folder)), " folder is empty,
@@ -270,27 +405,100 @@ shinyServer(function(input, output, session) {
     output$text_template_warn <- renderUI(tagList(br(), span(class = "warn_msg", HTML(warn_text))))
     show("div_template_warn")
   })
+    
+  observeEvent(c(input$dropdown_folder, input$tabs), {
+    # if (input$tabs == "tab_template" && Sys.getenv("DCA_MANIFEST_OUTPUT_FORMAT") == "excel") {
+    #   dcWaiter("show", msg = "Downloading data from Synapse...", color = dca_theme()$primary_col)
+    #   #schematic rest api to generate manifest
+    #   manifest_data <- switch(dca_schematic_api,
+    #                           reticulate =  manifest_generate_py(title = input$dropdown_template,
+    #                                                              rootNode = selected$schema(),
+    #                                                              datasetId = selected$folder()),
+    #                           rest = manifest_generate(url=file.path(api_uri, "v1/manifest/generate"),
+    #                                                    schema_url = data_model(),
+    #                                                    title = input$dropdown_template,
+    #                                                    data_type = selected$schema(),
+    #                                                    dataset_id = selected$folder(),
+    #                                                    asset_view = selected$master_asset_view(),
+    #                                                    output_format = Sys.getenv("DCA_MANIFEST_OUTPUT_FORMAT"),
+    #                                                    input_token=access_token),
+    #                           "offline-no-gsheet-url"
+    #   )
+    #   manifest_url(manifest_data)
+    #   
+    #   dcWaiter("hide", sleep = 1)
+    #   
+    # }
+  })
+  
+  # Bookmarking this thread in case we can't use writeBin...
+  # Use a db connection instead
+  # https://community.rstudio.com/t/how-to-let-download-button-work-with-eventreactive/20937
+  
+  # The giant anonymous content function lets users click through the app and
+  # only download the manifest if they need to. Originally, this was in the
+  # observeEvent above.
+  output$downloadData <- downloadHandler(
+    filename = function() sprintf("%s.xlsx", input$dropdown_template),
+    content = function(file) {
+      dcWaiter("show", msg = "Downloading manifest. This may take a minute.", color = dcc_config_react()$primary_col)
+      manifest_data <- switch(dca_schematic_api,
+                              reticulate =  manifest_generate_py(title = input$dropdown_template,
+                                                                 rootNode = selected$schema(),
+                                                                 datasetId = selected$folder()),
+                              rest = manifest_generate(url=file.path(api_uri, "v1/manifest/generate"),
+                                                       schema_url = data_model(),
+                                                       title = input$dropdown_template,
+                                                       data_type = selected$schema(),
+                                                       dataset_id = selected$folder(),
+                                                       asset_view = selected$master_asset_view(),
+                                                       output_format = Sys.getenv("DCA_MANIFEST_OUTPUT_FORMAT"),
+                                                       input_token=access_token),
+                              "offline-no-gsheet-url"
+      )
+      dcWaiter("hide", sleep = 1)
+      writeBin(manifest_data, file)
+      #capture.output(print(manifest_url()), file=file) # actually kinda works
+      # Just shows NULL
+      # sink(file)
+      # print(manifest_url())
+      # sink()
+    }
+  )
+  
+  if (dca_schematic_api == "offline") {
+    mock_offline_manifest <- tibble("column1"="mock offline data")
+    output$downloadData <- downloadHandler(
+      filename = function() sprintf("%s.csv", input$dropdown_template),
+      content = function(file) {
+        write_csv(mock_offline_manifest, file)
+      }
+    )
+  }
 
   # generate template
   observeEvent(input$btn_template, {
-
     # loading screen for template link generation
-    dcWaiter("show", msg = "Generating link...")
-
-    manifest_url <-
-      metadata_model$getModelManifest(
-        title = paste0(config$community, " ", input$dropdown_datatype),
-        rootNode = selected$schema(),
-        filenames = switch((selected$schema_type() == "file") + 1,
-          NULL,
-          as.list(names(data_list$files()))
-        ),
-        datasetId = selected$folder()
-      )
+    dcWaiter("show", msg = "Generating link...", color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
+    manifest_url(switch(dca_schematic_api,
+                           reticulate =  manifest_generate_py(title = input$dropdown_template,
+                                                              rootNode = selected$schema(),
+                                                              datasetId = selected$folder()),
+                           rest = manifest_generate(url=file.path(api_uri, "v1/manifest/generate"),
+                                                    schema_url = data_model(),
+                                                    title = input$dropdown_template,
+                                                    data_type = selected$schema(),
+                                                    dataset_id = selected$folder(),
+                                                    asset_view = selected$master_asset_view(),
+                                                    output_format = Sys.getenv("DCA_MANIFEST_OUTPUT_FORMAT"),
+                                                    input_token=access_token),
+                           "offline-no-gsheet-url"
+                           )
+    )
 
     # generate link
     output$text_template <- renderUI(
-      tags$a(id = "template_link", href = manifest_url, list(icon("hand-point-right"), manifest_url), target = "_blank")
+      tags$a(id = "template_link", href = manifest_url(), list(icon("hand-point-right"), manifest_url()), target = "_blank")
     )
 
     dcWaiter("hide", sleep = 1)
@@ -298,20 +506,21 @@ shinyServer(function(input, output, session) {
     nx_confirm(
       inputId = "btn_template_confirm",
       title = "Go to the template now?",
-      message = paste0("click 'Go' to edit your ", sQuote(input$dropdown_datatype), " template on the google sheet"),
+      message = paste0("click 'Go' to edit your ", sQuote(input$dropdown_template), " template on the google sheet"),
       button_ok = "Go",
     )
 
     # display link
     show("div_template") # TODO: add progress bar on (loading) screen
   })
-
+  
   observeEvent(input$btn_template_confirm, {
     req(input$btn_template_confirm == TRUE)
     runjs("$('#template_link')[0].click();")
   })
 
   ######## Reads .csv File ########
+  # Check out module and don't use filepath. Keep file in memory
   inFile <- csvInfileServer("inputFile", colsAsCharacters = TRUE, keepBlank = TRUE)
 
   observeEvent(inFile$data(), {
@@ -325,24 +534,27 @@ shinyServer(function(input, output, session) {
   observeEvent(input$btn_validate, {
 
     # loading screen for validating metadata
-    dcWaiter("show", msg = "Validating...")
-
-    annotation_status <-
-      tryCatch(
-        metadata_model$validateModelManifest(
-          manifestPath = inFile$raw()$datapath,
-          rootNode = selected$schema(),
-          restrict_rules = TRUE, # set true to disable great expectation
-          project_scope = list(selected$project())
-        ),
-        error = function(e) {
-          message("'validateModelManifest' failed:\n", e$message)
-          return(NULL)
-        }
-      )
+    dcWaiter("show", msg = "Validating manifest...", color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
+    annotation_status <- switch(dca_schematic_api,
+                                reticulate = manifest_validate_py(inFile$raw()$datapath,
+                                                                  selected$schema(),
+                                                                  TRUE,
+                                                                  list(selected$project())),
+                                rest = manifest_validate(url=file.path(api_uri, "v1/model/validate"),
+                                                         schema_url=data_model(),
+                                                         data_type=selected$schema(),
+                                                         file_name=inFile$raw()$datapath),
+                                                         #json_str=jsonlite::toJSON(read_csv(inFile$raw()$datapath))),
+                                list(list(
+                                    "errors" = list(
+                                     Row = NA, Column = NA, Value = NA,
+                                     Error = "Mock error for offline mode."
+                                    )
+                                ))
+                              )
 
     # validation messages
-    validation_res <- validationResult(annotation_status, input$dropdown_datatype, inFile$data())
+    validation_res <- validationResult(annotation_status, input$dropdown_template, inFile$data())
     ValidationMsgServer("text_validate", validation_res)
 
     # if there is a file uploaded
@@ -364,10 +576,16 @@ shinyServer(function(input, output, session) {
         output$submit <- renderUI(actionButton("btn_submit", "Submit to Synapse", class = "btn-primary-color"))
         dcWaiter("update", msg = paste0(validation_res$error_type, " Found !!! "), spin = spin_inner_circles(), sleep = 2.5)
       } else {
-        output$val_gsheet <- renderUI(
-          actionButton("btn_val_gsheet", "  Generate Google Sheet Link", icon = icon("table"), class = "btn-primary-color")
-        )
-        dcWaiter("update", msg = paste0(validation_res$error_type, " Found !!! "), spin = spin_pulsar(), sleep = 2.5)
+          if (dca_schematic_api != "offline" & Sys.getenv("DCA_MANIFEST_OUTPUT_FORMAT") == "google_sheet") {
+            output$val_gsheet <- renderUI(
+              actionButton("btn_val_gsheet", "  Generate Google Sheet Link", icon = icon("table"), class = "btn-primary-color")
+            )
+          } else if (dca_schematic_api == "offline") {
+            output$dl_manifest <- renderUI({
+              downloadButton("downloadData_good", "Download Corrected Data")
+            })
+          }
+          dcWaiter("update", msg = paste0(validation_res$error_type, " Found !!! "), spin = spin_pulsar(), sleep = 2.5)
       }
     } else {
       dcWaiter("hide")
@@ -379,28 +597,43 @@ shinyServer(function(input, output, session) {
   # if user click gsheet_btn, generating gsheet
   observeEvent(input$btn_val_gsheet, {
     # loading screen for Google link generation
-    dcWaiter("show", msg = "Generating link...")
+    dcWaiter("show", msg = "Generating link...", color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
+    filled_manifest <- switch(dca_schematic_api,
+                              reticulate = manifest_populate_py(paste0(config$community, " ", input$dropdown_template),
+                                                                inFile$raw()$datapath,
+                                                                selected$schema()),
+                              rest = manifest_populate(url=file.path(api_uri, "v1/manifest/populate"),
+                                                       schema_url = data_model(),
+                                                       title = paste0(config$community, " ", input$dropdown_template),
+                                                       data_type = selected$schema(),
+                                                       return_excel = FALSE,
+                                                       csv_file = inFile$raw()$datapath),
+                              "offline-no-gsheet-url")
 
-    filled_manifest <- metadata_model$populateModelManifest(
-      title = paste0(config$community, " ", input$dropdown_datatype),
-      manifestPath = inFile$raw()$datapath,
-      rootNode = selected$schema()
-    )
 
     # rerender and change button to link
-    output$val_gsheet <- renderUI({
-      HTML(paste0("<a target=\"_blank\" href=\"", filled_manifest, "\">Edit on the Google Sheet.</a>"))
-    })
-
+    if (dca_schematic_api != "offline") {
+      output$val_gsheet <- renderUI({
+          HTML(paste0("<a target=\"_blank\" href=\"", filled_manifest, "\">Edit on the Google Sheet.</a>"))
+      })
+    }
     dcWaiter("hide")
   })
+  
+    # Offline version of downloading a failed manifest
+    mock_offline_manifest_2 <- tibble("column1"="fixed offline data")
+    output$downloadData_good <- downloadHandler(
+      filename = function() sprintf("%s.csv", input$dropdown_template),
+      content = function(file) {
+        write_csv(mock_offline_manifest_2, file)
+      }
+    )
 
 
   ######## Submission Section ########
   observeEvent(input$btn_submit, {
     # loading screen for submitting data
-    dcWaiter("show", msg = "Submitting...")
-
+    dcWaiter("show", msg = "Submitting to Synapse. This may take a minute.", color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
 
 
     if (is.null(selected$folder())) {
@@ -411,8 +644,9 @@ shinyServer(function(input, output, session) {
     # abort submission if no folder selected
     req(selected$folder())
 
-    tmp_out_dir <- "./manifest"
-    tmp_file_path <- file.path(tmp_out_dir, "synapse_storage_manifest.csv")
+    manifest_filename <- sprintf("%s_%s.csv", manifest_basename, tolower(selected$schema()))
+    tmp_out_dir <- tempdir()
+    tmp_file_path <- file.path(tmp_out_dir, manifest_filename)
     dir.create(tmp_out_dir, showWarnings = FALSE)
 
     # reads file csv again
@@ -420,18 +654,24 @@ shinyServer(function(input, output, session) {
 
     # If a file-based component selected (define file-based components) note for future
     # the type to filter (eg file-based) on could probably also be a config choice
-    display_names <- config_schema$manifest_schemas$display_name[config_schema$manifest_schemas$type == "file"]
+    display_names <- config_schema()$manifest_schemas$display_name[config_schema()$manifest_schemas$type == "file"]
 
-    if (input$dropdown_datatype %in% display_names) {
+    if (input$dropdown_template %in% display_names) {
       # make into a csv or table for file-based components already has entityId
       if ("entityId" %in% colnames(submit_data)) {
+        # Convert this to JSON instead and submit
         write.csv(submit_data,
           file = tmp_file_path,
           quote = TRUE, row.names = FALSE, na = ""
         )
       } else {
-        file_list <- syn_store$getFilesInStorageDataset(selected$folder())
-        data_list$files(list2Vector(file_list))
+        file_list_raw <- switch(dca_schematic_api,
+                            reticulate = storage_dataset_files_py(selected$folder()),
+                            rest = storage_dataset_files(url=file.path(api_uri, "v1/storage/dataset/files"),
+                                                         asset_view = selected$master_asset_view(),
+                                                         dataset_id = selected$folder(),
+                                                         input_token=access_token))
+        data_list$files(list2Vector(file_list_raw))
 
         # better filename checking is needed
         # TODO: crash if no file existing
@@ -439,21 +679,32 @@ shinyServer(function(input, output, session) {
         # adds entityID, saves it as synapse_storage_manifest.csv, then associates with synapse files
         colnames(files_df) <- c("entityId", "Filename")
         files_entity <- inner_join(submit_data, files_df, by = "Filename")
-
+        # convert this to JSON instead and submit
         write.csv(files_entity,
           file = tmp_file_path,
           quote = TRUE, row.names = FALSE, na = ""
         )
       }
-
+      
       # associates metadata with data and returns manifest id
-      manifest_id <- syn_store$associateMetadataWithFiles(
-        schemaGenerator = schema_generator,
-        metadataManifestPath = tmp_file_path,
-        datasetId = selected$folder(),
-        manifest_record_type = "table",
-        restrict_manifest = FALSE
-      )
+      manifest_id <- switch(dca_schematic_api,
+                            reticulate = model_submit_py(schema_generator,
+                                                         tmp_file_path,
+                                                         selected$folder(),
+                                                         "table",
+                                                         FALSE),
+                            rest = model_submit(url=file.path(api_uri, "v1/model/submit"),
+                                                schema_url = data_model(),
+                                                data_type = selected$schema(),
+                                                dataset_id = selected$folder(),
+                                                input_token = access_token,
+                                                restrict_rules = FALSE,
+                                                file_name = tmp_file_path,
+                                                asset_view = selected$master_asset_view(),
+                                                use_schema_label=dcc_config_react()$submit_use_schema_labels,
+                                                manifest_record_type="table",
+                                                table_manipulation=dcc_config_react()$submit_table_manipulation)
+                            )
       manifest_path <- tags$a(href = paste0("https://www.synapse.org/#!Synapse:", manifest_id), manifest_id, target = "_blank")
 
       # add log message
@@ -463,7 +714,7 @@ shinyServer(function(input, output, session) {
       if (startsWith(manifest_id, "syn") == TRUE) {
         dcWaiter("hide")
         nx_report_success("Success!", HTML(paste0("Manifest submitted to: ", manifest_path)))
-
+  
         # clean up old inputs/results
         sapply(clean_tags, FUN = hide)
         reset("inputFile-file")
@@ -477,18 +728,30 @@ shinyServer(function(input, output, session) {
       }
     } else {
       # if not file-based type template
+      # convert this to JSON and submit
       write.csv(submit_data,
         file = tmp_file_path, quote = TRUE,
         row.names = FALSE, na = ""
       )
 
       # associates metadata with data and returns manifest id
-      manifest_id <- syn_store$associateMetadataWithFiles(
-        schemaGenerator = schema_generator,
-        metadataManifestPath = tmp_file_path,
-        datasetId = selected$folder(),
-        manifest_record_type = "table",
-        restrict_manifest = FALSE
+      manifest_id <- switch(dca_schematic_api,
+                            reticulate = model_submit_py(schema_generator,
+                                                         tmp_file_path,
+                                                         selected$folder(),
+                                                         "table",
+                                                         FALSE),
+                            rest = model_submit(url=file.path(api_uri, "v1/model/submit"),
+                                                schema_url = data_model(),
+                                                data_type = selected$schema(),
+                                                dataset_id = selected$folder(),
+                                                input_token = access_token,
+                                                restrict_rules = FALSE,
+                                                file_name = tmp_file_path,
+                                                asset_view = selected$master_asset_view(),
+                                                use_schema_label=dcc_config_react()$submit_use_schema_labels,
+                                                manifest_record_type="table",
+                                                table_manipulation=dcc_config_react()$submit_table_manipulation)
       )
       manifest_path <- tags$a(href = paste0("https://www.synapse.org/#!Synapse:", manifest_id), manifest_id, target = "_blank")
 

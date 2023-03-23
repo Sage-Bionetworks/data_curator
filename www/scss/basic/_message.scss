@@ -6,42 +6,18 @@
 }
 
 // validation message
-.error-msg,
+.error_msg,
 .shiny-output-error {
   color: $error_col;
 }
 
-.success-msg {
+.success_msg {
   color: $success_col;
 }
 
-.warn-msg {
+.warn_msg {
   color: $warning_col;
 }
-
-.black-msg {
-  color: $black;
-}
-
-// bold
-.no-bold {
-  font-weight: 400;
-}
-.bold-sm {
-  font-weight: 500;
-}
-.bold-normal {
-  font-weight: 600;
-}
-.bold-lg {
-  font-weight: 700;
-}
-
-//styles
-.font-italic {
-  font-style: italic;
-}
-
 // notification
 .shiny-notification {
   position: fixed;
