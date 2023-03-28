@@ -201,14 +201,17 @@ shinyServer(function(input, output, session) {
     config_schema(config_df)
     data_list$template(conf_template)
     
-    data_list_raw <- switch(dca_schematic_api,
-                            reticulate  = storage_projects_py(synapse_driver, access_token),
-                            rest = storage_projects(url=file.path(api_uri, "v1/storage/projects"),
-                                                    asset_view = selected$master_asset_view(),
-                                                    input_token = access_token),
-                            list(list("Offline Project A", "Offline Project"))
-    )
-    data_list$projects(list2Vector(data_list_raw))
+    # Check for user access to project scopes within asset view
+    scopes <- synapse_get_project_scope(id = selected$master_asset_view(), auth = access_token)
+    scope_access <- vapply(scopes, function(x) {
+      synapse_access(id=x, access="DOWNLOAD", auth=access_token)
+    }, 1L)
+    scopes <- scopes[scope_access==1]
+    projects <- bind_rows(
+      lapply(scopes, function(x) synapse_get(id=x, auth=access_token))
+      ) %>% arrange(name)
+    
+    data_list$projects(setNames(projects$id, projects$name))
     
     if (is.null(data_list$projects()) || length(data_list$projects()) == 0) {
       dcWaiter("update", landing = TRUE, isPermission = FALSE)
