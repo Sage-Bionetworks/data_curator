@@ -238,15 +238,8 @@ shinyServer(function(input, output, session) {
                  color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
         
         # gets folders per project
-        folder_list_raw <- switch(dca_schematic_api,
-                                  reticulate = storage_projects_datasets_py(synapse_driver, project_id),
-                                  rest = storage_project_datasets(url=file.path(api_uri, "v1/storage/project/datasets"),
-                                                                  asset_view = selected$master_asset_view(),
-                                                                  project_id=project_id,
-                                                                  input_token=access_token),
-                                  list(list("DatatypeA", "DatatypeA"), list("DatatypeB","DatatypeB"))
-        )
-        folder_list <- list2Vector(folder_list_raw)
+        folders <- synapse_entity_children(auth=access_token, parentId=project_id, includeTypes = list("folder"))
+        folder_list <- setNames(folders$id, folders$name)
         
         if (length(folder_list) > 0) folder_names <- sort(names(folder_list)) else folder_names <- " "
         
