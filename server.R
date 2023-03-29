@@ -683,7 +683,7 @@ shinyServer(function(input, output, session) {
                                                 file_name = tmp_file_path,
                                                 asset_view = selected$master_asset_view(),
                                                 use_schema_label=dcc_config_react()$submit_use_schema_labels,
-                                                manifest_record_type="table",
+                                                manifest_record_type="table_and_file",
                                                 table_manipulation=dcc_config_react()$submit_table_manipulation)
                             )
       manifest_path <- tags$a(href = paste0("https://www.synapse.org/#!Synapse:", manifest_id), manifest_id, target = "_blank")
@@ -731,7 +731,7 @@ shinyServer(function(input, output, session) {
                                                 file_name = tmp_file_path,
                                                 asset_view = selected$master_asset_view(),
                                                 use_schema_label=dcc_config_react()$submit_use_schema_labels,
-                                                manifest_record_type="table",
+                                                manifest_record_type="table_and_file",
                                                 table_manipulation=dcc_config_react()$submit_table_manipulation)
       )
       manifest_path <- tags$a(href = paste0("https://www.synapse.org/#!Synapse:", manifest_id), manifest_id, target = "_blank")
