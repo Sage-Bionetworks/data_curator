@@ -19,7 +19,6 @@ jobs:
     container: rocker/rstudio:4.1.2
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
-      GITHUB_PAT: ${{ github.GITHUB_TOKEN }}
       DCA_SCHEMATIC_API_TYPE: reticulate
       DCA_API_HOST: "https://schematic.api.sagebionetworks.org"
       DCA_API_PORT: ""
