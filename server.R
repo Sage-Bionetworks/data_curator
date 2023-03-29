@@ -426,25 +426,24 @@ shinyServer(function(input, output, session) {
   # only download the manifest if they need to. Originally, this was in the
   # observeEvent above.
   output$downloadData <- downloadHandler(
-    filename = function() sprintf("%s.xlsx", input$dropdown_template),
+    #filename = function() sprintf("%s.xlsx", input$dropdown_template),
+    filename = function() sprintf("%s.csv", input$dropdown_template),
     content = function(file) {
       dcWaiter("show", msg = "Downloading manifest. This may take a minute.", color = dcc_config_react()$primary_col)
-      manifest_data <- switch(dca_schematic_api,
-                              reticulate =  manifest_generate_py(title = input$dropdown_template,
-                                                                 rootNode = selected$schema(),
-                                                                 datasetId = selected$folder()),
-                              rest = manifest_generate(url=file.path(api_uri, "v1/manifest/generate"),
-                                                       schema_url = data_model(),
-                                                       title = input$dropdown_template,
-                                                       data_type = selected$schema(),
-                                                       dataset_id = selected$folder(),
-                                                       asset_view = selected$master_asset_view(),
-                                                       output_format = Sys.getenv("DCA_MANIFEST_OUTPUT_FORMAT"),
-                                                       input_token=access_token),
-                              "offline-no-gsheet-url"
-      )
+
+      manifest <- synapse_entity_children(auth = access_token,
+                                          parentId=selected$folder(),
+                                          includeTypes = list("file"))
+      entity <- synapse_get(id = manifest$id, auth=access_token)
+      
+      # Use entity dataFileHandleId and associated synapse ID to download data
+      manifest_data <- reactiveVal()
+      manifest_data(synapse_download_file_handle(dataFileHandleId=entity$dataFileHandleId,
+                                               id=entity$id, auth=access_token))
+      
       dcWaiter("hide", sleep = 1)
-      writeBin(manifest_data, file)
+      #writeBin(manifest_data, file)
+      readr::write_csv(manifest_data(), file)
       #capture.output(print(manifest_url()), file=file) # actually kinda works
       # Just shows NULL
       # sink(file)
