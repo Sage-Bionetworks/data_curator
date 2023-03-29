@@ -217,7 +217,7 @@ synapse_storage_projects <- function(id, auth, select_cols = c("id", "name", "pa
     select_cols)
 }
 
-synapse_download_file_handle <- function(dataFileHandleId, id, auth) {
+synapse_download_file_handle <- function(dataFileHandleId, id, auth, filepath=NULL) {
   url <- sprintf("https://repo-prod.prod.sagebase.org/file/v1/file/%s", dataFileHandleId)
   request <- httr::GET(url = url,
                        httr::add_headers( Authorization=paste0("Bearer ", auth)),
@@ -228,9 +228,8 @@ synapse_download_file_handle <- function(dataFileHandleId, id, auth) {
                        )
   )
   download_url <- httr::content(request)
-  destfile <- tempfile()
+  destfile <- ifelse(is.null(filepath), tempfile(), filepath)
   download.file(download_url, destfile)
-  readr::read_csv(destfile)
+  if (is.null(filepath)) readr::read_csv(destfile)
   
 }
->>>>>>> synapse_api
