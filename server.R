@@ -201,14 +201,17 @@ shinyServer(function(input, output, session) {
     config_schema(config_df)
     data_list$template(conf_template)
     
-    data_list_raw <- switch(dca_schematic_api,
-                            reticulate  = storage_projects_py(synapse_driver, access_token),
-                            rest = storage_projects(url=file.path(api_uri, "v1/storage/projects"),
-                                                    asset_view = selected$master_asset_view(),
-                                                    input_token = access_token),
-                            list(list("Offline Project A", "Offline Project"))
-    )
-    data_list$projects(list2Vector(data_list_raw))
+    # Check for user access to project scopes within asset view
+    scopes <- synapse_get_project_scope(id = selected$master_asset_view(), auth = access_token)
+    scope_access <- vapply(scopes, function(x) {
+      synapse_access(id=x, access="DOWNLOAD", auth=access_token)
+    }, 1L)
+    scopes <- scopes[scope_access==1]
+    projects <- bind_rows(
+      lapply(scopes, function(x) synapse_get(id=x, auth=access_token))
+      ) %>% arrange(name)
+    
+    data_list$projects(setNames(projects$id, projects$name))
     
     if (is.null(data_list$projects()) || length(data_list$projects()) == 0) {
       dcWaiter("update", landing = TRUE, isPermission = FALSE)
@@ -235,15 +238,8 @@ shinyServer(function(input, output, session) {
                  color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
         
         # gets folders per project
-        folder_list_raw <- switch(dca_schematic_api,
-                                  reticulate = storage_projects_datasets_py(synapse_driver, project_id),
-                                  rest = storage_project_datasets(url=file.path(api_uri, "v1/storage/project/datasets"),
-                                                                  asset_view = selected$master_asset_view(),
-                                                                  project_id=project_id,
-                                                                  input_token=access_token),
-                                  list(list("DatatypeA", "DatatypeA"), list("DatatypeB","DatatypeB"))
-        )
-        folder_list <- list2Vector(folder_list_raw)
+        folders <- synapse_entity_children(auth=access_token, parentId=project_id, includeTypes = list("folder"))
+        folder_list <- setNames(folders$id, folders$name)
         
         if (length(folder_list) > 0) folder_names <- sort(names(folder_list)) else folder_names <- " "
         
@@ -370,19 +366,10 @@ shinyServer(function(input, output, session) {
       )
     } else if (selected$schema_type() %in% c("record", "file")) {
       # check number of files if it's file-based template
-
       dcWaiter("show", msg = paste0("Getting files in ", input$dropdown_folder, "."), color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
       # get file list in selected folder
-      file_list <- switch(dca_schematic_api,
-                          reticulate = storage_dataset_files_py(selected$folder()),
-                          rest = storage_dataset_files(url=file.path(api_uri, "v1/storage/dataset/files"),
-                                                                  asset_view = selected$master_asset_view(),
-                                                                  dataset_id = selected$folder(),
-                                                                  input_token=access_token),
-                          list(list("DatatypeA", "DatatypeA"), list("DatatypeB", "DatatypeB")))
-
-      # update files list in the folder
-      data_list$files(list2Vector(file_list))
+      files <- synapse_entity_children(auth = access_token, parentId=selected$folder(), includeTypes = list("file"))
+      data_list$files(setNames(files$id, files$name))
 
       dcWaiter("hide")
       
@@ -665,13 +652,8 @@ shinyServer(function(input, output, session) {
           quote = TRUE, row.names = FALSE, na = ""
         )
       } else {
-        file_list_raw <- switch(dca_schematic_api,
-                            reticulate = storage_dataset_files_py(selected$folder()),
-                            rest = storage_dataset_files(url=file.path(api_uri, "v1/storage/dataset/files"),
-                                                         asset_view = selected$master_asset_view(),
-                                                         dataset_id = selected$folder(),
-                                                         input_token=access_token))
-        data_list$files(list2Vector(file_list_raw))
+        files <- synapse_entity_children(auth = access_token, parentId=selected$folder(), includeTypes = list("file"))
+        data_list$files(setNames(files$id, files$name))
 
         # better filename checking is needed
         # TODO: crash if no file existing

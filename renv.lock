@@ -904,10 +904,20 @@
     },
     "renv": {
       "Package": "renv",
+<<<<<<< HEAD
       "Version": "0.17.2",
       "OS_type": null,
       "Repository": "CRAN",
       "Source": "Repository"
+=======
+      "Version": "0.17.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "utils"
+      ],
+      "Hash": "ce3065fc1a0b64a859f55ac3998d6927"
+>>>>>>> synapse_api
     },
     "reticulate": {
       "Package": "reticulate",
@@ -1406,3 +1416,7 @@
     }
   }
 }
+<<<<<<< HEAD
+=======
+
+>>>>>>> synapse_api
