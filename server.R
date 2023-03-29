@@ -366,19 +366,10 @@ shinyServer(function(input, output, session) {
       )
     } else if (selected$schema_type() %in% c("record", "file")) {
       # check number of files if it's file-based template
-
       dcWaiter("show", msg = paste0("Getting files in ", input$dropdown_folder, "."), color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
       # get file list in selected folder
-      file_list <- switch(dca_schematic_api,
-                          reticulate = storage_dataset_files_py(selected$folder()),
-                          rest = storage_dataset_files(url=file.path(api_uri, "v1/storage/dataset/files"),
-                                                                  asset_view = selected$master_asset_view(),
-                                                                  dataset_id = selected$folder(),
-                                                                  input_token=access_token),
-                          list(list("DatatypeA", "DatatypeA"), list("DatatypeB", "DatatypeB")))
-
-      # update files list in the folder
-      data_list$files(list2Vector(file_list))
+      files <- synapse_entity_children(auth = access_token, parentId=selected$folder(), includeTypes = list("file"))
+      data_list$files(setNames(files$id, files$name))
 
       dcWaiter("hide")
       
@@ -661,13 +652,8 @@ shinyServer(function(input, output, session) {
           quote = TRUE, row.names = FALSE, na = ""
         )
       } else {
-        file_list_raw <- switch(dca_schematic_api,
-                            reticulate = storage_dataset_files_py(selected$folder()),
-                            rest = storage_dataset_files(url=file.path(api_uri, "v1/storage/dataset/files"),
-                                                         asset_view = selected$master_asset_view(),
-                                                         dataset_id = selected$folder(),
-                                                         input_token=access_token))
-        data_list$files(list2Vector(file_list_raw))
+        files <- synapse_entity_children(auth = access_token, parentId=selected$folder(), includeTypes = list("file"))
+        data_list$files(setNames(files$id, files$name))
 
         # better filename checking is needed
         # TODO: crash if no file existing
