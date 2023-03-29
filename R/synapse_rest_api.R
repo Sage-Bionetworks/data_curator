@@ -98,8 +98,6 @@ synapse_access <- function(url = "https://repo-prod.prod.sagebase.org/repo/v1/en
   cont$result
   
 }
-<<<<<<< HEAD
-=======
 
 synapse_entity_children <- function(url = "https://repo-prod.prod.sagebase.org/repo/v1/entity/children",
                                     auth, parentId=NULL, nextPageToken=NULL, includeTypes="project", sortBy="NAME",

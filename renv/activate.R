@@ -2,11 +2,7 @@
 local({
 
   # the requested version of renv
-<<<<<<< HEAD
   version <- "0.17.2"
-=======
-  version <- "0.17.0"
->>>>>>> synapse_api
 
   # the project directory
   project <- getwd()
