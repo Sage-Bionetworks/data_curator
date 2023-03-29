@@ -43,7 +43,6 @@ schematic_config <- yaml.load_file("schematic_config.yml")
 manifest_basename <- schematic_config$synapse$manifest_basename
 
 dca_schematic_api <- Sys.getenv("DCA_SCHEMATIC_API_TYPE")
-message(sprintf("dca_schematic_api=%s", Sys.getenv("DCA_SCHEMATIC_API_TYPE")))
 if (!dca_schematic_api %in% c("rest", "reticulate", "offline")) {
   stop(sprintf("DCA_SCHEMATIC_API_TYPE environment variable must be one of: %s", c("rest", "reticulate", "offline")))
 }
