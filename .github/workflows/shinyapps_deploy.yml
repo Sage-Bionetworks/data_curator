@@ -121,6 +121,7 @@ jobs:
           echo 'DCA_API_HOST="${{ env.DCA_API_HOST }}"' >> .Renviron
 
           echo 'DCA_SYNAPSE_PROJECT_API=TRUE' >> .Renviron
+          echo 'DCA_MANIFEST_OUTPUT_FORMAT="excel"' >> .Renviron
           
           echo 'GITHUB_PAT="${{ secrets.GITHUB_TOKEN }}"' >> .Renviron
 
