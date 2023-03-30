@@ -20,7 +20,7 @@ jobs:
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       DCA_SCHEMATIC_API_TYPE: rest
-      DCA_API_HOST: "https://schematic.api.sagebionetworks.org"
+      DCA_API_HOST: "https://schematic-dev.api.sagebionetworks.org"
       DCA_API_PORT: ""
     steps:
       - name: Install System Dependencies
