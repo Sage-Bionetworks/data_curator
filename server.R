@@ -243,7 +243,7 @@ shinyServer(function(input, output, session) {
     lapply(c("header_dropdown_", "dropdown_"), function(x) {
       observeEvent(ignoreInit = TRUE, input[[paste0(x, "project")]], {
         
-        dcWaiter("show", msg = paste0("Getting project data from ", selected$master_asset_view_label(), ". This may take a minute."),
+        dcWaiter("show", msg = paste0("Getting project data from ", names(data_list$projects()[input[[paste0(x, "project")]]]), ". This may take a minute."),
                  color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
         
         # get synID of selected project
