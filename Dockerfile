@@ -1,4 +1,4 @@
-FROM sagebionetworks/shiny-base:release-1.1
+FROM sagebionetworks/shiny-base:release-1.4
 LABEL maintainer="Anthony anthony.williams@sagebase.org"
 
 USER root
