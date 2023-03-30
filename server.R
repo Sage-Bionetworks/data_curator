@@ -397,7 +397,8 @@ shinyServer(function(input, output, session) {
       # get file list in selected folder
       if (Sys.getenv("DCA_SYNAPSE_PROJECT_API") == TRUE) {
         files <- synapse_entity_children(auth = access_token, parentId=selected$folder(), includeTypes = list("file"))
-        data_list$files(setNames(files$id, files$name))
+        if (nrow(files) > 0) data_list$files(setNames(files$id, files$name)) 
+        
       } else {
       
       file_list <- switch(dca_schematic_api,
