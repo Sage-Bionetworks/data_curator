@@ -494,6 +494,7 @@ shinyServer(function(input, output, session) {
             data_type = selected$schema(),
             dataset_id = selected$folder(),
             asset_view = selected$master_asset_view(),
+            use_annotations = FALSE,
             output_format = Sys.getenv("DCA_MANIFEST_OUTPUT_FORMAT"),
             input_token=access_token),
           "offline-no-gsheet-url"
@@ -535,6 +536,7 @@ shinyServer(function(input, output, session) {
                                                     data_type = selected$schema(),
                                                     dataset_id = selected$folder(),
                                                     asset_view = selected$master_asset_view(),
+                                                    use_annotations = FALSE,
                                                     output_format = Sys.getenv("DCA_MANIFEST_OUTPUT_FORMAT"),
                                                     input_token=access_token),
                            "offline-no-gsheet-url"
