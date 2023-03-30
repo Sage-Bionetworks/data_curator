@@ -201,26 +201,29 @@ shinyServer(function(input, output, session) {
     config_schema(config_df)
     data_list$template(conf_template)
     
-    # This chunk gets projects using the synapse REST API
-    # Check for user access to project scopes within asset view
-    # scopes <- synapse_get_project_scope(id = selected$master_asset_view(), auth = access_token)
-    # scope_access <- vapply(scopes, function(x) {
-    #   synapse_access(id=x, access="DOWNLOAD", auth=access_token)
-    # }, 1L)
-    # scopes <- scopes[scope_access==1]
-    # projects <- bind_rows(
-    #   lapply(scopes, function(x) synapse_get(id=x, auth=access_token))
-    #   ) %>% arrange(name)
-    # 
-    # data_list$projects(setNames(projects$id, projects$name))
-    data_list_raw <- switch(dca_schematic_api,
-      reticulate  = storage_projects_py(synapse_driver, access_token),
-      rest = storage_projects(url=file.path(api_uri, "v1/storage/projects"),
-        asset_view = selected$master_asset_view(),
-        input_token = access_token),
-      list(list("Offline Project A", "Offline Project"))
-    )
-    data_list$projects(list2Vector(data_list_raw))
+    if (Sys.getenv("DCA_SYNAPSE_PROJECT_API") == TRUE) {
+      #This chunk gets projects using the synapse REST API
+      #Check for user access to project scopes within asset view
+      scopes <- synapse_get_project_scope(id = selected$master_asset_view(), auth = access_token)
+      scope_access <- vapply(scopes, function(x) {
+        synapse_access(id=x, access="DOWNLOAD", auth=access_token)
+      }, 1L)
+      scopes <- scopes[scope_access==1]
+      projects <- bind_rows(
+        lapply(scopes, function(x) synapse_get(id=x, auth=access_token))
+        ) %>% arrange(name)
+  
+      data_list$projects(setNames(projects$id, projects$name))
+    } else{
+      data_list_raw <- switch(dca_schematic_api,
+        reticulate  = storage_projects_py(synapse_driver, access_token),
+        rest = storage_projects(url=file.path(api_uri, "v1/storage/projects"),
+          asset_view = selected$master_asset_view(),
+          input_token = access_token),
+        list(list("Offline Project A", "Offline Project"))
+      )
+      data_list$projects(list2Vector(data_list_raw))
+    }
     
     if (is.null(data_list$projects()) || length(data_list$projects()) == 0) {
       dcWaiter("update", landing = TRUE, isPermission = FALSE)
@@ -248,18 +251,21 @@ shinyServer(function(input, output, session) {
         
         # This gets the folder list using the synapse REST API
         # gets folders per project
-        # folders <- synapse_entity_children(auth=access_token, parentId=project_id, includeTypes = list("folder"))
-        # folder_list <- setNames(folders$id, folders$name)
+        if (Sys.getenv("DCA_SYNAPSE_PROJECT_API") == TRUE) {
+          folders <- synapse_entity_children(auth=access_token, parentId=project_id, includeTypes = list("folder"))
+          folder_list <- setNames(folders$id, folders$name)
+        } else {
         
-        folder_list_raw <- switch(dca_schematic_api,
-          reticulate = storage_projects_datasets_py(synapse_driver, project_id),
-          rest = storage_project_datasets(url=file.path(api_uri, "v1/storage/project/datasets"),
-            asset_view = selected$master_asset_view(),
-            project_id=project_id,
-            input_token=access_token),
-          list(list("DatatypeA", "DatatypeA"), list("DatatypeB","DatatypeB"))
-        )
-        folder_list <- list2Vector(folder_list_raw)
+          folder_list_raw <- switch(dca_schematic_api,
+            reticulate = storage_projects_datasets_py(synapse_driver, project_id),
+            rest = storage_project_datasets(url=file.path(api_uri, "v1/storage/project/datasets"),
+              asset_view = selected$master_asset_view(),
+              project_id=project_id,
+              input_token=access_token),
+            list(list("DatatypeA", "DatatypeA"), list("DatatypeB","DatatypeB"))
+          )
+          folder_list <- list2Vector(folder_list_raw)
+        }
         
         if (length(folder_list) > 0) folder_names <- sort(names(folder_list)) else folder_names <- " "
         
@@ -389,8 +395,10 @@ shinyServer(function(input, output, session) {
       dcWaiter("show", msg = paste0("Getting files in ", input$dropdown_folder, "."), color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
       # This gets files using the synapse REST API
       # get file list in selected folder
-      # files <- synapse_entity_children(auth = access_token, parentId=selected$folder(), includeTypes = list("file"))
-      # data_list$files(setNames(files$id, files$name))
+      if (Sys.getenv("DCA_SYNAPSE_PROJECT_API") == TRUE) {
+        files <- synapse_entity_children(auth = access_token, parentId=selected$folder(), includeTypes = list("file"))
+        data_list$files(setNames(files$id, files$name))
+      } else {
       
       file_list <- switch(dca_schematic_api,
         reticulate = storage_dataset_files_py(selected$folder()),
@@ -402,6 +410,7 @@ shinyServer(function(input, output, session) {
      
         # update files list in the folder
         data_list$files(list2Vector(file_list))
+      }
 
       dcWaiter("hide")
       
@@ -464,30 +473,32 @@ shinyServer(function(input, output, session) {
       dcWaiter("show", msg = "Downloading manifest. This may take a minute.", color = dcc_config_react()$primary_col)
 
       # This downloads a manifest using the synapse REST API
-      # manifest <- synapse_entity_children(auth = access_token,
-      #                                     parentId=selected$folder(),
-      #                                     includeTypes = list("file"))
-      # entity <- synapse_get(id = manifest$id, auth=access_token)
-      # 
-      # # Use entity dataFileHandleId and associated synapse ID to download data
-      # manifest_data <- reactiveVal()
-      # manifest_data(synapse_download_file_handle(dataFileHandleId=entity$dataFileHandleId,
-      #                                          id=entity$id, auth=access_token))
-      
-      manifest_data <- switch(dca_schematic_api,
-        reticulate =  manifest_generate_py(title = input$dropdown_template,
-          rootNode = selected$schema(),
-          datasetId = selected$folder()),
-        rest = manifest_generate(url=file.path(api_uri, "v1/manifest/generate"),
-          schema_url = data_model(),
-          title = input$dropdown_template,
-          data_type = selected$schema(),
-          dataset_id = selected$folder(),
-          asset_view = selected$master_asset_view(),
-          output_format = Sys.getenv("DCA_MANIFEST_OUTPUT_FORMAT"),
-          input_token=access_token),
-        "offline-no-gsheet-url"
-       )
+      if (Sys.getenv("DCA_SYNAPSE_PROJECT_API") == TRUE) {
+        manifest <- synapse_entity_children(auth = access_token,
+                                            parentId=selected$folder(),
+                                            includeTypes = list("file"))
+        entity <- synapse_get(id = manifest$id, auth=access_token)
+  
+        # Use entity dataFileHandleId and associated synapse ID to download data
+        manifest_data <- reactiveVal()
+        manifest_data(synapse_download_file_handle(dataFileHandleId=entity$dataFileHandleId,
+                                                 id=entity$id, auth=access_token))
+      } else {
+        manifest_data <- switch(dca_schematic_api,
+          reticulate =  manifest_generate_py(title = input$dropdown_template,
+            rootNode = selected$schema(),
+            datasetId = selected$folder()),
+          rest = manifest_generate(url=file.path(api_uri, "v1/manifest/generate"),
+            schema_url = data_model(),
+            title = input$dropdown_template,
+            data_type = selected$schema(),
+            dataset_id = selected$folder(),
+            asset_view = selected$master_asset_view(),
+            output_format = Sys.getenv("DCA_MANIFEST_OUTPUT_FORMAT"),
+            input_token=access_token),
+          "offline-no-gsheet-url"
+         )
+      }
       
       dcWaiter("hide", sleep = 1)
       writeBin(manifest_data, file)
@@ -700,17 +711,19 @@ shinyServer(function(input, output, session) {
         )
       } else {
         # Get file list from synapse REST API
-        # files <- synapse_entity_children(auth = access_token, parentId=selected$folder(), includeTypes = list("file"))
-        # data_list$files(setNames(files$id, files$name))
-        
-        file_list_raw <- switch(dca_schematic_api,
-          reticulate = storage_dataset_files_py(selected$folder()),
-          rest = storage_dataset_files(url=file.path(api_uri, "v1/storage/dataset/files"),
-            asset_view = selected$master_asset_view(),
-            dataset_id = selected$folder(),
-            input_token=access_token))
-        
-        data_list$files(list2Vector(file_list_raw))
+        if (Sys.getenv("DCA_SYNAPSE_PROJECT_API") == TRUE) {
+          files <- synapse_entity_children(auth = access_token, parentId=selected$folder(), includeTypes = list("file"))
+          data_list$files(setNames(files$id, files$name))
+        } else {
+          file_list_raw <- switch(dca_schematic_api,
+            reticulate = storage_dataset_files_py(selected$folder()),
+            rest = storage_dataset_files(url=file.path(api_uri, "v1/storage/dataset/files"),
+              asset_view = selected$master_asset_view(),
+              dataset_id = selected$folder(),
+              input_token=access_token))
+          
+          data_list$files(list2Vector(file_list_raw))
+        }
 
         # better filename checking is needed
         # TODO: crash if no file existing
