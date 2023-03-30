@@ -473,17 +473,17 @@ shinyServer(function(input, output, session) {
       dcWaiter("show", msg = "Downloading manifest. This may take a minute.", color = dcc_config_react()$primary_col)
 
       # This downloads a manifest using the synapse REST API
-      if (Sys.getenv("DCA_SYNAPSE_PROJECT_API") == TRUE) {
-        manifest <- synapse_entity_children(auth = access_token,
-                                            parentId=selected$folder(),
-                                            includeTypes = list("file"))
-        entity <- synapse_get(id = manifest$id, auth=access_token)
+      #if (Sys.getenv("DCA_SYNAPSE_PROJECT_API") == TRUE) {
+      #  manifest <- synapse_entity_children(auth = access_token,
+      #                                      parentId=selected$folder(),
+      #                                      includeTypes = list("file"))
+      #  entity <- synapse_get(id = manifest$id, auth=access_token)
   
         # Use entity dataFileHandleId and associated synapse ID to download data
-        manifest_data <- reactiveVal()
-        manifest_data(synapse_download_file_handle(dataFileHandleId=entity$dataFileHandleId,
-                                                 id=entity$id, auth=access_token))
-      } else {
+      #  manifest_data <- reactiveVal()
+      #  manifest_data(synapse_download_file_handle(dataFileHandleId=entity$dataFileHandleId,
+      #                                           id=entity$id, auth=access_token))
+      #} else {
         manifest_data <- switch(dca_schematic_api,
           reticulate =  manifest_generate_py(title = input$dropdown_template,
             rootNode = selected$schema(),
@@ -498,7 +498,7 @@ shinyServer(function(input, output, session) {
             input_token=access_token),
           "offline-no-gsheet-url"
          )
-      }
+      #}
       
       dcWaiter("hide", sleep = 1)
       writeBin(manifest_data, file)
