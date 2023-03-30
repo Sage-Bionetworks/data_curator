@@ -147,14 +147,14 @@ shinyServer(function(input, output, session) {
   })
   
   observeEvent(input$btn_asset_view, {
+    dcWaiter("show", msg = paste0("Getting data from ", selected$master_asset_view_label(),". This may take a minute."),
+             color=col2rgba(col2rgb("#CD0BBC01")))
+    
     selected$master_asset_view(input$dropdown_asset_view)
     av_names <- names(asset_views()[asset_views() %in% selected$master_asset_view()])
     selected$master_asset_view_label(av_names)
     
     dcc_config_react(dcc_config[dcc_config$synapse_asset_view == selected$master_asset_view(), ])
-    
-    dcWaiter("show", msg = paste0("Getting data from ", selected$master_asset_view_label(),". This may take a minute."),
-             color=col2rgba(col2rgb("#CD0BBC01")))
     
     data_model(data_model_options[selected$master_asset_view()])
 
@@ -243,11 +243,11 @@ shinyServer(function(input, output, session) {
     lapply(c("header_dropdown_", "dropdown_"), function(x) {
       observeEvent(ignoreInit = TRUE, input[[paste0(x, "project")]], {
         
-        # get synID of selected project
-        project_id <- data_list$projects()[input[[paste0(x, "project")]]]
-        
         dcWaiter("show", msg = paste0("Getting project data from ", selected$master_asset_view_label(), ". This may take a minute."),
                  color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
+        
+        # get synID of selected project
+        project_id <- data_list$projects()[input[[paste0(x, "project")]]]
         
         # This gets the folder list using the synapse REST API
         # gets folders per project
