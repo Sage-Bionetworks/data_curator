@@ -54,6 +54,7 @@ shinyServer(function(input, output, session) {
   dcc_config_react <- reactiveVal(dcc_config)
   
   manifest_data <- reactiveVal()
+  annotation_status <- reactiveVal()
   
   data_list <- list(
     projects = reactiveVal(NULL), folders = reactiveVal(NULL),
@@ -577,27 +578,41 @@ shinyServer(function(input, output, session) {
 
     # loading screen for validating metadata
     dcWaiter("show", msg = "Validating manifest...", color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
-    annotation_status <- switch(dca_schematic_api,
-                                reticulate = manifest_validate_py(inFile$raw()$datapath,
-                                                                  selected$schema(),
-                                                                  TRUE,
-                                                                  list(selected$project())),
-                                rest = manifest_validate(url=file.path(api_uri, "v1/model/validate"),
-                                                         schema_url=data_model(),
-                                                         data_type=selected$schema(),
-                                                         file_name=inFile$raw()$datapath),
-                                                         #json_str=jsonlite::toJSON(read_csv(inFile$raw()$datapath))),
-                                list(list(
-                                    "errors" = list(
-                                     Row = NA, Column = NA, Value = NA,
-                                     Error = "Mock error for offline mode."
-                                    )
-                                ))
-                              )
+    
+    .datapath <- inFile$raw()$datapath
+    .schema <- selected$schema()
+    .project <- list(selected$project())
+    .data_model <- data_model()
+    
+    promises::future_promise({
+      switch(dca_schematic_api,
+             reticulate = manifest_validate_py(
+               .datapath,
+               .schema,
+               TRUE,
+               .project),
+             rest = manifest_validate(
+               url=file.path(api_uri, "v1/model/validate"),
+               schema_url=.data_model,
+               data_type=.schema,
+               file_name=.datapath),
+             list(list(
+               "errors" = list(
+                 Row = NA, Column = NA, Value = NA,
+                 Error = "Mock error for offline mode."
+               )
+             ))
+      )
+    }) %...>% annotation_status()
 
+  })
+  
+  observeEvent(annotation_status(), {
     # validation messages
-    validation_res <- validationResult(annotation_status, input$dropdown_template, inFile$data())
+    validation_res <- validationResult(annotation_status(), input$dropdown_template, inFile$data())
     ValidationMsgServer("text_validate", validation_res)
+    # Update annotation_status so that subsequent clicks of validation will work.
+    annotation_status(NULL)
 
     # if there is a file uploaded
     if (!is.null(validation_res$result)) {
