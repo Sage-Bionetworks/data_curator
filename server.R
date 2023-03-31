@@ -53,6 +53,8 @@ shinyServer(function(input, output, session) {
   
   dcc_config_react <- reactiveVal(dcc_config)
   
+  manifest_data <- reactiveVal()
+  
   data_list <- list(
     projects = reactiveVal(NULL), folders = reactiveVal(NULL),
     template = reactiveVal(setNames(def_config$schema_name, def_config$display_name)),
@@ -435,29 +437,30 @@ shinyServer(function(input, output, session) {
     show("div_template_warn")
   })
     
-  observeEvent(c(input$dropdown_folder, input$tabs), {
-    # if (input$tabs == "tab_template" && Sys.getenv("DCA_MANIFEST_OUTPUT_FORMAT") == "excel") {
-    #   dcWaiter("show", msg = "Downloading data from Synapse...", color = dca_theme()$primary_col)
-    #   #schematic rest api to generate manifest
-    #   manifest_data <- switch(dca_schematic_api,
-    #                           reticulate =  manifest_generate_py(title = input$dropdown_template,
-    #                                                              rootNode = selected$schema(),
-    #                                                              datasetId = selected$folder()),
-    #                           rest = manifest_generate(url=file.path(api_uri, "v1/manifest/generate"),
-    #                                                    schema_url = data_model(),
-    #                                                    title = input$dropdown_template,
-    #                                                    data_type = selected$schema(),
-    #                                                    dataset_id = selected$folder(),
-    #                                                    asset_view = selected$master_asset_view(),
-    #                                                    output_format = Sys.getenv("DCA_MANIFEST_OUTPUT_FORMAT"),
-    #                                                    input_token=access_token),
-    #                           "offline-no-gsheet-url"
-    #   )
-    #   manifest_url(manifest_data)
-    #   
-    #   dcWaiter("hide", sleep = 1)
-    #   
-    # }
+  observeEvent(input$`switchTab2-Next`, {
+    
+    ### This doesn't work - try moving manifest_generate outside of downloadButton
+    .schema <- selected$schema()
+    .datasetId <- selected$folder()
+    .schema_url <- data_model()
+    .asset_view <- selected$master_asset_view()
+    .template <- input$dropdown_template
+    .url <- file.path(api_uri, "v1/manifest/generate")
+    
+    promises::future_promise({
+     manifest_generate(
+      url=.url,
+      schema_url = .schema_url,
+      title = .template,
+      data_type = .schema,
+      dataset_id = .datasetId,
+      asset_view = .asset_view,
+      use_annotations = FALSE,
+      output_format = "excel",
+      input_token=access_token
+      )
+    }) %...>% manifest_data()
+    
   })
   
   # Bookmarking this thread in case we can't use writeBin...
@@ -485,25 +488,12 @@ shinyServer(function(input, output, session) {
       #  manifest_data(synapse_download_file_handle(dataFileHandleId=entity$dataFileHandleId,
       #                                           id=entity$id, auth=access_token))
       #} else {
-        manifest_data <- switch(dca_schematic_api,
-          reticulate =  manifest_generate_py(title = input$dropdown_template,
-            rootNode = selected$schema(),
-            datasetId = selected$folder()),
-          rest = manifest_generate(url=file.path(api_uri, "v1/manifest/generate"),
-            schema_url = data_model(),
-            title = input$dropdown_template,
-            data_type = selected$schema(),
-            dataset_id = selected$folder(),
-            asset_view = selected$master_asset_view(),
-            use_annotations = FALSE,
-            output_format = "excel",
-            input_token=access_token),
-          "offline-no-gsheet-url"
-         )
+      
+
       #}
       
       dcWaiter("hide", sleep = 1)
-      writeBin(manifest_data, file)
+      writeBin(manifest_data(), file)
       #readr::write_csv(manifest_data(), file)
       #capture.output(print(manifest_url()), file=file) # actually kinda works
       # Just shows NULL
