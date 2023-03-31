@@ -17,6 +17,7 @@ suppressPackageStartupMessages({
   library(sass)
   library(shinydashboardPlus)
   library(promises)
+  library(future)
   # dashboard
   library(purrr)
   library(data.table)
@@ -24,6 +25,8 @@ suppressPackageStartupMessages({
   library(data.tree)
   library(r2d3)
 })
+
+plan(multisession)
 
 # import R files
 source_files <- list.files(c("functions", "modules"), pattern = "*\\.R$", recursive = TRUE, full.names = TRUE)
