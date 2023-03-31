@@ -430,6 +430,11 @@
       ],
       "Hash": "f4dcd23b67e33d851d2079f703e8b985"
     },
+    "future": {
+      "Package": "future",
+      "Version": "1.32.0",
+      "Source": "Repository"
+    },
     "generics": {
       "Package": "generics",
       "Version": "0.1.3",
