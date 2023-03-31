@@ -16,6 +16,7 @@ suppressPackageStartupMessages({
   library(readr)
   library(sass)
   library(shinydashboardPlus)
+  library(promises)
   # dashboard
   library(purrr)
   library(data.table)
