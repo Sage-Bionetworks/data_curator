@@ -439,6 +439,8 @@ shinyServer(function(input, output, session) {
     
   observeEvent(input$`switchTab2-Next`, {
     
+    dcWaiter("show", msg = "Downloading manifest. This may take a minute.", color = dcc_config_react()$primary_col)
+    
     ### This doesn't work - try moving manifest_generate outside of downloadButton
     .schema <- selected$schema()
     .datasetId <- selected$folder()
@@ -462,6 +464,8 @@ shinyServer(function(input, output, session) {
     }) %...>% manifest_data()
     
   })
+  
+  observeEvent(manifest_data(), dcWaiter("hide"))
   
   # Bookmarking this thread in case we can't use writeBin...
   # Use a db connection instead
