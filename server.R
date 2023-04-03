@@ -158,6 +158,7 @@ shinyServer(function(input, output, session) {
     selected$master_asset_view_label(av_names)
     
     dcc_config_react(dcc_config[dcc_config$synapse_asset_view == selected$master_asset_view(), ])
+    if (dca_schematic_api == "offline") dcc_config_react(dcc_config[dcc_config$project_name == "DCA Demo", ])
     
     data_model(data_model_options[selected$master_asset_view()])
 
@@ -204,7 +205,7 @@ shinyServer(function(input, output, session) {
     config_schema(config_df)
     data_list$template(conf_template)
     
-    if (Sys.getenv("DCA_SYNAPSE_PROJECT_API") == TRUE) {
+    if (Sys.getenv("DCA_SYNAPSE_PROJECT_API") == TRUE & dca_schematic_api != "offline") {
       #This chunk gets projects using the synapse REST API
       #Check for user access to project scopes within asset view
       scopes <- synapse_get_project_scope(id = selected$master_asset_view(), auth = access_token)
@@ -254,7 +255,7 @@ shinyServer(function(input, output, session) {
         
         # This gets the folder list using the synapse REST API
         # gets folders per project
-        if (Sys.getenv("DCA_SYNAPSE_PROJECT_API") == TRUE) {
+        if (Sys.getenv("DCA_SYNAPSE_PROJECT_API") == TRUE & dca_schematic_api != "offline") {
           folders <- synapse_entity_children(auth=access_token, parentId=project_id, includeTypes = list("folder"))
           folder_list <- setNames(folders$id, folders$name)
         } else {
@@ -398,7 +399,7 @@ shinyServer(function(input, output, session) {
       dcWaiter("show", msg = paste0("Getting files in ", input$dropdown_folder, "."), color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
       # This gets files using the synapse REST API
       # get file list in selected folder
-      if (Sys.getenv("DCA_SYNAPSE_PROJECT_API") == TRUE) {
+      if (Sys.getenv("DCA_SYNAPSE_PROJECT_API") == TRUE & dca_schematic_api != "offline") {
         files <- synapse_entity_children(auth = access_token, parentId=selected$folder(), includeTypes = list("file"))
         if (nrow(files) > 0) data_list$files(setNames(files$id, files$name)) 
         
@@ -448,20 +449,29 @@ shinyServer(function(input, output, session) {
     .schema_url <- data_model()
     .asset_view <- selected$master_asset_view()
     .template <- input$dropdown_template
-    .url <- file.path(api_uri, "v1/manifest/generate")
+    .url <- ifelse(dca_schematic_api != "offline",
+                   file.path(api_uri, "v1/manifest/generate"),
+                   NA)
     
     promises::future_promise({
-     manifest_generate(
-      url=.url,
-      schema_url = .schema_url,
-      title = .template,
-      data_type = .schema,
-      dataset_id = .datasetId,
-      asset_view = .asset_view,
-      use_annotations = FALSE,
-      output_format = "excel",
-      input_token=access_token
-      )
+     switch(dca_schematic_api, 
+            rest = manifest_generate(
+              url=.url,
+              schema_url = .schema_url,
+              title = .template,
+              data_type = .schema,
+              dataset_id = .datasetId,
+              asset_view = .asset_view,
+              use_annotations = FALSE,
+              output_format = "excel",
+              input_token=access_token
+              ),
+            {
+              message("Downloading offline manifest")
+              Sys.sleep(10)
+              tibble(a="b", c="d")
+            }
+     )
     }) %...>% manifest_data()
     
   })
@@ -567,18 +577,14 @@ shinyServer(function(input, output, session) {
   inFile <- csvInfileServer("inputFile", colsAsCharacters = TRUE, keepBlank = TRUE)
 
   observeEvent(inFile$data(), {
+    dcWaiter("show", msg = "Validating manifest...", color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
+    
     # hide the validation section when upload a new file
     sapply(clean_tags[-c(1:2)], FUN = hide)
     # renders in DT for preview
     DTableServer("tbl_preview", inFile$data(), filter = "top")
-  })
-
-  ######## Validation Section #######
-  observeEvent(input$btn_validate, {
-
-    # loading screen for validating metadata
-    dcWaiter("show", msg = "Validating manifest...", color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
     
+    # loading screen for validating metadata
     .datapath <- inFile$raw()$datapath
     .schema <- selected$schema()
     .project <- list(selected$project())
@@ -596,27 +602,34 @@ shinyServer(function(input, output, session) {
                schema_url=.data_model,
                data_type=.schema,
                file_name=.datapath),
-             list(list(
+             {
+               Sys.sleep(10)
+               list(list(
                "errors" = list(
                  Row = NA, Column = NA, Value = NA,
                  Error = "Mock error for offline mode."
                )
              ))
+             }
       )
     }) %...>% annotation_status()
-
+    
   })
   
-  observeEvent(annotation_status(), {
+  observeEvent(annotation_status(), dcWaiter("hide")) 
+
+  ######## Validation Section #######
+  observeEvent(input$btn_validate, {
+
+    dcWaiter("show", msg = "Validating manifest...", color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
+    
     # validation messages
     validation_res <- validationResult(annotation_status(), input$dropdown_template, inFile$data())
     ValidationMsgServer("text_validate", validation_res)
-    # Update annotation_status so that subsequent clicks of validation will work.
-    annotation_status(NULL)
-
+    
     # if there is a file uploaded
     if (!is.null(validation_res$result)) {
-
+      
       # highlight invalue cells in preview table
       if (validation_res$error_type == "Wrong Schema") {
         DTableServer("tbl_preview", data = inFile$data(), highlight = "full")
@@ -627,29 +640,34 @@ shinyServer(function(input, output, session) {
           highlight = "partial", highlightValues = validation_res$preview_highlight
         )
       }
-
+      
       if (validation_res$result == "valid") {
         # show submit button
         output$submit <- renderUI(actionButton("btn_submit", "Submit to Synapse", class = "btn-primary-color"))
         dcWaiter("update", msg = paste0(validation_res$error_type, " Found !!! "), spin = spin_inner_circles(), sleep = 2.5)
       } else {
-          if (dca_schematic_api != "offline" & Sys.getenv("DCA_MANIFEST_OUTPUT_FORMAT") == "google_sheet") {
-            output$val_gsheet <- renderUI(
-              actionButton("btn_val_gsheet", "  Generate Google Sheet Link", icon = icon("table"), class = "btn-primary-color")
-            )
-          } else if (dca_schematic_api == "offline") {
-            output$dl_manifest <- renderUI({
-              downloadButton("downloadData_good", "Download Corrected Data")
-            })
-          }
-          dcWaiter("update", msg = paste0(validation_res$error_type, " Found !!! "), spin = spin_pulsar(), sleep = 2.5)
+        if (dca_schematic_api != "offline" & Sys.getenv("DCA_MANIFEST_OUTPUT_FORMAT") == "google_sheet") {
+          output$val_gsheet <- renderUI(
+            actionButton("btn_val_gsheet", "  Generate Google Sheet Link", icon = icon("table"), class = "btn-primary-color")
+          )
+        } else if (dca_schematic_api == "offline") {
+          output$dl_manifest <- renderUI({
+            downloadButton("downloadData_good", "Download Corrected Data")
+          })
+        }
+        dcWaiter("update", msg = paste0(validation_res$error_type, " Found !!! "), spin = spin_pulsar(), sleep = 2.5)
       }
     } else {
       dcWaiter("hide")
     }
-
+    
     show("div_validate")
+
   })
+  
+  #observeEvent(validation_status(), {
+  # 
+  #})
 
   # if user click gsheet_btn, generating gsheet
   observeEvent(input$btn_val_gsheet, {
