@@ -117,6 +117,8 @@ scope <- "openid view download modify"
 
 template_config_files <- setNames(dcc_config$template_menu_config_file,
                                   dcc_config$synapse_asset_view)
+if (dca_schematic_api == "offline") template_config_files <- setNames("www/template_config/config_offline.json",
+                                                                      "synXXXXXX")
 
 ## Set Up Virtual Environment
 # ShinyAppys has a limit of 7000 files which this app' grossly exceeds
