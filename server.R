@@ -608,7 +608,7 @@ shinyServer(function(input, output, session) {
                data_type=.schema,
                file_name=.datapath),
              {
-               Sys.sleep(10)
+               Sys.sleep(0)
                list(list(
                  "errors" = list(
                    Row = NA, Column = NA, Value = NA,
@@ -642,7 +642,7 @@ shinyServer(function(input, output, session) {
         )
       }
       
-      if (validation_res()$result == "valid") {
+      if (validation_res()$result == "valid" | dca_schematic_api == "offline" && grepl("fixed", inFile$data()[1,1])) {
         # show submit button
         output$submit <- renderUI(actionButton("btn_submit", "Submit to Synapse", class = "btn-primary-color"))
         dcWaiter("update", msg = paste0(validation_res()$error_type, " Found !!! "), spin = spin_inner_circles(), sleep = 2.5)
@@ -743,7 +743,7 @@ shinyServer(function(input, output, session) {
         )
       } else {
         # Get file list from synapse REST API
-        if (Sys.getenv("DCA_SYNAPSE_PROJECT_API") == TRUE) {
+        if (Sys.getenv("DCA_SYNAPSE_PROJECT_API") == TRUE & dca_schematic_api != "offline") {
           files <- synapse_entity_children(auth = access_token, parentId=selected$folder(), includeTypes = list("file"))
           data_list$files(setNames(files$id, files$name))
         } else {
@@ -787,7 +787,8 @@ shinyServer(function(input, output, session) {
                                                 asset_view = selected$master_asset_view(),
                                                 use_schema_label=dcc_config_react()$submit_use_schema_labels,
                                                 manifest_record_type="table_and_file",
-                                                table_manipulation=dcc_config_react()$submit_table_manipulation)
+                                                table_manipulation=dcc_config_react()$submit_table_manipulation),
+                            "synXXXX - No data uploaded"
                             )
       manifest_path <- tags$a(href = paste0("https://www.synapse.org/#!Synapse:", manifest_id), manifest_id, target = "_blank")
 
@@ -835,7 +836,8 @@ shinyServer(function(input, output, session) {
                                                 asset_view = selected$master_asset_view(),
                                                 use_schema_label=dcc_config_react()$submit_use_schema_labels,
                                                 manifest_record_type="table_and_file",
-                                                table_manipulation=dcc_config_react()$submit_table_manipulation)
+                                                table_manipulation=dcc_config_react()$submit_table_manipulation),
+                            "synXXXX - No data uploaded"
       )
       manifest_path <- tags$a(href = paste0("https://www.synapse.org/#!Synapse:", manifest_id), manifest_id, target = "_blank")
 
