@@ -595,6 +595,7 @@ shinyServer(function(input, output, session) {
     .project <- list(selected$project())
     .data_model <- data_model()
     .infile_data <- inFile$data()
+    .dd_template <- input$dropdown_template
     
     promises::future_promise({
       annotation_status <- switch(dca_schematic_api,
@@ -620,7 +621,7 @@ shinyServer(function(input, output, session) {
       )
       
       # validation messages
-      validationResult(annotation_status, input$dropdown_template, .infile_data)
+      validationResult(annotation_status, .dd_template, .infile_data)
       
     }) %...>% validation_res()
     
