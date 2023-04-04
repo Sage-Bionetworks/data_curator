@@ -55,6 +55,7 @@ shinyServer(function(input, output, session) {
   
   manifest_data <- reactiveVal()
   validation_res <- reactiveVal()
+  manifest_id <- reactiveVal()
   
   data_list <- list(
     projects = reactiveVal(NULL), folders = reactiveVal(NULL),
@@ -770,33 +771,87 @@ shinyServer(function(input, output, session) {
         )
       }
       
+      .folder <- selected$folder()
+      .data_model <- data_model()
+      .schema <- selected$schema()
+      .asset_view <- selected$master_asset_view()
+      .submit_use_schema_labels <- dcc_config_react()$submit_use_schema_labels
+      .table_manipulation <- dcc_config_react()$submit_table_manipulation
+      
       # associates metadata with data and returns manifest id
-      manifest_id <- switch(dca_schematic_api,
+      promises::future_promise({
+        switch(dca_schematic_api,
                             reticulate = model_submit_py(schema_generator,
                                                          tmp_file_path,
-                                                         selected$folder(),
+                                                         .folder,
                                                          "table",
                                                          FALSE),
                             rest = model_submit(url=file.path(api_uri, "v1/model/submit"),
-                                                schema_url = data_model(),
-                                                data_type = selected$schema(),
-                                                dataset_id = selected$folder(),
+                                                schema_url = .data_model,
+                                                data_type = .schema,
+                                                dataset_id = .folder,
                                                 input_token = access_token,
                                                 restrict_rules = FALSE,
                                                 file_name = tmp_file_path,
-                                                asset_view = selected$master_asset_view(),
-                                                use_schema_label=dcc_config_react()$submit_use_schema_labels,
+                                                asset_view = .asset_view,
+                                                use_schema_label=.submit_use_schema_labels,
                                                 manifest_record_type="table_and_file",
-                                                table_manipulation=dcc_config_react()$submit_table_manipulation),
+                                                table_manipulation=.table_manipulation),
                             "synXXXX - No data uploaded"
                             )
-      manifest_path <- tags$a(href = paste0("https://www.synapse.org/#!Synapse:", manifest_id), manifest_id, target = "_blank")
+        }) %...>% manifest_id()
+    
+    } else {
+      # if not file-based type template
+      # convert this to JSON and submit
+      write.csv(submit_data,
+                file = tmp_file_path, quote = TRUE,
+                row.names = FALSE, na = ""
+      )
+      
+      # associates metadata with data and returns manifest id
+      .folder <- selected$folder()
+      .data_model <- data_model()
+      .schema <- selected$schema()
+      .asset_view <- selected$master_asset_view()
+      .submit_use_schema_labels <- dcc_config_react()$submit_use_schema_labels
+      .table_manipulation <- dcc_config_react()$submit_table_manipulation
+      
+      # associates metadata with data and returns manifest id
+      promises::future_promise({
+        switch(dca_schematic_api,
+               reticulate = model_submit_py(schema_generator,
+                                            tmp_file_path,
+                                            .folder,
+                                            "table",
+                                            FALSE),
+               rest = model_submit(url=file.path(api_uri, "v1/model/submit"),
+                                   schema_url = .data_model,
+                                   data_type = .schema,
+                                   dataset_id = .folder,
+                                   input_token = access_token,
+                                   restrict_rules = FALSE,
+                                   file_name = tmp_file_path,
+                                   asset_view = .asset_view,
+                                   use_schema_label=.submit_use_schema_labels,
+                                   manifest_record_type="table_and_file",
+                                   table_manipulation=.table_manipulation),
+               "synXXXX - No data uploaded"
+        )
+        }) %...>% manifest_id()
+        
+      }
+    
+    })
+    
+    observeEvent(manifest_id(), {
+      manifest_path <- tags$a(href = paste0("https://www.synapse.org/#!Synapse:", manifest_id()), manifest_id(), target = "_blank")
 
       # add log message
-      message(paste0("Manifest :", sQuote(manifest_id), " has been successfully uploaded"))
+      message(paste0("Manifest :", sQuote(manifest_id()), " has been successfully uploaded"))
 
       # if no error
-      if (startsWith(manifest_id, "syn") == TRUE) {
+      if (startsWith(manifest_id(), "syn") == TRUE) {
         dcWaiter("hide")
         nx_report_success("Success!", HTML(paste0("Manifest submitted to: ", manifest_path)))
   
@@ -811,67 +866,6 @@ shinyServer(function(input, output, session) {
           " is not a valid Synapse ID. Try again?"
         )), sleep = 3)
       }
-    } else {
-      # if not file-based type template
-      # convert this to JSON and submit
-      write.csv(submit_data,
-        file = tmp_file_path, quote = TRUE,
-        row.names = FALSE, na = ""
-      )
-
-      # associates metadata with data and returns manifest id
-      manifest_id <- switch(dca_schematic_api,
-                            reticulate = model_submit_py(schema_generator,
-                                                         tmp_file_path,
-                                                         selected$folder(),
-                                                         "table",
-                                                         FALSE),
-                            rest = model_submit(url=file.path(api_uri, "v1/model/submit"),
-                                                schema_url = data_model(),
-                                                data_type = selected$schema(),
-                                                dataset_id = selected$folder(),
-                                                input_token = access_token,
-                                                restrict_rules = FALSE,
-                                                file_name = tmp_file_path,
-                                                asset_view = selected$master_asset_view(),
-                                                use_schema_label=dcc_config_react()$submit_use_schema_labels,
-                                                manifest_record_type="table_and_file",
-                                                table_manipulation=dcc_config_react()$submit_table_manipulation),
-                            "synXXXX - No data uploaded"
-      )
-      manifest_path <- tags$a(href = paste0("https://www.synapse.org/#!Synapse:", manifest_id), manifest_id, target = "_blank")
-
-      # add log message
-      message(paste0("Manifest :", sQuote(manifest_id), " has been successfully uploaded"))
-
-      # if uploaded provided valid synID message
-      if (startsWith(manifest_id, "syn") == TRUE) {
-        dcWaiter("hide")
-        nx_report_success("Success!", HTML(paste0("Manifest submitted to: ", manifest_path)))
-
-        # clear inputs
-        sapply(clean_tags, FUN = hide)
-
-        # rerenders fileinput UI
-        output$fileInput_ui <- renderUI({
-          fileInput("file1", "Upload CSV File", accept = c(
-            "text/csv", "text/comma-separated-values",
-            ".csv"
-          ))
-        })
-        # renders empty df
-        output$tbl_preview <- renderDT(datatable(as.data.frame(matrix(0,
-          ncol = 0,
-          nrow = 0
-        ))))
-      } else {
-        dcWaiter("update", msg = HTML(paste0(
-          "Uh oh, looks like something went wrong!",
-          manifest_id, " is not a valid Synapse ID. Try again?"
-        )), sleep = 3)
-      }
-    }
-    # delete tmp manifest folder
-    unlink(tmp_file_path)
+    
   })
 })
