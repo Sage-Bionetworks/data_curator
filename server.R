@@ -81,8 +81,14 @@ shinyServer(function(input, output, session) {
   syn_store <- NULL # gets list of projects they have access to
   
   asset_views <- reactiveVal(c("mock dca fileview (syn33715412)"="syn33715412"))
-
-  tabs_list <- c("tab_data", "tab_template", "tab_upload")
+  
+  # All of tabName from the tabs in ui.R
+  tabs_list <- c("tab_asset_view",
+                 "tab_project",
+                 "tab_template_select",
+                 "tab_folder",
+                 "tab_template",
+                 "tab_upload")
   clean_tags <- c(
     "div_template", "div_template_warn",
     "div_validate", NS("tbl_validate", "table"), "btn_val_gsheet", "btn_submit"
@@ -144,12 +150,14 @@ shinyServer(function(input, output, session) {
     }
     
     ######## Arrow Button ########
-    lapply(1:4, function(i) {
+    lapply(1:6, function(i) {
       switchTabServer(id = paste0("switchTab", i), tabId = "tabs", tab = reactive(input$tabs)(), tabList = tabs_list, parent = session)
     })
     
   })
   
+  # Goal of this observer is to retrieve a list of projects the users can access
+  # within the selected asset view.
   observeEvent(input$btn_asset_view, {
     dcWaiter("show", msg = paste0("Getting data from ", selected$master_asset_view_label(),". This may take a minute."),
              color=col2rgba(col2rgb("#CD0BBC01")))
@@ -209,16 +217,21 @@ shinyServer(function(input, output, session) {
     if (Sys.getenv("DCA_SYNAPSE_PROJECT_API") == TRUE & dca_schematic_api != "offline") {
       #This chunk gets projects using the synapse REST API
       #Check for user access to project scopes within asset view
-      scopes <- synapse_get_project_scope(id = selected$master_asset_view(), auth = access_token)
-      scope_access <- vapply(scopes, function(x) {
-        synapse_access(id=x, access="DOWNLOAD", auth=access_token)
-      }, 1L)
-      scopes <- scopes[scope_access==1]
-      projects <- bind_rows(
-        lapply(scopes, function(x) synapse_get(id=x, auth=access_token))
+      
+      .asset_view <- selected$master_asset_view()
+      promises::future_promise({
+        scopes <- synapse_get_project_scope(id = .asset_view, auth = access_token)
+        scope_access <- vapply(scopes, function(x) {
+          synapse_access(id=x, access="DOWNLOAD", auth=access_token)
+        }, 1L)
+        scopes <- scopes[scope_access==1]
+        projects <- bind_rows(
+          lapply(scopes, function(x) synapse_get(id=x, auth=access_token))
         ) %>% arrange(name)
-  
-      data_list$projects(setNames(projects$id, projects$name))
+        setNames(projects$id, projects$name)
+          
+      }) %...>% data_list$projects()
+      
     } else{
       data_list_raw <- switch(dca_schematic_api,
         reticulate  = storage_projects_py(synapse_driver, access_token),
@@ -229,7 +242,9 @@ shinyServer(function(input, output, session) {
       )
       data_list$projects(list2Vector(data_list_raw))
     }
-    
+  })
+  
+  observeEvent(data_list$projects(), {
     if (is.null(data_list$projects()) || length(data_list$projects()) == 0) {
       dcWaiter("update", landing = TRUE, isPermission = FALSE)
     } else {
@@ -244,72 +259,157 @@ shinyServer(function(input, output, session) {
       })
     }
     
-    ######## Update Folder List ########
-    lapply(c("header_dropdown_", "dropdown_"), function(x) {
-      observeEvent(ignoreInit = TRUE, input[[paste0(x, "project")]], {
-        
-        dcWaiter("show", msg = paste0("Getting project data from ", names(data_list$projects()[input[[paste0(x, "project")]]]), ". This may take a minute."),
-                 color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
-        
-        # get synID of selected project
-        project_id <- data_list$projects()[input[[paste0(x, "project")]]]
-        
-        # This gets the folder list using the synapse REST API
-        # gets folders per project
-        if (Sys.getenv("DCA_SYNAPSE_PROJECT_API") == TRUE & dca_schematic_api != "offline") {
-          folders <- synapse_entity_children(auth=access_token, parentId=project_id, includeTypes = list("folder"))
-          folder_list <- setNames(folders$id, folders$name)
-        } else {
-        
-          folder_list_raw <- switch(dca_schematic_api,
-            reticulate = storage_projects_datasets_py(synapse_driver, project_id),
-            rest = storage_project_datasets(url=file.path(api_uri, "v1/storage/project/datasets"),
-              asset_view = selected$master_asset_view(),
-              project_id=project_id,
-              input_token=access_token),
-            list(list("DatatypeA", "DatatypeA"), list("DatatypeB","DatatypeB"))
-          )
-          folder_list <- list2Vector(folder_list_raw)
-        }
-        
-        if (length(folder_list) > 0) folder_names <- sort(names(folder_list)) else folder_names <- " "
-        
-        # update folder names
-        updateSelectInput(session, paste0(x, "folder"), choices = folder_names)
-        
-        if (x == "dropdown_") {
-          selected$project(project_id)
-          data_list$folders(folder_list)
-        }
-        
-        if (isUpdateFolder()) {
-          # sync with header dropdown
-          updateSelectInput(session, "dropdown_folder", selected = input[["header_dropdown_folder"]])
-          isUpdateFolder(FALSE)
-        }
-        
-        dcWaiter("hide")
-        
-      })
-    })
-    
     updateTabsetPanel(session, "tabs",
-                      selected = "tab_data")
+                      selected = "tab_project")
     
     shinyjs::show(selector = ".sidebar-menu")
     
     dcWaiter("hide")
   })
+  
+  # Goal of this observer is to get all of the folders within the selected
+  # project.
+  observeEvent(input$btn_project, {
+    ######## Update Folder List ########
+    dcWaiter("show", msg = paste0("Getting project. This may take a minute."),
+             color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
+    selected$project(data_list$projects()[names(data_list$projects()) == input$dropdown_project])
+    
+   # lapply(c("header_dropdown_", "dropdown_"), function(x) {
+      observeEvent(input[["dropdown_project"]], {
+        # get synID of selected project
+        project_id <- selected$project()
+        
+        # This gets the folder list using the synapse REST API
+        # gets folders per project
+        if (Sys.getenv("DCA_SYNAPSE_PROJECT_API") == TRUE & dca_schematic_api != "offline") {
+          promises::future_promise({
+            folders <- synapse_entity_children(auth=access_token, parentId=project_id, includeTypes = list("folder"))
+            setNames(folders$id, folders$name)
+          }) %...>% data_list$folders()
 
-  ######## Arrow Button ########
-  lapply(1:4, function(i) {
-    switchTabServer(id = paste0("switchTab", i), tabId = "tabs", tab = reactive(input$tabs)(), tabList = tabs_list, parent = session)
+        } else {
+          
+          folder_list_raw <- switch(
+            dca_schematic_api,
+              reticulate = storage_projects_datasets_py(synapse_driver, project_id),
+              rest = storage_project_datasets(url=file.path(api_uri, "v1/storage/project/datasets"),
+                                              asset_view = selected$master_asset_view(),
+                                              project_id=project_id,
+                                              input_token=access_token),
+              list(list("DatatypeA", "DatatypeA"), list("DatatypeB","DatatypeB"))
+          )
+          data_list$folders(list2Vector(folder_list_raw))
+        }
+      })
+  })
+      
+      observeEvent(data_list$folders(), {
+        if (length(data_list$folders()) > 0) folder_names <- sort(names(data_list$folders())) else folder_names <- " "
+        
+        
+        #if (x == "dropdown_") {
+          #data_list$folders(folder_list)
+          updateSelectInput(session, "dropdown_folder", choices = data_list$folders())
+        #}
+        
+        #if (isUpdateFolder()) {
+        #  # sync with header dropdown
+        #  updateSelectInput(session, "dropdown_template", selected = input[["header_dropdown_folder"]])
+        #  isUpdateFolder(FALSE)
+        #}
+    
+    updateTabsetPanel(session, "tabs",
+                      selected = "tab_template_select")
+    
+    dcWaiter("hide")
+      })
+  
+      # Goal of this button is to updpate the template reactive object
+      # with the template the user chooses
+  observeEvent(input$btn_template_select, {
+    dcWaiter("show", msg = paste0("Please wait."), color = col2rgba(dcc_config_react()$primary_col, 255*0.9), sleep=0)
+    selected$schema(data_list$template()[input$dropdown_template])
+    updateTabsetPanel(session, "tabs", selected = "tab_folder")
+    dcWaiter("hide")
+  })
+  
+  # Goal of this button is to get the files within a folder the user selects
+  observeEvent(input$btn_folder, {
+    
+    dcWaiter("show", msg = paste0("Please wait."), color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
+    
+    selected$folder(data_list$folders()[which(data_list$folders() == input$dropdown_folder)])
+    # clean tags in generating-template tab
+    sapply(clean_tags[1:2], FUN = hide)
+    
+    
+    if (selected$schema_type() %in% c("record", "file")) {
+      # check number of files if it's file-based template
+      # This gets files using the synapse REST API
+      # get file list in selected folder
+      if (Sys.getenv("DCA_SYNAPSE_PROJECT_API") == TRUE & dca_schematic_api != "offline") {
+        .folder <- selected$folder()
+        promises::future_promise({
+          files <- synapse_entity_children(auth = access_token, parentId=.folder, includeTypes = list("file"))
+          if (nrow(files) > 0) files_vec <- setNames(files$id, files$name)
+        }) %...>% data_list$files()
+        
+      } else {
+        
+        file_list <- switch(dca_schematic_api,
+                            reticulate = storage_dataset_files_py(selected$folder()),
+                            rest = storage_dataset_files(url=file.path(api_uri, "v1/storage/dataset/files"),
+                                                         asset_view = selected$master_asset_view(),
+                                                         dataset_id = selected$folder(),
+                                                         input_token=access_token),
+                            list(list("DatatypeA", "DatatypeA"), list("DatatypeB", "DatatypeB")))
+        
+        # update files list in the folder
+        data_list$files(list2Vector(file_list))
+      }
+  }
+    })
+  
+  observeEvent(data_list$files(), {
+    warn_text <- NULL
+    if (length(data_list$folders()) == 0) {
+      # add warning if there is no folder in the selected project
+      warn_text <- paste0(
+        "please create a folder in the ",
+        strong(sQuote(input$dropdown_project)),
+        " prior to submitting templates."
+      )
+    }
+    if (is.null(data_list$files())) {
+      # display warning message if folder is empty and data type is file-based
+      warn_text <- paste0(
+        strong(sQuote(input$dropdown_folder)), " folder is empty,
+          please upload your data before generating manifest.",
+        "<br>", strong(sQuote(input$dropdown_template)),
+        " requires data files to be uploaded prior to generating and submitting templates.",
+        "<br>", "Filling in a template before uploading your data,
+          may result in errors and delays in your data submission later."
+      )
+    }
+  
+  # if there is warning from above checks
+  if (!is.null(warn_text)){
+    # display warnings
+    output$text_template_warn <- renderUI(tagList(br(), span(class = "warn_msg", HTML(warn_text))))
+    show("div_template_warn")
+  }
+  
+  
+  #updateTabsetPanel(session, "tabs", selected = "tab_template")
+  dcWaiter("hide")
+  
   })
 
   ######## Header Dropdown Button ########
   # Adjust header selection dropdown based on tabs
   observe({
-    if (input[["tabs"]] %in% c("tab_data", "tab_asset_view")) {
+    if (input[["tabs"]] %in% c("tab_project", "tab_asset_view")) {
       hide("header_selection_dropdown")
     } else {
       show("header_selection_dropdown")
@@ -346,14 +446,6 @@ shinyServer(function(input, output, session) {
     })
   })
 
-  ######## Update Folder ########
-  # update selected folder synapse id and name
-  observeEvent(input$dropdown_folder, {
-    selected$folder(data_list$folders()[input$dropdown_folder])
-    # clean tags in generating-template tab
-    sapply(clean_tags[1:2], FUN = hide)
-  })
-
   ######## Update Template ########
   # update selected schema template name
   observeEvent(input$dropdown_template, {
@@ -386,61 +478,11 @@ shinyServer(function(input, output, session) {
   ######## Template Google Sheet Link ########
   # validate before generating template
   observeEvent(c(selected$folder(), selected$schema(), input$tabs), {
-    req(input$tabs %in% c("tab_template", "tab_validate"))
-    warn_text <- NULL
-    if (length(data_list$folders()) == 0) {
-      # add warning if there is no folder in the selected project
-      warn_text <- paste0(
-        "please create a folder in the ",
-        strong(sQuote(input$dropdown_project)),
-        " prior to submitting templates."
-      )
-    } else if (selected$schema_type() %in% c("record", "file")) {
-      # check number of files if it's file-based template
-      dcWaiter("show", msg = paste0("Getting files in ", input$dropdown_folder, "."), color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
-      # This gets files using the synapse REST API
-      # get file list in selected folder
-      if (Sys.getenv("DCA_SYNAPSE_PROJECT_API") == TRUE & dca_schematic_api != "offline") {
-        files <- synapse_entity_children(auth = access_token, parentId=selected$folder(), includeTypes = list("file"))
-        if (nrow(files) > 0) data_list$files(setNames(files$id, files$name)) 
-        
-      } else {
-      
-      file_list <- switch(dca_schematic_api,
-        reticulate = storage_dataset_files_py(selected$folder()),
-        rest = storage_dataset_files(url=file.path(api_uri, "v1/storage/dataset/files"),
-          asset_view = selected$master_asset_view(),
-          dataset_id = selected$folder(),
-          input_token=access_token),
-        list(list("DatatypeA", "DatatypeA"), list("DatatypeB", "DatatypeB")))
-     
-        # update files list in the folder
-        data_list$files(list2Vector(file_list))
-      }
-
-      dcWaiter("hide")
-      
-      if (is.null(data_list$files())) {
-        # display warning message if folder is empty and data type is file-based
-        warn_text <- paste0(
-          strong(sQuote(input$dropdown_folder)), " folder is empty,
-          please upload your data before generating manifest.",
-          "<br>", strong(sQuote(input$dropdown_template)),
-          " requires data files to be uploaded prior to generating and submitting templates.",
-          "<br>", "Filling in a template before uploading your data,
-          may result in errors and delays in your data submission later."
-        )
-      }
-    }
-
-    # if there is warning from above checks
-    req(warn_text)
-    # display warnings
-    output$text_template_warn <- renderUI(tagList(br(), span(class = "warn_msg", HTML(warn_text))))
-    show("div_template_warn")
+    
   })
     
-  observeEvent(input$`switchTab2-Next`, {
+  #observeEvent(input$`switchTab2-Next`, {
+  observeEvent(input$`switchTab4-Next`, {
     
     dcWaiter("show", msg = "Downloading manifest. This may take a minute.", color = dcc_config_react()$primary_col)
     
