@@ -26,7 +26,7 @@ suppressPackageStartupMessages({
   library(r2d3)
 })
 
-plan(multisession)
+plan(multisession, workers = 2)
 
 # import R files
 source_files <- list.files(c("functions", "modules"), pattern = "*\\.R$", recursive = TRUE, full.names = TRUE)
@@ -148,5 +148,4 @@ config_file <- fromJSON("www/template_config/config.json")
 dropdown_types <- c("project", "folder", "template")
 # set up cores used for parallelization
 ncores <- parallel::detectCores() - 1
-datatypes <- c("project", "folder", "template")
 options(sass.cache = FALSE)
