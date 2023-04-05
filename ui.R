@@ -56,17 +56,27 @@ ui <- shinydashboardPlus::dashboardPage(
         icon = icon("database")
       ),
       menuItem(
-        "Select your Dataset",
-        tabName = "tab_data",
+        "Select Project",
+        tabName = "tab_project",
         icon = icon("mouse-pointer")
       ),
       menuItem(
-        "Get Metadata Template",
+        "Select Template",
+        tabName = "tab_template_select",
+        icon = icon("mouse-pointer")
+      ),
+      menuItem(
+        "Select Folder",
+        tabName = "tab_folder",
+        icon = icon("mouse-pointer")
+      ),
+      menuItem(
+        "Download Metadata",
         tabName = "tab_template",
         icon = icon("table")
       ),
       menuItem(
-        "Submit & Validate Metadata",
+        "Validate & Submit Metadata",
         tabName = "tab_upload",
         icon = icon("upload")
       ),
@@ -134,44 +144,69 @@ ui <- shinydashboardPlus::dashboardPage(
         #switchTabUI("switchTab1", direction = "right") # remove arrow from assetview page.
       ),
       tabItem(
-        tabName = "tab_data",
-        h2("Set Dataset and Data Type for Curation"),
+        tabName = "tab_project",
+        h2("Set Project"),
         fluidRow(
           box(
             id = "box_pick_project",
             status = "primary",
             width = 6,
-            title = "Choose a Project and Folder: ",
+            title = "Choose a Project: ",
             selectInput(
               inputId = "dropdown_project",
               label = "Project:",
               choices = "Generating..."
             ),
-            selectInput(
-              inputId = "dropdown_folder",
-              label = "Dataset:",
-              choices = "Generating..."
-            ),
-            helpText(
-              "If your recently updated folder does not appear, please wait for a few minutes and refresh"
+            actionButton("btn_project", "Click to confirm",
+                         class = "btn-primary-color"
             )
+            ),
+          if (dca_schematic_api != "offline" && Sys.getenv("DCA_COMPLIANCE_DASHBOARD")==TRUE) dashboardUI("dashboard")
           ),
+        switchTabUI("switchTab2", direction = "both")
+        ),
+      tabItem(
+        tabName = "tab_template_select",
+        h2("Set Dataset for Curation"),
+        fluidRow(
           box(
-            id = "box_pick_manifest",
+            id = "box_pick_template",
             status = "primary",
             width = 6,
-            title = "Choose a Data Type: ",
+            title = "Choose a Template: ",
             selectInput(
               inputId = "dropdown_template",
-              label = "Data Type Template:",
+              label = "Template:",
               choices = "Generating..."
+            ),
+            actionButton("btn_template_select", "Click to confirm",
+                         class = "btn-primary-color"
             )
-          ),
-          if (dca_schematic_api != "offline" && Sys.getenv("DCA_COMPLIANCE_DASHBOARD")==TRUE) dashboardUI("dashboard")
+          )
         ),
-        switchTabUI("switchTab2", direction = "right")
+        switchTabUI("switchTab3", direction = "both")
       ),
-      # Third tab item
+      tabItem(
+        tabName = "tab_folder",
+        h2("Set Folder"),
+        fluidRow(
+          box(
+            id = "box_pick_folder",
+            status = "primary",
+            width = 6,
+            title = "Choose a Folder: ",
+            selectInput(
+              inputId = "dropdown_folder",
+              label = "Folder:",
+              choices = "Generating..."
+            ),
+            actionButton("btn_folder", "Click to confirm",
+                         class = "btn-primary-color"
+            )
+          )
+        ),
+        switchTabUI("switchTab4", direction = "both")
+      ),
       tabItem(
         tabName = "tab_template",
         useShinyjs(),
@@ -221,7 +256,7 @@ ui <- shinydashboardPlus::dashboardPage(
             helpText("This link will leads to an empty template or your previously submitted template with new files if applicable.")
           )
         )},
-        switchTabUI("switchTab3", direction = "both")
+        switchTabUI("switchTab5", direction = "both")
       ),
       # Fourth tab content
       tabItem(
@@ -267,7 +302,7 @@ ui <- shinydashboardPlus::dashboardPage(
             uiOutput("submit")
           )
         ),
-        switchTabUI("switchTab4", direction = "left")
+        switchTabUI("switchTab6", direction = "left")
       )
     ),
     # waiter loading screen
