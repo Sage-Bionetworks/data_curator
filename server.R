@@ -58,7 +58,7 @@ shinyServer(function(input, output, session) {
   manifest_id <- reactiveVal()
   
   data_list <- list(
-    projects = reactiveVal(NULL), folders = reactiveVal(NULL),
+    projects = reactiveVal(NA), folders = reactiveVal(NULL),
     template = reactiveVal(setNames(def_config$schema_name, def_config$display_name)),
     files = reactiveVal(NULL),
     master_asset_view = reactiveVal(NULL)
@@ -219,7 +219,7 @@ shinyServer(function(input, output, session) {
       #Check for user access to project scopes within asset view
       
       .asset_view <- selected$master_asset_view()
-      promises::future_promise({
+      #promises::future_promise({
         scopes <- synapse_get_project_scope(id = .asset_view, auth = access_token)
         scope_access <- vapply(scopes, function(x) {
           synapse_access(id=x, access="DOWNLOAD", auth=access_token)
@@ -228,9 +228,9 @@ shinyServer(function(input, output, session) {
         projects <- bind_rows(
           lapply(scopes, function(x) synapse_get(id=x, auth=access_token))
         ) %>% arrange(name)
-        setNames(projects$id, projects$name)
+        data_list$projects(setNames(projects$id, projects$name))
           
-      }) %...>% data_list$projects()
+      #}) %...>% data_list$projects()
       
     } else{
       data_list_raw <- switch(dca_schematic_api,
@@ -244,7 +244,7 @@ shinyServer(function(input, output, session) {
     }
   })
   
-  observeEvent(input$btn_asset_view, priority = -10, {
+  observeEvent(input$btn_asset_view, ignoreInit = TRUE, {
     if (is.null(data_list$projects()) || length(data_list$projects()) == 0) {
       dcWaiter("update", landing = TRUE, isPermission = FALSE)
     } else {
@@ -260,10 +260,10 @@ shinyServer(function(input, output, session) {
     }
     
     updateTabsetPanel(session, "tabs",
-                      selected = "tab_project")
-    
+                       selected = "tab_project")
+  
     shinyjs::show(selector = ".sidebar-menu")
-    
+
     dcWaiter("hide")
   })
   
@@ -283,10 +283,10 @@ shinyServer(function(input, output, session) {
         # This gets the folder list using the synapse REST API
         # gets folders per project
         if (Sys.getenv("DCA_SYNAPSE_PROJECT_API") == TRUE & dca_schematic_api != "offline") {
-          promises::future_promise({
+          #promises::future_promise({
             folders <- synapse_entity_children(auth=access_token, parentId=project_id, includeTypes = list("folder"))
-            setNames(folders$id, folders$name)
-          }) %...>% data_list$folders()
+            data_list$folders(setNames(folders$id, folders$name))
+          #}) %...>% data_list$folders()
 
         } else {
           
@@ -304,13 +304,13 @@ shinyServer(function(input, output, session) {
       })
   })
       
-      observeEvent(input$btn_project, priority = -10, {
+      observeEvent(input$btn_project, {
         if (length(data_list$folders()) > 0) folder_names <- sort(names(data_list$folders())) else folder_names <- " "
         
         
         #if (x == "dropdown_") {
           #data_list$folders(folder_list)
-          updateSelectInput(session, "dropdown_folder", choices = data_list$folders())
+          # updateSelectInput(session, "dropdown_folder", choices = data_list$folders())
         #}
         
         #if (isUpdateFolder()) {
@@ -318,6 +318,7 @@ shinyServer(function(input, output, session) {
         #  updateSelectInput(session, "dropdown_template", selected = input[["header_dropdown_folder"]])
         #  isUpdateFolder(FALSE)
         #}
+    #updateSelectInput(session, "dropdown_template", choices = data_list$template())
     
     updateTabsetPanel(session, "tabs",
                       selected = "tab_template_select")
@@ -330,6 +331,7 @@ shinyServer(function(input, output, session) {
   observeEvent(input$btn_template_select, {
     dcWaiter("show", msg = paste0("Please wait."), color = col2rgba(dcc_config_react()$primary_col, 255*0.9), sleep=0)
     selected$schema(data_list$template()[input$dropdown_template])
+    updateSelectInput(session, "dropdown_folder", choices = data_list$folders())
     updateTabsetPanel(session, "tabs", selected = "tab_folder")
     dcWaiter("hide")
   })
@@ -350,10 +352,11 @@ shinyServer(function(input, output, session) {
       # get file list in selected folder
       if (Sys.getenv("DCA_SYNAPSE_PROJECT_API") == TRUE & dca_schematic_api != "offline") {
         .folder <- selected$folder()
-        promises::future_promise({
+        #promises::future_promise({
           files <- synapse_entity_children(auth = access_token, parentId=.folder, includeTypes = list("file"))
           if (nrow(files) > 0) files_vec <- setNames(files$id, files$name)
-        }) %...>% data_list$files()
+          data_list$files(files_vec)
+        #}) %...>% data_list$files()
         
       } else {
         
@@ -371,7 +374,7 @@ shinyServer(function(input, output, session) {
   }
     })
   
-  observeEvent(input$btn_folder, priority = -10, {
+  observeEvent(input$btn_folder, {
     warn_text <- NULL
     if (length(data_list$folders()) == 0) {
       # add warning if there is no folder in the selected project
