@@ -354,7 +354,8 @@ shinyServer(function(input, output, session) {
         .folder <- selected$folder()
         #promises::future_promise({
           files <- synapse_entity_children(auth = access_token, parentId=.folder, includeTypes = list("file"))
-          if (nrow(files) > 0) files_vec <- setNames(files$id, files$name)
+          if (nrow(files) > 0) { files_vec <- setNames(files$id, files$name)
+          } else files_vec <- NA_character_
           data_list$files(files_vec)
         #}) %...>% data_list$files()
         
@@ -402,7 +403,6 @@ shinyServer(function(input, output, session) {
     output$text_template_warn <- renderUI(tagList(br(), span(class = "warn_msg", HTML(warn_text))))
     show("div_template_warn")
   }
-  
   
   #updateTabsetPanel(session, "tabs", selected = "tab_template")
   dcWaiter("hide")
