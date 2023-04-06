@@ -159,7 +159,7 @@ shinyServer(function(input, output, session) {
   # Goal of this observer is to retrieve a list of projects the users can access
   # within the selected asset view.
   observeEvent(input$btn_asset_view, {
-    dcWaiter("show", msg = paste0("Getting data from ", selected$master_asset_view_label(),". This may take a minute."),
+    dcWaiter("show", msg = paste0("Getting data from synapse"),
              color=col2rgba(col2rgb("#CD0BBC01")))
     
     selected$master_asset_view(input$dropdown_asset_view)
@@ -184,7 +184,7 @@ shinyServer(function(input, output, session) {
         #}
       })
 
-      dcWaiter("show", msg = paste0("Getting data from ", selected$master_asset_view_label(), ". This may take a minute."),
+      dcWaiter("show", msg = paste0("Getting data from Synase"),
                color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
 
     output$logo <- renderUI({update_logo(selected$master_asset_view())})
@@ -271,7 +271,7 @@ shinyServer(function(input, output, session) {
   # project.
   observeEvent(input$btn_project, {
     ######## Update Folder List ########
-    dcWaiter("show", msg = paste0("Getting project. This may take a minute."),
+    dcWaiter("show", msg = paste0("Getting data from Synapse"),
              color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
     selected$project(data_list$projects()[names(data_list$projects()) == input$dropdown_project])
     
@@ -329,7 +329,7 @@ shinyServer(function(input, output, session) {
       # Goal of this button is to updpate the template reactive object
       # with the template the user chooses
   observeEvent(input$btn_template_select, {
-    dcWaiter("show", msg = paste0("Please wait."), color = col2rgba(dcc_config_react()$primary_col, 255*0.9), sleep=0)
+    dcWaiter("show", msg = "Please wait", color = col2rgba(dcc_config_react()$primary_col, 255*0.9), sleep=0)
     selected$schema(data_list$template()[input$dropdown_template])
     updateSelectInput(session, "dropdown_folder", choices = data_list$folders())
     updateTabsetPanel(session, "tabs", selected = "tab_folder")
@@ -339,7 +339,7 @@ shinyServer(function(input, output, session) {
   # Goal of this button is to get the files within a folder the user selects
   observeEvent(input$btn_folder, {
     
-    dcWaiter("show", msg = paste0("Please wait."), color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
+    dcWaiter("show", msg = paste0("Getting data from Synapse"), color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
     
     selected$folder(data_list$folders()[which(data_list$folders() == input$dropdown_folder)])
     # clean tags in generating-template tab
@@ -487,7 +487,7 @@ shinyServer(function(input, output, session) {
   #observeEvent(input$`switchTab2-Next`, {
   observeEvent(input$`switchTab4-Next`, {
     
-    dcWaiter("show", msg = "Downloading manifest. This may take a minute.", color = dcc_config_react()$primary_col)
+    dcWaiter("show", msg = "Getting template. This may take a minute.", color = dcc_config_react()$primary_col)
     
     ### This doesn't work - try moving manifest_generate outside of downloadButton
     .schema <- selected$schema()
@@ -535,7 +535,7 @@ shinyServer(function(input, output, session) {
     filename = function() sprintf("%s.xlsx", input$dropdown_template),
     #filename = function() sprintf("%s.csv", input$dropdown_template),
     content = function(file) {
-      dcWaiter("show", msg = "Downloading manifest. This may take a minute.", color = dcc_config_react()$primary_col)
+      dcWaiter("show", msg = "Downloading data", color = dcc_config_react()$primary_col)
 
       # This downloads a manifest using the synapse REST API
       #if (Sys.getenv("DCA_SYNAPSE_PROJECT_API") == TRUE) {
@@ -632,7 +632,7 @@ shinyServer(function(input, output, session) {
   ######## Validation Section #######
   observeEvent(input$btn_validate, {
 
-    dcWaiter("show", msg = "Validating manifest...", color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
+    dcWaiter("show", msg = "Validating manifest. This may take a minute.", color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
     
     # loading screen for validating metadata
     .datapath <- inFile$raw()$datapath
