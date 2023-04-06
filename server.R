@@ -244,7 +244,7 @@ shinyServer(function(input, output, session) {
     }
   })
   
-  observeEvent(data_list$projects(), {
+  observeEvent(input$btn_asset_view, priority = -10, {
     if (is.null(data_list$projects()) || length(data_list$projects()) == 0) {
       dcWaiter("update", landing = TRUE, isPermission = FALSE)
     } else {
@@ -304,7 +304,7 @@ shinyServer(function(input, output, session) {
       })
   })
       
-      observeEvent(data_list$folders(), {
+      observeEvent(input$btn_project, priority = -10, {
         if (length(data_list$folders()) > 0) folder_names <- sort(names(data_list$folders())) else folder_names <- " "
         
         
@@ -371,7 +371,7 @@ shinyServer(function(input, output, session) {
   }
     })
   
-  observeEvent(data_list$files(), {
+  observeEvent(input$btn_folder, priority = -10, {
     warn_text <- NULL
     if (length(data_list$folders()) == 0) {
       # add warning if there is no folder in the selected project
