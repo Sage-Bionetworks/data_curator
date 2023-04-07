@@ -161,6 +161,7 @@ shinyServer(function(input, output, session) {
   observeEvent(input$btn_asset_view, {
     dcWaiter("show", msg = paste0("Getting data from Synapse. This may take a minute."),
              color=col2rgba(col2rgb("#CD0BBC01")))
+    shinyjs::disable("btn_asset_view")
     
     selected$master_asset_view(input$dropdown_asset_view)
     av_names <- names(asset_views()[asset_views() %in% selected$master_asset_view()])
@@ -266,6 +267,10 @@ shinyServer(function(input, output, session) {
     shinyjs::show(selector = ".sidebar-menu")
 
     dcWaiter("hide")
+  })
+  
+  observeEvent(input$dropdown_asset_view, {
+    shinyjs::enable("btn_asset_view")
   })
   
   # Goal of this observer is to get all of the folders within the selected
