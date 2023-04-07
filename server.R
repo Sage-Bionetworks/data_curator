@@ -159,7 +159,7 @@ shinyServer(function(input, output, session) {
   # Goal of this observer is to retrieve a list of projects the users can access
   # within the selected asset view.
   observeEvent(input$btn_asset_view, {
-    dcWaiter("show", msg = paste0("Getting data from synapse. This may take a minute."),
+    dcWaiter("show", msg = paste0("Getting data from Synapse. This may take a minute."),
              color=col2rgba(col2rgb("#CD0BBC01")))
     
     selected$master_asset_view(input$dropdown_asset_view)
@@ -184,7 +184,8 @@ shinyServer(function(input, output, session) {
         #}
       })
 
-      dcWaiter("show", msg = paste0("Getting data from Synase"),
+      dcWaiter("hide")
+      dcWaiter("show", msg = paste0("Getting data from Synase. This may take a minute."),
                color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
 
     output$logo <- renderUI({update_logo(selected$master_asset_view())})
