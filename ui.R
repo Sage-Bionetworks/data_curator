@@ -17,27 +17,6 @@ ui <- shinydashboardPlus::dashboardPage(
       span(class = "logo-lg", "Data Curator"),
       span(class = "logo-mini", "DCA")
     ),
-    leftUi = tagList(
-      dropdownBlock(
-        id = "header_selection_dropdown",
-        title = "Selection",
-        icon = icon("sliders-h"),
-        badgeStatus = "info",
-        fluidRow(
-          lapply(dropdown_types, function(x) {
-            div(
-              id = paste0("header_content_", x),
-              selectInput(
-                inputId = paste0("header_dropdown_", x),
-                label = NULL,
-                choices = character(0)
-              )
-            )
-          }),
-          actionButton("btn_header_update", NULL, icon("sync-alt"), class = "btn-shiny-effect")
-        )
-      )
-    ),
     uiOutput("logo")
   ),
   dashboardSidebar(
