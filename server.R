@@ -219,7 +219,7 @@ shinyServer(function(input, output, session) {
       #Check for user access to project scopes within asset view
       
       .asset_view <- selected$master_asset_view()
-      #promises::future_promise({
+      promises::future_promise({
         scopes <- synapse_get_project_scope(id = .asset_view, auth = access_token)
         scope_access <- vapply(scopes, function(x) {
           synapse_access(id=x, access="DOWNLOAD", auth=access_token)
@@ -228,9 +228,9 @@ shinyServer(function(input, output, session) {
         projects <- bind_rows(
           lapply(scopes, function(x) synapse_get(id=x, auth=access_token))
         ) %>% arrange(name)
-        data_list$projects(setNames(projects$id, projects$name))
+        setNames(projects$id, projects$name)
           
-      #}) %...>% data_list$projects()
+      }) %...>% data_list$projects()
       
     } else{
       data_list_raw <- switch(dca_schematic_api,
@@ -244,7 +244,7 @@ shinyServer(function(input, output, session) {
     }
   })
   
-  observeEvent(input$btn_asset_view, ignoreInit = TRUE, {
+  observeEvent(data_list$projects(), ignoreInit = TRUE, {
     if (is.null(data_list$projects()) || length(data_list$projects()) == 0) {
       dcWaiter("update", landing = TRUE, isPermission = FALSE)
     } else {
