@@ -279,6 +279,7 @@ shinyServer(function(input, output, session) {
     ######## Update Folder List ########
     dcWaiter("show", msg = paste0("Getting data from Synapse"),
              color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
+    shinyjs::disable("btn_project")
     selected$project(data_list$projects()[names(data_list$projects()) == input$dropdown_project])
     
    # lapply(c("header_dropdown_", "dropdown_"), function(x) {
@@ -331,22 +332,31 @@ shinyServer(function(input, output, session) {
     
     dcWaiter("hide")
       })
+      
+      observeEvent(input$dropdown_project, {
+        shinyjs::enable("btn_project")
+      })
   
       # Goal of this button is to updpate the template reactive object
       # with the template the user chooses
   observeEvent(input$btn_template_select, {
     dcWaiter("show", msg = "Please wait", color = col2rgba(dcc_config_react()$primary_col, 255*0.9), sleep=0)
+    shinyjs::disable("btn_template_select")
     selected$schema(data_list$template()[input$dropdown_template])
     updateSelectInput(session, "dropdown_folder", choices = data_list$folders())
     updateTabsetPanel(session, "tabs", selected = "tab_folder")
     dcWaiter("hide")
   })
   
+  observeEvent(input$dropdown_template, {
+    shinyjs::enable("btn_template_select")
+  })
+  
   # Goal of this button is to get the files within a folder the user selects
   observeEvent(input$btn_folder, {
     
     dcWaiter("show", msg = paste0("Getting data from Synapse"), color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
-    
+    shinyjs::disable("btn_folder")
     selected$folder(data_list$folders()[which(data_list$folders() == input$dropdown_folder)])
     # clean tags in generating-template tab
     sapply(clean_tags[1:2], FUN = hide)
@@ -380,6 +390,10 @@ shinyServer(function(input, output, session) {
       }
   }
     })
+  
+  observeEvent(input$dropdown_folder,{
+    shinyjs::enable("btn_folder")
+  })
   
   observeEvent(data_list$files(), ignoreInit = TRUE, {
     warn_text <- NULL
