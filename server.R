@@ -265,6 +265,10 @@ shinyServer(function(input, output, session) {
                        selected = "tab_project")
   
     shinyjs::show(selector = ".sidebar-menu")
+    shinyjs::hide(select = "li:nth-child(3)")
+    shinyjs::hide(select = "li:nth-child(4)")
+    shinyjs::hide(select = "li:nth-child(5)")
+    shinyjs::hide(select = "li:nth-child(6)")
 
     dcWaiter("hide")
   })
@@ -329,7 +333,7 @@ shinyServer(function(input, output, session) {
     
     updateTabsetPanel(session, "tabs",
                       selected = "tab_template_select")
-    
+    shinyjs::show(select = "li:nth-child(3)")
     dcWaiter("hide")
       })
       
@@ -345,6 +349,7 @@ shinyServer(function(input, output, session) {
     selected$schema(data_list$template()[input$dropdown_template])
     updateSelectInput(session, "dropdown_folder", choices = data_list$folders())
     updateTabsetPanel(session, "tabs", selected = "tab_folder")
+    shinyjs::show(select = "li:nth-child(4)")
     dcWaiter("hide")
   })
   
@@ -357,6 +362,8 @@ shinyServer(function(input, output, session) {
     
     dcWaiter("show", msg = paste0("Getting data from Synapse"), color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
     shinyjs::disable("btn_folder")
+    shinyjs::show(select = "li:nth-child(5)")
+    shinyjs::show(select = "li:nth-child(6)")
     selected$folder(data_list$folders()[which(data_list$folders() == input$dropdown_folder)])
     # clean tags in generating-template tab
     sapply(clean_tags[1:2], FUN = hide)
@@ -475,8 +482,9 @@ shinyServer(function(input, output, session) {
   })
     
   #observeEvent(input$`switchTab2-Next`, {
-  observeEvent(input$`switchTab4-Next`, {
+  observeEvent(c(input$`switchTab4-Next`, input$tabs), {
     
+    req(input$tabs == "tab_template")
     dcWaiter("show", msg = "Getting template. This may take a minute.", color = dcc_config_react()$primary_col)
     
     ### This doesn't work - try moving manifest_generate outside of downloadButton
