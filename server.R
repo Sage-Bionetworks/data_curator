@@ -284,10 +284,10 @@ shinyServer(function(input, output, session) {
         # This gets the folder list using the synapse REST API
         # gets folders per project
         if (Sys.getenv("DCA_SYNAPSE_PROJECT_API") == TRUE & dca_schematic_api != "offline") {
-          #promises::future_promise({
+          promises::future_promise({
             folders <- synapse_entity_children(auth=access_token, parentId=project_id, includeTypes = list("folder"))
-            data_list$folders(setNames(folders$id, folders$name))
-          #}) %...>% data_list$folders()
+            setNames(folders$id, folders$name)
+          }) %...>% data_list$folders()
 
         } else {
           
@@ -305,7 +305,7 @@ shinyServer(function(input, output, session) {
       })
   })
       
-      observeEvent(input$btn_project, {
+      observeEvent(data_list$folders(), ignoreInit = TRUE, {
         if (length(data_list$folders()) > 0) folder_names <- sort(names(data_list$folders())) else folder_names <- " "
         
         
@@ -353,12 +353,12 @@ shinyServer(function(input, output, session) {
       # get file list in selected folder
       if (Sys.getenv("DCA_SYNAPSE_PROJECT_API") == TRUE & dca_schematic_api != "offline") {
         .folder <- selected$folder()
-        #promises::future_promise({
+        promises::future_promise({
           files <- synapse_entity_children(auth = access_token, parentId=.folder, includeTypes = list("file"))
           if (nrow(files) > 0) { files_vec <- setNames(files$id, files$name)
           } else files_vec <- NA_character_
-          data_list$files(files_vec)
-        #}) %...>% data_list$files()
+          files_vec
+        }) %...>% data_list$files()
         
       } else {
         
@@ -376,7 +376,7 @@ shinyServer(function(input, output, session) {
   }
     })
   
-  observeEvent(input$btn_folder, {
+  observeEvent(data_list$files(), ignoreInit = TRUE, {
     warn_text <- NULL
     if (length(data_list$folders()) == 0) {
       # add warning if there is no folder in the selected project
