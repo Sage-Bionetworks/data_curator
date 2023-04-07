@@ -252,7 +252,7 @@ shinyServer(function(input, output, session) {
     } else {
       
       # updates project dropdown
-      lapply(c("header_dropdown_", "dropdown_"), function(x) {
+      lapply(c("dropdown_"), function(x) {
         lapply(c(1, 3), function(i) {
           updateSelectInput(session, paste0(x, dropdown_types[i]),
                             choices = sort(names(data_list[[i]]()))
@@ -423,40 +423,10 @@ shinyServer(function(input, output, session) {
     output$text_template_warn <- renderUI(tagList(br(), span(class = "warn_msg", HTML(warn_text))))
     show("div_template_warn")
   }
-  
+    
   #updateTabsetPanel(session, "tabs", selected = "tab_template")
   dcWaiter("hide")
   
-  })
-
-  ######## Header Dropdown Button ########
-  # Adjust header selection dropdown based on tabs
-  observe({
-    if (input[["tabs"]] %in% c("tab_project", "tab_asset_view")) {
-      hide("header_selection_dropdown")
-    } else {
-      show("header_selection_dropdown")
-      addClass(id = "header_selection_dropdown", class = "open")
-    }
-  })
-  
-  # sync header dropdown with main dropdown
-  lapply(dropdown_types, function(x) {
-    observeEvent(input[[paste0("dropdown_", x)]], {
-      updateSelectInput(session, paste0("header_dropdown_", x),
-        selected = input[[paste0("dropdown_", x)]]
-      )
-    })
-  })
-
-  observeEvent(input$btn_header_update, {
-    nx_confirm(
-      inputId = "update_confirm",
-      title = "Are you sure to update?",
-      message = "previous selections will also change",
-      button_ok = "Sure!",
-      button_cancel = "Nope!"
-    )
   })
 
   observeEvent(input$update_confirm, {
