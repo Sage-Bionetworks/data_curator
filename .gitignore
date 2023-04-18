@@ -8,10 +8,10 @@ app.bak.R
 schematic/
 data-models/
 great_expectations/
-# *.json
+*.json
 *.jsonld
 *.rds
-# *.csv
+*.csv
 *.txt
 **/token.pickle
 **/.synapseConfig
