@@ -32,27 +32,27 @@ ui <- shinydashboardPlus::dashboardPage(
       menuItem(
         "Select DCC",
         tabName = "tab_asset_view",
-        icon = icon("database")
+        icon = icon("server")
       ),
       menuItem(
         "Select Project",
         tabName = "tab_project",
-        icon = icon("mouse-pointer")
+        icon = icon("database")
       ),
       menuItem(
         "Select Template",
         tabName = "tab_template_select",
-        icon = icon("mouse-pointer")
+        icon = icon("table")
       ),
       menuItem(
         "Select Folder",
         tabName = "tab_folder",
-        icon = icon("mouse-pointer")
+        icon = icon("folder")
       ),
       menuItem(
         "Download Metadata",
         tabName = "tab_template",
-        icon = icon("table")
+        icon = icon("download")
       ),
       menuItem(
         "Validate & Submit Metadata",
