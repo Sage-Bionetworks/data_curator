@@ -56,7 +56,7 @@ update_logo <- function(project = "sage") {
                                    img_src = "img/HTAN_text_logo.png"),
                 syn27210848 = list(href = "https://cancercomplexity.synapse.org/",
                                    img_src = "img/cckp_logo.png"),
-                syn30109515 = list(href = "https://https://includedcc.org/",
+                syn30109515 = list(href = "https://includedcc.org/",
                                    img_src = "img/INCLUDE DCC Logo-01.png"),
                 list(href = "https://synapse.org",
                      img_src = "img/Logo_Sage_Logomark.png")
