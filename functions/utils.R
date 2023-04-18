@@ -58,6 +58,8 @@ update_logo <- function(project = "sage") {
                                    img_src = "img/cckp_logo.png"),
                 syn30109515 = list(href = "https://includedcc.org/",
                                    img_src = "img/INCLUDE DCC Logo-01.png"),
+                syn51324810 = list(href = "https://adknowledgeportal.synapse.org/",
+                                   img_src = "img/ADKnowledgePortal.png"),
                 list(href = "https://synapse.org",
                      img_src = "img/Logo_Sage_Logomark.png")
   )
