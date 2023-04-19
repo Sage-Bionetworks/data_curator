@@ -368,7 +368,12 @@ shinyServer(function(input, output, session) {
     shinyjs::show(select = "li:nth-child(5)")
     shinyjs::show(select = "li:nth-child(6)")
     
-    selected$folder(data_list$folders()[which(data_list$folders() == input$dropdown_folder)])
+    selected_folder <- data_list$folders()[which(data_list$folders() == input$dropdown_folder)]
+    output$template_title <- renderText({ sprintf("Get %s template for %s",
+                                                  selected$schema(),
+                                                  names(selected_folder))
+      })
+    selected$folder(selected_folder)
     # clean tags in generating-template tab
     sapply(clean_tags[1:2], FUN = hide)
     
