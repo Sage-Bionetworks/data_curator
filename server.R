@@ -828,6 +828,7 @@ shinyServer(function(input, output, session) {
       .asset_view <- selected$master_asset_view()
       .submit_use_schema_labels <- dcc_config_react()$submit_use_schema_labels
       .table_manipulation <- dcc_config_react()$submit_table_manipulation
+      .submit_manifest_record_type <- dcc_config_react()$submit_manifest_record_type
       
       # associates metadata with data and returns manifest id
       promises::future_promise({
@@ -846,7 +847,7 @@ shinyServer(function(input, output, session) {
                                                 file_name = tmp_file_path,
                                                 asset_view = .asset_view,
                                                 use_schema_label=.submit_use_schema_labels,
-                                                manifest_record_type="table_and_file",
+                                                manifest_record_type=.submit_manifest_record_type,
                                                 table_manipulation=.table_manipulation),
                             "synXXXX - No data uploaded"
                             )
@@ -867,6 +868,7 @@ shinyServer(function(input, output, session) {
       .asset_view <- selected$master_asset_view()
       .submit_use_schema_labels <- dcc_config_react()$submit_use_schema_labels
       .table_manipulation <- dcc_config_react()$submit_table_manipulation
+      .submit_manifest_record_type <- dcc_config_react()$submit_manifest_record_type
       
       # associates metadata with data and returns manifest id
       promises::future_promise({
@@ -885,7 +887,7 @@ shinyServer(function(input, output, session) {
                                    file_name = tmp_file_path,
                                    asset_view = .asset_view,
                                    use_schema_label=.submit_use_schema_labels,
-                                   manifest_record_type="table_and_file",
+                                   manifest_record_type=.submit_manifest_record_type,
                                    table_manipulation=.table_manipulation),
                "synXXXX - No data uploaded"
         )
