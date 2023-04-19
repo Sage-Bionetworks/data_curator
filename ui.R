@@ -216,6 +216,8 @@ ui <- shinydashboardPlus::dashboardPage(
             status = "primary",
             width = 12,
             downloadButton("downloadData", "Download"),
+            helpText("Note: After downloading, spreadsheet apps may add blank",
+                     "rows that must be removed before validating."),
             hidden(
               div(
                 id = "div_template_warn_xls",
