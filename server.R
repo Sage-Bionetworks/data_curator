@@ -103,6 +103,9 @@ shinyServer(function(input, output, session) {
   
   shinyjs::useShinyjs()
   shinyjs::hide(selector = ".sidebar-menu")
+  shinyjs::hide("box_preview")
+  shinyjs::hide("box_validate")
+  shinyjs::hide("box_submit")
 
   # initial loading page
   #
@@ -625,6 +628,8 @@ shinyServer(function(input, output, session) {
     sapply(clean_tags[-c(1:2)], FUN = hide)
     # renders in DT for preview
     DTableServer("tbl_preview", inFile$data(), filter = "top")
+    shinyjs::show("box_preview")
+    shinyjs::show("box_validate")
   })
   
   ######## Validation Section #######
@@ -709,6 +714,7 @@ shinyServer(function(input, output, session) {
     
     validation_res(NULL)
     show("div_validate")
+    shinyjs::show("box_submit")
 
   })
   
