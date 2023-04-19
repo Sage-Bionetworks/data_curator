@@ -367,6 +367,7 @@ shinyServer(function(input, output, session) {
     shinyjs::disable("btn_folder")
     shinyjs::show(select = "li:nth-child(5)")
     shinyjs::show(select = "li:nth-child(6)")
+    
     selected$folder(data_list$folders()[which(data_list$folders() == input$dropdown_folder)])
     # clean tags in generating-template tab
     sapply(clean_tags[1:2], FUN = hide)
@@ -554,7 +555,7 @@ shinyServer(function(input, output, session) {
 
       #}
       
-      dcWaiter("hide", sleep = 1)
+      dcWaiter("hide", sleep = 0)
       writeBin(manifest_data(), file)
       #readr::write_csv(manifest_data(), file)
       #capture.output(print(manifest_url()), file=file) # actually kinda works
@@ -601,7 +602,7 @@ shinyServer(function(input, output, session) {
       tags$a(id = "template_link", href = manifest_url(), list(icon("hand-point-right"), manifest_url()), target = "_blank")
     )
 
-    dcWaiter("hide", sleep = 1)
+    dcWaiter("hide", sleep = 0)
 
     nx_confirm(
       inputId = "btn_template_confirm",
@@ -695,7 +696,7 @@ shinyServer(function(input, output, session) {
       if (validation_res()$result == "valid" | dca_schematic_api == "offline" && grepl("fixed", inFile$data()[1,1])) {
         # show submit button
         output$submit <- renderUI(actionButton("btn_submit", "Submit to Synapse", class = "btn-primary-color"))
-        dcWaiter("update", msg = paste0(validation_res()$error_type, " Found !!! "), spin = spin_inner_circles(), sleep = 2.5)
+        dcWaiter("update", msg = paste0(validation_res()$error_type, " Found !!! "), spin = spin_inner_circles(), sleep = 0)
       } else {
         if (dca_schematic_api != "offline" & Sys.getenv("DCA_MANIFEST_OUTPUT_FORMAT") == "google_sheet") {
           output$val_gsheet <- renderUI(
@@ -706,7 +707,7 @@ shinyServer(function(input, output, session) {
             downloadButton("downloadData_good", "Download Corrected Data")
           })
         }
-        dcWaiter("update", msg = paste0(validation_res()$error_type, " Found !!! "), spin = spin_pulsar(), sleep = 2.5)
+        dcWaiter("update", msg = paste0(validation_res()$error_type, " Found !!! "), spin = spin_pulsar(), sleep = 0)
       }
     } else {
       dcWaiter("hide")
@@ -766,7 +767,7 @@ shinyServer(function(input, output, session) {
 
     if (is.null(selected$folder())) {
       # add waiter if no folder selected
-      dcWaiter("update", msg = paste0("Please select a folder to submit"), spin = spin_pulsar(), sleep = 2.5)
+      dcWaiter("update", msg = paste0("Please select a folder to submit"), spin = spin_pulsar(), sleep = 0)
     }
 
     # abort submission if no folder selected
@@ -914,7 +915,7 @@ shinyServer(function(input, output, session) {
           "Uh oh, looks like something went wrong!",
           manifest_id,
           " is not a valid Synapse ID. Try again?"
-        )), sleep = 3)
+        )), sleep = 0)
       }
     
   })
