@@ -241,7 +241,8 @@ ui <- shinydashboardPlus::dashboardPage(
             title = "Upload Filled Metadata as a CSV",
             status = "primary",
             width = 12,
-            csvInfileUI("inputFile")
+            csvInfileUI("inputFile"),
+            helpText("Note: Remove blank rows from your file before uploading.")
           ),
           box(
             title = "Metadata Preview",
