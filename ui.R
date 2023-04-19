@@ -181,7 +181,7 @@ ui <- shinydashboardPlus::dashboardPage(
             )
           )
         ),
-        #switchTabUI("switchTab4", direction = "both")
+        switchTabUI("switchTab4", direction = "right")
       ),
       tabItem(
         tabName = "tab_template",
@@ -235,7 +235,7 @@ ui <- shinydashboardPlus::dashboardPage(
       # Fourth tab content
       tabItem(
         tabName = "tab_upload",
-        h2("Submit & Validate a Filled Metadata Template"),
+        #h2("Submit & Validate a Filled Metadata Template"),
         fluidRow(
           box(
             title = "Upload Filled Metadata as a CSV",
@@ -248,7 +248,8 @@ ui <- shinydashboardPlus::dashboardPage(
             collapsible = TRUE,
             status = "primary",
             width = 12,
-            DTableUI("tbl_preview")
+            DTableUI("tbl_preview"),
+            id = "box_preview"
           ),
           box(
             title = "Validate Filled Metadata",
@@ -267,13 +268,15 @@ ui <- shinydashboardPlus::dashboardPage(
             helpText(
               HTML("If you have an error, please try editing locally or on google sheet.
                   Reupload your CSV and press the validate button as needed.")
-            )
+            ),
+            id = "box_validate"
           ),
           box(
             title = "Submit Validated Metadata to Synapse",
             status = "primary",
             width = 12,
-            uiOutput("submit")
+            uiOutput("submit"),
+            id = "box_submit"
           )
         ),
         #switchTabUI("switchTab6", direction = "left")
