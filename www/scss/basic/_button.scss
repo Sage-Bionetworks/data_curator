@@ -192,7 +192,8 @@
   cursor: pointer;
   outline: none !important;
 
-  &:hover {
+// Don't apply a hover animation when the button is disabled
+  &:not(.disable):hover {
     background: $primary_col;
     color: #fff;
     box-shadow: $float_shadow2;
