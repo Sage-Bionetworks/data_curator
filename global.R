@@ -26,7 +26,7 @@ suppressPackageStartupMessages({
   library(r2d3)
 })
 
-ncores <- 1 #availableCores()
+ncores <- availableCores()
 message(sprintf("Available cores: %s", ncores))
 plan(multisession, workers = ncores)
 
