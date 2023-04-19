@@ -213,7 +213,7 @@ ui <- shinydashboardPlus::dashboardPage(
         )}else{
         fluidRow(
           box(
-            title = "Get template for <selected-template> and <selected-folder>",
+            title = "Get template",
             status = "primary",
             width = 12,
             downloadButton("downloadData", "Download"),
