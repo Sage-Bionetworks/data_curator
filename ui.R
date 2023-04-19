@@ -178,7 +178,8 @@ ui <- shinydashboardPlus::dashboardPage(
             ),
             actionButton("btn_folder", "Go",
                          class = "btn-primary-color"
-            )
+            ),
+            helpText("After clicking 'Go', click the Download Template tab to proceed.")
           )
         ),
         switchTabUI("switchTab4", direction = "right")
@@ -230,7 +231,7 @@ ui <- shinydashboardPlus::dashboardPage(
                 htmlOutput("text_template_xls")
               )
             )
-          )
+          ),
         )},
         switchTabUI("switchTab5", direction = "right")
       ),
