@@ -697,6 +697,7 @@ shinyServer(function(input, output, session) {
         # show submit button
         output$submit <- renderUI(actionButton("btn_submit", "Submit to Synapse", class = "btn-primary-color"))
         dcWaiter("update", msg = paste0(validation_res()$error_type, " Found !!! "), spin = spin_inner_circles(), sleep = 0)
+        shinyjs::show("box_submit")
       } else {
         if (dca_schematic_api != "offline" & Sys.getenv("DCA_MANIFEST_OUTPUT_FORMAT") == "google_sheet") {
           output$val_gsheet <- renderUI(
@@ -715,7 +716,6 @@ shinyServer(function(input, output, session) {
     
     validation_res(NULL)
     show("div_validate")
-    shinyjs::show("box_submit")
 
   })
   
