@@ -296,25 +296,33 @@ shinyServer(function(input, output, session) {
         
         # This gets the folder list using the synapse REST API
         # gets folders per project
-        if (Sys.getenv("DCA_SYNAPSE_PROJECT_API") == TRUE & dca_schematic_api != "offline") {
-          promises::future_promise({
-            folders <- synapse_entity_children(auth=access_token, parentId=project_id, includeTypes = list("folder"))
-            setNames(folders$id, folders$name)
-          }) %...>% data_list$folders()
+        #if (Sys.getenv("DCA_SYNAPSE_PROJECT_API") == TRUE & dca_schematic_api != "offline") {
+        #  promises::future_promise({
+        #    folders <- synapse_entity_children(auth=access_token, parentId=project_id, includeTypes = list("folder"))
+        #    setNames(folders$id, folders$name)
+        #  }) %...>% data_list$folders()
 
-        } else {
+#        } else {
+          .asset_view <- selected$master_asset_view()
           
+        promises::future_promise({
           folder_list_raw <- switch(
             dca_schematic_api,
-              reticulate = storage_projects_datasets_py(synapse_driver, project_id),
-              rest = storage_project_datasets(url=file.path(api_uri, "v1/storage/project/datasets"),
-                                              asset_view = selected$master_asset_view(),
-                                              project_id=project_id,
-                                              input_token=access_token),
+              reticulate = storage_projects_datasets_py(
+                synapse_driver,
+                project_id),
+              rest = storage_project_datasets(
+                url=file.path(api_uri, "v1/storage/project/datasets"),
+                    asset_view = .asset_view,
+                    project_id=project_id,
+                    input_token=access_token),
               list(list("DatatypeA", "DatatypeA"), list("DatatypeB","DatatypeB"))
           )
-          data_list$folders(list2Vector(folder_list_raw))
-        }
+          
+          list2Vector(folder_list_raw)
+        
+        }) %...>% data_list$folders()
+ #       }
       })
   })
       
