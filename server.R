@@ -162,7 +162,7 @@ shinyServer(function(input, output, session) {
   # Goal of this observer is to retrieve a list of projects the users can access
   # within the selected asset view.
   observeEvent(input$btn_asset_view, {
-    dcWaiter("show", msg = paste0("Getting data from Synapse. This may take a minute."),
+    dcWaiter("show", msg = paste0("Getting data. This may take a minute."),
              color=col2rgba(col2rgb("#CD0BBC01")))
     shinyjs::disable("btn_asset_view")
     
@@ -189,7 +189,7 @@ shinyServer(function(input, output, session) {
       })
 
       dcWaiter("hide")
-      dcWaiter("show", msg = paste0("Getting data from Synase. This may take a minute."),
+      dcWaiter("show", msg = paste0("Getting data. This may take a minute."),
                color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
 
     output$logo <- renderUI({update_logo(selected$master_asset_view())})
@@ -284,7 +284,7 @@ shinyServer(function(input, output, session) {
   # project.
   observeEvent(input$btn_project, {
     ######## Update Folder List ########
-    dcWaiter("show", msg = paste0("Getting data from Synapse"),
+    dcWaiter("show", msg = paste0("Getting data"),
              color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
     shinyjs::disable("btn_project")
     selected$project(data_list$projects()[names(data_list$projects()) == input$dropdown_project])
@@ -371,7 +371,7 @@ shinyServer(function(input, output, session) {
   # Goal of this button is to get the files within a folder the user selects
   observeEvent(input$btn_folder, {
     
-    dcWaiter("show", msg = paste0("Getting data from Synapse"), color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
+    dcWaiter("show", msg = paste0("Getting data"), color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
     shinyjs::disable("btn_folder")
     shinyjs::show(select = "li:nth-child(5)")
     shinyjs::show(select = "li:nth-child(6)")
@@ -711,7 +711,7 @@ shinyServer(function(input, output, session) {
       
       if (validation_res()$result == "valid" | dca_schematic_api == "offline" && grepl("fixed", inFile$data()[1,1])) {
         # show submit button
-        output$submit <- renderUI(actionButton("btn_submit", "Submit to Synapse", class = "btn-primary-color"))
+        output$submit <- renderUI(actionButton("btn_submit", "Submit data", class = "btn-primary-color"))
         dcWaiter("update", msg = paste0(validation_res()$error_type, " Found !!! "), spin = spin_inner_circles(), sleep = 0)
         shinyjs::show("box_submit")
       } else {
@@ -778,7 +778,7 @@ shinyServer(function(input, output, session) {
   ######## Submission Section ########
   observeEvent(input$btn_submit, {
     # loading screen for submitting data
-    dcWaiter("show", msg = "Submitting to Synapse. This may take a minute.", color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
+    dcWaiter("show", msg = "Submitting data. This may take a minute.", color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
 
 
     if (is.null(selected$folder())) {
