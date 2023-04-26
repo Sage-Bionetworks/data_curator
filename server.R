@@ -376,6 +376,9 @@ shinyServer(function(input, output, session) {
     shinyjs::show(select = "li:nth-child(5)")
     shinyjs::show(select = "li:nth-child(6)")
     
+    updateTabsetPanel(session, "tabs",
+                      selected = "tab_template")
+    
     selected_folder <- data_list$folders()[which(data_list$folders() == input$dropdown_folder)]
     output$template_title <- renderText({ sprintf("Get %s template for %s",
                                                   selected$schema(),
