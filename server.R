@@ -638,7 +638,7 @@ shinyServer(function(input, output, session) {
 
   ######## Reads .csv File ########
   # Check out module and don't use filepath. Keep file in memory
-  inFile <- csvInfileServer("inputFile", colsAsCharacters = TRUE, keepBlank = TRUE)
+  inFile <- csvInfileServer("inputFile", colsAsCharacters = TRUE, keepBlank = TRUE, trimEmptyRows = TRUE)
 
   observeEvent(inFile$data(), {
     # hide the validation section when upload a new file
