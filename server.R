@@ -641,6 +641,9 @@ shinyServer(function(input, output, session) {
   inFile <- csvInfileServer("inputFile", colsAsCharacters = TRUE, keepBlank = TRUE, trimEmptyRows = TRUE)
 
   observeEvent(inFile$data(), {
+    # After trimming blank rows and columns from data, write to the filepath
+    # so it can be passed to the submit endpoint.
+    readr::write_csv(inFile$data(), inFile$raw()$datapath)
     # hide the validation section when upload a new file
     sapply(clean_tags[-c(1:2)], FUN = hide)
     # renders in DT for preview
