@@ -8,7 +8,7 @@ col2rgba <- function(x, alpha=255) {
 dcWaiter <- function(stage = c("show", "update", "hide"),
                      id = NULL, landing = FALSE, userName = NULL,
                      isLogin = TRUE, isCertified = TRUE, isPermission = TRUE,
-                     sleep = 2, msg = NULL, style = NULL,
+                     sleep = 0, msg = NULL, style = NULL,
                      spin = NULL, custom_spinner = FALSE, url = "",
                      color = col2rgba("#424874", 255*0.9)) {
   # validate arguments

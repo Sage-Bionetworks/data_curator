@@ -1,3 +1,15 @@
+#' @description Check if a httr request succeeded.
+#' @param x An httr response object
+check_success <- function(x){
+  if (!inherits(x, "response")) stop("Input must be an httr reponse object")
+  status <- httr::http_status(x)
+  if (tolower(status$category) == "success") {
+    return()
+  } else {
+    stop(sprintf("Response from server: %s", status$reason))
+  }
+}
+
 #' @description Download an existing manifest
 #' @param url URI of API endpoint
 #' @param input_token Synapse PAT
@@ -6,17 +18,29 @@
 #' @param as_json if True return the manifest in JSON format
 #' @returns a csv of the manifest
 #' @export
-manifest_download <- function(url="http://localhost:3001/v1/manifest/download",
-                              input_token, asset_view, dataset_id, as_json=TRUE){
-  req <- httr::GET(url,
-                   query = list(
-                     asset_view = asset_view,
-                     dataset_id = dataset_id,
-                     as_json = as_json,
-                     input_token = input_token
-                   ))
-  manifest <- httr::content(req, as = "text")
-  jsonlite::fromJSON(manifest)
+manifest_download <- function(url = "http://localhost:3001/v1/manifest/download", input_token, asset_view, dataset_id, as_json=TRUE, new_manifest_name=NULL) {
+  request <- httr::GET(
+    url = url,
+    query = list(
+      input_token = input_token,
+      asset_view = asset_view,
+      dataset_id = dataset_id,
+      as_json = as_json,
+      new_manifest_name = new_manifest_name
+    )
+  )
+  
+  check_success(request)
+  response <- httr::content(request, type = "application/json")
+  
+  # Output can have many NULL values which get dropped or cause errors. Set them to NA
+  nullToNA <- function(x) {
+    x[sapply(x, is.null)] <- NA
+    return(x)
+  }
+  df <- do.call(rbind, lapply(response, rbind))
+  nullToNA(df)
+  
 }
 
 #' schematic rest api to generate manifest
@@ -31,7 +55,7 @@ manifest_download <- function(url="http://localhost:3001/v1/manifest/download",
 #' @export
 manifest_generate <- function(url="http://localhost:3001/v1/manifest/generate",
                               schema_url="https://raw.githubusercontent.com/ncihtan/data-models/main/HTAN.model.jsonld", #nolint
-                              title, data_type, oauth="true",
+                              title, data_type,
                               use_annotations="false", dataset_id=NULL,
                               asset_view, output_format, input_token = NULL) {
   
@@ -40,7 +64,6 @@ manifest_generate <- function(url="http://localhost:3001/v1/manifest/generate",
                      schema_url=schema_url,
                      title=title,
                      data_type=data_type,
-                     oauth=oauth,
                      use_annotations=use_annotations,
                      dataset_id=dataset_id,
                      asset_view=asset_view,
@@ -48,6 +71,7 @@ manifest_generate <- function(url="http://localhost:3001/v1/manifest/generate",
                      input_token = input_token
                    ))
   
+  check_success(req)
   manifest_url <- httr::content(req)
   manifest_url
 }
@@ -72,6 +96,7 @@ manifest_populate <- function(url="http://localhost:3001/v1/manifest/populate",
                       return_excel=return_excel),
                     body=list(csv_file=httr::upload_file(csv_file, type = "text/csv"))
   )
+  check_success(req)
   req
   
 }
@@ -82,18 +107,18 @@ manifest_populate <- function(url="http://localhost:3001/v1/manifest/populate",
 #' @param url URL to schematic API endpoint
 #' @param schema_url URL to a schema jsonld 
 #' @param data_type Type of dataset
-#' @param csv_file Filepath of csv to validate
+#' @param file_name Filepath of csv to validate
 #' 
 #' @returns An empty list() if sucessfully validated. Or a list of errors.
 #' @export
 manifest_validate <- function(url="http://localhost:3001/v1/model/validate",
                               schema_url="https://raw.githubusercontent.com/ncihtan/data-models/main/HTAN.model.jsonld", #nolint
-                              data_type, json_str=NULL, file_name) {
+                              data_type, file_name, restrict_rules=FALSE) {
   req <- httr::POST(url,
                      query=list(
                        schema_url=schema_url,
                        data_type=data_type,
-                       json_str=json_str),
+                       restrict_rules=restrict_rules),
                     body=list(file_name=httr::upload_file(file_name))
   )
   
@@ -111,6 +136,7 @@ manifest_validate <- function(url="http://localhost:3001/v1/model/validate",
      )
     )
   }
+  check_success(req)
   annotation_status <- httr::content(req)
   annotation_status
 }
@@ -130,7 +156,7 @@ manifest_validate <- function(url="http://localhost:3001/v1/model/validate",
 model_submit <- function(url="http://localhost:3001/v1/model/submit",
                          schema_url="https://raw.githubusercontent.com/ncihtan/data-models/main/HTAN.model.jsonld", #notlint
                          data_type, dataset_id, restrict_rules=FALSE, input_token, json_str=NULL, asset_view,
-                         use_schema_label=TRUE, manifest_record_type="table", file_name,
+                         use_schema_label=TRUE, manifest_record_type="table_and_file", file_name,
                          table_manipulation="replace") {
   req <- httr::POST(url,
                     #add_headers(Authorization=paste0("Bearer ", pat)),
@@ -149,9 +175,7 @@ model_submit <- function(url="http://localhost:3001/v1/model/submit",
                     #body=list(file_name=file_name)
   )
   
-  if (tolower(httr::http_status(req)$category) != "success") {
-    stop(sprintf("Error submitting manifest: %s", httr::http_status(req)$reason))
-  }
+  check_success(req)
   manifest_id <- httr::content(req)
   manifest_id
 }
@@ -175,7 +199,7 @@ model_component_requirements <- function(url="http://localhost:3001/v1/model/com
                      as_graph = as_graph
                    ))
   
-  if (httr::http_error(req)) stop(httr::http_status(req)$reason)
+  check_success(req)
   cont <- httr::content(req)
   
   if (inherits(cont, "xml_document")){
@@ -210,6 +234,7 @@ storage_project_datasets <- function(url="http://localhost:3001/v1/storage/proje
                       input_token=input_token)
   )
   
+  check_success(req)
   httr::content(req)
 }
 
@@ -231,6 +256,7 @@ storage_projects <- function(url="http://localhost:3001/v1/storage/projects",
                      input_token=input_token
                    ))
   
+  check_success(req)
   httr::content(req)
 }
 
@@ -258,6 +284,7 @@ storage_dataset_files <- function(url="http://localhost:3001/v1/storage/dataset/
                      file_names=file_names,
                      full_path=full_path,
                      input_token=input_token))
+  check_success(req)
   httr::content(req)
                    
 }
@@ -277,14 +304,13 @@ get_asset_view_table <- function(url="http://localhost:3001/v1/storage/assets/ta
                      input_token=input_token,
                      return_type=return_type))
   
-  if (httr::http_status(req)$category == "Success") {
-    if (return_type=="json") {
-      return(list2DF(fromJSON(httr::content(req))))
-    } else {
-    csv <- readr::read_csv(httr::content(req))
-    return(csv)
-    }
-  } else stop("File could not be downloaded from Synapse.")
+  check_success(req)
+  if (return_type=="json") {
+    return(list2DF(fromJSON(httr::content(req))))
+  } else {
+  csv <- readr::read_csv(httr::content(req))
+  return(csv)
+  }
   
 }
 

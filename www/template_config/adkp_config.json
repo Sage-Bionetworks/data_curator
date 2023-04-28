@@ -1,0 +1,46 @@
+{
+    "manifest_schemas": [
+      {
+        "display_name": "Diverse Cohorts Clinical Metadata",
+        "schema_name": "DiverseCohortsClinicalMetadata",
+        "type": "record"
+      },
+      {
+        "display_name": "Diverse Cohorts Biospecimen Metadata",
+        "schema_name": "DiverseCohortsBiospecimenMetadata",
+        "type": "record"
+      },
+      {
+        "display_name": "WGS Assay Metadata",
+        "schema_name": "WholeGenomeSeqAssayMetadata",
+        "type": "record"
+      },
+      {
+        "display_name": "WGS VCF Files",
+        "schema_name": "WholeGenomeSeqVCFFileAnnotations",
+        "type": "file"
+      },
+      {
+        "display_name": "WGS Raw Files",
+        "schema_name": "WholeGenomeSeqRawFileAnnotations",
+        "type": "file"
+      },
+      {
+        "display_name": "Bulk RNAseq Assay Metadata",
+        "schema_name": "BulkRNASeqAssayMetadata",
+        "type": "record"
+      },
+      {
+        "display_name": "Bulk RNAseq Raw Files",
+        "schema_name": "BulkRNASeqRawFileAnnotations",
+        "type": "file"
+      },
+      {
+        "display_name": "Bulk RNAseq Counts Files",
+        "schema_name": "BulkRNASeqCountsFileAnnotations",
+        "type": "file"
+      }
+    ],
+    "service_version": "v23.1.1",
+    "schema_version": ""
+  }

@@ -18,6 +18,7 @@ To configure your project for this version, edit [dcc_config.csv](dcc_config.csv
 - **manifest_output_format**: "excel"  
 - **submit_use_schema_labels**: Schematic option to use schema labels when submitting (default TRUE) TRUE or FALSE  
 - **submit_table_manipulation**: Schematic option when submitting (default "replace") "replace" or "upsert"  
+- **submit_manifest_record_type**: Schematic option when submitting.
 - **use_compliance_dashboard**: (default FALSE) TRUE or FALSE  
 - primary_col: (default Sage theme) hexadecimal color code  
 - secondary_col; (default Sage theme) hexadecimal color code  

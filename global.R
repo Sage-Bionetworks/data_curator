@@ -16,6 +16,8 @@ suppressPackageStartupMessages({
   library(readr)
   library(sass)
   library(shinydashboardPlus)
+  library(promises)
+  library(future)
   # dashboard
   library(purrr)
   library(data.table)
@@ -23,6 +25,10 @@ suppressPackageStartupMessages({
   library(data.tree)
   library(r2d3)
 })
+
+ncores <- availableCores()
+message(sprintf("Available cores: %s", ncores))
+plan(multisession, workers = ncores)
 
 # import R files
 source_files <- list.files(c("functions", "modules"), pattern = "*\\.R$", recursive = TRUE, full.names = TRUE)
@@ -113,6 +119,8 @@ scope <- "openid view download modify"
 
 template_config_files <- setNames(dcc_config$template_menu_config_file,
                                   dcc_config$synapse_asset_view)
+if (dca_schematic_api == "offline") template_config_files <- setNames("www/template_config/config_offline.json",
+                                                                      "synXXXXXX")
 
 ## Set Up Virtual Environment
 # ShinyAppys has a limit of 7000 files which this app' grossly exceeds
@@ -141,6 +149,4 @@ config_file <- fromJSON("www/template_config/config.json")
 ## Global variables
 dropdown_types <- c("project", "folder", "template")
 # set up cores used for parallelization
-ncores <- parallel::detectCores() - 1
-datatypes <- c("project", "folder", "template")
 options(sass.cache = FALSE)

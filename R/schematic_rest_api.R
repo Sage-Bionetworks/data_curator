@@ -18,19 +18,29 @@ check_success <- function(x){
 #' @param as_json if True return the manifest in JSON format
 #' @returns a csv of the manifest
 #' @export
-manifest_download <- function(url="http://localhost:3001/v1/manifest/download",
-                              input_token, asset_view, dataset_id, as_json=TRUE){
-  req <- httr::GET(url,
-                   query = list(
-                     asset_view = asset_view,
-                     dataset_id = dataset_id,
-                     as_json = as_json,
-                     input_token = input_token
-                   ))
+manifest_download <- function(url = "http://localhost:3001/v1/manifest/download", input_token, asset_view, dataset_id, as_json=TRUE, new_manifest_name=NULL) {
+  request <- httr::GET(
+    url = url,
+    query = list(
+      input_token = input_token,
+      asset_view = asset_view,
+      dataset_id = dataset_id,
+      as_json = as_json,
+      new_manifest_name = new_manifest_name
+    )
+  )
   
-  check_success(req)
-  manifest <- httr::content(req, as = "text")
-  jsonlite::fromJSON(manifest)
+  check_success(request)
+  response <- httr::content(request, type = "application/json")
+  
+  # Output can have many NULL values which get dropped or cause errors. Set them to NA
+  nullToNA <- function(x) {
+    x[sapply(x, is.null)] <- NA
+    return(x)
+  }
+  df <- do.call(rbind, lapply(response, rbind))
+  nullToNA(df)
+  
 }
 
 #' schematic rest api to generate manifest
@@ -146,7 +156,7 @@ manifest_validate <- function(url="http://localhost:3001/v1/model/validate",
 model_submit <- function(url="http://localhost:3001/v1/model/submit",
                          schema_url="https://raw.githubusercontent.com/ncihtan/data-models/main/HTAN.model.jsonld", #notlint
                          data_type, dataset_id, restrict_rules=FALSE, input_token, json_str=NULL, asset_view,
-                         use_schema_label=TRUE, manifest_record_type="table", file_name,
+                         use_schema_label=TRUE, manifest_record_type="table_and_file", file_name,
                          table_manipulation="replace") {
   req <- httr::POST(url,
                     #add_headers(Authorization=paste0("Bearer ", pat)),

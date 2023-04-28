@@ -13,7 +13,7 @@ switchTabUI <- function(id, direction = c("left", "right", "both")) {
   btn_next <- actionButton(ns(tagID[1]), class = "switch-tab-next", lapply(1:3, function(i) tags$i(class = "fa fa-angle-right")))
   fluidRow(
     if (direction == "right") {
-      column(1, offset = 10, btn_next)
+      column(1, offset = 5, btn_next)
     } else if (direction == "left") {
       column(1, offset = 1, btn_prev)
     } else {
