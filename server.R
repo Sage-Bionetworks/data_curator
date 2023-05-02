@@ -657,6 +657,10 @@ shinyServer(function(input, output, session) {
 
     dcWaiter("show", msg = "Validating manifest. This may take a minute.", color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
     
+    # Reset validation_result in case user reuploads the same file. This makes
+    # the validation_res observer trigger any time this button is pressed.
+    validation_res(NULL) 
+    
     # loading screen for validating metadata
     .datapath <- inFile$raw()$datapath
     .schema <- selected$schema()
@@ -715,7 +719,7 @@ shinyServer(function(input, output, session) {
       if (validation_res()$result == "valid" | dca_schematic_api == "offline" && grepl("fixed", inFile$data()[1,1])) {
         # show submit button
         output$submit <- renderUI(actionButton("btn_submit", "Submit data", class = "btn-primary-color"))
-        dcWaiter("update", msg = paste0(validation_res()$error_type, " Found !!! "), spin = spin_inner_circles(), sleep = 0)
+        dcWaiter("update", msg = paste0(validation_res()$error_type, " Found !!! "), spin = spin_inner_circles(), sleep = 2.5)
         shinyjs::show("box_submit")
       } else {
         if (dca_schematic_api != "offline" & Sys.getenv("DCA_MANIFEST_OUTPUT_FORMAT") == "google_sheet") {
@@ -727,13 +731,12 @@ shinyServer(function(input, output, session) {
             downloadButton("downloadData_good", "Download Corrected Data")
           })
         }
-        dcWaiter("update", msg = paste0(validation_res()$error_type, " Found !!! "), spin = spin_pulsar(), sleep = 0)
+        dcWaiter("update", msg = paste0(validation_res()$error_type, " Found !!! "), spin = spin_pulsar(), sleep = 2.5)
       }
     } else {
       dcWaiter("hide")
     }
     
-    validation_res(NULL)
     show("div_validate")
 
   })
