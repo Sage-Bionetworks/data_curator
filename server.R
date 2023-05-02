@@ -478,20 +478,20 @@ shinyServer(function(input, output, session) {
   }, ignoreInit = TRUE)
 
   ######## Dashboard ########
-  dashboard(
-    id = "dashboard",
-    syn.store = syn_store,
-    project.scope = selected$project,
-    schema = selected$schema,
-    schema.display.name = reactive(input$dropdown_datatype),
-    disable.ids = c("box_pick_project", "box_pick_manifest"),
-    ncores = ncores,
-    access_token = access_token,
-    fileview = selected$master_asset_view(),
-    folder = selected$project(),
-    schematic_api = dca_schematic_api,
-    schema_url = data_model()
-  )
+#  dashboard(
+#    id = "dashboard",
+#    syn.store = syn_store,
+#    project.scope = selected$project,
+#    schema = selected$schema,
+#    schema.display.name = reactive(input$dropdown_datatype),
+#    disable.ids = c("box_pick_project", "box_pick_manifest"),
+#    ncores = ncores,
+#    access_token = access_token,
+#    fileview = selected$master_asset_view(),
+#    folder = selected$project(),
+#    schematic_api = dca_schematic_api,
+#    schema_url = data_model()
+#  )
 
   manifest_url <- reactiveVal(NULL)
   

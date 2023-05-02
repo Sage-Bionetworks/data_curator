@@ -139,7 +139,7 @@ ui <- shinydashboardPlus::dashboardPage(
                          class = "btn-primary-color"
             )
             ),
-          if (dca_schematic_api != "offline" && Sys.getenv("DCA_COMPLIANCE_DASHBOARD")==TRUE) dashboardUI("dashboard")
+#          if (dca_schematic_api != "offline" && Sys.getenv("DCA_COMPLIANCE_DASHBOARD")==TRUE) dashboardUI("dashboard")
           ),
         #switchTabUI("switchTab2", direction = "both")
         ),
