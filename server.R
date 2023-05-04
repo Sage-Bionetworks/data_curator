@@ -210,7 +210,7 @@ shinyServer(function(input, output, session) {
     config_schema(config_df)
     data_list$template(conf_template)
   
-    if (Sys.getenv("DCA_SYNAPSE_PROJECT_API") == TRUE & dca_schematic_api != "offline") {
+    if (dca_synapse_api == TRUE & dca_schematic_api != "offline") {
       #This chunk gets projects using the synapse REST API
       #Check for user access to project scopes within asset view
       
@@ -359,7 +359,7 @@ shinyServer(function(input, output, session) {
       # check number of files if it's file-based template
       # This gets files using the synapse REST API
       # get file list in selected folder
-      if (Sys.getenv("DCA_SYNAPSE_PROJECT_API") == TRUE & dca_schematic_api != "offline") {
+      if (dca_synapse_api == TRUE & dca_schematic_api != "offline") {
         .folder <- selected$folder()
         promises::future_promise({
           files <- synapse_entity_children(auth = access_token, parentId=.folder, includeTypes = list("file"))
@@ -476,10 +476,15 @@ shinyServer(function(input, output, session) {
     .datasetId <- selected$folder()
     .schema_url <- data_model()
     .asset_view <- selected$master_asset_view()
-    .template <- input$dropdown_template
+    .template <- paste(
+      dcc_config_react()$project_name,
+      "-",
+      input$dropdown_template
+    )
     .url <- ifelse(dca_schematic_api != "offline",
     file.path(api_uri, "v1/manifest/generate"),
     NA)
+    .output_format <- dcc_config_react()$manifest_output_format
     
     promises::future_promise({
       switch(dca_schematic_api, 
@@ -491,7 +496,7 @@ shinyServer(function(input, output, session) {
           dataset_id = .datasetId,
           asset_view = .asset_view,
           use_annotations = FALSE,
-          output_format = "excel",
+          output_format = .output_format,
           input_token=access_token
         ),
         {
@@ -504,7 +509,13 @@ shinyServer(function(input, output, session) {
   
   })
   
-  observeEvent(manifest_data(), dcWaiter("hide"))
+  observeEvent(manifest_data(), {
+    browser()
+    if (dcc_config_react()$manifest_output_format == "google_sheet") {
+      shinyjs::show("div_template")
+    } else shinyjs::show("div_download_data")
+    dcWaiter("hide")
+  })
   
   # Bookmarking this thread in case we can't use writeBin...
   # Use a db connection instead
@@ -523,6 +534,11 @@ shinyServer(function(input, output, session) {
     }
   )
   
+    # generate link
+  output$text_template <- renderUI(
+    tags$a(id = "template_link", href = manifest_data(), list(icon("hand-point-right"), manifest_data()), target = "_blank")
+  )
+  
   if (dca_schematic_api == "offline") {
     mock_offline_manifest <- tibble("column1"="mock offline data")
     output$downloadData <- downloadHandler(
@@ -532,45 +548,6 @@ shinyServer(function(input, output, session) {
       }
     )
   }
-  
-  # generate template
-  observeEvent(input$btn_template, {
-    # loading screen for template link generation
-    dcWaiter("show", msg = "Generating link...", color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
-    manifest_url(switch(dca_schematic_api,
-      reticulate =  manifest_generate_py(title = input$dropdown_template,
-        rootNode = selected$schema(),
-        datasetId = selected$folder()),
-      rest = manifest_generate(url=file.path(api_uri, "v1/manifest/generate"),
-        schema_url = data_model(),
-        title = input$dropdown_template,
-        data_type = selected$schema(),
-        dataset_id = selected$folder(),
-        asset_view = selected$master_asset_view(),
-        use_annotations = FALSE,
-        output_format = "google_sheet",
-        input_token=access_token),
-      "offline-no-gsheet-url"
-      )
-    )
-    
-    # generate link
-    output$text_template <- renderUI(
-      tags$a(id = "template_link", href = manifest_url(), list(icon("hand-point-right"), manifest_url()), target = "_blank")
-    )
-    
-    dcWaiter("hide", sleep = 0)
-    
-    nx_confirm(
-      inputId = "btn_template_confirm",
-      title = "Go to the template now?",
-      message = paste0("click 'Go' to edit your ", sQuote(input$dropdown_template), " template on the google sheet"),
-      button_ok = "Go",
-    )
-    
-    # display link
-    show("div_template") # TODO: add progress bar on (loading) screen
-  })
   
   observeEvent(input$btn_template_confirm, {
    req(input$btn_template_confirm == TRUE)
@@ -663,7 +640,7 @@ shinyServer(function(input, output, session) {
         dcWaiter("update", msg = paste0(validation_res()$error_type, " Found !!! "), spin = spin_inner_circles(), sleep = 2.5)
         shinyjs::show("box_submit")
       } else {
-          if (dca_schematic_api != "offline" & Sys.getenv("DCA_MANIFEST_OUTPUT_FORMAT") == "google_sheet") {
+          if (dca_schematic_api != "offline" & dcc_config_react()$manifest_output_format == "google_sheet") {
           output$val_gsheet <- renderUI(
           actionButton("btn_val_gsheet", "  Generate Google Sheet Link", icon = icon("table"), class = "btn-primary-color")
           )
@@ -754,7 +731,7 @@ shinyServer(function(input, output, session) {
         )
       } else {
         # Get file list from synapse REST API
-        if (Sys.getenv("DCA_SYNAPSE_PROJECT_API") == TRUE & dca_schematic_api != "offline") {
+        if (dca_synapse_api == TRUE & dca_schematic_api != "offline") {
           files <- synapse_entity_children(auth = access_token, parentId=selected$folder(), includeTypes = list("file"))
           data_list$files(setNames(files$id, files$name))
         } else {
