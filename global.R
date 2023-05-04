@@ -62,6 +62,8 @@ if (dca_schematic_api == "rest") {
   )
 }
 
+dca_synapse_api <- Sys.getenv("DCA_SYNAPSE_PROJECT_API")
+
 # update port if running app locally
 if (interactive()) {
   port <- httr::parse_url(app_url)$port
