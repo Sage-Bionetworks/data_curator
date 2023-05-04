@@ -26,6 +26,7 @@ suppressPackageStartupMessages({
   library(r2d3)
 })
 
+# Set up futures/promises for asynchronous calls
 ncores <- availableCores()
 message(sprintf("Available cores: %s", ncores))
 plan(multisession, workers = ncores)
@@ -54,18 +55,18 @@ if (!dca_schematic_api %in% c("rest", "reticulate", "offline")) {
 }
 if (dca_schematic_api == "rest") {
   api_uri <- ifelse(Sys.getenv("DCA_API_PORT") == "",
-                    Sys.getenv("DCA_API_HOST"),
-                      paste(Sys.getenv("DCA_API_HOST"),
-                        Sys.getenv("DCA_API_PORT"),
-                        sep = ":")
+  Sys.getenv("DCA_API_HOST"),
+  paste(Sys.getenv("DCA_API_HOST"),
+  Sys.getenv("DCA_API_PORT"),
+  sep = ":")
   )
 }
 
 syn_themes <- c(
-    "syn20446927" = "www/dca_themes/htan_theme_config.rds",
-    "syn27210848" = "www/dca_themes/mc2_theme_config.rds",
-    "syn30109515" = "www/dca_themes/include_theme_config.rds"
-  )
+"syn20446927" = "www/dca_themes/htan_theme_config.rds",
+"syn27210848" = "www/dca_themes/mc2_theme_config.rds",
+"syn30109515" = "www/dca_themes/include_theme_config.rds"
+)
 
 # update port if running app locally
 if (interactive()) {
@@ -118,9 +119,9 @@ api <- oauth_endpoint(
 scope <- "openid view download modify"
 
 template_config_files <- setNames(dcc_config$template_menu_config_file,
-                                  dcc_config$synapse_asset_view)
+dcc_config$synapse_asset_view)
 if (dca_schematic_api == "offline") template_config_files <- setNames("www/template_config/config_offline.json",
-                                                                      "synXXXXXX")
+  "synXXXXXX")
 
 ## Set Up Virtual Environment
 # ShinyAppys has a limit of 7000 files which this app' grossly exceeds
@@ -138,9 +139,9 @@ if (dca_schematic_api == "reticulate"){
   
   ## Read config.json
   if (!file.exists("www/config.json")) {
-#    system(
-#      "python3 .github/config_schema.py -c schematic_config.yml --service_repo 'Sage-Bionetworks/schematic' --overwrite"
-#    )
+  #    system(
+  #      "python3 .github/config_schema.py -c schematic_config.yml --service_repo 'Sage-Bionetworks/schematic' --overwrite"
+  #    )
   }
 }
 config_file <- fromJSON("www/template_config/config.json")
@@ -148,5 +149,4 @@ config_file <- fromJSON("www/template_config/config.json")
 
 ## Global variables
 dropdown_types <- c("project", "folder", "template")
-# set up cores used for parallelization
 options(sass.cache = FALSE)
