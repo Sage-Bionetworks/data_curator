@@ -299,17 +299,16 @@ shinyServer(function(input, output, session) {
           list(list("DatatypeA", "DatatypeA"), list("DatatypeB","DatatypeB"))
         )
         
-        list2Vector(folder_list_raw)
+        folder_list <- list2Vector(folder_list_raw)
+        folder_list[sort(names(folder_list))]
       
       }) %...>% data_list$folders()
     })
   })
   
   observeEvent(data_list$folders(), ignoreInit = TRUE, {
-    if (length(data_list$folders()) > 0) folder_names <- sort(names(data_list$folders())) else folder_names <- " "
-    
     updateTabsetPanel(session, "tabs",
-    selected = "tab_template_select")
+      selected = "tab_template_select")
     shinyjs::show(select = "li:nth-child(3)")
     dcWaiter("hide")
   })
