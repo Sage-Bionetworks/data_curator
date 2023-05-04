@@ -510,7 +510,6 @@ shinyServer(function(input, output, session) {
   })
   
   observeEvent(manifest_data(), {
-    browser()
     if (dcc_config_react()$manifest_output_format == "google_sheet") {
       shinyjs::show("div_template")
     } else shinyjs::show("div_download_data")
