@@ -40,7 +40,7 @@ csvInfileServer <- function(id, na = c("", "NA"), colsAsCharacters = FALSE, keep
         infile <- infile[, !grepl("^\\.\\.\\.", colnames(infile))]
         infile <- infile[rowSums(is.na(infile)) != ncol(infile), ]
         # add 1 to row index to match spreadsheet's row index
-        rownames(infile) <- as.numeric(rownames(infile)) + 1
+        suppressWarnings(rownames(infile) <- as.numeric(rownames(infile)) + 1)
         
         return(infile)
       })
