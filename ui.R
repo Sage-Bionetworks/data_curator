@@ -23,12 +23,6 @@ ui <- shinydashboardPlus::dashboardPage(
     width = 250,
     sidebarMenu(
       id = "tabs",
-      # uiOutput("title"),
-      # menuItem(
-      #   "Instructions",
-      #   tabName = "tab_instructions",
-      #   icon = icon("book-open")
-      # ),
       menuItem(
         "Select DCC",
         tabName = "tab_asset_view",
@@ -76,33 +70,10 @@ ui <- shinydashboardPlus::dashboardPage(
     # load dependencies
     use_notiflix_report(width = "400px"),
     use_waiter(),
-    #dcamodules::use_dca(),
     tabItems(
-      # First tab content
-      # tabItem(
-      #   tabName = "tab_instructions",
-      #   h2("Instructions for the Data Curator App (DCA):"),
-      #   h3(
-      #     "1. Go to",
-      #     strong("Select your Dataset"),
-      #     "tab - select your project; choose your folder and metadata template type matching your metadata."
-      #   ),
-      #   h3(
-      #     "2. Go to",
-      #     strong("Get Metadata Template"),
-      #     "tab - click on the link to generate the metadata template, then fill out and download the file as a CSV. If you already have an annotated metadata template, you may skip this step."
-      #   ),
-      #   h3(
-      #     "3. Go to",
-      #     strong("Submit and Validate Metadata"),
-      #     "tab - upload your filled CSV and validate your metadata. If you receive errors correct them, reupload your CSV, and revalidate until you receive no more errors. When your metadata is valid, you will be able to see a 'Submit' button. Press it to submit your metadata."
-      #   ),
-      #   switchTabUI("switchTab1", direction = "right")
-      # ),
       # second tab content
       tabItem(
         tabName = "tab_asset_view",
-        #h2("Select the asset view"),
         fluidRow(
           box(
             id = "box_pick_asset_view",
@@ -119,8 +90,7 @@ ui <- shinydashboardPlus::dashboardPage(
                          class = "btn-primary-color"
             )
         )
-        )#,
-        #switchTabUI("switchTab1", direction = "right") # remove arrow from assetview page.
+        )
       ),
       tabItem(
         tabName = "tab_project",
@@ -139,9 +109,7 @@ ui <- shinydashboardPlus::dashboardPage(
                          class = "btn-primary-color"
             )
             ),
-#          if (dca_schematic_api != "offline" && Sys.getenv("DCA_COMPLIANCE_DASHBOARD")==TRUE) dashboardUI("dashboard")
           ),
-        #switchTabUI("switchTab2", direction = "both")
         ),
       tabItem(
         tabName = "tab_template_select",
@@ -161,7 +129,6 @@ ui <- shinydashboardPlus::dashboardPage(
             )
           )
         ),
-        #switchTabUI("switchTab3", direction = "both")
       ),
       tabItem(
         tabName = "tab_folder",
@@ -238,7 +205,6 @@ ui <- shinydashboardPlus::dashboardPage(
       # Fourth tab content
       tabItem(
         tabName = "tab_upload",
-        #h2("Submit & Validate a Filled Metadata Template"),
         fluidRow(
           box(
             title = "Upload Filled Metadata as a CSV",
@@ -283,7 +249,6 @@ ui <- shinydashboardPlus::dashboardPage(
             id = "box_submit"
           )
         ),
-        #switchTabUI("switchTab6", direction = "left")
       )
     ),
     # waiter loading screen
