@@ -1,12 +1,12 @@
-# This is the user-interface definition of a Shiny web application.
-# You can find out more about building applications with Shiny here:
-#
-# http://shiny.rstudio.com
-#
-# This interface has been modified to be used specifically on Sage Bionetworks Synapse pages
-# to log into Synapse as the currently logged in user from the web portal using the session token.
-#
-# https://www.synapse.org
+# This R Shiny app functions as a frontend GUI to the Schematic python module
+# github.com/sage-Bionetworks/schematic
+# 
+# The UI is a dashboard that acts like a wizard. The user steps through each tab
+# and selects from dropdown menus.
+# After input selection, a spreadsheet is downloaded, modified outside of the 
+# app, and then uploaded to the app.
+# The final steps are to validate the spreadsheet with Schematic and either
+# report validation errors to the user or submit the data to synapse.org
 
 ui <- shinydashboardPlus::dashboardPage(
   title = "Data Curator",
