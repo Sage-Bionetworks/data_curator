@@ -61,198 +61,198 @@ ui <- shinydashboardPlus::dashboardPage(
     )
   ),
   dashboardBody(
-    tags$head(
-      tags$style(sass(sass_file("www/scss/main.scss"))),
-      singleton(includeScript("www/js/readCookie.js")),
-      tags$script(htmlwidgets::JS("setTimeout(function(){history.pushState({}, 'Data Curator', window.location.pathname);},2000);"))
+  tags$head(
+    tags$style(sass(sass_file("www/scss/main.scss"))),
+    singleton(includeScript("www/js/readCookie.js")),
+    tags$script(htmlwidgets::JS("setTimeout(function(){history.pushState({}, 'Data Curator', window.location.pathname);},2000);"))
+  ),
+  uiOutput("sass"),
+  # load dependencies
+  use_notiflix_report(width = "400px"),
+  use_waiter(),
+  tabItems(
+  # second tab content
+  tabItem(
+    tabName = "tab_asset_view",
+    fluidRow(
+      box(
+        id = "box_pick_asset_view",
+        status = "primary",
+        width = 6,
+        title = "Select a DCC: ",
+        selectInput(
+          inputId = "dropdown_asset_view",
+          label = NULL,
+          choices = setNames(dcc_config$synapse_asset_view,
+                 dcc_config$project_name)
+        ),
+        actionButton("btn_asset_view", "Go",
+        class = "btn-primary-color"
+        )
+      )
+    )
+  ),
+  tabItem(
+    tabName = "tab_project",
+    fluidRow(
+      box(
+        id = "box_pick_project",
+        status = "primary",
+        width = 6,
+        title = "Select a Project: ",
+        selectInput(
+          inputId = "dropdown_project",
+          label = NULL,
+          choices = "Generating..."
+        ),
+        actionButton("btn_project", "Go",
+        class = "btn-primary-color"
+        )
+      ),
     ),
-    uiOutput("sass"),
-    # load dependencies
-    use_notiflix_report(width = "400px"),
-    use_waiter(),
-    tabItems(
-      # second tab content
-      tabItem(
-        tabName = "tab_asset_view",
-        fluidRow(
-          box(
-            id = "box_pick_asset_view",
-            status = "primary",
-            width = 6,
-            title = "Select a DCC: ",
-            selectInput(
-              inputId = "dropdown_asset_view",
-              label = NULL,
-              choices = setNames(dcc_config$synapse_asset_view,
-                                 dcc_config$project_name)
-            ),
-            actionButton("btn_asset_view", "Go",
-                         class = "btn-primary-color"
-            )
+  ),
+  tabItem(
+    tabName = "tab_template_select",
+    fluidRow(
+      box(
+        id = "box_pick_template",
+        status = "primary",
+        width = 6,
+        title = "Select a Template: ",
+          selectInput(
+          inputId = "dropdown_template",
+          label = NULL,
+          choices = "Generating..."
+        ),
+        actionButton("btn_template_select", "Go",
+        class = "btn-primary-color"
         )
-        )
-      ),
-      tabItem(
-        tabName = "tab_project",
-        fluidRow(
-          box(
-            id = "box_pick_project",
-            status = "primary",
-            width = 6,
-            title = "Select a Project: ",
-            selectInput(
-              inputId = "dropdown_project",
-              label = NULL,
-              choices = "Generating..."
-            ),
-            actionButton("btn_project", "Go",
-                         class = "btn-primary-color"
-            )
-            ),
-          ),
-        ),
-      tabItem(
-        tabName = "tab_template_select",
-        fluidRow(
-          box(
-            id = "box_pick_template",
-            status = "primary",
-            width = 6,
-            title = "Select a Template: ",
-            selectInput(
-              inputId = "dropdown_template",
-              label = NULL,
-              choices = "Generating..."
-            ),
-            actionButton("btn_template_select", "Go",
-                         class = "btn-primary-color"
-            )
-          )
-        ),
-      ),
-      tabItem(
-        tabName = "tab_folder",
-        fluidRow(
-          box(
-            id = "box_pick_folder",
-            status = "primary",
-            width = 6,
-            title = "Select a Folder: ",
-            selectInput(
-              inputId = "dropdown_folder",
-              label = NULL,
-              choices = "Generating..."
-            ),
-            actionButton("btn_folder", "Go",
-                         class = "btn-primary-color"
-            ),
-            helpText("After clicking 'Go', click the Download Template tab to proceed.")
-          )
-        ),
-        switchTabUI("switchTab4", direction = "right")
-      ),
-      tabItem(
-        tabName = "tab_template",
-        useShinyjs(),
-        if (Sys.getenv("DCA_MANIFEST_OUTPUT_FORMAT") != "excel") {
-        fluidRow(
-          box(
-            title = "Get Link, Annotate, and Download Template as CSV",
-            status = "primary",
-            width = 12,
-            actionButton("btn_template", "Click to Generate Google Sheets Template",
-              class = "btn-primary-color"
-            ),
-            hidden(
-              div(
-                id = "div_template_warn",
-                height = "100%",
-                htmlOutput("text_template_warn")
-              ),
-              div(
-                id = "div_template",
-                height = "100%",
-                htmlOutput("text_template")
-              )
-            ),
-            helpText("This link will lead to an empty template or your previously submitted template with new files if applicable.")
-          )
-        )}else{
-        fluidRow(
-          box(
-            title = textOutput('template_title'),
-            status = "primary",
-            width = 12,
-            downloadButton("downloadData", "Download"),
-            helpText("Note: After downloading, spreadsheet apps may add blank",
-                     "rows that must be removed before validating."),
-            hidden(
-              div(
-                id = "div_template_warn_xls",
-                height = "100%",
-                htmlOutput("text_template_warn_xls")
-              ),
-              div(
-                id = "div_template_xls",
-                height = "100%",
-                htmlOutput("text_template_xls")
-              )
-            )
-          ),
-        )},
-        switchTabUI("switchTab5", direction = "right")
-      ),
-      # Fourth tab content
-      tabItem(
-        tabName = "tab_upload",
-        fluidRow(
-          box(
-            title = "Upload Filled Metadata as a CSV",
-            status = "primary",
-            width = 12,
-            csvInfileUI("inputFile"),
-            helpText("Note: Remove blank rows from your file before uploading.")
-          ),
-          box(
-            title = "Metadata Preview",
-            collapsible = TRUE,
-            status = "primary",
-            width = 12,
-            DTableUI("tbl_preview"),
-            id = "box_preview"
-          ),
-          box(
-            title = "Validate Filled Metadata",
-            status = "primary",
-            collapsible = TRUE,
-            width = 12,
-            actionButton("btn_validate", "Validate Metadata", class = "btn-primary-color"),
-            div(
-              id = "div_validate",
-              height = "100%",
-              ValidationMsgUI("text_validate")
-            ),
-            DTableUI("tbl_validate"),
-            uiOutput("val_gsheet"),
-            uiOutput("dl_manifest"),
-            helpText(
-              HTML("If you have an error, please try editing locally or on google sheet.
-                  Reupload your CSV and press the validate button as needed.")
-            ),
-            id = "box_validate"
-          ),
-          box(
-            title = "Submit Validated Metadata to Synapse",
-            status = "primary",
-            width = 12,
-            uiOutput("submit"),
-            id = "box_submit"
-          )
-        ),
       )
     ),
-    # waiter loading screen
-    dcWaiter("show", landing = TRUE)
+  ),
+  tabItem(
+    tabName = "tab_folder",
+    fluidRow(
+      box(
+        id = "box_pick_folder",
+        status = "primary",
+        width = 6,
+        title = "Select a Folder: ",
+        selectInput(
+        inputId = "dropdown_folder",
+        label = NULL,
+        choices = "Generating..."
+      ),
+        actionButton("btn_folder", "Go",
+          class = "btn-primary-color"
+        ),
+        helpText("After clicking 'Go', click the Download Template tab to proceed.")
+      )
+    ),
+    switchTabUI("switchTab4", direction = "right")
+  ),
+  tabItem(
+    tabName = "tab_template",
+    useShinyjs(),
+    if (Sys.getenv("DCA_MANIFEST_OUTPUT_FORMAT") != "excel") {
+      fluidRow(
+        box(
+        title = "Get Link, Annotate, and Download Template as CSV",
+        status = "primary",
+        width = 12,
+        actionButton("btn_template", "Click to Generate Google Sheets Template",
+          class = "btn-primary-color"
+        ),
+        hidden(
+          div(
+            id = "div_template_warn",
+            height = "100%",
+            htmlOutput("text_template_warn")
+          ),
+          div(
+            id = "div_template",
+            height = "100%",
+            htmlOutput("text_template")
+          )
+        ),
+        helpText("This link will lead to an empty template or your previously submitted template with new files if applicable.")
+      )
+    )} else {
+    fluidRow(
+      box(
+        title = textOutput('template_title'),
+        status = "primary",
+        width = 12,
+        downloadButton("downloadData", "Download"),
+        helpText("Note: After downloading, spreadsheet apps may add blank",
+         "rows that must be removed before validating."),
+        hidden(
+          div(
+            id = "div_template_warn_xls",
+            height = "100%",
+            htmlOutput("text_template_warn_xls")
+          ),
+          div(
+            id = "div_template_xls",
+            height = "100%",
+            htmlOutput("text_template_xls")
+          )
+        )
+      ),
+    )},
+    switchTabUI("switchTab5", direction = "right")
+  ),
+  # Fourth tab content
+  tabItem(
+    tabName = "tab_upload",
+    fluidRow(
+      box(
+        title = "Upload Filled Metadata as a CSV",
+        status = "primary",
+        width = 12,
+        csvInfileUI("inputFile"),
+        helpText("Note: Remove blank rows from your file before uploading.")
+      ),
+      box(
+        title = "Metadata Preview",
+        collapsible = TRUE,
+        status = "primary",
+        width = 12,
+        DTableUI("tbl_preview"),
+        id = "box_preview"
+      ),
+      box(
+        title = "Validate Filled Metadata",
+        status = "primary",
+        collapsible = TRUE,
+        width = 12,
+        actionButton("btn_validate", "Validate Metadata", class = "btn-primary-color"),
+        div(
+          id = "div_validate",
+          height = "100%",
+          ValidationMsgUI("text_validate")
+        ),
+        DTableUI("tbl_validate"),
+        uiOutput("val_gsheet"),
+        uiOutput("dl_manifest"),
+        helpText(
+        HTML("If you have an error, please try editing locally or on google sheet.
+          Reupload your CSV and press the validate button as needed.")
+        ),
+        id = "box_validate"
+      ),
+      box(
+        title = "Submit Validated Metadata to Synapse",
+        status = "primary",
+        width = 12,
+        uiOutput("submit"),
+        id = "box_submit"
+      )
+    ),
+  )
+  ),
+  # waiter loading screen
+  dcWaiter("show", landing = TRUE)
   )
 )
 
@@ -263,10 +263,10 @@ uiFunc <- function(req) {
   }
   if (!has_auth_code(parseQueryString(req$QUERY_STRING))) {
     authorization_url <- oauth2.0_authorize_url(api, app, scope = scope)
-      return(tags$script(HTML(sprintf(
-        "location.replace(\"%s\");",
-        authorization_url
-      ))))
+    redir <- tags$script(HTML(
+      sprintf("location.replace(\"%s\");", authorization_url)
+    ))
+    return(redir)
   } else {
     ui
   }
