@@ -62,12 +62,6 @@ if (dca_schematic_api == "rest") {
   )
 }
 
-syn_themes <- c(
-"syn20446927" = "www/dca_themes/htan_theme_config.rds",
-"syn27210848" = "www/dca_themes/mc2_theme_config.rds",
-"syn30109515" = "www/dca_themes/include_theme_config.rds"
-)
-
 # update port if running app locally
 if (interactive()) {
   port <- httr::parse_url(app_url)$port
