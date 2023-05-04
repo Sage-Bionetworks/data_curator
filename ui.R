@@ -152,15 +152,25 @@ ui <- shinydashboardPlus::dashboardPage(
   tabItem(
     tabName = "tab_template",
     useShinyjs(),
-    if (Sys.getenv("DCA_MANIFEST_OUTPUT_FORMAT") != "google_sheet") {
       fluidRow(
         box(
           title = textOutput('template_title'),
           status = "primary",
           width = 12,
-          downloadButton("downloadData", "Download"),
-          helpText("Note: After downloading, spreadsheet apps may add blank",
-                   "rows that must be removed before validating."),
+          hidden(
+            div(
+              id = "div_download_data",
+              height = "100%",
+              downloadButton("downloadData", "Download")
+            ),
+            div(
+              id = "div_template",
+              height = "100%",
+              htmlOutput("text_template")
+            ),
+            helpText("Note: After downloading, spreadsheet apps may add blank",
+                     "rows that must be removed before validating.")
+            ),
           hidden(
             div(
               id = "div_template_warn_xls",
@@ -174,31 +184,7 @@ ui <- shinydashboardPlus::dashboardPage(
             )
           )
         ),
-      )
-    } else {
-      fluidRow(
-        box(
-          title = "Get Link, Annotate, and Download Template as CSV",
-          status = "primary",
-          width = 12,
-          actionButton("btn_template", "Click to Generate Google Sheets Template",
-                       class = "btn-primary-color"
-          ),
-          hidden(
-            div(
-              id = "div_template_warn",
-              height = "100%",
-              htmlOutput("text_template_warn")
-            ),
-            div(
-              id = "div_template",
-              height = "100%",
-              htmlOutput("text_template")
-            )
-          ),
-          helpText("This link will lead to an empty template or your previously submitted template with new files if applicable.")
-        )
-    )},
+      ),
     switchTabUI("switchTab5", direction = "right")
   ),
   # Fourth tab content
