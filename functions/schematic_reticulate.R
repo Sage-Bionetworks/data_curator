@@ -52,7 +52,7 @@ storage_projects_datasets_py <- function(synapse_driver, project_id) {
 }
 
 storage_dataset_files_py <- function(project_id) {
-  file_list <- syn_store$getFilesInStorageDataset(project_id)
+  syn_store$getFilesInStorageDataset(project_id)
 }
 
 manifest_generate_py <- function(title, rootNode, filenames=NULL, datasetId){

@@ -1,0 +1,31 @@
+{
+    "manifest_schemas": [
+      {
+        "display_name": "Clinical Metadata Template",
+        "schema_name": "ClinicalMetadataTemplate",
+        "type": "record"
+      },
+      {
+        "display_name": "Biospecimen Metadata Template",
+        "schema_name": "BiospecimenMetadataTemplate",
+        "type": "record"
+      },
+      {
+        "display_name": "Bulk RNAseq Template",
+        "schema_name": "BulkRNAseqTemplate",
+        "type": "record"
+      },
+      {
+        "display_name": "scRNAseq Template",
+        "schema_name": "ScRNAseqTemplate",
+        "type": "record"
+      },
+      {
+        "display_name": "Organoid Template",
+        "schema_name": "OrganoidTemplate",
+        "type": "record"
+      }
+    ],
+    "service_version": "v23.1.1",
+    "schema_version": ""
+  }

@@ -6,7 +6,6 @@ on:
       - main
       - develop*
       - develop-*
-      - beta-schematic-rest-api
     tags:
       - v[0-9]+.[0-9]+.[0-9]+
     paths-ignore:
@@ -18,9 +17,9 @@ jobs:
     runs-on: ubuntu-latest
     container: rocker/rstudio:4.1.2
     env:
-      GITHUB_PAT: ${{ github.GITHUB_TOKEN }}
-      DCA_SCHEMATIC_API_TYPE: reticulate
-      DCA_API_HOST: "https://schematic.api.sagebionetworks.org"
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      DCA_SCHEMATIC_API_TYPE: rest
+      DCA_API_HOST: "https://schematic-dev.api.sagebionetworks.org"
       DCA_API_PORT: ""
     steps:
       - name: Install System Dependencies
@@ -119,6 +118,9 @@ jobs:
           echo 'DCA_SCHEMATIC_API_TYPE="${{ env.DCA_SCHEMATIC_API_TYPE }}"' >> .Renviron
           echo 'DCA_API_PORT="${{ env.DCA_API_PORT }}"' >> .Renviron
           echo 'DCA_API_HOST="${{ env.DCA_API_HOST }}"' >> .Renviron
+
+          echo 'DCA_SYNAPSE_PROJECT_API=TRUE' >> .Renviron
+          echo 'DCA_MANIFEST_OUTPUT_FORMAT="excel"' >> .Renviron
           
           echo 'GITHUB_PAT="${{ secrets.GITHUB_TOKEN }}"' >> .Renviron
 
@@ -135,7 +137,7 @@ jobs:
           # if tag is v*.*.*, deploy to prod, if main to staging, otherwise to test
           if (grepl("v[0-9]+.[0-9]+.[0-9]+", refName)) {
             message("Deploying release version of app")
-          } else if (refName %in% c("main", "beta-schematic-rest-api")) {
+          } else if (refName %in% c("main")) {
             appName <- paste(appName, "staging", sep = "-")
             message("Deploying staging version of app")
           } else {
