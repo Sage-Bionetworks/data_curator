@@ -233,7 +233,7 @@ shinyServer(function(input, output, session) {
       reticulate  = storage_projects_py(synapse_driver, access_token),
       rest = storage_projects(url=file.path(api_uri, "v1/storage/projects"),
       asset_view = selected$master_asset_view(),
-      input_token = access_token),
+      access_token = access_token),
       list(list("Offline Project A", "Offline Project"))
       )
       data_list$projects(list2Vector(data_list_raw))
@@ -295,7 +295,7 @@ shinyServer(function(input, output, session) {
             url=file.path(api_uri, "v1/storage/project/datasets"),
             asset_view = .asset_view,
             project_id=project_id,
-            input_token=access_token),
+            access_token=access_token),
           list(list("DatatypeA", "DatatypeA"), list("DatatypeB","DatatypeB"))
         )
         
@@ -374,7 +374,7 @@ shinyServer(function(input, output, session) {
           rest = storage_dataset_files(url=file.path(api_uri, "v1/storage/dataset/files"),
             asset_view = selected$master_asset_view(),
             dataset_id = selected$folder(),
-            input_token=access_token),
+            access_token=access_token),
           list(list("DatatypeA", "DatatypeA"), list("DatatypeB", "DatatypeB")))
         
         # update files list in the folder
@@ -496,7 +496,7 @@ shinyServer(function(input, output, session) {
           asset_view = .asset_view,
           use_annotations = FALSE,
           output_format = .output_format,
-          input_token=access_token
+          access_token=access_token
         ),
         {
           message("Downloading offline manifest")
@@ -738,7 +738,7 @@ shinyServer(function(input, output, session) {
             rest = storage_dataset_files(url=file.path(api_uri, "v1/storage/dataset/files"),
               asset_view = selected$master_asset_view(),
               dataset_id = selected$folder(),
-              input_token=access_token))
+              access_token=access_token))
           
           data_list$files(list2Vector(file_list_raw))
         }
@@ -776,7 +776,7 @@ shinyServer(function(input, output, session) {
             schema_url = .data_model,
             data_type = .schema,
             dataset_id = .folder,
-            input_token = access_token,
+            access_token = access_token,
             restrict_rules = FALSE,
             file_name = tmp_file_path,
             asset_view = .asset_view,
@@ -816,7 +816,7 @@ shinyServer(function(input, output, session) {
           schema_url = .data_model,
           data_type = .schema,
           dataset_id = .folder,
-          input_token = access_token,
+          access_token = access_token,
           restrict_rules = FALSE,
           file_name = tmp_file_path,
           asset_view = .asset_view,
