@@ -1,31 +1,41 @@
 {
-    "manifest_schemas": [
-      {
-        "display_name": "Clinical Metadata Template",
-        "schema_name": "ClinicalMetadataTemplate",
-        "type": "record"
-      },
-      {
-        "display_name": "Biospecimen Metadata Template",
-        "schema_name": "BiospecimenMetadataTemplate",
-        "type": "record"
-      },
-      {
-        "display_name": "Bulk RNAseq Template",
-        "schema_name": "BulkRNAseqTemplate",
-        "type": "record"
-      },
-      {
-        "display_name": "scRNAseq Template",
-        "schema_name": "ScRNAseqTemplate",
-        "type": "record"
-      },
-      {
-        "display_name": "Organoid Template",
-        "schema_name": "OrganoidTemplate",
-        "type": "record"
-      }
-    ],
-    "service_version": "v23.1.1",
-    "schema_version": ""
-  }
+  "manifest_schemas": [
+    {
+      "display_name": "Clinical Metadata Template",
+      "schema_name": "ClinicalMetadataTemplate",
+      "type": "record"
+    },
+    {
+      "display_name": "Biospecimen Metadata Template",
+      "schema_name": "BiospecimenMetadataTemplate",
+      "type": "record"
+    },
+    {
+      "display_name": "Bulk RNAseq Assay Template",
+      "schema_name": "BulkRNAseqAssayTemplate",
+      "type": "record"
+    },
+    {
+      "display_name": "scRNAseq Assay Template",
+      "schema_name": "ScRNAseqAssayTemplate",
+      "type": "record"
+    },
+    {
+      "display_name": "Bulk RNAseq Raw File Annotations",
+      "schema_name": "BulkRNAseqRawFileAnnotations",
+      "type": "file"
+    },
+    {
+      "display_name": "Bulk RNASeq Counts File Annotations",
+      "schema_name": "BulkRNASeqCountsFileAnnotations",
+      "type": "file"
+    },
+    {
+      "display_name": "Metadata File Annotations",
+      "schema_name": "MetadataFileAnnotations",
+      "type": "file"
+    }
+  ],
+  "service_version": "v23.1.1",
+  "schema_version": ""
+}
