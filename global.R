@@ -35,7 +35,8 @@ plan(multisession, workers = ncores)
 source_files <- list.files(c("functions", "modules"), pattern = "*\\.R$", recursive = TRUE, full.names = TRUE)
 sapply(source_files, FUN = source)
 
-dcc_config <- read_csv("dcc_config.csv", show_col_types = FALSE)
+dcc_config_file <- Sys.getenv("DCA_DCC_CONFIG")
+dcc_config <- read_csv(dcc_config_file, show_col_types = FALSE)
 
 ## Set Up OAuth
 client_id <- Sys.getenv("DCA_CLIENT_ID")
