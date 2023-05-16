@@ -35,8 +35,8 @@ shinyServer(function(input, output, session) {
   ######## session global variables ########
   # read config in
   def_config <- ifelse(dca_schematic_api == "offline",
-    fromJSON("www/template_config/config_offline.json"),
-    fromJSON("www/template_config/config.json")
+    fromJSON("https://raw.githubusercontent.com/Sage-Bionetworks/data_curator_config/main/demo/dca-template-config.json"),
+    fromJSON("https://raw.githubusercontent.com/Sage-Bionetworks/data_curator_config/main/demo/dca-template-config.json")
   )
   config <- reactiveVal()
   config_schema <- reactiveVal(def_config)
