@@ -4,7 +4,7 @@
 
 The *Data Curator App* is an R Shiny app that serves as the *frontend* to the [schematic Python package](github.com/sage-Bionetworks/schematic/). It allows data contributors to easily annotate, validate and submit their metadata.
 
-## Quickstart {#quickstart}
+## Quickstart 
 
 Sage Bionetworks hosts a version of Data Curator App for its collaborators. [Access it here](link%20TBD).\
 To configure your project for this version, fork this repo and append [dcc_config.csv](dcc_config.csv). Then submit a pull request to [this branch](https://github.com/Sage-Bionetworks/data_curator/tree/beta-schematic-rest-api). [dcc_config.csv](dcc_config.csv) contains the following. **Bold fields** are required:
