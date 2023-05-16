@@ -106,7 +106,7 @@ git clone https://github.com/Sage-Bionetworks/data-models
 3.  Create `config.json` and placed it in the `www` folder
 
 ```
-python3 .github/generate_config_json.py \
+python3 .github/config_schema.py \
   -jd data-models/example.model.jsonld \
   -schema 'Sage-Bionetworks/data-models' \
   -service Sage-Bionetworks/schematic'
