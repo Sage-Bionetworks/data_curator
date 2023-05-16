@@ -201,8 +201,14 @@ shinyServer(function(input, output, session) {
       )
     
     }
-    
     conf_file <- reactiveVal(template_config_files[input$dropdown_asset_view])
+    if (!file.exists(conf_file())){
+      conf_file(
+        file.path("https://raw.githubusercontent.com/Sage-Bionetworks/data_curator_config/main",
+                  conf_file()
+                  )
+        )
+    }
     config_df <- jsonlite::fromJSON(conf_file())
     
     conf_template <- setNames(config_df[[1]]$schema_name, config_df[[1]]$display_name)
