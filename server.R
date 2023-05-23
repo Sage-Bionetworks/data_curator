@@ -35,8 +35,8 @@ shinyServer(function(input, output, session) {
   ######## session global variables ########
   # read config in
   def_config <- ifelse(dca_schematic_api == "offline",
-    fromJSON("www/template_config/config_offline.json"),
-    fromJSON("www/template_config/config.json")
+    fromJSON("https://raw.githubusercontent.com/Sage-Bionetworks/data_curator_config/main/demo/dca-template-config.json"),
+    fromJSON("https://raw.githubusercontent.com/Sage-Bionetworks/data_curator_config/main/demo/dca-template-config.json")
   )
   config <- reactiveVal()
   config_schema <- reactiveVal(def_config)
@@ -183,7 +183,29 @@ shinyServer(function(input, output, session) {
     dcWaiter("show", msg = paste0("Getting data. This may take a minute."),
       color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
     
-    output$logo <- renderUI({update_logo(selected$master_asset_view())})
+    logo_img <- ifelse(!is.na(dcc_config_react()$logo_location),
+      paste0("https://raw.githubusercontent.com/Sage-Bionetworks/data_curator_config/main/",
+        dcc_config_react()$logo_location),
+      "https://raw.githubusercontent.com/Sage-Bionetworks/data_curator_config/main/demo/Logo_Sage_Logomark.png")
+    
+    logo_link <- ifelse(!is.na(dcc_config_react()$logo_link),
+      dcc_config_react()$logo_link,
+      "https://synapse.org"
+    )
+    
+    output$logo <- renderUI({
+      tags$li(
+        class = "dropdown", id = "logo",
+        tags$a(
+          href = logo_link,
+          target = "_blank",
+          tags$img(
+            height = "40px", alt = "LOGO",
+            src = logo_img
+          )
+        )
+      )
+      })
     
     if (dca_schematic_api == "reticulate") {
       # Update schematic_config and login
@@ -201,8 +223,14 @@ shinyServer(function(input, output, session) {
       )
     
     }
-    
     conf_file <- reactiveVal(template_config_files[input$dropdown_asset_view])
+    if (!file.exists(conf_file())){
+      conf_file(
+        file.path("https://raw.githubusercontent.com/Sage-Bionetworks/data_curator_config/main",
+                  conf_file()
+                  )
+        )
+    }
     config_df <- jsonlite::fromJSON(conf_file())
     
     conf_template <- setNames(config_df[[1]]$schema_name, config_df[[1]]$display_name)
