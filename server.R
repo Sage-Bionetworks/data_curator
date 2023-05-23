@@ -48,7 +48,7 @@ shinyServer(function(input, output, session) {
   
   all_asset_views <- setNames(dcc_config$synapse_asset_view,
   dcc_config$project_name)
-  asset_views <- reactiveVal(c("mock dca fileview"="syn33715412"))
+  asset_views <- reactiveVal(NULL)
   
   dcc_config_react <- reactiveVal(dcc_config)
   
@@ -79,7 +79,7 @@ shinyServer(function(input, output, session) {
   # data available to the user
   syn_store <- NULL # gets list of projects they have access to
   
-  asset_views <- reactiveVal(c("mock dca fileview (syn33715412)"="syn33715412"))
+  asset_views <- reactiveVal(NULL)
   
   # All of tabName from the tabs in ui.R
   tabs_list <- c("tab_asset_view",
@@ -139,6 +139,7 @@ shinyServer(function(input, output, session) {
       # update waiter loading screen once login successful
       dcWaiter("update", landing = TRUE, userName = user_name)
     }
+    
   } else {
     updateSelectInput(session, "dropdown_asset_view",
       choices = c("Offline mock data (synXXXXXX)"="synXXXXXX"))
@@ -149,12 +150,27 @@ shinyServer(function(input, output, session) {
   lapply(1:6, function(i) {
     switchTabServer(id = paste0("switchTab", i), tabId = "tabs", tab = reactive(input$tabs)(), tabList = tabs_list, parent = session)
   })
+    
+    # If user has access to one DCC, skip the DCC selection page
+    if (length(asset_views()) == 1L) {
+      updateTabsetPanel(session, "tabs", selected = "tab_project")
+    }
+    
+  })
   
+  # Watch if it's time to get projects within an asset view.
+  # This is if user clicks Go on btn_asset_view or if they have access to only
+  # one asset view. 
+  dcc_picked <- reactive({
+    input$btn_asset_view
+    asset_views()
   })
   
   # Goal of this observer is to retrieve a list of projects the users can access
   # within the selected asset view.
-  observeEvent(input$btn_asset_view, {
+  observeEvent(dcc_picked(), ignoreInit = TRUE, {
+    req(length(asset_views()) == 1 || input$btn_asset_view > 0)
+    
     dcWaiter("show", msg = paste0("Getting data. This may take a minute."),
       color=col2rgba(col2rgb("#CD0BBC01")))
     shinyjs::disable("btn_asset_view")
@@ -307,7 +323,7 @@ shinyServer(function(input, output, session) {
     shinyjs::disable("btn_project")
     selected$project(data_list$projects()[names(data_list$projects()) == input$dropdown_project])
     
-    observeEvent(input[["dropdown_project"]], {
+    #observeEvent(input[["dropdown_project"]], {
       # get synID of selected project
       project_id <- selected$project()
       
@@ -331,7 +347,7 @@ shinyServer(function(input, output, session) {
         folder_list[sort(names(folder_list))]
       
       }) %...>% data_list$folders()
-    })
+    #})
   })
   
   observeEvent(data_list$folders(), ignoreInit = TRUE, {
