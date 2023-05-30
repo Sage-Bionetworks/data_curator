@@ -338,6 +338,8 @@ shinyServer(function(input, output, session) {
     updateTabsetPanel(session, "tabs",
       selected = "tab_template_select")
     shinyjs::show(select = "li:nth-child(3)")
+    updateSelectInput(session, "header_dropdown_project",
+      choices = selected$project())
     dcWaiter("hide")
   })
   
@@ -353,6 +355,8 @@ shinyServer(function(input, output, session) {
     selected$schema(data_list$template()[input$dropdown_template])
     updateSelectInput(session, "dropdown_folder", choices = data_list$folders())
     updateTabsetPanel(session, "tabs", selected = "tab_folder")
+    updateSelectInput(session, "header_dropdown_template",
+                      choices = selected$schema())
     shinyjs::show(select = "li:nth-child(4)")
     dcWaiter("hide")
   })
@@ -378,6 +382,8 @@ shinyServer(function(input, output, session) {
       names(selected_folder))
     })
     selected$folder(selected_folder)
+    updateSelectInput(session, "header_dropdown_folder",
+                      choices = selected$folder())
     # clean tags in generating-template tab
     sapply(clean_tags[1:2], FUN = hide)
     
