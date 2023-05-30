@@ -458,6 +458,14 @@ shinyServer(function(input, output, session) {
   
   })
   
+  observeEvent(input$btn_folder_have_template, {
+    selected_folder <- data_list$folders()[which(data_list$folders() == input$dropdown_folder)]
+    selected$folder(selected_folder)
+    # clean tags in generating-template tab
+    updateTabsetPanel(session, "tabs",
+                      selected = "tab_upload")
+  })
+  
   observeEvent(input$update_confirm, {
     req(input$update_confirm == TRUE)
     isUpdateFolder(TRUE)
