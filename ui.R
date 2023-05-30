@@ -17,7 +17,41 @@ ui <- shinydashboardPlus::dashboardPage(
       span(class = "logo-lg", "Data Curator"),
       span(class = "logo-mini", "DCA")
     ),
-    uiOutput("logo")
+    uiOutput("logo"),
+    leftUi = tagList(
+      dropdownBlock(
+        id = "header_selection_dropdown",
+        title = "Selection",
+        icon = icon("sliders"),
+        badgeStatus = "info",
+        fluidRow(
+          div(
+            id = "header_content_project",
+            selectInput(
+              inputId = "header_dropdown_project",
+              label = NULL,
+              choices = "No project selected"
+            )
+          ),
+          div(
+            id = "header_content_template",
+            selectInput(
+              inputId = "header_dropdown_template",
+              label = NULL,
+              choices = "No template selected"
+            )
+          ),
+          div(
+            id = "header_content_folder",
+            selectInput(
+              inputId = "header_dropdown_folder",
+              label = NULL,
+              choices = "No folder selected"
+            )
+          )
+        )
+      )
+    )
   ),
   dashboardSidebar(
     width = 250,
