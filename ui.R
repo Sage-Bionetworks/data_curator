@@ -30,7 +30,7 @@ ui <- shinydashboardPlus::dashboardPage(
             selectInput(
               inputId = "header_dropdown_project",
               label = NULL,
-              choices = character(0)
+              choices = "No project selected"
             )
           ),
           div(
@@ -38,7 +38,7 @@ ui <- shinydashboardPlus::dashboardPage(
             selectInput(
               inputId = "header_dropdown_template",
               label = NULL,
-              choices = character(0)
+              choices = "No template selected"
             )
           ),
           div(
@@ -46,7 +46,7 @@ ui <- shinydashboardPlus::dashboardPage(
             selectInput(
               inputId = "header_dropdown_folder",
               label = NULL,
-              choices = character(0)
+              choices = "No folder selected"
             )
           )
         )
