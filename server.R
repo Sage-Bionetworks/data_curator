@@ -522,6 +522,7 @@ shinyServer(function(input, output, session) {
     file.path(api_uri, "v1/manifest/generate"),
     NA)
     .output_format <- dcc_config_react()$manifest_output_format
+    .use_annotations <- dcc_config_react()$manifest_use_annotations
     
     promises::future_promise({
       switch(dca_schematic_api, 
@@ -532,7 +533,7 @@ shinyServer(function(input, output, session) {
           data_type = .schema,
           dataset_id = .datasetId,
           asset_view = .asset_view,
-          use_annotations = FALSE,
+          use_annotations = .use_annotations,
           output_format = .output_format,
           access_token=access_token
         ),
