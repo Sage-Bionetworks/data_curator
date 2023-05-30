@@ -143,9 +143,13 @@ ui <- shinydashboardPlus::dashboardPage(
         label = NULL,
         choices = "Generating..."
       ),
-        actionButton("btn_folder", "Go",
+        actionButton("btn_folder", "Download template",
           class = "btn-primary-color"
-        )
+        ),
+      actionButton("btn_folder_have_template",
+                   "I already have a template or manifest",
+                   class = "btn-primary-color"
+      )
       )
     )
   ),
