@@ -144,6 +144,10 @@ shinyServer(function(input, output, session) {
       choices = c("Offline mock data (synXXXXXX)"="synXXXXXX"))
     dcWaiter("hide")
   }
+    
+  if (length(asset_views()) == 1L) {
+    click("btn_asset_view")
+  } 
   
   ######## Arrow Button ########
   lapply(1:6, function(i) {
