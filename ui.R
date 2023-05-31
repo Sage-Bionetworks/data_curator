@@ -21,9 +21,9 @@ ui <- shinydashboardPlus::dashboardPage(
     leftUi = tagList(
       dropdownBlock(
         id = "header_selection_dropdown",
-        title = "Selection",
+        title = "Selected data",
         icon = icon("sliders"),
-        badgeStatus = "info",
+        badgeStatus = NULL,
         fluidRow(
           div(
             id = "header_content_project",
