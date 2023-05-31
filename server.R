@@ -461,7 +461,8 @@ shinyServer(function(input, output, session) {
   observeEvent(input$btn_folder_have_template, {
     selected_folder <- data_list$folders()[which(data_list$folders() == input$dropdown_folder)]
     selected$folder(selected_folder)
-    # clean tags in generating-template tab
+    shinyjs::show(select = "li:nth-child(5)")
+    shinyjs::show(select = "li:nth-child(6)")
     updateTabsetPanel(session, "tabs",
                       selected = "tab_upload")
   })
@@ -765,7 +766,7 @@ shinyServer(function(input, output, session) {
     # If a file-based component selected (define file-based components) note for future
     # the type to filter (eg file-based) on could probably also be a config choice
     display_names <- config_schema()$manifest_schemas$display_name[config_schema()$manifest_schemas$type == "file"]
-    
+
     if (input$dropdown_template %in% display_names) {
       # make into a csv or table for file-based components already has entityId
       if ("entityId" %in% colnames(submit_data)) {
