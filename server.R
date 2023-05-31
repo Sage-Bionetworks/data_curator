@@ -380,14 +380,10 @@ shinyServer(function(input, output, session) {
     updateTabsetPanel(session, "tabs",
     selected = "tab_template")
     
-    selected_folder <- data_list$folders()[which(data_list$folders() == input$dropdown_folder)]
     output$template_title <- renderText({ sprintf("Get %s template for %s",
       selected$schema(),
-      names(selected_folder))
+      names(selected$folder()))
     })
-    selected$folder(selected_folder)
-    updateSelectInput(session, "header_dropdown_folder",
-                      choices = selected$folder())
     # clean tags in generating-template tab
     sapply(clean_tags[1:2], FUN = hide)
     
@@ -423,6 +419,10 @@ shinyServer(function(input, output, session) {
   
   observeEvent(input$dropdown_folder,{
     shinyjs::enable("btn_folder")
+    selected_folder <- data_list$folders()[which(data_list$folders() == input$dropdown_folder)]
+    selected$folder(selected_folder)
+    updateSelectInput(session, "header_dropdown_folder",
+                      choices = selected$folder())
   })
   
   observeEvent(data_list$files(), ignoreInit = TRUE, {
@@ -459,8 +459,6 @@ shinyServer(function(input, output, session) {
   })
   
   observeEvent(input$btn_folder_have_template, {
-    selected_folder <- data_list$folders()[which(data_list$folders() == input$dropdown_folder)]
-    selected$folder(selected_folder)
     shinyjs::show(select = "li:nth-child(5)")
     shinyjs::show(select = "li:nth-child(6)")
     updateTabsetPanel(session, "tabs",
