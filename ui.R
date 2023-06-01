@@ -18,7 +18,8 @@ ui <- shinydashboardPlus::dashboardPage(
       span(class = "logo-mini", "DCA")
     ),
     uiOutput("logo"),
-    leftUi = tagList(
+    leftUi = hidden(
+      tagList(
       dropdownBlock(
         id = "header_selection_dropdown",
         title = "Selected data",
@@ -52,6 +53,7 @@ ui <- shinydashboardPlus::dashboardPage(
         )
       )
     )
+    ) # end hidden
   ),
   dashboardSidebar(
     width = 250,
