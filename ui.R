@@ -57,6 +57,7 @@ ui <- shinydashboardPlus::dashboardPage(
   ),
   dashboardSidebar(
     width = 250,
+    hidden(
     sidebarMenu(
       id = "tabs",
       menuItem(
@@ -94,6 +95,7 @@ ui <- shinydashboardPlus::dashboardPage(
         id = "sidebar_footer", `data-toggle` = "tab",
         tags$footer(HTML(' Powered by <i class="far fa-heart"></i> and Sage Bionetworks'))
       )
+    )
     )
   ),
   dashboardBody(
