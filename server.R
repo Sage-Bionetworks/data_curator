@@ -515,6 +515,11 @@ shinyServer(function(input, output, session) {
     shinyjs::addClass(id = "header_selection_dropdown", class = "dropdown open")
   })
   
+  observeEvent(input$tabs, {
+    req(input$tabs == "tab_template_select")
+    shinyjs::show("header_selection_dropdown")
+  })
+  
   observeEvent(c(input$`switchTab4-Next`, input$tabs), {
   
     req(input$tabs == "tab_template")
