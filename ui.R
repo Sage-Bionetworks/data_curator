@@ -17,10 +17,47 @@ ui <- shinydashboardPlus::dashboardPage(
       span(class = "logo-lg", "Data Curator"),
       span(class = "logo-mini", "DCA")
     ),
-    uiOutput("logo")
+    uiOutput("logo"),
+    leftUi = hidden(
+      tagList(
+      dropdownBlock(
+        id = "header_selection_dropdown",
+        title = "Selected data",
+        icon = icon("sliders"),
+        badgeStatus = NULL,
+        fluidRow(
+          div(
+            id = "header_content_project",
+            selectInput(
+              inputId = "header_dropdown_project",
+              label = NULL,
+              choices = "No project selected"
+            )
+          ),
+          div(
+            id = "header_content_template",
+            selectInput(
+              inputId = "header_dropdown_template",
+              label = NULL,
+              choices = "No template selected"
+            )
+          ),
+          div(
+            id = "header_content_folder",
+            selectInput(
+              inputId = "header_dropdown_folder",
+              label = NULL,
+              choices = "No folder selected"
+            )
+          )
+        )
+      )
+    )
+    ) # end hidden
   ),
   dashboardSidebar(
     width = 250,
+    hidden(
     sidebarMenu(
       id = "tabs",
       menuItem(
@@ -58,6 +95,7 @@ ui <- shinydashboardPlus::dashboardPage(
         id = "sidebar_footer", `data-toggle` = "tab",
         tags$footer(HTML(' Powered by <i class="far fa-heart"></i> and Sage Bionetworks'))
       )
+    )
     )
   ),
   dashboardBody(
@@ -143,9 +181,13 @@ ui <- shinydashboardPlus::dashboardPage(
         label = NULL,
         choices = "Generating..."
       ),
-        actionButton("btn_folder", "Go",
+        actionButton("btn_folder", "Download template",
           class = "btn-primary-color"
-        )
+        ),
+      actionButton("btn_folder_have_template",
+                   "I already have a template or manifest",
+                   class = "btn-primary-color"
+      )
       )
     )
   ),

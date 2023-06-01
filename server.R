@@ -144,6 +144,10 @@ shinyServer(function(input, output, session) {
       choices = c("Offline mock data (synXXXXXX)"="synXXXXXX"))
     dcWaiter("hide")
   }
+    
+  if (length(asset_views()) == 1L) {
+    click("btn_asset_view")
+  } 
   
   ######## Arrow Button ########
   lapply(1:6, function(i) {
@@ -338,6 +342,8 @@ shinyServer(function(input, output, session) {
     updateTabsetPanel(session, "tabs",
       selected = "tab_template_select")
     shinyjs::show(select = "li:nth-child(3)")
+    updateSelectInput(session, "header_dropdown_project",
+      choices = selected$project())
     dcWaiter("hide")
   })
   
@@ -353,6 +359,8 @@ shinyServer(function(input, output, session) {
     selected$schema(data_list$template()[input$dropdown_template])
     updateSelectInput(session, "dropdown_folder", choices = data_list$folders())
     updateTabsetPanel(session, "tabs", selected = "tab_folder")
+    updateSelectInput(session, "header_dropdown_template",
+                      choices = selected$schema())
     shinyjs::show(select = "li:nth-child(4)")
     dcWaiter("hide")
   })
@@ -372,12 +380,10 @@ shinyServer(function(input, output, session) {
     updateTabsetPanel(session, "tabs",
     selected = "tab_template")
     
-    selected_folder <- data_list$folders()[which(data_list$folders() == input$dropdown_folder)]
     output$template_title <- renderText({ sprintf("Get %s template for %s",
       selected$schema(),
-      names(selected_folder))
+      names(selected$folder()))
     })
-    selected$folder(selected_folder)
     # clean tags in generating-template tab
     sapply(clean_tags[1:2], FUN = hide)
     
@@ -413,6 +419,10 @@ shinyServer(function(input, output, session) {
   
   observeEvent(input$dropdown_folder,{
     shinyjs::enable("btn_folder")
+    selected_folder <- data_list$folders()[which(data_list$folders() == input$dropdown_folder)]
+    selected$folder(selected_folder)
+    updateSelectInput(session, "header_dropdown_folder",
+                      choices = selected$folder())
   })
   
   observeEvent(data_list$files(), ignoreInit = TRUE, {
@@ -446,6 +456,13 @@ shinyServer(function(input, output, session) {
     
     dcWaiter("hide")
   
+  })
+  
+  observeEvent(input$btn_folder_have_template, {
+    shinyjs::show(select = "li:nth-child(5)")
+    shinyjs::show(select = "li:nth-child(6)")
+    updateTabsetPanel(session, "tabs",
+                      selected = "tab_upload")
   })
   
   observeEvent(input$update_confirm, {
@@ -493,6 +510,16 @@ shinyServer(function(input, output, session) {
   
   })
   
+  observeEvent(input$tabs, {
+    req(input$tabs %in% c("tab_project", "tab_template_select", "tab_folder", "tab_template", "tab_upload"))
+    shinyjs::addClass(id = "header_selection_dropdown", class = "dropdown open")
+  })
+  
+  observeEvent(input$tabs, {
+    req(input$tabs == "tab_template_select")
+    shinyjs::show("header_selection_dropdown")
+  })
+  
   observeEvent(c(input$`switchTab4-Next`, input$tabs), {
   
     req(input$tabs == "tab_template")
@@ -512,6 +539,7 @@ shinyServer(function(input, output, session) {
     file.path(api_uri, "v1/manifest/generate"),
     NA)
     .output_format <- dcc_config_react()$manifest_output_format
+    .use_annotations <- dcc_config_react()$manifest_use_annotations
     
     promises::future_promise({
       switch(dca_schematic_api, 
@@ -522,7 +550,7 @@ shinyServer(function(input, output, session) {
           data_type = .schema,
           dataset_id = .datasetId,
           asset_view = .asset_view,
-          use_annotations = FALSE,
+          use_annotations = .use_annotations,
           output_format = .output_format,
           access_token=access_token
         ),
@@ -746,7 +774,7 @@ shinyServer(function(input, output, session) {
     # If a file-based component selected (define file-based components) note for future
     # the type to filter (eg file-based) on could probably also be a config choice
     display_names <- config_schema()$manifest_schemas$display_name[config_schema()$manifest_schemas$type == "file"]
-    
+
     if (input$dropdown_template %in% display_names) {
       # make into a csv or table for file-based components already has entityId
       if ("entityId" %in% colnames(submit_data)) {
