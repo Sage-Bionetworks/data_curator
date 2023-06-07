@@ -640,6 +640,7 @@ shinyServer(function(input, output, session) {
     .data_model <- data_model()
     .infile_data <- inFile$data()
     .dd_template <- input$dropdown_template
+    .restrict_rules <- dcc_config_react()$validate_restrict_rules
     
     promises::future_promise({
       annotation_status <- switch(dca_schematic_api,
@@ -652,7 +653,8 @@ shinyServer(function(input, output, session) {
         url=file.path(api_uri, "v1/model/validate"),
         schema_url=.data_model,
         data_type=.schema,
-        file_name=.datapath),
+        file_name=.datapath,
+        restrict_rules = .restrict_rules),
       {
         Sys.sleep(0)
         list(list(
@@ -819,6 +821,7 @@ shinyServer(function(input, output, session) {
       .submit_use_schema_labels <- dcc_config_react()$submit_use_schema_labels
       .table_manipulation <- dcc_config_react()$submit_table_manipulation
       .submit_manifest_record_type <- dcc_config_react()$submit_manifest_record_type
+      .restrict_rules <- dcc_config_react()$validate_restrict_rules
       
       # associates metadata with data and returns manifest id
       promises::future_promise({
@@ -833,7 +836,7 @@ shinyServer(function(input, output, session) {
             data_type = .schema,
             dataset_id = .folder,
             access_token = access_token,
-            restrict_rules = FALSE,
+            restrict_rules = .restrict_rules,
             file_name = tmp_file_path,
             asset_view = .asset_view,
             use_schema_label=.submit_use_schema_labels,
@@ -859,6 +862,7 @@ shinyServer(function(input, output, session) {
     .submit_use_schema_labels <- dcc_config_react()$submit_use_schema_labels
     .table_manipulation <- dcc_config_react()$submit_table_manipulation
     .submit_manifest_record_type <- dcc_config_react()$submit_manifest_record_type
+    .restrict_rules <- dcc_config_react()$validate_restrict_rules
     
     # associates metadata with data and returns manifest id
     promises::future_promise({
@@ -873,7 +877,7 @@ shinyServer(function(input, output, session) {
           data_type = .schema,
           dataset_id = .folder,
           access_token = access_token,
-          restrict_rules = FALSE,
+          restrict_rules = .restrict_rules,
           file_name = tmp_file_path,
           asset_view = .asset_view,
           use_schema_label=.submit_use_schema_labels,
