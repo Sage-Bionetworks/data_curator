@@ -26,6 +26,15 @@ ui <- shinydashboardPlus::dashboardPage(
         icon = icon("sliders"),
         badgeStatus = NULL,
         fluidRow(
+          # Set color and background for items to remove the grey background
+          # when using the option maxItems = 1. Note, this affects all dropdowns
+          # but it's difficult to notice.
+          tags$style(HTML(
+            ".item {
+               background: white !important;
+               color: black !important;
+             }"
+          )),
           div(
             id = "header_content_project",
             # Use selectizeInput instead of selectInput to specify options
