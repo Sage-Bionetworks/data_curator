@@ -28,26 +28,31 @@ ui <- shinydashboardPlus::dashboardPage(
         fluidRow(
           div(
             id = "header_content_project",
-            selectInput(
+            # Use selectizeInput instead of selectInput to specify options
+            # maxItems = "1" will remove the dropdown triangle from the box.
+            selectizeInput(
               inputId = "header_dropdown_project",
               label = NULL,
-              choices = "No project selected"
+              choices = "No project selected",
+              options = list(maxItems = "1")
             )
           ),
           div(
             id = "header_content_template",
-            selectInput(
+            selectizeInput(
               inputId = "header_dropdown_template",
               label = NULL,
-              choices = "No template selected"
+              choices = "No template selected",
+              options = list(maxItems = "1")
             )
           ),
           div(
             id = "header_content_folder",
-            selectInput(
+            selectizeInput(
               inputId = "header_dropdown_folder",
               label = NULL,
-              choices = "No folder selected"
+              choices = "No folder selected",
+              options = list(maxItems = "1")
             )
           )
         )
