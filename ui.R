@@ -26,28 +26,42 @@ ui <- shinydashboardPlus::dashboardPage(
         icon = icon("sliders"),
         badgeStatus = NULL,
         fluidRow(
+          # Set color and background for items to remove the grey background
+          # when using the option maxItems = 1. Note, this affects all dropdowns
+          # but it's difficult to notice.
+          tags$style(HTML(
+            ".item {
+               background: white !important;
+               color: black !important;
+             }"
+          )),
           div(
             id = "header_content_project",
-            selectInput(
+            # Use selectizeInput instead of selectInput to specify options
+            # maxItems = "1" will remove the dropdown triangle from the box.
+            selectizeInput(
               inputId = "header_dropdown_project",
               label = NULL,
-              choices = "No project selected"
+              choices = "No project selected",
+              options = list(maxItems = "1")
             )
           ),
           div(
             id = "header_content_template",
-            selectInput(
+            selectizeInput(
               inputId = "header_dropdown_template",
               label = NULL,
-              choices = "No template selected"
+              choices = "No template selected",
+              options = list(maxItems = "1")
             )
           ),
           div(
             id = "header_content_folder",
-            selectInput(
+            selectizeInput(
               inputId = "header_dropdown_folder",
               label = NULL,
-              choices = "No folder selected"
+              choices = "No folder selected",
+              options = list(maxItems = "1")
             )
           )
         )
