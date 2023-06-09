@@ -4,8 +4,7 @@ on:
   push:
     branches:
       - main
-      - develop*
-      - develop-*
+      - dev*
     tags:
       - v[0-9]+.[0-9]+.[0-9]+
     paths-ignore:
@@ -20,7 +19,6 @@ jobs:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       DCA_SCHEMATIC_API_TYPE: rest
       DCA_API_HOST: "https://schematic-dev.api.sagebionetworks.org"
-      DCA_API_PORT: ""
     steps:
       - name: Install System Dependencies
         run: |
@@ -116,11 +114,10 @@ jobs:
           echo 'DCA_CLIENT_SECRET="${{ secrets.OAUTH_CLIENT_SECRET }}"' >> .Renviron
           
           echo 'DCA_SCHEMATIC_API_TYPE="${{ env.DCA_SCHEMATIC_API_TYPE }}"' >> .Renviron
-          echo 'DCA_API_PORT="${{ env.DCA_API_PORT }}"' >> .Renviron
           echo 'DCA_API_HOST="${{ env.DCA_API_HOST }}"' >> .Renviron
 
           echo 'DCA_SYNAPSE_PROJECT_API=TRUE' >> .Renviron
-          echo 'DCA_MANIFEST_OUTPUT_FORMAT="excel"' >> .Renviron
+          echo 'DCA_DCC_CONFIG="https://raw.githubusercontent.com/Sage-Bionetworks/data_curator_config/shinyapps-io/dcc_config.csv"' >> .Renviron
           
           echo 'GITHUB_PAT="${{ secrets.GITHUB_TOKEN }}"' >> .Renviron
 
