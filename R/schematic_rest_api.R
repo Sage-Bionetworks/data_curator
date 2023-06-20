@@ -157,7 +157,7 @@ model_submit <- function(url="http://localhost:3001/v1/model/submit",
                          schema_url="https://raw.githubusercontent.com/ncihtan/data-models/main/HTAN.model.jsonld", #notlint
                          data_type, dataset_id, restrict_rules=FALSE, access_token, json_str=NULL, asset_view,
                          use_schema_label=TRUE, manifest_record_type="table_and_file", file_name,
-                         table_manipulation="replace") {
+                         table_manipulation="replace", hide_blanks=FALSE) {
   req <- httr::POST(url,
                     #add_headers(Authorization=paste0("Bearer ", pat)),
                     query=list(
@@ -170,7 +170,8 @@ model_submit <- function(url="http://localhost:3001/v1/model/submit",
                       asset_view=asset_view,
                       use_schema_label=use_schema_label,
                       manifest_record_type=manifest_record_type,
-                      table_manipulation=table_manipulation),
+                      table_manipulation=table_manipulation,
+                      hide_blanks=hide_blanks),
                     body=list(file_name=httr::upload_file(file_name))
                     #body=list(file_name=file_name)
   )
