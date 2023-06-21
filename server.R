@@ -697,9 +697,9 @@ shinyServer(function(input, output, session) {
         shinyjs::show("box_submit")
       } else {
           if (dca_schematic_api != "offline" & dcc_config_react()$manifest_output_format == "google_sheet") {
-          output$val_gsheet <- renderUI(
-          actionButton("btn_val_gsheet", "  Generate Google Sheet Link", icon = icon("table"), class = "btn-primary-color")
-          )
+          #output$val_gsheet <- renderUI(
+          #actionButton("btn_val_gsheet", "  Generate Google Sheet Link", icon = icon("table"), class = "btn-primary-color")
+          #)
           } else if (dca_schematic_api == "offline") {
           output$dl_manifest <- renderUI({
           downloadButton("downloadData_good", "Download Corrected Data")
