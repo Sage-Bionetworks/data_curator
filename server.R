@@ -822,6 +822,7 @@ shinyServer(function(input, output, session) {
       .table_manipulation <- dcc_config_react()$submit_table_manipulation
       .submit_manifest_record_type <- dcc_config_react()$submit_manifest_record_type
       .restrict_rules <- dcc_config_react()$validate_restrict_rules
+      .hide_blanks <- dcc_config_react()$submit_hide_blanks
       
       # associates metadata with data and returns manifest id
       promises::future_promise({
@@ -841,7 +842,8 @@ shinyServer(function(input, output, session) {
             asset_view = .asset_view,
             use_schema_label=.submit_use_schema_labels,
             manifest_record_type=.submit_manifest_record_type,
-            table_manipulation=.table_manipulation),
+            table_manipulation=.table_manipulation,
+            hide_blanks=.hide_blanks),
           "synXXXX - No data uploaded"
       )
       }) %...>% manifest_id()
@@ -863,7 +865,8 @@ shinyServer(function(input, output, session) {
     .table_manipulation <- dcc_config_react()$submit_table_manipulation
     .submit_manifest_record_type <- dcc_config_react()$submit_manifest_record_type
     .restrict_rules <- dcc_config_react()$validate_restrict_rules
-    
+    .hide_blanks <- dcc_config_react()$submit_hide_blanks
+ 
     # associates metadata with data and returns manifest id
     promises::future_promise({
       switch(dca_schematic_api,
@@ -882,7 +885,8 @@ shinyServer(function(input, output, session) {
           asset_view = .asset_view,
           use_schema_label=.submit_use_schema_labels,
           manifest_record_type=.submit_manifest_record_type,
-          table_manipulation=.table_manipulation),
+          table_manipulation=.table_manipulation,
+          hide_blanks=.hide_blanks),
         "synXXXX - No data uploaded"
     )
     }) %...>% manifest_id()
