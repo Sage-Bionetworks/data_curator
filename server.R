@@ -511,7 +511,7 @@ shinyServer(function(input, output, session) {
   observeEvent(input$tabs, {
     req(input$tabs %in% "tab_template")
     output$template_title <- renderText({
-      sprintf("Get %s template for %s folder",
+      sprintf("Go to %s template for %s folder",
               selected$schema(),
               names(selected$folder())
               )
