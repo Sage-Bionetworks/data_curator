@@ -340,10 +340,11 @@ shinyServer(function(input, output, session) {
   
   observeEvent(data_list$folders(), ignoreInit = TRUE, {
     updateTabsetPanel(session, "tabs",
-      selected = "tab_template_select")
+      selected = "tab_folder")
     shinyjs::show(select = "li:nth-child(3)")
     updateSelectInput(session, "header_dropdown_project",
       choices = selected$project())
+    updateSelectInput(session, "dropdown_folder", choices = data_list$folders())
     dcWaiter("hide")
   })
   
@@ -357,16 +358,15 @@ shinyServer(function(input, output, session) {
     dcWaiter("show", msg = "Please wait", color = col2rgba(dcc_config_react()$primary_col, 255*0.9), sleep=0)
     shinyjs::disable("btn_template_select")
     selected$schema(data_list$template()[input$dropdown_template])
-    updateSelectInput(session, "dropdown_folder", choices = data_list$folders())
-    updateTabsetPanel(session, "tabs", selected = "tab_folder")
-    updateSelectInput(session, "header_dropdown_template",
-                      choices = selected$schema())
-    shinyjs::show(select = "li:nth-child(4)")
+    shinyjs::show(select = "li:nth-child(5)")
+    shinyjs::show(select = "li:nth-child(6)")
     dcWaiter("hide")
   })
   
   observeEvent(input$dropdown_template, {
-   shinyjs::enable("btn_template_select")
+   shinyjs::enable("btn_template")
+    updateSelectInput(session, "header_dropdown_template",
+                      choices = input$dropdown_template)
   })
   
   # Goal of this button is to get the files within a folder the user selects
@@ -374,14 +374,14 @@ shinyServer(function(input, output, session) {
   
     dcWaiter("show", msg = paste0("Getting data"), color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
     shinyjs::disable("btn_folder")
-    shinyjs::show(select = "li:nth-child(5)")
-    shinyjs::show(select = "li:nth-child(6)")
+    shinyjs::show(select = "li:nth-child(4)")
+
     
     updateTabsetPanel(session, "tabs",
-    selected = "tab_template")
+    selected = "tab_template_select")
     
-    output$template_title <- renderText({ sprintf("Get %s template for %s",
-      selected$schema(),
+    output$template_title <- renderText({ sprintf("Get template for %s",
+      #selected$schema(),
       names(selected$folder()))
     })
     # clean tags in generating-template tab
