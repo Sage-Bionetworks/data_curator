@@ -896,6 +896,8 @@ shinyServer(function(input, output, session) {
   })
   
   observeEvent(manifest_id(), {
+    
+    req(!is.null(manifest_id()))
     manifest_path <- tags$a(href = paste0("https://www.synapse.org/#!Synapse:", manifest_id()), manifest_id(), target = "_blank")
     
     # add log message
@@ -917,5 +919,6 @@ shinyServer(function(input, output, session) {
       " is not a valid Synapse ID. Try again?"
       )), sleep = 0)
     }
+    manifest_id(NULL)
   })
 })
