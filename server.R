@@ -360,6 +360,8 @@ shinyServer(function(input, output, session) {
     selected$schema(data_list$template()[input$dropdown_template])
     shinyjs::show(select = "li:nth-child(5)")
     shinyjs::show(select = "li:nth-child(6)")
+    updateTabsetPanel(session, "tabs",
+                      selected = "tab_template")
     dcWaiter("hide")
   })
   
@@ -380,10 +382,6 @@ shinyServer(function(input, output, session) {
     updateTabsetPanel(session, "tabs",
     selected = "tab_template_select")
     
-    output$template_title <- renderText({ sprintf("Get template for %s",
-      #selected$schema(),
-      names(selected$folder()))
-    })
     # clean tags in generating-template tab
     sapply(clean_tags[1:2], FUN = hide)
     
@@ -508,6 +506,16 @@ shinyServer(function(input, output, session) {
   # validate before generating template
   observeEvent(c(selected$folder(), selected$schema(), input$tabs), {
   
+  })
+  
+  observeEvent(input$tabs, {
+    req(input$tabs %in% "tab_template")
+    output$template_title <- renderText({
+      sprintf("Get %s template for %s folder",
+              selected$schema(),
+              names(selected$folder())
+              )
+    })
   })
   
   observeEvent(input$tabs, {
