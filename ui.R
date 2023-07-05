@@ -138,7 +138,7 @@ ui <- shinydashboardPlus::dashboardPage(
           choices = setNames(dcc_config$synapse_asset_view,
                  dcc_config$project_name)
         ),
-        actionButton("btn_asset_view", "Go",
+        actionButton("btn_asset_view", "Next",
         class = "btn-primary-color"
         )
       )
@@ -157,7 +157,7 @@ ui <- shinydashboardPlus::dashboardPage(
           label = NULL,
           choices = "Generating..."
         ),
-        actionButton("btn_project", "Go",
+        actionButton("btn_project", "Next",
         class = "btn-primary-color"
         )
       ),
@@ -176,7 +176,7 @@ ui <- shinydashboardPlus::dashboardPage(
           label = NULL,
           choices = "Generating..."
         ),
-        actionButton("btn_folder", "Go",
+        actionButton("btn_folder", "Next",
                      class = "btn-primary-color"
         )
       )
@@ -199,7 +199,7 @@ ui <- shinydashboardPlus::dashboardPage(
                      class = "btn-primary-color"
         ),
         actionButton("btn_folder_have_template",
-                     "I already have a template or manifest",
+                     "Skip to validation",
                      class = "btn-primary-color"
         )
       )
