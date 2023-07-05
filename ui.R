@@ -47,20 +47,20 @@ ui <- shinydashboardPlus::dashboardPage(
             )
           ),
           div(
-            id = "header_content_template",
-            selectizeInput(
-              inputId = "header_dropdown_template",
-              label = NULL,
-              choices = "No template selected",
-              options = list(maxItems = "1")
-            )
-          ),
-          div(
             id = "header_content_folder",
             selectizeInput(
               inputId = "header_dropdown_folder",
               label = NULL,
               choices = "No folder selected",
+              options = list(maxItems = "1")
+            )
+          ),
+          div(
+            id = "header_content_template",
+            selectizeInput(
+              inputId = "header_dropdown_template",
+              label = NULL,
+              choices = "No template selected",
               options = list(maxItems = "1")
             )
           )
@@ -85,14 +85,14 @@ ui <- shinydashboardPlus::dashboardPage(
         icon = icon("database")
       ),
       menuItem(
-        "Select Template",
-        tabName = "tab_template_select",
-        icon = icon("table")
-      ),
-      menuItem(
         "Select Folder",
         tabName = "tab_folder",
         icon = icon("folder")
+      ),
+      menuItem(
+        "Select Template",
+        tabName = "tab_template_select",
+        icon = icon("table")
       ),
       menuItem(
         "Download Template",
@@ -164,6 +164,25 @@ ui <- shinydashboardPlus::dashboardPage(
     ),
   ),
   tabItem(
+    tabName = "tab_folder",
+    fluidRow(
+      box(
+        id = "box_pick_folder",
+        status = "primary",
+        width = 6,
+        title = "Select a Folder: ",
+        selectInput(
+          inputId = "dropdown_folder",
+          label = NULL,
+          choices = "Generating..."
+        ),
+        actionButton("btn_folder", "Go",
+                     class = "btn-primary-color"
+        )
+      )
+    )
+  ),
+  tabItem(
     tabName = "tab_template_select",
     fluidRow(
       box(
@@ -176,34 +195,15 @@ ui <- shinydashboardPlus::dashboardPage(
           label = NULL,
           choices = "Generating..."
         ),
-        actionButton("btn_template_select", "Go",
-        class = "btn-primary-color"
+        actionButton("btn_template_select", "Download template",
+                     class = "btn-primary-color"
+        ),
+        actionButton("btn_folder_have_template",
+                     "I already have a template or manifest",
+                     class = "btn-primary-color"
         )
       )
     ),
-  ),
-  tabItem(
-    tabName = "tab_folder",
-    fluidRow(
-      box(
-        id = "box_pick_folder",
-        status = "primary",
-        width = 6,
-        title = "Select a Folder: ",
-        selectInput(
-        inputId = "dropdown_folder",
-        label = NULL,
-        choices = "Generating..."
-      ),
-        actionButton("btn_folder", "Download template",
-          class = "btn-primary-color"
-        ),
-      actionButton("btn_folder_have_template",
-                   "I already have a template or manifest",
-                   class = "btn-primary-color"
-      )
-      )
-    )
   ),
   tabItem(
     tabName = "tab_template",
