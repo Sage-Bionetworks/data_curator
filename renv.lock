@@ -909,7 +909,7 @@
     },
     "renv": {
       "Package": "renv",
-      "Version": "0.17.2",
+      "Version": "1.0.0",
       "OS_type": null,
       "Repository": "CRAN",
       "Source": "Repository"
