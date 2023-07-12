@@ -6,7 +6,7 @@ The *Data Curator App* is an R Shiny app that serves as the *frontend* to the [s
 
 ## Sage's Multitenant DCA 
 
-Sage Bionetworks hosts a version of Data Curator App for its collaborators. [Access it here](https://dca.app.sagebionetworks.org/).\
+Sage Bionetworks hosts a version of Data Curator App for its collaborators.\
 To configure your project for this version, fork [data_curator_config](https://github.com/Sage-Bionetworks/data_curator_config/) and follow the instructions in the [README](https://github.com/Sage-Bionetworks/data_curator_config/#readme).
 
 Other things you will need:\
@@ -47,7 +47,7 @@ poetry install
 poetry run python3 run_api.py
 ```
 
-To use Schematic through its REST API, run the service locally using the commands above. Or access [Schematic hosted by Sage Bionetwork](https://schematic.api.sagebionetworks.org/v1/ui/).
+To use Schematic through its REST API, run the service locally using the commands above. Or access Schematic hosted by Sage Bionetwork.
 
 ### 3. Configure App
 
