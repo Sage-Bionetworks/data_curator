@@ -20,7 +20,7 @@ manifest:
   - Patient
 model:
   input:
-    download_url: https://raw.githubusercontent.com/mc2-center/data-models/main/mc2.model.jsonld
+    download_url: https://raw.githubusercontent.com/Sage-Bionetworks/data-models/main/example.model.jsonld
     location: data-models/example.model.jsonld
     file_type: local
 style:
@@ -35,5 +35,3 @@ style:
       blue: 0.9019
     master_template_id: 1LYS5qE4nV9jzcYw5sXwCza25slDfRA1CIg3cs-hCdpU
     strict_validation: yes
-api:
-  type: reticulate
