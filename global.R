@@ -16,6 +16,8 @@ suppressPackageStartupMessages({
   library(readr)
   library(sass)
   library(shinydashboardPlus)
+  library(promises)
+  library(future)
   # dashboard
   library(purrr)
   library(data.table)
@@ -24,16 +26,44 @@ suppressPackageStartupMessages({
   library(r2d3)
 })
 
+# Set up futures/promises for asynchronous calls
+ncores <- availableCores()
+message(sprintf("Available cores: %s", ncores))
+plan(multisession, workers = ncores)
+
+# import R files
+source_files <- list.files(c("functions", "modules"), pattern = "*\\.R$", recursive = TRUE, full.names = TRUE)
+sapply(source_files, FUN = source)
+
+dcc_config_file <- Sys.getenv("DCA_DCC_CONFIG")
+dcc_config <- read_csv(dcc_config_file, show_col_types = FALSE)
+
 ## Set Up OAuth
-oauth_client <- yaml.load_file("oauth_config.yml")
+client_id <- Sys.getenv("DCA_CLIENT_ID")
+client_secret <- Sys.getenv("DCA_CLIENT_SECRET")
+app_url <- Sys.getenv("DCA_APP_URL")
 
-client_id <- toString(oauth_client$CLIENT_ID)
-client_secret <- toString(oauth_client$CLIENT_SECRET)
-app_url <- toString(oauth_client$APP_URL)
+if (is.null(client_id) || nchar(client_id) == 0) stop("missing DCA_CLIENT_ID environmental variable")
+if (is.null(client_secret) || nchar(client_secret) == 0) stop("missing DCA_CLIENT_SECRET environmental variable")
+if (is.null(app_url) || nchar(app_url) == 0) stop("missing DCA_APP_URL environmental variable")
 
-if (is.null(client_id) || nchar(client_id) == 0) stop("oauth_config.yml is missing CLIENT_ID")
-if (is.null(client_secret) || nchar(client_secret) == 0) stop("oauth_config.yml is missing CLIENT_SECRET")
-if (is.null(app_url) || nchar(app_url) == 0) stop("oauth_config.yml is missing APP_URL")
+schematic_config <- yaml.load_file("schematic_config.yml")
+manifest_basename <- schematic_config$synapse$manifest_basename
+
+dca_schematic_api <- Sys.getenv("DCA_SCHEMATIC_API_TYPE")
+if (!dca_schematic_api %in% c("rest", "reticulate", "offline")) {
+  stop(sprintf("DCA_SCHEMATIC_API_TYPE environment variable must be one of: %s", c("rest", "reticulate", "offline")))
+}
+if (dca_schematic_api == "rest") {
+  api_uri <- ifelse(Sys.getenv("DCA_API_PORT") == "",
+  Sys.getenv("DCA_API_HOST"),
+  paste(Sys.getenv("DCA_API_HOST"),
+  Sys.getenv("DCA_API_PORT"),
+  sep = ":")
+  )
+}
+
+dca_synapse_api <- Sys.getenv("DCA_SYNAPSE_PROJECT_API")
 
 # update port if running app locally
 if (interactive()) {
@@ -85,40 +115,33 @@ api <- oauth_endpoint(
 # The 'openid' scope is required by the protocol for retrieving user information.
 scope <- "openid view download modify"
 
+template_config_files <- setNames(dcc_config$template_menu_config_file,
+dcc_config$synapse_asset_view)
+if (dca_schematic_api == "offline") template_config_files <- setNames("www/template_config/config_offline.json",
+  "synXXXXXX")
+
 ## Set Up Virtual Environment
 # ShinyAppys has a limit of 7000 files which this app' grossly exceeds
 # due to its Python dependencies.  To get around the limit we zip up
 # the virtual environment before deployment and unzip it here.
-
 # unzip virtual environment, named as ".venv.zip"
-if (!file.exists(".venv")) utils::unzip(".venv.zip")
-
-# We get a '126' error (non-executable) if we don't do this:
-system("chmod -R +x .venv")
-
-# Don't necessarily have to set `RETICULATE_PYTHON` env variable
-Sys.unsetenv("RETICULATE_PYTHON")
-reticulate::use_virtualenv(file.path(getwd(), ".venv"), required = TRUE)
-
-## Import functions/modules
-# import synapse client
-syn <- import("synapseclient")$Synapse()
-# import schematic modules
-source_python("functions/metadataModel.py")
-# import R files
-source_files <- list.files(c("functions", "modules"), pattern = "*\\.R$", recursive = TRUE, full.names = TRUE) %>%
-  .[!grepl("dashboard", .)]
-sapply(source_files, FUN = source)
-
-## Read config.json
-if (!file.exists("www/config.json")) {
-  system(
-    "python3 .github/config_schema.py -c schematic_config.yml --service_repo 'Sage-Bionetworks/schematic' --overwrite"
-  )
+if (dca_schematic_api == "reticulate"){
+  if (!file.exists(".venv")) utils::unzip(".venv.zip")
+  
+  # We get a '126' error (non-executable) if we don't do this:
+  system("chmod -R +x .venv")
+  # Don't necessarily have to set `RETICULATE_PYTHON` env variable
+  Sys.unsetenv("RETICULATE_PYTHON")
+  #setup_synapse_driver()
+  
+  ## Read config.json
+  if (!file.exists("www/config.json")) {
+  #    system(
+  #      "python3 .github/config_schema.py -c schematic_config.yml --service_repo 'Sage-Bionetworks/schematic' --overwrite"
+  #    )
+  }
 }
-config_file <- fromJSON("www/config.json")
 
 ## Global variables
-dropdown_types <- c("project", "folder", "datatype")
-# set up cores used for parallelization
-ncores <- parallel::detectCores() - 1
+dropdown_types <- c("project", "folder", "template")
+options(sass.cache = FALSE)

@@ -45,6 +45,7 @@ DTableServer <- function(id, data, escape = TRUE,
             #   but the column names of the data are  , Component, ...
             if (! col %in% names(data)) next()
             values <- highlightValues[[col]]
+            if (length(values) == 0) next()
             # if NULL is provided for values, it will highlight entire columns
             if ("ht_entire_column" %in% values) style <- "yellow" else style <- styleEqual(values, rep("yellow", length(values)))
             df <- df %>% formatStyle(col, backgroundColor = style)

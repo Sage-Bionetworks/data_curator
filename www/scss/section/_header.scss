@@ -6,7 +6,7 @@
 
 .main-header {
 
-  @include header_bg;
+  @include header_bg($sidebar_col, $htan_col, $primary_col);
 
   .logo {
     font-size: 1.8em;

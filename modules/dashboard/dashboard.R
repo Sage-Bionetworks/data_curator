@@ -52,7 +52,9 @@ dashboardUI <- function(id) {
 #' @param disable_ids selector ids to be disable during the process of dashboard
 #' @param ncores number of cpu to run parallelization
 #'
-dashboard <- function(id, syn.store, project.scope, schema, schema.display.name, disable.ids = NULL, ncores = 1) {
+dashboard <- function(id, syn.store, project.scope, schema, schema.display.name,
+                      disable.ids = NULL, ncores = 1, access_token, fileview,
+                      folder, schematic_api="reticulate", schema_url) {
   moduleServer(
     id,
     function(input, output, session) {
@@ -75,7 +77,6 @@ dashboard <- function(id, syn.store, project.scope, schema, schema.display.name,
         hide("toggle-btn-container")
         shinydashboardPlus::updateBox("box", action = "restore")
       })
-
       # retrieving data progress for dashboard should not be executed until dashboard visiable
       # get all uploaded manifests once the project/folder changed
       observeEvent(c(project.scope(), input$box$visible), {
@@ -84,7 +85,7 @@ dashboard <- function(id, syn.store, project.scope, schema, schema.display.name,
         dcWaiter(
           "show",
           id = ns("tab-container"), url = "www/img/logo.svg", custom_spinner = TRUE,
-          msg = "Loading, please wait...", style = "color: #000;", color = transparent(1)
+          msg = "Loading, please wait...", style = "color: #000;", color = transparent(0.95)
         )
 
         # disable selection to prevent changes until all uploaded manifests are queried
@@ -92,17 +93,27 @@ dashboard <- function(id, syn.store, project.scope, schema, schema.display.name,
         lapply(disable.ids, FUN = disable, asis = TRUE)
 
         # get all datasets from selected project
-        folder_list <- syn.store$getStorageDatasetsInProject(project.scope())
+        folder_list <- switch(schematic_api,
+                              "rest" = storage_project_datasets(url=file.path(api_uri, "v1/storage/project/datasets"),
+                                                                asset_view = fileview,
+                                                                project_id=folder,
+                                                                input_token=access_token),
+                              "reticulate" = storage_projects_datasets_py(syn.store, project.scope())
+        )
         folder_list <- list2Vector(folder_list)
 
         # get all uploaded manifests for selected project
         metadata <- get_dataset_metadata(
           syn.store = syn.store,
           datasets = folder_list,
-          ncores = ncores
+          ncores = ncores,
+          schematic_api = schematic_api,
+          access_token = access_token,
+          fileview = fileview
         )
 
-        metadata <- validate_metadata(metadata, project.scope = list(project.scope()))
+        metadata <- validate_metadata(metadata, project.scope = list(project.scope()),
+                                      schematic_api = schematic_api, schema_url=schema_url)
         # update reactive value
         uploaded_manifests(metadata)
       })
@@ -110,7 +121,9 @@ dashboard <- function(id, syn.store, project.scope, schema, schema.display.name,
       # get requirements for selected data type
       selected_datatype_requirement <- eventReactive(c(schema(), input$box$visible), {
         req(input$box$visible)
-        get_schema_nodes(schema())
+        get_schema_nodes(schema(), schematic_api = schematic_api,
+                    url=file.path(api_uri, "v1/model/component-requirements"),
+                    schema_url = schema_url)
       })
 
       # get requirements for all uploaded manifests
@@ -119,7 +132,8 @@ dashboard <- function(id, syn.store, project.scope, schema, schema.display.name,
         req(uploaded_manifests())
         # remove rows with invalid component name
         metadata <- uploaded_manifests() %>% filter(!is.na(Component), Component != "Unknown")
-        get_metadata_nodes(metadata, ncores = ncores)
+        get_metadata_nodes(metadata, ncores = ncores, schematic_api=schematic_api,
+                          schema_url = schema_url, url = file.path(api_uri, "v1/model/component-requirements"))
       })
 
       # render info/plots for selected datatype
@@ -144,7 +158,9 @@ dashboard <- function(id, syn.store, project.scope, schema, schema.display.name,
       observeEvent(c(uploaded_manifests_requirement(), input$box$visible), {
         req(input$box$visible)
         req(uploaded_manifests())
-        user_name <- syn$getUserProfile()$userName
+        user_name <- switch(schematic_api,
+                            reticulate = synapse_user_profile_py(),
+                            rest = synapse_user_profile(auth=access_token)[["userName"]])
         # remove rows with invalid component name
         metadata <- uploaded_manifests() %>% filter(!is.na(Component), Component != "Unknown")
         selectedProjectTab(

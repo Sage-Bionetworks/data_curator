@@ -11,7 +11,7 @@ csvInfileUI <- function(id) {
   )
 }
 
-csvInfileServer <- function(id, na = c("", "NA"), colsAsCharacters = FALSE, keepBlank = FALSE) {
+csvInfileServer <- function(id, na = c("", "NA"), colsAsCharacters = FALSE, keepBlank = FALSE, trimEmptyRows = TRUE) {
   moduleServer(
     id,
     function(input, output, session) {
@@ -26,6 +26,10 @@ csvInfileServer <- function(id, na = c("", "NA"), colsAsCharacters = FALSE, keep
         } else {
           infile <- read_csv(input$file$datapath, na = na, col_types = cols())
         }
+        
+        if (trimEmptyRows) {
+          infile <- infile %>% filter_all(any_vars(!is.na(.)))
+        }
 
         if (keepBlank) {
           # change NA to blank to match schematic output
@@ -33,11 +37,11 @@ csvInfileServer <- function(id, na = c("", "NA"), colsAsCharacters = FALSE, keep
         }
 
         # remove empty rows/columns where readr called it 'X'[digit] for unnamed col
-        infile <- infile[, !grepl("^X", colnames(infile))]
+        infile <- infile[, !grepl("^\\.\\.\\.", colnames(infile))]
         infile <- infile[rowSums(is.na(infile)) != ncol(infile), ]
         # add 1 to row index to match spreadsheet's row index
-        rownames(infile) <- as.numeric(rownames(infile)) + 1
-
+        suppressWarnings(rownames(infile) <- as.numeric(rownames(infile)) + 1)
+        
         return(infile)
       })
 
