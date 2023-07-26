@@ -29,7 +29,7 @@ suppressPackageStartupMessages({
 # Set up futures/promises for asynchronous calls
 ncores <- availableCores()
 message(sprintf("Available cores: %s", ncores))
-plan(multisession, workers = ncores)
+plan(multicore, workers = ncores)
 
 # import R files
 source_files <- list.files(c("functions", "modules"), pattern = "*\\.R$", recursive = TRUE, full.names = TRUE)
