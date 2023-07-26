@@ -560,7 +560,8 @@ shinyServer(function(input, output, session) {
           asset_view = .asset_view,
           use_annotations = .use_annotations,
           output_format = .output_format,
-          access_token=access_token
+          access_token=access_token,
+          strict_validation = FALSE
         ),
         {
           message("Downloading offline manifest")
