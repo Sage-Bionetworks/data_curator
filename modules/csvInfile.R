@@ -28,7 +28,10 @@ csvInfileServer <- function(id, na = c("", "NA"), colsAsCharacters = FALSE, keep
         }
         
         if (trimEmptyRows) {
-          infile <- infile %>% filter_all(any_vars(!is.na(.)))
+          # Originally used the following, but got C buffer error w/ 74+ columns
+          #infile <- infile %>% filter_all(any_vars(!is.na(.)))
+          keep_rows <- apply(infile, 1, function(x) !all(is.na(x)))
+          if (length(keep_rows) > 0) infile <- infile[which(keep_rows), ]
         }
 
         if (keepBlank) {
