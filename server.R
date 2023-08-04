@@ -366,7 +366,8 @@ shinyServer(function(input, output, session) {
   })
   
   observeEvent(input$dropdown_template, {
-   shinyjs::enable("btn_template")
+    shinyjs::enable("btn_template")
+    shinyjs::enable("btn_template_select")
     updateSelectInput(session, "header_dropdown_template",
                       choices = input$dropdown_template)
   })
