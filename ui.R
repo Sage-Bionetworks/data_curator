@@ -294,6 +294,9 @@ ui <- shinydashboardPlus::dashboardPage(
   ),
   # waiter loading screen
   dcWaiter("show", landing = TRUE)
+  ),
+  footer = dashboardFooter(
+    left = "DCA v22.8.1 - Schematic v22.7.1"
   )
 )
 
