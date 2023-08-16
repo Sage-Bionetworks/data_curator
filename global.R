@@ -61,6 +61,9 @@ if (dca_schematic_api == "rest") {
   Sys.getenv("DCA_API_PORT"),
   sep = ":")
   )
+  
+  # Get Schematic version
+  schematic_version <- httr::content(httr::GET(file.path(api_uri, "v1/version")))
 }
 
 dca_synapse_api <- Sys.getenv("DCA_SYNAPSE_PROJECT_API")
