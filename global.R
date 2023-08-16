@@ -66,6 +66,8 @@ if (dca_schematic_api == "rest") {
   schematic_version <- httr::content(httr::GET(file.path(api_uri, "v1/version")))
 }
 
+dca_version <- Sys.getenv("DCA_VERSION")
+
 dca_synapse_api <- Sys.getenv("DCA_SYNAPSE_PROJECT_API")
 
 # update port if running app locally
