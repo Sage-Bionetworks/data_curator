@@ -1,9 +1,9 @@
 FROM ghcr.io/afwillia/shiny-base:release-update-node
 
 # add version tag as a build argument and set as env var
-ARG TAG
+ARG DCA_VERSION
 
-ENV DCA_VERSION=$TAG
+ENV DCA_VERSION=$DCA_VERSION
 
 USER root
 RUN apt-get update

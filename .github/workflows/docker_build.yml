@@ -15,6 +15,7 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_PATH: ghcr.io/${{ github.repository }}
+  DCA_VERSION: ${{ github.REF_NAME }}
 
 jobs:
   build-and-push-image:
@@ -52,5 +53,5 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
-            TAG=${{ github.REF_NAME }}
+            DCA_VERSION=${{ env.DCA_VERSION }}
 
