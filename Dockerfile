@@ -1,5 +1,9 @@
 FROM ghcr.io/afwillia/shiny-base:release-update-node
-LABEL maintainer="Anthony anthony.williams@sagebase.org"
+
+# add version tag as a build argument and set as env var
+ARG TAG
+
+ENV VERSION=$TAG
 
 USER root
 RUN apt-get update
