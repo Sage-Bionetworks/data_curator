@@ -296,7 +296,7 @@ ui <- shinydashboardPlus::dashboardPage(
   dcWaiter("show", landing = TRUE)
   ),
   footer = dashboardFooter(
-    left = "DCA v22.8.1 - Schematic v22.7.1"
+    left = sprintf("DCA v23.8.1 - Schematic %s", schematic_version)
   )
 )
 
