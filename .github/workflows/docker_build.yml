@@ -52,5 +52,5 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
-            TAG=${{ github.GITHUB_REF_NAME }}
+            TAG=${{ github.REF_NAME }}
 
