@@ -33,9 +33,6 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-          
-      - name: Set env variable for version tag
-        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta
@@ -55,5 +52,5 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
-            TAG=${{ env.RELEASE_VERSION }}
+            TAG=${{ GITHUB_REF_NAME }}
 
