@@ -3,6 +3,8 @@ FROM ghcr.io/afwillia/shiny-base:release-update-node
 # add version tag as a build argument
 ARG DCA_VERSION
 
+ENV DCA_VERSION=$DCA_VERSION
+
 USER root
 RUN apt-get update
 RUN apt-get install -y libxml2 libglpk-dev libicu-dev libicu70 curl
@@ -10,9 +12,6 @@ RUN apt-get install -y libxml2 libglpk-dev libicu-dev libicu70 curl
 # overwrite the default config with our modified copy
 COPY shiny-server.conf /etc/shiny-server/shiny-server.conf
 RUN chmod 777 /etc/shiny-server/shiny-server.conf
-
-# Add build argument to Renviron
-RUN echo DCA_VERSION=$DCA_VERSION >> .Renviron
 
 # Update node. https://github.com/nodesource/distributions
 RUN apt-get remove nodejs
