@@ -780,7 +780,7 @@ shinyServer(function(input, output, session) {
     dir.create(tmp_out_dir, showWarnings = FALSE)
     
     # reads file csv again
-    submit_data <- csvInfileServer("inputFile")$data()
+    submit_data <- csvInfileServer("inputFile", colsAsCharacters = TRUE, keepBlank = TRUE, trimEmptyRows = TRUE)$data()
     
     # If a file-based component selected (define file-based components) note for future
     # the type to filter (eg file-based) on could probably also be a config choice
@@ -843,7 +843,7 @@ shinyServer(function(input, output, session) {
             FALSE),
           rest = model_submit(url=file.path(api_uri, "v1/model/submit"),
             schema_url = .data_model,
-            data_type = .schema,
+            data_type = NULL, # NULL to bypass validation
             dataset_id = .folder,
             access_token = access_token,
             restrict_rules = .restrict_rules,
@@ -875,7 +875,7 @@ shinyServer(function(input, output, session) {
     .submit_manifest_record_type <- dcc_config_react()$submit_manifest_record_type
     .restrict_rules <- dcc_config_react()$validate_restrict_rules
     .hide_blanks <- dcc_config_react()$submit_hide_blanks
- 
+
     # associates metadata with data and returns manifest id
     promises::future_promise({
       switch(dca_schematic_api,
@@ -886,7 +886,7 @@ shinyServer(function(input, output, session) {
           FALSE),
         rest = model_submit(url=file.path(api_uri, "v1/model/submit"),
           schema_url = .data_model,
-          data_type = .schema,
+          data_type = NULL, # NULL to bypass validation
           dataset_id = .folder,
           access_token = access_token,
           restrict_rules = .restrict_rules,
