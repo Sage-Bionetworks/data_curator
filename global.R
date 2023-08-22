@@ -63,7 +63,12 @@ if (dca_schematic_api == "rest") {
   )
   
   # Get Schematic version
-  schematic_version <- httr::content(httr::GET(file.path(api_uri, "v1/version")))
+  get_schematic_version <- try(httr::GET(file.path(api_uri, "v1/version")), silent=TRUE)
+  if (inherits(get_schematic_version, "try-error")) {
+    schematic_version <- ""
+  } else if (httr::http_error(get_schematic_version)) {
+    schematic_version <- ""
+  } else schematic_version <- httr::content(get_schematic_version)
 }
 
 dca_version <- Sys.getenv("DCA_VERSION")
