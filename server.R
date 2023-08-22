@@ -318,6 +318,7 @@ shinyServer(function(input, output, session) {
       .asset_view <- selected$master_asset_view()
       
       promises::future_promise({
+        try({
         folder_list_raw <- switch(
           dca_schematic_api,
           reticulate = storage_projects_datasets_py(
@@ -333,6 +334,7 @@ shinyServer(function(input, output, session) {
         
         folder_list <- list2Vector(folder_list_raw)
         folder_list[sort(names(folder_list))]
+        }, silent = TRUE)
       
       }) %...>% data_list$folders()
     })
@@ -345,6 +347,10 @@ shinyServer(function(input, output, session) {
     updateSelectInput(session, "header_dropdown_project",
       choices = selected$project())
     updateSelectInput(session, "dropdown_folder", choices = data_list$folders())
+
+    if (inherits(data_list$folders(), "try-error")) {
+      nx_report_error(title = "Error retrieving folders", message = "Project contains no folders")
+    }
     dcWaiter("hide")
   })
   
