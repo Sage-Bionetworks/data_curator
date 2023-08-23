@@ -7,7 +7,7 @@
 name: test-schematic-api
 
 on:
-  pr:
+  pull_request:
     branches:
       - main
 

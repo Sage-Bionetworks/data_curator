@@ -1,7 +1,7 @@
 name: shiny-deploy
 
 on:
-  pr:
+  pull_request:
     branches:
       - main
 
