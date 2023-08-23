@@ -8,9 +8,8 @@ on:
   push:
     tags:
       - '*beta*'
+      - '*rc*'
       - v[0-9]+.[0-9]+.[0-9]+
-    branches:
-      - 'dev*'
 
 env:
   REGISTRY: ghcr.io
@@ -51,4 +50,3 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-
