@@ -1,5 +1,10 @@
 name: shiny-deploy
 
+on:
+  pr:
+    branches:
+      - main
+
 jobs:
   shiny-deploy:
     runs-on: ubuntu-latest

@@ -6,6 +6,11 @@
 # schematic's REST API endpoints.
 name: test-schematic-api
 
+on:
+  pr:
+    branches:
+      - main
+
 jobs:
   test-schematic-rest-api:
     runs-on: ubuntu-latest
