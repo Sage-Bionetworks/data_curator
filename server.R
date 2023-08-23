@@ -34,10 +34,12 @@ shinyServer(function(input, output, session) {
   
   ######## session global variables ########
   # read config in
-  def_config <- ifelse(dca_schematic_api == "offline",
-    fromJSON("https://raw.githubusercontent.com/Sage-Bionetworks/data_curator_config/main/demo/dca-template-config.json"),
-    fromJSON("https://raw.githubusercontent.com/Sage-Bionetworks/data_curator_config/main/demo/dca-template-config.json")
-  )
+  if (grepl("dev", dcc_config_file)) {
+    def_config <- fromJSON("https://raw.githubusercontent.com/Sage-Bionetworks/data_curator_config/dev/demo/dca-template-config.json")
+  } else if (grepl("staging", dcc_config_file)) {
+    def_config <- fromJSON("https://raw.githubusercontent.com/Sage-Bionetworks/data_curator_config/staging/demo/dca-template-config.json")
+  } else def_config <- fromJSON("https://raw.githubusercontent.com/Sage-Bionetworks/data_curator_config/main/demo/dca-template-config.json")
+  
   config <- reactiveVal()
   config_schema <- reactiveVal(def_config)
   model_ops <- setNames(dcc_config$data_model_url,
@@ -227,13 +229,29 @@ shinyServer(function(input, output, session) {
       )
     
     }
+    # Use the template dropdown config file from the appropriate branch of
+    # data_curator_config
     conf_file <- reactiveVal(template_config_files[input$dropdown_asset_view])
     if (!file.exists(conf_file())){
-      conf_file(
-        file.path("https://raw.githubusercontent.com/Sage-Bionetworks/data_curator_config/main",
-                  conf_file()
-                  )
+      if (grepl("dev", dcc_config_file)) {
+        conf_file(
+          file.path("https://raw.githubusercontent.com/Sage-Bionetworks/data_curator_config/dev",
+                    conf_file()
+          )
         )
+      } else if (grepl("staging", dcc_config_file)) {
+        conf_file(
+          file.path("https://raw.githubusercontent.com/Sage-Bionetworks/data_curator_config/staging",
+                    conf_file()
+          )
+        )
+      } else {
+        conf_file(
+          file.path("https://raw.githubusercontent.com/Sage-Bionetworks/data_curator_config/main",
+                    conf_file()
+          )
+        )
+      }
     }
     config_df <- jsonlite::fromJSON(conf_file())
     
