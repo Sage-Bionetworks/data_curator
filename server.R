@@ -266,16 +266,17 @@ shinyServer(function(input, output, session) {
       
       .asset_view <- selected$master_asset_view()
       promises::future_promise({
-      scopes <- synapse_get_project_scope(id = .asset_view, auth = access_token)
-      scope_access <- vapply(scopes, function(x) {
-      synapse_access(id=x, access="DOWNLOAD", auth=access_token)
-      }, 1L)
-      scopes <- scopes[scope_access==1]
-      projects <- bind_rows(
-      lapply(scopes, function(x) synapse_get(id=x, auth=access_token))
-      ) %>% arrange(name)
-      setNames(projects$id, projects$name)
-      
+        try({
+          scopes <- synapse_get_project_scope(id = .asset_view, auth = access_token)
+          scope_access <- vapply(scopes, function(x) {
+            synapse_access(id=x, access="DOWNLOAD", auth=access_token)
+          }, 1L)
+          scopes <- scopes[scope_access==1]
+          projects <- bind_rows(
+            lapply(scopes, function(x) synapse_get(id=x, auth=access_token))
+          ) %>% arrange(name)
+          setNames(projects$id, projects$name)
+        }, silent = FALSE)
       }) %...>% data_list$projects()
     
     } else {
@@ -291,7 +292,8 @@ shinyServer(function(input, output, session) {
   })
   
   observeEvent(data_list$projects(), ignoreInit = TRUE, {
-    if (is.null(data_list$projects()) || length(data_list$projects()) == 0) {
+    if (is.null(data_list$projects()) || length(data_list$projects()) == 0 ||
+        inherits(data_list$projects(), "try-error")) {
       dcWaiter("update", landing = TRUE, isPermission = FALSE)
     } else {
     
@@ -303,7 +305,6 @@ shinyServer(function(input, output, session) {
       )
       })
       })
-    }
     
     updateTabsetPanel(session, "tabs", selected = "tab_project")
     
@@ -314,6 +315,7 @@ shinyServer(function(input, output, session) {
     shinyjs::hide(select = "li:nth-child(6)")
     
     dcWaiter("hide")
+    }
   })
   
   observeEvent(input$dropdown_asset_view, {
