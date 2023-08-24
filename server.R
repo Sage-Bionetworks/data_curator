@@ -320,6 +320,7 @@ shinyServer(function(input, output, session) {
   
   observeEvent(input$dropdown_asset_view, {
     shinyjs::enable("btn_asset_view")
+    shinyjs::enable("btn_template_select")
   })
   
   # Goal of this observer is to get all of the folders within the selected
@@ -370,6 +371,7 @@ shinyServer(function(input, output, session) {
   
   observeEvent(input$dropdown_project, {
     shinyjs::enable("btn_project")
+    shinyjs::enable("btn_template_select")
   })
   
   # Goal of this button is to updpate the template reactive object
@@ -438,6 +440,7 @@ shinyServer(function(input, output, session) {
   
   observeEvent(input$dropdown_folder,{
     shinyjs::enable("btn_folder")
+    shinyjs::enable("btn_template_select")
     selected_folder <- data_list$folders()[which(data_list$folders() == input$dropdown_folder)]
     selected$folder(selected_folder)
     updateSelectInput(session, "header_dropdown_folder",
@@ -497,6 +500,7 @@ shinyServer(function(input, output, session) {
   ######## Update Template ########
   # update selected schema template name
   observeEvent(input$dropdown_template, {
+    shinyjs::enable("btn_template_select")
     # update reactive selected values for schema
     selected$schema(data_list$template()[input$dropdown_template])
     schema_type <- config_schema()[[1]]$type[which(config_schema()[[1]]$display_name == input$dropdown_template)]
