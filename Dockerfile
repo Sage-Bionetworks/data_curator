@@ -1,5 +1,9 @@
 FROM ghcr.io/afwillia/shiny-base:release-update-node
-LABEL maintainer="Anthony anthony.williams@sagebase.org"
+
+# add version tag as a build argument
+ARG DCA_VERSION
+
+ENV DCA_VERSION=$DCA_VERSION
 
 USER root
 RUN apt-get update
