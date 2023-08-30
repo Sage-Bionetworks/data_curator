@@ -321,6 +321,7 @@ shinyServer(function(input, output, session) {
   observeEvent(input$dropdown_asset_view, {
     shinyjs::enable("btn_asset_view")
     shinyjs::enable("btn_template_select")
+  })
   
   # Goal of this observer is to get all of the folders within the selected
   # project.
