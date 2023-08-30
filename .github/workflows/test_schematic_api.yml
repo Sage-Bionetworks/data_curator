@@ -86,3 +86,4 @@ jobs:
         shell: Rscript {0}
         run: |
           devtools::test()
+
