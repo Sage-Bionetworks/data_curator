@@ -913,7 +913,6 @@ shinyServer(function(input, output, session) {
     .submit_manifest_record_type <- dcc_config_react()$submit_manifest_record_type
     .restrict_rules <- dcc_config_react()$validate_restrict_rules
     .hide_blanks <- dcc_config_react()$submit_hide_blanks
-
     # associates metadata with data and returns manifest id
     promises::future_promise({
       switch(dca_schematic_api,
