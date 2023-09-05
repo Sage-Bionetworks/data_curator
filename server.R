@@ -6,31 +6,8 @@
 
 shinyServer(function(input, output, session) {
   options(shiny.reactlog = TRUE)
-  params <- parseQueryString(isolate(session$clientData$url_search))
-  if (!has_auth_code(params) & dca_schematic_api != "offline") {
-   return()
-  }
-  
-  redirect_url <- paste0(
-    api$access, "?", "redirect_uri=", app_url, "&grant_type=",
-    "authorization_code", "&code=", params$code
-  )
-  
-  if (dca_schematic_api != "offline") {
-    # get the access_token and userinfo token
-    req <- POST(redirect_url, encode = "form", body = "", authenticate(app$key, app$secret,
-      type = "basic"
-    ), config = list())
-    
-    # Stop the code if anything other than 2XX status code is returned
-    stop_for_status(req, task = "get an access token")
-    token_response <- content(req, type = NULL)
-    access_token <- token_response$access_token
-    
-    session$userData$access_token <- access_token
-  } else {
-    dcWaiter("show", "Cannot connect to Synapse. Running in offline mode.")
-  }
+  access_token <- session$request$HTTP_TOKEN
+  session$userData$access_token <- access_token
   
   ######## session global variables ########
   # read config in
