@@ -301,17 +301,5 @@ ui <- shinydashboardPlus::dashboardPage(
 )
 
 uiFunc <- function(req) {
-  if (dca_schematic_api == "offline") {
-    message("dca_schematic_api set to offline. Running in offline mode.")
-    return(ui)
-  }
-  if (!has_auth_code(parseQueryString(req$QUERY_STRING))) {
-    authorization_url <- oauth2.0_authorize_url(api, app, scope = scope)
-    redir <- tags$script(HTML(
-      sprintf("location.replace(\"%s\");", authorization_url)
-    ))
-    return(redir)
-  } else {
-    ui
-  }
+  ui
 }
