@@ -6,9 +6,7 @@
 
 shinyServer(function(input, output, session) {
   options(shiny.reactlog = TRUE)
-  access_token <- ifelse(Sys.getenv("SYNAPSE_PAT") == "",
-                         session$request$HTTP_TOKEN,
-                         Sys.getenv("SYNAPSE_PAT"))
+  access_token <- Sys.getenv("SYNAPSE_PAT")
   session$userData$access_token <- access_token
   
   ######## session global variables ########
