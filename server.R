@@ -320,6 +320,7 @@ shinyServer(function(input, output, session) {
   
   observeEvent(input$dropdown_asset_view, {
     shinyjs::enable("btn_asset_view")
+    shinyjs::enable("btn_template_select")
   })
   
   # Goal of this observer is to get all of the folders within the selected
@@ -393,6 +394,7 @@ shinyServer(function(input, output, session) {
   
   observeEvent(input$dropdown_project, {
     shinyjs::enable("btn_project")
+    shinyjs::enable("btn_template_select")
   })
   
   # Goal of this button is to updpate the template reactive object
@@ -409,7 +411,8 @@ shinyServer(function(input, output, session) {
   })
   
   observeEvent(input$dropdown_template, {
-   shinyjs::enable("btn_template")
+    shinyjs::enable("btn_template")
+    shinyjs::enable("btn_template_select")
     updateSelectInput(session, "header_dropdown_template",
                       choices = input$dropdown_template)
   })
@@ -460,6 +463,7 @@ shinyServer(function(input, output, session) {
   
   observeEvent(input$dropdown_folder,{
     shinyjs::enable("btn_folder")
+    shinyjs::enable("btn_template_select")
     selected_folder <- data_list$folders()[which(data_list$folders() == input$dropdown_folder)]
     selected$folder(selected_folder)
     updateSelectInput(session, "header_dropdown_folder",
@@ -519,6 +523,7 @@ shinyServer(function(input, output, session) {
   ######## Update Template ########
   # update selected schema template name
   observeEvent(input$dropdown_template, {
+    shinyjs::enable("btn_template_select")
     # update reactive selected values for schema
     selected$schema(data_list$template()[input$dropdown_template])
     schema_type <- config_schema()[[1]]$type[which(config_schema()[[1]]$display_name == input$dropdown_template)]
@@ -603,7 +608,8 @@ shinyServer(function(input, output, session) {
           asset_view = .asset_view,
           use_annotations = .use_annotations,
           output_format = .output_format,
-          access_token=access_token
+          access_token=access_token,
+          strict_validation = FALSE
         ),
         {
           message("Downloading offline manifest")
@@ -917,7 +923,6 @@ shinyServer(function(input, output, session) {
     .submit_manifest_record_type <- dcc_config_react()$submit_manifest_record_type
     .restrict_rules <- dcc_config_react()$validate_restrict_rules
     .hide_blanks <- dcc_config_react()$submit_hide_blanks
-
     # associates metadata with data and returns manifest id
     promises::future_promise({
       switch(dca_schematic_api,
