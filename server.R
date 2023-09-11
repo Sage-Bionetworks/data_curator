@@ -371,10 +371,20 @@ shinyServer(function(input, output, session) {
     if (inherits(data_list$folders(), "try-error")) {
       nx_report_error(title = "Error retrieving folders",
         message = tagList(
-          p("Check if this project contains folders and users have appropriate access permissions."),
+          p("Confirm that this project contains folders."),
           p("Refresh the app to try again or contact the DCC for help."),
           p("For debugging: ", data_list$folders())
         )
+      )
+      hide(selector = "#NXReportButton") # hide OK button so users can't continue
+    }
+    if (length(data_list$folders()) < 1) {
+      nx_report_error(title = "Error retrieving folders",
+                      message = tagList(
+                        p("Confirm you have appropriate access permissions."),
+                        p("Refresh the app to try again or contact the DCC for help."),
+                        p("For debugging: ", data_list$folders())
+                      )
       )
       hide(selector = "#NXReportButton") # hide OK button so users can't continue
     }
