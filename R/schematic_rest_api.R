@@ -61,6 +61,7 @@ manifest_generate <- function(url="http://localhost:3001/v1/manifest/generate",
                               strict_validation = FALSE) {
   
   req <- httr::GET(url,
+                   httr::add_headers(Authorization = sprintf("Bearer %s", access_token)),
                    query = list(
                      schema_url=schema_url,
                      title=title,
@@ -69,7 +70,6 @@ manifest_generate <- function(url="http://localhost:3001/v1/manifest/generate",
                      dataset_id=dataset_id,
                      asset_view=asset_view,
                      output_format=output_format,
-                     access_token = access_token,
                      strict_validation = strict_validation
                    ))
   
