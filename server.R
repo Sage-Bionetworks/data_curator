@@ -339,6 +339,7 @@ shinyServer(function(input, output, session) {
       .asset_view <- selected$master_asset_view()
       
       promises::future_promise({
+        try({
         folder_list_raw <- switch(
           dca_schematic_api,
           reticulate = storage_projects_datasets_py(
@@ -354,6 +355,7 @@ shinyServer(function(input, output, session) {
         
         folder_list <- list2Vector(folder_list_raw)
         folder_list[sort(names(folder_list))]
+        }, silent = TRUE)
       
       }) %...>% data_list$folders()
     })
@@ -361,11 +363,32 @@ shinyServer(function(input, output, session) {
   
   observeEvent(data_list$folders(), ignoreInit = TRUE, {
     updateTabsetPanel(session, "tabs",
-      selected = "tab_folder")
+                      selected = "tab_folder")
     shinyjs::show(select = "li:nth-child(3)")
     updateSelectInput(session, "header_dropdown_project",
-      choices = selected$project())
+                      choices = selected$project())
     updateSelectInput(session, "dropdown_folder", choices = data_list$folders())
+    
+    if (inherits(data_list$folders(), "try-error")) {
+      nx_report_error(title = "Error retrieving folders",
+                      message = tagList(
+                        p("Confirm that this project contains folders."),
+                        p("Refresh the app to try again or contact the DCC for help."),
+                        p("For debugging: ", data_list$folders())
+                      )
+      )
+      hide(selector = "#NXReportButton") # hide OK button so users can't continue
+    }
+    if (length(data_list$folders()) < 1) {
+      nx_report_error(title = "Error retrieving folders",
+                      message = tagList(
+                        p("Confirm you have appropriate access permissions."),
+                        p("Refresh the app to try again or contact the DCC for help."),
+                        p("For debugging: ", data_list$folders())
+                      )
+      )
+      hide(selector = "#NXReportButton") # hide OK button so users can't continue
+    }
     dcWaiter("hide")
   })
   
