@@ -227,6 +227,7 @@ ui <- shinydashboardPlus::dashboardPage(
             helpText("Note: After downloading, spreadsheet apps may add blank",
                      "rows that must be removed before validating.")
             ),
+            htmlOutput("data_model_url_download"),
           hidden(
             div(
               id = "div_template_warn_xls",
@@ -273,6 +274,7 @@ ui <- shinydashboardPlus::dashboardPage(
           height = "100%",
           ValidationMsgUI("text_validate")
         ),
+        htmlOutput("data_model_url_validate"),
         DTableUI("tbl_validate"),
         uiOutput("val_gsheet"),
         uiOutput("dl_manifest"),

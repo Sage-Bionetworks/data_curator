@@ -321,6 +321,12 @@ shinyServer(function(input, output, session) {
   observeEvent(input$dropdown_asset_view, {
     shinyjs::enable("btn_asset_view")
     shinyjs::enable("btn_template_select")
+    output$data_model_url_download <- renderUI({
+      data_model_url <- tags$a(href = data_model(), "See Data Model Used to Generate this Template", target = "_blank")
+    })
+    output$data_model_url_validate <- renderUI({
+      data_model_url <- tags$a(href = data_model(), "See Data Model Used to Validate this Metadata", target = "_blank")
+    })
   })
   
   # Goal of this observer is to get all of the folders within the selected
