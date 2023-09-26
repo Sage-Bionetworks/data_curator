@@ -896,26 +896,28 @@ shinyServer(function(input, output, session) {
       
       # associates metadata with data and returns manifest id
       promises::future_promise({
-        switch(dca_schematic_api,
-          reticulate = model_submit_py(schema_generator,
-            tmp_file_path,
-            .folder,
-            "table",
-            FALSE),
-          rest = model_submit(url=file.path(api_uri, "v1/model/submit"),
-            schema_url = .data_model,
-            data_type = NULL, # NULL to bypass validation
-            dataset_id = .folder,
-            access_token = access_token,
-            restrict_rules = .restrict_rules,
-            file_name = tmp_file_path,
-            asset_view = .asset_view,
-            use_schema_label=.submit_use_schema_labels,
-            manifest_record_type=.submit_manifest_record_type,
-            table_manipulation=.table_manipulation,
-            hide_blanks=.hide_blanks),
-          "synXXXX - No data uploaded"
-      )
+        try({
+          switch(dca_schematic_api,
+                 reticulate = model_submit_py(schema_generator,
+                                              tmp_file_path,
+                                              .folder,
+                                              "table",
+                                              FALSE),
+                 rest = model_submit(url=file.path(api_uri, "v1/model/submit"),
+                                     schema_url = .data_model,
+                                     data_type = NULL, # NULL to bypass validation
+                                     dataset_id = .folder,
+                                     access_token = access_token,
+                                     restrict_rules = .restrict_rules,
+                                     file_name = tmp_file_path,
+                                     asset_view = .asset_view,
+                                     use_schema_label=.submit_use_schema_labels,
+                                     manifest_record_type=.submit_manifest_record_type,
+                                     table_manipulation=.table_manipulation,
+                                     hide_blanks=.hide_blanks),
+                 "synXXXX - No data uploaded"
+          )
+        }, silent = TRUE)
       }) %...>% manifest_id()
       
     } else {
@@ -938,26 +940,28 @@ shinyServer(function(input, output, session) {
     .hide_blanks <- dcc_config_react()$submit_hide_blanks
     # associates metadata with data and returns manifest id
     promises::future_promise({
-      switch(dca_schematic_api,
-        reticulate = model_submit_py(schema_generator,
-          tmp_file_path,
-          .folder,
-          "table",
-          FALSE),
-        rest = model_submit(url=file.path(api_uri, "v1/model/submit"),
-          schema_url = .data_model,
-          data_type = NULL, # NULL to bypass validation
-          dataset_id = .folder,
-          access_token = access_token,
-          restrict_rules = .restrict_rules,
-          file_name = tmp_file_path,
-          asset_view = .asset_view,
-          use_schema_label=.submit_use_schema_labels,
-          manifest_record_type=.submit_manifest_record_type,
-          table_manipulation=.table_manipulation,
-          hide_blanks=.hide_blanks),
-        "synXXXX - No data uploaded"
-    )
+      try({
+        switch(dca_schematic_api,
+               reticulate = model_submit_py(schema_generator,
+                                            tmp_file_path,
+                                            .folder,
+                                            "table",
+                                            FALSE),
+               rest = model_submit(url=file.path(api_uri, "v1/model/submit"),
+                                   schema_url = .data_model,
+                                   data_type = NULL, # NULL to bypass validation
+                                   dataset_id = .folder,
+                                   access_token = access_token,
+                                   restrict_rules = .restrict_rules,
+                                   file_name = tmp_file_path,
+                                   asset_view = .asset_view,
+                                   use_schema_label=.submit_use_schema_labels,
+                                   manifest_record_type=.submit_manifest_record_type,
+                                   table_manipulation=.table_manipulation,
+                                   hide_blanks=.hide_blanks),
+               "synXXXX - No data uploaded"
+        )
+      }, silent = TRUE)
     }) %...>% manifest_id()
     
     }
@@ -967,27 +971,39 @@ shinyServer(function(input, output, session) {
   observeEvent(manifest_id(), {
     
     req(!is.null(manifest_id()))
-    manifest_path <- tags$a(href = paste0("https://www.synapse.org/#!Synapse:", manifest_id()), manifest_id(), target = "_blank")
     
-    # add log message
-    message(paste0("Manifest :", sQuote(manifest_id()), " has been successfully uploaded"))
-    
-    # if no error
-    if (startsWith(manifest_id(), "syn") == TRUE) {
+    if (inherits(manifes_id(), "try-error")) {
       dcWaiter("hide")
-      nx_report_success("Success!", HTML(paste0("Manifest submitted to: ", manifest_path)))
-      
-      # clean up old inputs/results
-      sapply(clean_tags, FUN = hide)
-      reset("inputFile-file")
-      DTableServer("tbl_preview", data.frame(NULL))
+      nx_report_error(title = "Error submitting manifest",
+                      message = tagList(
+                        p("Refresh the app to try again or contact the DCC for help."),
+                        p("For debugging: ", manifest_id())
+                      )
+      )
     } else {
-      dcWaiter("update", msg = HTML(paste0(
-      "Uh oh, looks like something went wrong!",
-      manifest_id,
-      " is not a valid Synapse ID. Try again?"
-      )), sleep = 0)
+      manifest_path <- tags$a(href = paste0("https://www.synapse.org/#!Synapse:", manifest_id()), manifest_id(), target = "_blank")
+      
+      # add log message
+      message(paste0("Manifest :", sQuote(manifest_id()), " has been successfully uploaded"))
+      
+      # if no error
+      if (startsWith(manifest_id(), "syn") == TRUE) {
+        dcWaiter("hide")
+        nx_report_success("Success!", HTML(paste0("Manifest submitted to: ", manifest_path)))
+        
+        # clean up old inputs/results
+        sapply(clean_tags, FUN = hide)
+        reset("inputFile-file")
+        DTableServer("tbl_preview", data.frame(NULL))
+      } else {
+        dcWaiter("update", msg = HTML(paste0(
+          "Uh oh, looks like something went wrong!",
+          manifest_id,
+          " is not a valid Synapse ID. Try again?"
+        )), sleep = 0)
+      }
     }
+
     manifest_id(NULL)
   })
 })
