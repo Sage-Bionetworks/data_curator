@@ -972,7 +972,7 @@ shinyServer(function(input, output, session) {
     
     req(!is.null(manifest_id()))
     
-    if (inherits(manifes_id(), "try-error")) {
+    if (inherits(manifest_id(), "try-error")) {
       dcWaiter("hide")
       nx_report_error(title = "Error submitting manifest",
                       message = tagList(
