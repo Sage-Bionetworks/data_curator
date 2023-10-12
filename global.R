@@ -29,7 +29,7 @@ suppressPackageStartupMessages({
 # Set up futures/promises for asynchronous calls
 ncores <- availableCores()
 message(sprintf("Available cores: %s", ncores))
-plan(multisession, workers = ncores)
+plan(multicore, workers = ncores)
 
 # import R files
 source_files <- list.files(c("functions", "modules"), pattern = "*\\.R$", recursive = TRUE, full.names = TRUE)
@@ -61,7 +61,17 @@ if (dca_schematic_api == "rest") {
   Sys.getenv("DCA_API_PORT"),
   sep = ":")
   )
+  
+  # Get Schematic version
+  get_schematic_version <- try(httr::GET(file.path(api_uri, "v1/version")), silent=TRUE)
+  if (inherits(get_schematic_version, "try-error")) {
+    schematic_version <- ""
+  } else if (httr::http_error(get_schematic_version)) {
+    schematic_version <- ""
+  } else schematic_version <- httr::content(get_schematic_version)
 }
+
+dca_version <- Sys.getenv("DCA_VERSION")
 
 dca_synapse_api <- Sys.getenv("DCA_SYNAPSE_PROJECT_API")
 

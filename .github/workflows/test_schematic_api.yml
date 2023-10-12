@@ -7,11 +7,9 @@
 name: test-schematic-api
 
 on:
-  push:
+  pull_request:
     branches:
-      - develop
-    paths-ignore:
-      - .github/ISSUE_TEMPLATE/**
+      - main
 
 jobs:
   test-schematic-rest-api:
@@ -88,6 +86,4 @@ jobs:
         shell: Rscript {0}
         run: |
           devtools::test()
-
-
 

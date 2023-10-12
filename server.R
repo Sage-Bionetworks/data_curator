@@ -34,10 +34,12 @@ shinyServer(function(input, output, session) {
   
   ######## session global variables ########
   # read config in
-  def_config <- ifelse(dca_schematic_api == "offline",
-    fromJSON("https://raw.githubusercontent.com/Sage-Bionetworks/data_curator_config/main/demo/dca-template-config.json"),
-    fromJSON("https://raw.githubusercontent.com/Sage-Bionetworks/data_curator_config/main/demo/dca-template-config.json")
-  )
+  if (grepl("dev", dcc_config_file)) {
+    def_config <- fromJSON("https://raw.githubusercontent.com/Sage-Bionetworks/data_curator_config/dev/demo/dca-template-config.json")
+  } else if (grepl("staging", dcc_config_file)) {
+    def_config <- fromJSON("https://raw.githubusercontent.com/Sage-Bionetworks/data_curator_config/staging/demo/dca-template-config.json")
+  } else def_config <- fromJSON("https://raw.githubusercontent.com/Sage-Bionetworks/data_curator_config/main/demo/dca-template-config.json")
+  
   config <- reactiveVal()
   config_schema <- reactiveVal(def_config)
   model_ops <- setNames(dcc_config$data_model_url,
@@ -227,13 +229,29 @@ shinyServer(function(input, output, session) {
       )
     
     }
+    # Use the template dropdown config file from the appropriate branch of
+    # data_curator_config
     conf_file <- reactiveVal(template_config_files[input$dropdown_asset_view])
     if (!file.exists(conf_file())){
-      conf_file(
-        file.path("https://raw.githubusercontent.com/Sage-Bionetworks/data_curator_config/main",
-                  conf_file()
-                  )
+      if (grepl("dev", dcc_config_file)) {
+        conf_file(
+          file.path("https://raw.githubusercontent.com/Sage-Bionetworks/data_curator_config/dev",
+                    conf_file()
+          )
         )
+      } else if (grepl("staging", dcc_config_file)) {
+        conf_file(
+          file.path("https://raw.githubusercontent.com/Sage-Bionetworks/data_curator_config/staging",
+                    conf_file()
+          )
+        )
+      } else {
+        conf_file(
+          file.path("https://raw.githubusercontent.com/Sage-Bionetworks/data_curator_config/main",
+                    conf_file()
+          )
+        )
+      }
     }
     config_df <- jsonlite::fromJSON(conf_file())
     
@@ -248,16 +266,17 @@ shinyServer(function(input, output, session) {
       
       .asset_view <- selected$master_asset_view()
       promises::future_promise({
-      scopes <- synapse_get_project_scope(id = .asset_view, auth = access_token)
-      scope_access <- vapply(scopes, function(x) {
-      synapse_access(id=x, access="DOWNLOAD", auth=access_token)
-      }, 1L)
-      scopes <- scopes[scope_access==1]
-      projects <- bind_rows(
-      lapply(scopes, function(x) synapse_get(id=x, auth=access_token))
-      ) %>% arrange(name)
-      setNames(projects$id, projects$name)
-      
+        try({
+          scopes <- synapse_get_project_scope(id = .asset_view, auth = access_token)
+          scope_access <- vapply(scopes, function(x) {
+            synapse_access(id=x, access="DOWNLOAD", auth=access_token)
+          }, 1L)
+          scopes <- scopes[scope_access==1]
+          projects <- bind_rows(
+            lapply(scopes, function(x) synapse_get(id=x, auth=access_token))
+          ) %>% arrange(name)
+          setNames(projects$id, projects$name)
+        }, silent = FALSE)
       }) %...>% data_list$projects()
     
     } else {
@@ -273,7 +292,8 @@ shinyServer(function(input, output, session) {
   })
   
   observeEvent(data_list$projects(), ignoreInit = TRUE, {
-    if (is.null(data_list$projects()) || length(data_list$projects()) == 0) {
+    if (is.null(data_list$projects()) || length(data_list$projects()) == 0 ||
+        inherits(data_list$projects(), "try-error")) {
       dcWaiter("update", landing = TRUE, isPermission = FALSE)
     } else {
     
@@ -285,7 +305,6 @@ shinyServer(function(input, output, session) {
       )
       })
       })
-    }
     
     updateTabsetPanel(session, "tabs", selected = "tab_project")
     
@@ -296,10 +315,12 @@ shinyServer(function(input, output, session) {
     shinyjs::hide(select = "li:nth-child(6)")
     
     dcWaiter("hide")
+    }
   })
   
   observeEvent(input$dropdown_asset_view, {
     shinyjs::enable("btn_asset_view")
+    shinyjs::enable("btn_template_select")
   })
   
   # Goal of this observer is to get all of the folders within the selected
@@ -318,6 +339,7 @@ shinyServer(function(input, output, session) {
       .asset_view <- selected$master_asset_view()
       
       promises::future_promise({
+        try({
         folder_list_raw <- switch(
           dca_schematic_api,
           reticulate = storage_projects_datasets_py(
@@ -333,6 +355,7 @@ shinyServer(function(input, output, session) {
         
         folder_list <- list2Vector(folder_list_raw)
         folder_list[sort(names(folder_list))]
+        }, silent = TRUE)
       
       }) %...>% data_list$folders()
     })
@@ -340,16 +363,38 @@ shinyServer(function(input, output, session) {
   
   observeEvent(data_list$folders(), ignoreInit = TRUE, {
     updateTabsetPanel(session, "tabs",
-      selected = "tab_folder")
+                      selected = "tab_folder")
     shinyjs::show(select = "li:nth-child(3)")
     updateSelectInput(session, "header_dropdown_project",
-      choices = selected$project())
+                      choices = selected$project())
     updateSelectInput(session, "dropdown_folder", choices = data_list$folders())
+    
+    if (inherits(data_list$folders(), "try-error")) {
+      nx_report_error(title = "Error retrieving folders",
+                      message = tagList(
+                        p("Confirm that this project contains folders."),
+                        p("Refresh the app to try again or contact the DCC for help."),
+                        p("For debugging: ", data_list$folders())
+                      )
+      )
+      hide(selector = "#NXReportButton") # hide OK button so users can't continue
+    }
+    if (length(data_list$folders()) < 1) {
+      nx_report_error(title = "Error retrieving folders",
+                      message = tagList(
+                        p("Confirm you have appropriate access permissions."),
+                        p("Refresh the app to try again or contact the DCC for help."),
+                        p("For debugging: ", data_list$folders())
+                      )
+      )
+      hide(selector = "#NXReportButton") # hide OK button so users can't continue
+    }
     dcWaiter("hide")
   })
   
   observeEvent(input$dropdown_project, {
     shinyjs::enable("btn_project")
+    shinyjs::enable("btn_template_select")
   })
   
   # Goal of this button is to updpate the template reactive object
@@ -366,7 +411,8 @@ shinyServer(function(input, output, session) {
   })
   
   observeEvent(input$dropdown_template, {
-   shinyjs::enable("btn_template")
+    shinyjs::enable("btn_template")
+    shinyjs::enable("btn_template_select")
     updateSelectInput(session, "header_dropdown_template",
                       choices = input$dropdown_template)
   })
@@ -417,6 +463,7 @@ shinyServer(function(input, output, session) {
   
   observeEvent(input$dropdown_folder,{
     shinyjs::enable("btn_folder")
+    shinyjs::enable("btn_template_select")
     selected_folder <- data_list$folders()[which(data_list$folders() == input$dropdown_folder)]
     selected$folder(selected_folder)
     updateSelectInput(session, "header_dropdown_folder",
@@ -476,6 +523,7 @@ shinyServer(function(input, output, session) {
   ######## Update Template ########
   # update selected schema template name
   observeEvent(input$dropdown_template, {
+    shinyjs::enable("btn_template_select")
     # update reactive selected values for schema
     selected$schema(data_list$template()[input$dropdown_template])
     schema_type <- config_schema()[[1]]$type[which(config_schema()[[1]]$display_name == input$dropdown_template)]
@@ -550,6 +598,7 @@ shinyServer(function(input, output, session) {
     .use_annotations <- dcc_config_react()$manifest_use_annotations
     
     promises::future_promise({
+      try({
       switch(dca_schematic_api, 
         rest = manifest_generate(
           url=.url,
@@ -560,7 +609,8 @@ shinyServer(function(input, output, session) {
           asset_view = .asset_view,
           use_annotations = .use_annotations,
           output_format = .output_format,
-          access_token=access_token
+          access_token=access_token,
+          strict_validation = FALSE
         ),
         {
           message("Downloading offline manifest")
@@ -568,14 +618,26 @@ shinyServer(function(input, output, session) {
           tibble(a="b", c="d")
         }
       )
+      }, silent = TRUE)
     }) %...>% manifest_data()
   
   })
   
   observeEvent(manifest_data(), {
-    if (dcc_config_react()$manifest_output_format == "google_sheet") {
-      shinyjs::show("div_template")
-    } else shinyjs::show("div_download_data")
+    if (inherits(manifest_data(), "try-error")) {
+      nx_report_error("Failed to get manifest",
+                      tagList(
+                        p("There was a problem downloading the manifest."),
+                        p("Try again or contact the DCC for help"),
+                        p("For debugging: ", manifest_data())
+                      ))
+      shinyjs::enable("btn_template_select")
+      updateTabsetPanel(session, "tab_template_select")
+    } else {
+      if (dcc_config_react()$manifest_output_format == "google_sheet") {
+        shinyjs::show("div_template")
+      } else shinyjs::show("div_download_data")
+    }
     dcWaiter("hide")
   })
   
@@ -779,7 +841,7 @@ shinyServer(function(input, output, session) {
     dir.create(tmp_out_dir, showWarnings = FALSE)
     
     # reads file csv again
-    submit_data <- csvInfileServer("inputFile")$data()
+    submit_data <- csvInfileServer("inputFile", colsAsCharacters = TRUE, keepBlank = TRUE, trimEmptyRows = TRUE)$data()
     
     # If a file-based component selected (define file-based components) note for future
     # the type to filter (eg file-based) on could probably also be a config choice
@@ -834,26 +896,28 @@ shinyServer(function(input, output, session) {
       
       # associates metadata with data and returns manifest id
       promises::future_promise({
-        switch(dca_schematic_api,
-          reticulate = model_submit_py(schema_generator,
-            tmp_file_path,
-            .folder,
-            "table",
-            FALSE),
-          rest = model_submit(url=file.path(api_uri, "v1/model/submit"),
-            schema_url = .data_model,
-            data_type = .schema,
-            dataset_id = .folder,
-            access_token = access_token,
-            restrict_rules = .restrict_rules,
-            file_name = tmp_file_path,
-            asset_view = .asset_view,
-            use_schema_label=.submit_use_schema_labels,
-            manifest_record_type=.submit_manifest_record_type,
-            table_manipulation=.table_manipulation,
-            hide_blanks=.hide_blanks),
-          "synXXXX - No data uploaded"
-      )
+        try({
+          switch(dca_schematic_api,
+                 reticulate = model_submit_py(schema_generator,
+                                              tmp_file_path,
+                                              .folder,
+                                              "table",
+                                              FALSE),
+                 rest = model_submit(url=file.path(api_uri, "v1/model/submit"),
+                                     schema_url = .data_model,
+                                     data_type = NULL, # NULL to bypass validation
+                                     dataset_id = .folder,
+                                     access_token = access_token,
+                                     restrict_rules = .restrict_rules,
+                                     file_name = tmp_file_path,
+                                     asset_view = .asset_view,
+                                     use_schema_label=.submit_use_schema_labels,
+                                     manifest_record_type=.submit_manifest_record_type,
+                                     table_manipulation=.table_manipulation,
+                                     hide_blanks=.hide_blanks),
+                 "synXXXX - No data uploaded"
+          )
+        }, silent = TRUE)
       }) %...>% manifest_id()
       
     } else {
@@ -874,29 +938,30 @@ shinyServer(function(input, output, session) {
     .submit_manifest_record_type <- dcc_config_react()$submit_manifest_record_type
     .restrict_rules <- dcc_config_react()$validate_restrict_rules
     .hide_blanks <- dcc_config_react()$submit_hide_blanks
- 
     # associates metadata with data and returns manifest id
     promises::future_promise({
-      switch(dca_schematic_api,
-        reticulate = model_submit_py(schema_generator,
-          tmp_file_path,
-          .folder,
-          "table",
-          FALSE),
-        rest = model_submit(url=file.path(api_uri, "v1/model/submit"),
-          schema_url = .data_model,
-          data_type = .schema,
-          dataset_id = .folder,
-          access_token = access_token,
-          restrict_rules = .restrict_rules,
-          file_name = tmp_file_path,
-          asset_view = .asset_view,
-          use_schema_label=.submit_use_schema_labels,
-          manifest_record_type=.submit_manifest_record_type,
-          table_manipulation=.table_manipulation,
-          hide_blanks=.hide_blanks),
-        "synXXXX - No data uploaded"
-    )
+      try({
+        switch(dca_schematic_api,
+               reticulate = model_submit_py(schema_generator,
+                                            tmp_file_path,
+                                            .folder,
+                                            "table",
+                                            FALSE),
+               rest = model_submit(url=file.path(api_uri, "v1/model/submit"),
+                                   schema_url = .data_model,
+                                   data_type = NULL, # NULL to bypass validation
+                                   dataset_id = .folder,
+                                   access_token = access_token,
+                                   restrict_rules = .restrict_rules,
+                                   file_name = tmp_file_path,
+                                   asset_view = .asset_view,
+                                   use_schema_label=.submit_use_schema_labels,
+                                   manifest_record_type=.submit_manifest_record_type,
+                                   table_manipulation=.table_manipulation,
+                                   hide_blanks=.hide_blanks),
+               "synXXXX - No data uploaded"
+        )
+      }, silent = TRUE)
     }) %...>% manifest_id()
     
     }
@@ -906,27 +971,39 @@ shinyServer(function(input, output, session) {
   observeEvent(manifest_id(), {
     
     req(!is.null(manifest_id()))
-    manifest_path <- tags$a(href = paste0("https://www.synapse.org/#!Synapse:", manifest_id()), manifest_id(), target = "_blank")
     
-    # add log message
-    message(paste0("Manifest :", sQuote(manifest_id()), " has been successfully uploaded"))
-    
-    # if no error
-    if (startsWith(manifest_id(), "syn") == TRUE) {
+    if (inherits(manifest_id(), "try-error")) {
       dcWaiter("hide")
-      nx_report_success("Success!", HTML(paste0("Manifest submitted to: ", manifest_path)))
-      
-      # clean up old inputs/results
-      sapply(clean_tags, FUN = hide)
-      reset("inputFile-file")
-      DTableServer("tbl_preview", data.frame(NULL))
+      nx_report_error(title = "Error submitting manifest",
+                      message = tagList(
+                        p("Refresh the app to try again or contact the DCC for help."),
+                        p("For debugging: ", manifest_id())
+                      )
+      )
     } else {
-      dcWaiter("update", msg = HTML(paste0(
-      "Uh oh, looks like something went wrong!",
-      manifest_id,
-      " is not a valid Synapse ID. Try again?"
-      )), sleep = 0)
+      manifest_path <- tags$a(href = paste0("https://www.synapse.org/#!Synapse:", manifest_id()), manifest_id(), target = "_blank")
+      
+      # add log message
+      message(paste0("Manifest :", sQuote(manifest_id()), " has been successfully uploaded"))
+      
+      # if no error
+      if (startsWith(manifest_id(), "syn") == TRUE) {
+        dcWaiter("hide")
+        nx_report_success("Success!", HTML(paste0("Manifest submitted to: ", manifest_path)))
+        
+        # clean up old inputs/results
+        sapply(clean_tags, FUN = hide)
+        reset("inputFile-file")
+        DTableServer("tbl_preview", data.frame(NULL))
+      } else {
+        dcWaiter("update", msg = HTML(paste0(
+          "Uh oh, looks like something went wrong!",
+          manifest_id,
+          " is not a valid Synapse ID. Try again?"
+        )), sleep = 0)
+      }
     }
+
     manifest_id(NULL)
   })
 })
