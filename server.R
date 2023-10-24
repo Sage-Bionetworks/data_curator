@@ -326,10 +326,12 @@ shinyServer(function(input, output, session) {
   observeEvent(input$info_box, {
     nx_report_info("App Info",
       tags$ul(
+        tags$li("DCA Help Docs: ", "todo"),
+        tags$li("Portal Help Docs: ", "todo"),
+        tags$li("Data model: ", data_model()),
+        tags$li("Asset view: ", selected$master_asset_view()),
         tags$li("DCA version: ", dca_version),
         tags$li("Schematic version: ", schematic_version),
-        tags$li("Data model: ", data_model()),
-        tags$li("Asset view: ", selected$master_asset_view())
         )
       )
   })
