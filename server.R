@@ -323,6 +323,17 @@ shinyServer(function(input, output, session) {
     shinyjs::enable("btn_template_select")
   })
   
+  observeEvent(input$info_box, {
+    nx_report_info("App Info",
+      tags$ul(
+        tags$li("DCA version: ", dca_version),
+        tags$li("Schematic version: ", schematic_version),
+        tags$li("Data model: ", data_model()),
+        tags$li("Asset view: ", selected$master_asset_view())
+        )
+      )
+  })
+  
   # Goal of this observer is to get all of the folders within the selected
   # project.
   observeEvent(input$btn_project, {
