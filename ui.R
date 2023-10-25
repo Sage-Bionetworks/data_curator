@@ -107,7 +107,7 @@ ui <- shinydashboardPlus::dashboardPage(
       # add sidebar footer here
       tags$a(
         id = "sidebar_footer", `data-toggle` = "tab", href = "#shiny-info_box",
-        tags$footer(actionButton("info_box", "Info", icon("circle-info")),
+        tags$footer(actionButton("info_box", "Info", icon("circle-info"), class="btn-info"),
                     HTML('Powered by <i class="far fa-heart"></i> and Sage Bionetworks'))
       )
     )
