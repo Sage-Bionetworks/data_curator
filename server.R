@@ -324,9 +324,8 @@ shinyServer(function(input, output, session) {
   })
   
   observeEvent(input$info_box, {
-    showModal(modalDialog(
+    nx_report_info(
       title = "App Info",
-      easyClose = TRUE,
       tags$ul(
         tags$li("DCA Help Docs: ", "todo"),
         tags$li("Portal Help Docs: ", "todo"),
@@ -335,7 +334,7 @@ shinyServer(function(input, output, session) {
         tags$li("DCA version: ", dca_version),
         tags$li("Schematic version: ", schematic_version),
       )
-    ))
+    )
   })
   
   # Goal of this observer is to get all of the folders within the selected
