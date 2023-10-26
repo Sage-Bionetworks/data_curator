@@ -34,25 +34,18 @@ shinyServer(function(input, output, session) {
   
   ######## session global variables ########
   # read config in
-  if (grepl("dev", dcc_config_file)) {
-    def_config <- fromJSON("https://raw.githubusercontent.com/Sage-Bionetworks/data_curator_config/dev/demo/dca-template-config.json")
-  } else if (grepl("staging", dcc_config_file)) {
-    def_config <- fromJSON("https://raw.githubusercontent.com/Sage-Bionetworks/data_curator_config/staging/demo/dca-template-config.json")
-  } else def_config <- fromJSON("https://raw.githubusercontent.com/Sage-Bionetworks/data_curator_config/main/demo/dca-template-config.json")
-  
   config <- reactiveVal()
-  config_schema <- reactiveVal(def_config)
-  model_ops <- setNames(dcc_config$data_model_url,
-  dcc_config$synapse_asset_view)
+  config_schema <- reactiveVal()
   
   # mapping from display name to schema name
   template_namedList <- reactiveVal()
   
-  all_asset_views <- setNames(dcc_config$synapse_asset_view,
-  dcc_config$project_name)
+  all_asset_views <- setNames(tenants_config$synapse_asset_view,
+                              tenants_config$name)
   asset_views <- reactiveVal(c("mock dca fileview"="syn33715412"))
   
-  dcc_config_react <- reactiveVal(dcc_config)
+  dcc_config_react <- reactiveVal()
+  tenant_config_react <- reactiveVal()
   
   manifest_data <- reactiveVal()
   validation_res <- reactiveVal()
@@ -60,7 +53,7 @@ shinyServer(function(input, output, session) {
   
   data_list <- list(
     projects = reactiveVal(NA), folders = reactiveVal(NULL),
-    template = reactiveVal(setNames(def_config$schema_name, def_config$display_name)),
+    template = reactiveVal(NULL),
     files = reactiveVal(NULL),
     master_asset_view = reactiveVal(NULL)
   )
@@ -74,9 +67,10 @@ shinyServer(function(input, output, session) {
   
   isUpdateFolder <- reactiveVal(FALSE)
   
-  data_model_options <- setNames(dcc_config$data_model_url,
-    dcc_config$synapse_asset_view)
   data_model = reactiveVal(NULL)
+  
+  if (dca_schematic_api == "offline") template_config_files <- setNames("www/template_config/config_offline.json",
+                                                                        "synXXXXXX")
   
   # data available to the user
   syn_store <- NULL # gets list of projects they have access to
@@ -169,10 +163,18 @@ shinyServer(function(input, output, session) {
     av_names <- names(asset_views()[asset_views() %in% selected$master_asset_view()])
     selected$master_asset_view_label(av_names)
     
-    dcc_config_react(dcc_config[dcc_config$synapse_asset_view == selected$master_asset_view(), ])
-    if (dca_schematic_api == "offline") dcc_config_react(dcc_config[dcc_config$project_name == "DCA Demo", ])
+    tenant_config_react(tenants_config[tenants_config$synapse_asset_view == selected$master_asset_view(), ])
+    if (dca_schematic_api == "offline") tenant_config_react(tenants_config[tenants_config$name == "DCA Demo", ])
     
-    data_model(data_model_options[selected$master_asset_view()])
+    dcc_config_react(read_json(tenant_config_react()$config_location))
+    
+    model_ops <- reactive(setNames(dcc_config_react()$data_model_url,
+                          dcc_config_react()$synapse_asset_view))
+    
+    data_model(model_ops())
+    
+    template_config_files <- setNames(dcc_config_react()$template_menu_config_file,
+                                      dcc_config_react()$synapse_asset_view)
     
     output$sass <- renderUI({
     tags$head(tags$style(css()))
@@ -232,27 +234,7 @@ shinyServer(function(input, output, session) {
     # Use the template dropdown config file from the appropriate branch of
     # data_curator_config
     conf_file <- reactiveVal(template_config_files[input$dropdown_asset_view])
-    if (!file.exists(conf_file())){
-      if (grepl("dev", dcc_config_file)) {
-        conf_file(
-          file.path("https://raw.githubusercontent.com/Sage-Bionetworks/data_curator_config/dev",
-                    conf_file()
-          )
-        )
-      } else if (grepl("staging", dcc_config_file)) {
-        conf_file(
-          file.path("https://raw.githubusercontent.com/Sage-Bionetworks/data_curator_config/staging",
-                    conf_file()
-          )
-        )
-      } else {
-        conf_file(
-          file.path("https://raw.githubusercontent.com/Sage-Bionetworks/data_curator_config/main",
-                    conf_file()
-          )
-        )
-      }
-    }
+
     config_df <- jsonlite::fromJSON(conf_file())
     
     conf_template <- setNames(config_df[[1]]$schema_name, config_df[[1]]$display_name)
