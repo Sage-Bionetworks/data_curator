@@ -138,8 +138,8 @@ ui <- shinydashboardPlus::dashboardPage(
         selectInput(
           inputId = "dropdown_asset_view",
           label = NULL,
-          choices = setNames(dcc_config$synapse_asset_view,
-                 dcc_config$project_name)
+          choices = setNames(tenants_config$synapse_asset_view,
+                             tenants_config$name)
         ),
         actionButton("btn_asset_view", "Next",
         class = "btn-primary-color"
