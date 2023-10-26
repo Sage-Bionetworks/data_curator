@@ -156,7 +156,7 @@ shinyServer(function(input, output, session) {
   # within the selected asset view.
   observeEvent(input$btn_asset_view, {
     dcWaiter("show", msg = paste0("Getting data. This may take a minute."),
-      color=col2rgba(col2rgb("#CD0BBC01")))
+      color="#2a668d")
     shinyjs::disable("btn_asset_view")
     
     selected$master_asset_view(input$dropdown_asset_view)
