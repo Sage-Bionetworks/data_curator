@@ -192,8 +192,7 @@ shinyServer(function(input, output, session) {
       color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
     
     logo_img <- ifelse(!is.na(dcc_config_react()$logo_location),
-      paste0("https://raw.githubusercontent.com/Sage-Bionetworks/data_curator_config/main/",
-        dcc_config_react()$logo_location),
+        dcc_config_react()$logo_location,
       "https://raw.githubusercontent.com/Sage-Bionetworks/data_curator_config/main/demo/Logo_Sage_Logomark.png")
     
     logo_link <- ifelse(!is.na(dcc_config_react()$logo_link),
