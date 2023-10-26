@@ -35,8 +35,10 @@ plan(multicore, workers = ncores)
 source_files <- list.files(c("functions", "modules"), pattern = "*\\.R$", recursive = TRUE, full.names = TRUE)
 sapply(source_files, FUN = source)
 
-dcc_config_file <- Sys.getenv("DCA_DCC_CONFIG")
-dcc_config <- read_csv(dcc_config_file, show_col_types = FALSE)
+if (Sys.getenv("DCA_DCC_CONFIG") == "") stop("missing DCA_DCC_CONFIG environment variable")
+dca_dcc_config <- read_json(Sys.getenv("DCA_DCC_CONFIG"), simplifyVector = TRUE)
+tenants_config <- dca_dcc_config$tenants
+
 
 ## Set Up OAuth
 client_id <- Sys.getenv("DCA_CLIENT_ID")
@@ -124,11 +126,6 @@ api <- oauth_endpoint(
 
 # The 'openid' scope is required by the protocol for retrieving user information.
 scope <- "openid view download modify"
-
-template_config_files <- setNames(dcc_config$template_menu_config_file,
-dcc_config$synapse_asset_view)
-if (dca_schematic_api == "offline") template_config_files <- setNames("www/template_config/config_offline.json",
-  "synXXXXXX")
 
 ## Set Up Virtual Environment
 # ShinyAppys has a limit of 7000 files which this app' grossly exceeds
