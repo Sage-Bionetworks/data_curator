@@ -166,7 +166,9 @@ shinyServer(function(input, output, session) {
     tenant_config_react(tenants_config[tenants_config$synapse_asset_view == selected$master_asset_view(), ])
     if (dca_schematic_api == "offline") tenant_config_react(tenants_config[tenants_config$name == "DCA Demo", ])
     
-    dcc_config_react(read_json(tenant_config_react()$config_location))
+    dcc_config_react(read_json(
+      file.path(config_dir, tenant_config_react()$config_location))
+    )
     
     model_ops <- reactive(setNames(dcc_config_react()$data_model_url,
                           dcc_config_react()$synapse_asset_view))
@@ -192,7 +194,7 @@ shinyServer(function(input, output, session) {
       color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
     
     logo_img <- ifelse(!is.na(dcc_config_react()$logo_location),
-        dcc_config_react()$logo_location,
+        file.path(config_dir, dcc_config_react()$logo_location),
       "https://raw.githubusercontent.com/Sage-Bionetworks/data_curator_config/main/demo/Logo_Sage_Logomark.png")
     
     logo_link <- ifelse(!is.na(dcc_config_react()$logo_link),
@@ -232,7 +234,9 @@ shinyServer(function(input, output, session) {
     }
     # Use the template dropdown config file from the appropriate branch of
     # data_curator_config
-    conf_file <- reactiveVal(template_config_files[input$dropdown_asset_view])
+    conf_file <- reactiveVal(
+      file.path(config_dir, template_config_files[input$dropdown_asset_view])
+      )
 
     config_df <- jsonlite::fromJSON(conf_file())
     
