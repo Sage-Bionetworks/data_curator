@@ -38,7 +38,7 @@ sapply(source_files, FUN = source)
 if (Sys.getenv("DCA_DCC_CONFIG") == "") stop("missing DCA_DCC_CONFIG environment variable")
 dca_dcc_config <- read_json(Sys.getenv("DCA_DCC_CONFIG"), simplifyVector = TRUE)
 tenants_config <- dca_dcc_config$tenants
-
+config_dir <- dirname(Sys.getenv("DCA_DCC_CONFIG"))
 
 ## Set Up OAuth
 client_id <- Sys.getenv("DCA_CLIENT_ID")
