@@ -1,4 +1,5 @@
 #' @export
+#' @importFrom httr GET content
 graph_by_edge_type <- function(url = "https://schematic-dev.api.sagebionetworks.org/v1/schemas/get/graph_by_edge_type",
                                schema_url, relationship = "requiresDependency") {
   req <- httr::GET(url = url,
@@ -53,5 +54,5 @@ create_json_template_config <- function(data_model) {
 #' @export
 write_template_config <- function(data_model, file) {
   df <- create_json_template_config(data_model)
-  jsonlite::write_json(data_model, file)
+  jsonlite::write_json(df, file)
 }
