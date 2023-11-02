@@ -645,6 +645,7 @@ shinyServer(function(input, output, session) {
                         p("Try again or contact the DCC for help"),
                         p("For debugging: ", manifest_data())
                       ))
+      hide(selector = "#NXReportButton") # hide OK button so users can't continue
       shinyjs::enable("btn_template_select")
       updateTabsetPanel(session, "tab_template_select")
     } else {
@@ -994,6 +995,7 @@ shinyServer(function(input, output, session) {
                         p("For debugging: ", manifest_id())
                       )
       )
+      hide(selector = "#NXReportButton") # hide OK button so users can't continue
     } else {
       manifest_path <- tags$a(href = paste0("https://www.synapse.org/#!Synapse:", manifest_id()), manifest_id(), target = "_blank")
       
