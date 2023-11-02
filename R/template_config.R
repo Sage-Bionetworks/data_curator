@@ -54,5 +54,5 @@ create_json_template_config <- function(data_model) {
 #' @export
 write_template_config <- function(data_model, file) {
   df <- create_json_template_config(data_model)
-  jsonlite::write_json(df, file)
+  jsonlite::write_json(df, file, pretty = TRUE, flatten = TRUE)
 }
