@@ -309,13 +309,21 @@ shinyServer(function(input, output, session) {
   })
   
   observeEvent(input$info_box, {
+    
+    data_model_link <- ifelse(dcc_config_react()$data_model_info == "",
+                              dcc_config_react()$data_model_url,
+                              dcc_config_react()$data_model_info)
+    dca_help_link <- ifelse(is.null(dcc_config_react()$dca_help_link), "", dcc_config_react()$dca_help_link)
+    portal_help_link <- ifelse(is.null(dcc_config_react()$portal_help_link), "", dcc_config_react()$portal_help_link)
+    
     nx_report_info(
-      title = "App Info",
+      title = "About Data Curator",
       tags$ul(
-        tags$li("DCA Help Docs: ", "todo"),
-        tags$li("Portal Help Docs: ", "todo"),
-        tags$li("Data model: ", data_model()),
-        tags$li("Asset view: ", selected$master_asset_view()),
+        #tags$li(tags$a(href = "https://sagebionetworks.jira.com/wiki/spaces/SCHEM/pages/2732818485/Data+Curator+App+Setup+for+DCCs+and+Science+Teams+at+Sage", "DCA Help Docs", target = "_blank")),
+        if (dca_help_link != "") tags$li(tags$a(href = dca_help_link, "DCA Help Docs", target = "_blank")),
+        if (portal_help_link != "") tags$li(tags$a(href = portal_help_link, "Portal Help Docs", target = "_blank")),
+        if (data_model_link != "") tags$li(tags$a(href = data_model_link, "Data Model Info", target = "_blank")),
+        tags$li(tags$a(href = paste0("https://www.synapse.org/#!Synapse:", selected$master_asset_view()), paste("Asset View:", selected$master_asset_view()), target = "_blank")),
         tags$li("DCA version: ", dca_version),
         tags$li("Schematic version: ", schematic_version),
       )
