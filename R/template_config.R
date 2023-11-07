@@ -1,16 +1,4 @@
 #' @export
-#' @importFrom httr GET content
-graph_by_edge_type <- function(url = "https://schematic-dev.api.sagebionetworks.org/v1/schemas/get/graph_by_edge_type",
-                               schema_url, relationship = "requiresDependency") {
-  req <- httr::GET(url = url,
-                   query = list(
-                     schema_url = schema_url,
-                     relationship = relationship
-                   ))
-  httr::content(req)
-}
-
-#' @export
 format_edge_type <- function(edge_types) {
   et <- dplyr::bind_rows(lapply(edge_types, function(x) data.frame(value=x[[2]], schema_name=x[[1]])))
   et |> dplyr::filter(value %in% c("Component", "Filename")) |> 
@@ -40,7 +28,7 @@ create_template_config <- function(data_model) {
 }
 
 #' @export
-create_json_template_config <- function(data_model) {
+create_dca_template_config <- function(data_model) {
   df <- create_template_config(data_model)
   schematic_version <- httr::GET("https://schematic-dev.api.sagebionetworks.org/v1/version") |>
     httr::content()
@@ -51,8 +39,8 @@ create_json_template_config <- function(data_model) {
   )
 }
 
-#' @export
-write_template_config <- function(data_model, file) {
+# Create a DCA-specific template generation function
+write_dca_template_config <- function(data_model, file) {
   df <- create_json_template_config(data_model)
   jsonlite::write_json(df, file, pretty = TRUE, auto_unbox = TRUE)
 }
