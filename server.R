@@ -338,7 +338,6 @@ shinyServer(function(input, output, session) {
         if (portal_help_link != "") tags$li(tags$a(href = portal_help_link, "Portal Help Docs", target = "_blank")),
         if (data_model_link != "") tags$li(tags$a(href = data_model_link, "Data Model Info", target = "_blank")),
         tags$li(tags$a(href = paste0("https://www.synapse.org/#!Synapse:", selected$master_asset_view()), paste("Asset View:", selected$master_asset_view()), target = "_blank")),
-        tags$li("Asset view: ", selected$master_asset_view()),
         tags$li("DCA version: ", dca_version),
         tags$li("Schematic version: ", schematic_version),
       )
