@@ -124,7 +124,7 @@ ui <- shinydashboardPlus::dashboardPage(
   ),
   uiOutput("sass"),
   # load dependencies
-  use_notiflix_report(width = "400px"),
+  use_notiflix_report(width = "500px", messageMaxLength = 10000),
   use_waiter(),
   tabItems(
   # second tab content
