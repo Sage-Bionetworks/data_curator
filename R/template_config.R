@@ -20,20 +20,24 @@ get_display_names <- function(qlist) {
 }
 
 #' @export
-create_template_config <- function(data_model) {
+create_template_config <- function(data_model, include_schemas=NULL, exclude_schemas=NULL) {
+  if (!is.null(include_schemas) & !is.null(exclude_schemas)) stop("include_schemas and exclude_schemas cannot both have values")
   edges <- graph_by_edge_type(schema_url = data_model)
   schema_names <- format_edge_type(edges)
   nl <- setNames(as.list(schema_names$schema_name), rep("node_list", length(schema_names$schema_name)))
   dnames <- get_display_names(c(schema_url = data_model, nl)) |> httr::content()
-  data.frame(display_name = unlist(dnames), schema_name = unlist(nl)) |>
+  config <- data.frame(display_name = unlist(dnames), schema_name = unlist(nl)) |>
     dplyr::left_join(schema_names, by = "schema_name") |>
     dplyr::mutate(type = ifelse(file_based, "file", "record")) |>
     dplyr::select(-file_based)
+  if (!is.null(include_schemas)) config <- dplyr::filter(config, schema_name %in% include_schemas)
+  if (!is.null(exclude_schemas)) config <- dplyr::filter(config, !schema_name %in% exclude_schemas)
+  config
 }
 
 #' @export
-create_dca_template_config <- function(data_model) {
-  df <- create_template_config(data_model)
+create_dca_template_config <- function(data_model, include_schemas=NULL, exclude_schemas=NULL) {
+  df <- create_template_config(data_model, include_schemas, exclude_schemas)
   schematic_version <- httr::GET("https://schematic-dev.api.sagebionetworks.org/v1/version") |>
     httr::content()
   list(
@@ -45,7 +49,7 @@ create_dca_template_config <- function(data_model) {
 
 #' @export
 #' @description Create a DCA-specific template generation function
-write_dca_template_config <- function(data_model, file) {
-  df <- create_dca_template_config(data_model)
+write_dca_template_config <- function(data_model, file, include_schemas, exclude_schemas) {
+  df <- create_dca_template_config(data_model, include_schemas, exclude_schemas)
   jsonlite::write_json(df, file, pretty = TRUE, auto_unbox = TRUE)
 }
