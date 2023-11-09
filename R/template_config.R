@@ -1,11 +1,12 @@
 #' @export
 format_edge_type <- function(edge_types) {
-  et <- dplyr::bind_rows(lapply(edge_types, function(x) data.frame(value=x[[2]], schema_name=x[[1]])))
+  et <- dplyr::bind_rows(lapply(edge_types, function(x) data.frame(value = x[[2]], schema_name = x[[1]])))
   components <- et |>
-    dplyr::filter(, tolower(value) == "component") |>
+    dplyr::filter(tolower(value) == "component") |>
     dplyr::pull(schema_name)
-  et |> dplyr::filter(value %in% c("Component", "Filename")) |> 
-    dplyr::group_by(schema_name) |> 
+  et |>
+    dplyr::filter(value %in% c("Component", "Filename")) |>
+    dplyr::group_by(schema_name) |>
     dplyr::summarise(file_based = "Filename" %in% value) |>
     dplyr::filter(schema_name %in% components)
 }
@@ -14,13 +15,14 @@ format_edge_type <- function(edge_types) {
 get_display_names <- function(qlist) {
   if (!"schema_url" %in% names(qlist)) stop("qlist needs element named `schema_url`")
   if (!"node_list" %in% names(qlist)) stop("qlist needs at least one element named `node_list`")
-  httr::GET(url = "https://schematic-dev.api.sagebionetworks.org/v1/schemas/get_nodes_display_names",
-            query = qlist
+  httr::GET(
+    url = "https://schematic-dev.api.sagebionetworks.org/v1/schemas/get_nodes_display_names",
+    query = qlist
   )
 }
 
 #' @export
-create_template_config <- function(data_model, include_schemas=NULL, exclude_schemas=NULL) {
+create_template_config <- function(data_model, include_schemas = NULL, exclude_schemas = NULL) {
   if (!is.null(include_schemas) && !is.null(exclude_schemas)) stop("include_schemas and exclude_schemas cannot both have values")
   edges <- graph_by_edge_type(schema_url = data_model)
   schema_names <- format_edge_type(edges)
@@ -42,7 +44,7 @@ create_template_config <- function(data_model, include_schemas=NULL, exclude_sch
 }
 
 #' @export
-create_dca_template_config <- function(data_model, include_schemas=NULL, exclude_schemas=NULL) {
+create_dca_template_config <- function(data_model, include_schemas = NULL, exclude_schemas = NULL) {
   df <- create_template_config(data_model, include_schemas, exclude_schemas)
   schematic_version <- httr::GET("https://schematic-dev.api.sagebionetworks.org/v1/version") |>
     httr::content()
@@ -55,7 +57,7 @@ create_dca_template_config <- function(data_model, include_schemas=NULL, exclude
 
 #' @export
 #' @description Create a DCA-specific template generation function
-write_dca_template_config <- function(data_model, file, include_schemas=NULL, exclude_schemas=NULL) {
+write_dca_template_config <- function(data_model, file, include_schemas = NULL, exclude_schemas = NULL) {
   df <- create_dca_template_config(data_model, include_schemas, exclude_schemas)
   jsonlite::write_json(df, file, pretty = TRUE, auto_unbox = TRUE)
 }
