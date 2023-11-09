@@ -1,9 +1,13 @@
 #' @export
 format_edge_type <- function(edge_types) {
   et <- dplyr::bind_rows(lapply(edge_types, function(x) data.frame(value=x[[2]], schema_name=x[[1]])))
+  components <- et |>
+    dplyr::filter(, tolower(value) == "component") |>
+    dplyr::pull(schema_name)
   et |> dplyr::filter(value %in% c("Component", "Filename")) |> 
     dplyr::group_by(schema_name) |> 
-    dplyr::summarise(file_based = "Filename" %in% value)
+    dplyr::summarise(file_based = "Filename" %in% value) %>%
+    dplyr::filter(schema_name %in% components)
 }
 
 #' @export
