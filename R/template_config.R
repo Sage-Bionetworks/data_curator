@@ -6,7 +6,7 @@ format_edge_type <- function(edge_types) {
     dplyr::pull(schema_name)
   et |> dplyr::filter(value %in% c("Component", "Filename")) |> 
     dplyr::group_by(schema_name) |> 
-    dplyr::summarise(file_based = "Filename" %in% value) %>%
+    dplyr::summarise(file_based = "Filename" %in% value) |>
     dplyr::filter(schema_name %in% components)
 }
 
