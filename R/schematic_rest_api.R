@@ -21,8 +21,8 @@ check_success <- function(x){
 manifest_download <- function(url = "http://localhost:3001/v1/manifest/download", access_token, asset_view, dataset_id, as_json=TRUE, new_manifest_name=NULL) {
   request <- httr::GET(
     url = url,
+    httr::add_headers(Authorization = sprintf("Bearer %s", access_token)),
     query = list(
-      access_token = access_token,
       asset_view = asset_view,
       dataset_id = dataset_id,
       as_json = as_json,
@@ -61,6 +61,7 @@ manifest_generate <- function(url="http://localhost:3001/v1/manifest/generate",
                               strict_validation = FALSE) {
   
   req <- httr::GET(url,
+                   httr::add_headers(Authorization = sprintf("Bearer %s", access_token)),
                    query = list(
                      schema_url=schema_url,
                      title=title,
@@ -69,7 +70,6 @@ manifest_generate <- function(url="http://localhost:3001/v1/manifest/generate",
                      dataset_id=dataset_id,
                      asset_view=asset_view,
                      output_format=output_format,
-                     access_token = access_token,
                      strict_validation = strict_validation
                    ))
   
@@ -161,12 +161,11 @@ model_submit <- function(url="http://localhost:3001/v1/model/submit",
                          use_schema_label=TRUE, manifest_record_type="table_and_file", file_name,
                          table_manipulation="replace", hide_blanks=FALSE) {
   req <- httr::POST(url,
-                    #add_headers(Authorization=paste0("Bearer ", pat)),
+                    httr::add_headers(Authorization = sprintf("Bearer %s", access_token)),
                     query=list(
                       schema_url=schema_url,
                       data_type=data_type,
                       dataset_id=dataset_id,
-                      access_token=access_token,
                       restrict_rules=restrict_rules,
                       json_str=json_str,
                       asset_view=asset_view,
@@ -230,11 +229,10 @@ storage_project_datasets <- function(url="http://localhost:3001/v1/storage/proje
                                      access_token) {
   
   req <- httr::GET(url,
-                    #add_headers(Authorization=paste0("Bearer ", pat)),
+                   httr::add_headers(Authorization = sprintf("Bearer %s", access_token)),
                     query=list(
                       asset_view=asset_view,
-                      project_id=project_id,
-                      access_token=access_token)
+                      project_id=project_id)
   )
   
   check_success(req)
@@ -254,9 +252,9 @@ storage_projects <- function(url="http://localhost:3001/v1/storage/projects",
                              access_token) {
   
   req <- httr::GET(url,
+                   httr::add_headers(Authorization = sprintf("Bearer %s", access_token)),
                    query = list(
-                     asset_view=asset_view,
-                     access_token=access_token
+                     asset_view=asset_view
                    ))
   
   check_success(req)
@@ -280,13 +278,12 @@ storage_dataset_files <- function(url="http://localhost:3001/v1/storage/dataset/
                                   full_path=FALSE, access_token) {
   
   req <- httr::GET(url,
-                   #add_headers(Authorization=paste0("Bearer ", pat)),
+                   httr::add_headers(Authorization = sprintf("Bearer %s", access_token)),
                    query=list(
                      asset_view=asset_view,
                      dataset_id=dataset_id,
                      file_names=file_names,
-                     full_path=full_path,
-                     access_token=access_token))
+                     full_path=full_path))
   check_success(req)
   httr::content(req)
                    
@@ -302,9 +299,9 @@ get_asset_view_table <- function(url="http://localhost:3001/v1/storage/assets/ta
                                  access_token, asset_view, return_type="json") {
   
   req <- httr::GET(url,
+                   httr::add_headers(Authorization = sprintf("Bearer %s", access_token)),
                    query=list(
                      asset_view=asset_view,
-                     access_token=access_token,
                      return_type=return_type))
   
   check_success(req)
