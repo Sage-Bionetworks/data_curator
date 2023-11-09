@@ -324,16 +324,13 @@ shinyServer(function(input, output, session) {
   })
   
   observeEvent(input$info_box, {
-    data_model_link <- ifelse(is.na(dcc_config_react()$data_model_info),
-                              dcc_config_react()$data_model_url,
-                              dcc_config_react()$data_model_info)
     
     nx_report_info(
       title = sprintf("DCA for %s", dcc_config_react()$project_name),
       tags$ul(
         if (!is.na(dcc_config_react()$dca_help_link)) tags$li(tags$a(href = dcc_config_react()$dca_help_link, "DCA Help Docs", target = "_blank")),
         if (!is.na(dcc_config_react()$portal_help_link)) tags$li(tags$a(href = dcc_config_react()$portal_help_link, "Portal Help Docs", target = "_blank")),
-        if (data_model_link != "") tags$li(tags$a(href = data_model_link, "Data Model Info", target = "_blank")),
+        if (!is.na(dcc_config_react()$data_model_info)) tags$li(tags$a(href = dcc_config_react()$data_model_info, "Data Model Info", target = "_blank")),
         tags$li(tags$a(href = paste0("https://www.synapse.org/#!Synapse:", selected$master_asset_view()), paste("Asset View:", selected$master_asset_view()), target = "_blank")),
         tags$li("DCA version: ", dca_version),
         tags$li("Schematic version: ", schematic_version),
