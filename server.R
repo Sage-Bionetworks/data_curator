@@ -35,7 +35,7 @@ shinyServer(function(input, output, session) {
   ######## session global variables ########
   # read config in
   if (grepl("dev", dcc_config_file)) {
-    def_config <- fromJSON("https://raw.githubusercontent.com/Sage-Bionetworks/data_curator_config/dev/demo/dca-template-config.json")
+    def_config <- fromJSON("https://raw.githubusercontent.com/Sage-Bionetworks/data_curator_config/dev-old/demo/dca-template-config.json")
   } else if (grepl("staging", dcc_config_file)) {
     def_config <- fromJSON("https://raw.githubusercontent.com/Sage-Bionetworks/data_curator_config/staging/demo/dca-template-config.json")
   } else def_config <- fromJSON("https://raw.githubusercontent.com/Sage-Bionetworks/data_curator_config/main/demo/dca-template-config.json")
@@ -235,7 +235,7 @@ shinyServer(function(input, output, session) {
     if (!file.exists(conf_file())){
       if (grepl("dev", dcc_config_file)) {
         conf_file(
-          file.path("https://raw.githubusercontent.com/Sage-Bionetworks/data_curator_config/dev",
+          file.path("https://raw.githubusercontent.com/Sage-Bionetworks/data_curator_config/dev-old",
                     conf_file()
           )
         )
@@ -321,6 +321,21 @@ shinyServer(function(input, output, session) {
   observeEvent(input$dropdown_asset_view, {
     shinyjs::enable("btn_asset_view")
     shinyjs::enable("btn_template_select")
+  })
+  
+  observeEvent(input$info_box, {
+    
+    nx_report_info(
+      title = sprintf("DCA for %s", dcc_config_react()$project_name),
+      tags$ul(
+        if (!is.na(dcc_config_react()$dca_help_link)) tags$li(tags$a(href = dcc_config_react()$dca_help_link, "DCA Help Docs", target = "_blank")),
+        if (!is.na(dcc_config_react()$portal_help_link)) tags$li(tags$a(href = dcc_config_react()$portal_help_link, "Portal Help Docs", target = "_blank")),
+        if (!is.na(dcc_config_react()$data_model_info)) tags$li(tags$a(href = dcc_config_react()$data_model_info, "Data Model Info", target = "_blank")),
+        tags$li(tags$a(href = paste0("https://www.synapse.org/#!Synapse:", selected$master_asset_view()), paste("Asset View:", selected$master_asset_view()), target = "_blank")),
+        tags$li("DCA version: ", dca_version),
+        tags$li("Schematic version: ", schematic_version),
+      )
+    )
   })
   
   # Goal of this observer is to get all of the folders within the selected
@@ -631,6 +646,7 @@ shinyServer(function(input, output, session) {
                         p("Try again or contact the DCC for help"),
                         p("For debugging: ", manifest_data())
                       ))
+      hide(selector = "#NXReportButton") # hide OK button so users can't continue
       shinyjs::enable("btn_template_select")
       updateTabsetPanel(session, "tab_template_select")
     } else {
@@ -980,6 +996,7 @@ shinyServer(function(input, output, session) {
                         p("For debugging: ", manifest_id())
                       )
       )
+      hide(selector = "#NXReportButton") # hide OK button so users can't continue
     } else {
       manifest_path <- tags$a(href = paste0("https://www.synapse.org/#!Synapse:", manifest_id()), manifest_id(), target = "_blank")
       
