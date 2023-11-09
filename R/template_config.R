@@ -21,7 +21,7 @@ get_display_names <- function(qlist) {
 
 #' @export
 create_template_config <- function(data_model, include_schemas=NULL, exclude_schemas=NULL) {
-  if (!is.null(include_schemas) & !is.null(exclude_schemas)) stop("include_schemas and exclude_schemas cannot both have values")
+  if (!is.null(include_schemas) && !is.null(exclude_schemas)) stop("include_schemas and exclude_schemas cannot both have values")
   edges <- graph_by_edge_type(schema_url = data_model)
   schema_names <- format_edge_type(edges)
   nl <- setNames(as.list(schema_names$schema_name), rep("node_list", length(schema_names$schema_name)))
@@ -30,8 +30,14 @@ create_template_config <- function(data_model, include_schemas=NULL, exclude_sch
     dplyr::left_join(schema_names, by = "schema_name") |>
     dplyr::mutate(type = ifelse(file_based, "file", "record")) |>
     dplyr::select(-file_based)
-  if (!is.null(include_schemas)) config <- dplyr::filter(config, schema_name %in% include_schemas)
-  if (!is.null(exclude_schemas)) config <- dplyr::filter(config, !schema_name %in% exclude_schemas)
+  if (!is.null(include_schemas)) {
+    if (any(length(x <- setdiff(include_schemas, config$schema_name)))) stop(sprintf("%s is not a schema name in the data model", x))
+    config <- dplyr::filter(config, schema_name %in% include_schemas)
+  }
+  if (!is.null(exclude_schemas)) {
+    if (any(length(y <- setdiff(exclude_schemas, config$schema_name)))) stop(sprintf("%s is not a schema name in the data model", y))
+    config <- dplyr::filter(config, !schema_name %in% exclude_schemas)
+  }
   config
 }
 
