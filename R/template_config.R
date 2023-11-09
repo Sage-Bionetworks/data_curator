@@ -55,7 +55,7 @@ create_dca_template_config <- function(data_model, include_schemas=NULL, exclude
 
 #' @export
 #' @description Create a DCA-specific template generation function
-write_dca_template_config <- function(data_model, file, include_schemas, exclude_schemas) {
+write_dca_template_config <- function(data_model, file, include_schemas=NULL, exclude_schemas=NULL) {
   df <- create_dca_template_config(data_model, include_schemas, exclude_schemas)
   jsonlite::write_json(df, file, pretty = TRUE, auto_unbox = TRUE)
 }
