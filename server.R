@@ -329,7 +329,7 @@ shinyServer(function(input, output, session) {
                               dcc_config_react()$data_model_info)
     
     nx_report_info(
-      title = "About Data Curator",
+      title = sprintf("DCA for %s", dcc_config_react()$project_name),
       tags$ul(
         if (!is.na(dcc_config_react()$dca_help_link)) tags$li(tags$a(href = dcc_config_react()$dca_help_link, "DCA Help Docs", target = "_blank")),
         if (!is.na(dcc_config_react()$portal_help_link)) tags$li(tags$a(href = dcc_config_react()$portal_help_link, "Portal Help Docs", target = "_blank")),
