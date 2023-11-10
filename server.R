@@ -34,6 +34,12 @@ shinyServer(function(input, output, session) {
   
   ######## session global variables ########
   # read config in
+  if (grepl("dev", dcc_config_file)) {
+    def_config <- fromJSON("https://raw.githubusercontent.com/Sage-Bionetworks/data_curator_config/dev-old/demo/dca-template-config.json")
+  } else if (grepl("staging", dcc_config_file)) {
+    def_config <- fromJSON("https://raw.githubusercontent.com/Sage-Bionetworks/data_curator_config/staging/demo/dca-template-config.json")
+  } else def_config <- fromJSON("https://raw.githubusercontent.com/Sage-Bionetworks/data_curator_config/main/demo/dca-template-config.json")
+  
   config <- reactiveVal()
   config_schema <- reactiveVal()
   
@@ -234,10 +240,28 @@ shinyServer(function(input, output, session) {
     }
     # Use the template dropdown config file from the appropriate branch of
     # data_curator_config
-    conf_file <- reactiveVal(
-      file.path(config_dir, template_config_files[input$dropdown_asset_view])
-      )
-
+    conf_file <- reactiveVal(template_config_files[input$dropdown_asset_view])
+    if (!file.exists(conf_file())){
+      if (grepl("dev", dcc_config_file)) {
+        conf_file(
+          file.path("https://raw.githubusercontent.com/Sage-Bionetworks/data_curator_config/dev-old",
+                    conf_file()
+          )
+        )
+      } else if (grepl("staging", dcc_config_file)) {
+        conf_file(
+          file.path("https://raw.githubusercontent.com/Sage-Bionetworks/data_curator_config/staging",
+                    conf_file()
+          )
+        )
+      } else {
+        conf_file(
+          file.path("https://raw.githubusercontent.com/Sage-Bionetworks/data_curator_config/main",
+                    conf_file()
+          )
+        )
+      }
+    }
     config_df <- jsonlite::fromJSON(conf_file())
     
     conf_template <- setNames(config_df[[1]]$schema_name, config_df[[1]]$display_name)
@@ -309,13 +333,14 @@ shinyServer(function(input, output, session) {
   })
   
   observeEvent(input$info_box, {
+    
     nx_report_info(
-      title = "App Info",
+      title = sprintf("DCA for %s", dcc_config_react()$project_name),
       tags$ul(
-        tags$li("DCA Help Docs: ", "todo"),
-        tags$li("Portal Help Docs: ", "todo"),
-        tags$li("Data model: ", data_model()),
-        tags$li("Asset view: ", selected$master_asset_view()),
+        if (!is.na(dcc_config_react()$dca_help_link)) tags$li(tags$a(href = dcc_config_react()$dca_help_link, "DCA Help Docs", target = "_blank")),
+        if (!is.na(dcc_config_react()$portal_help_link)) tags$li(tags$a(href = dcc_config_react()$portal_help_link, "Portal Help Docs", target = "_blank")),
+        if (!is.na(dcc_config_react()$data_model_info)) tags$li(tags$a(href = dcc_config_react()$data_model_info, "Data Model Info", target = "_blank")),
+        tags$li(tags$a(href = paste0("https://www.synapse.org/#!Synapse:", selected$master_asset_view()), paste("Asset View:", selected$master_asset_view()), target = "_blank")),
         tags$li("DCA version: ", dca_version),
         tags$li("Schematic version: ", schematic_version),
       )
@@ -630,6 +655,7 @@ shinyServer(function(input, output, session) {
                         p("Try again or contact the DCC for help"),
                         p("For debugging: ", manifest_data())
                       ))
+      hide(selector = "#NXReportButton") # hide OK button so users can't continue
       shinyjs::enable("btn_template_select")
       updateTabsetPanel(session, "tab_template_select")
     } else {
@@ -979,6 +1005,7 @@ shinyServer(function(input, output, session) {
                         p("For debugging: ", manifest_id())
                       )
       )
+      hide(selector = "#NXReportButton") # hide OK button so users can't continue
     } else {
       manifest_path <- tags$a(href = paste0("https://www.synapse.org/#!Synapse:", manifest_id()), manifest_id(), target = "_blank")
       
