@@ -34,12 +34,6 @@ shinyServer(function(input, output, session) {
   
   ######## session global variables ########
   # read config in
-  if (grepl("dev", dcc_config_file)) {
-    def_config <- fromJSON("https://raw.githubusercontent.com/Sage-Bionetworks/data_curator_config/dev-old/demo/dca-template-config.json")
-  } else if (grepl("staging", dcc_config_file)) {
-    def_config <- fromJSON("https://raw.githubusercontent.com/Sage-Bionetworks/data_curator_config/staging/demo/dca-template-config.json")
-  } else def_config <- fromJSON("https://raw.githubusercontent.com/Sage-Bionetworks/data_curator_config/main/demo/dca-template-config.json")
-  
   config <- reactiveVal()
   config_schema <- reactiveVal()
   
@@ -56,6 +50,8 @@ shinyServer(function(input, output, session) {
   manifest_data <- reactiveVal()
   validation_res <- reactiveVal()
   manifest_id <- reactiveVal()
+  
+  primary_col <- reactiveVal()
   
   data_list <- list(
     projects = reactiveVal(NA), folders = reactiveVal(NULL),
@@ -188,7 +184,7 @@ shinyServer(function(input, output, session) {
     tags$head(tags$style(css()))
     })
     
-    primary_col <- reactive(col2rgba(dcc_config_react()$dca$primary_col, 255*0.9))
+    primary_col(col2rgba(dcc_config_react()$dca$primary_col, 255*0.9))
     css <- reactive({
     # Don't change theme for default projects
     sass(input = list(primary_col=dcc_config_react()$dca$primary_col,
@@ -242,28 +238,7 @@ shinyServer(function(input, output, session) {
     }
     # Use the template dropdown config file from the appropriate branch of
     # data_curator_config
-    conf_file <- reactiveVal(template_config_files[input$dropdown_asset_view])
-    if (!file.exists(conf_file())){
-      if (grepl("dev", dcc_config_file)) {
-        conf_file(
-          file.path("https://raw.githubusercontent.com/Sage-Bionetworks/data_curator_config/dev-old",
-                    conf_file()
-          )
-        )
-      } else if (grepl("staging", dcc_config_file)) {
-        conf_file(
-          file.path("https://raw.githubusercontent.com/Sage-Bionetworks/data_curator_config/staging",
-                    conf_file()
-          )
-        )
-      } else {
-        conf_file(
-          file.path("https://raw.githubusercontent.com/Sage-Bionetworks/data_curator_config/main",
-                    conf_file()
-          )
-        )
-      }
-    }
+    conf_file <- reactiveVal(file.path(config_dir, template_config_files[input$dropdown_asset_view]))
     config_df <- jsonlite::fromJSON(conf_file())
     
     conf_template <- setNames(config_df[[1]]$schema_name, config_df[[1]]$display_name)
@@ -335,13 +310,24 @@ shinyServer(function(input, output, session) {
   })
   
   observeEvent(input$info_box, {
-    
+    has_dcc <- ifelse(is.na(dcc_config_react()$dcc$dcc_help_link) |
+                      dcc_config_react()$dcc$dcc_help_link == "" |
+                      is.null(dcc_config_react()$dcc$dcc_help_link),
+                      FALSE, TRUE)
+    has_portal <- ifelse(is.na(dcc_config_react()$dcc$portal_help_link) |
+                        dcc_config_react()$dcc$portal_help_link == "" |
+                        is.null(dcc_config_react()$dcc$portal_help_link),
+                      FALSE, TRUE)
+    has_dm <- ifelse(is.na(dcc_config_react()$dcc$data_model_info) |
+                           dcc_config_react()$dcc$data_model_info == "" |
+                           is.null(dcc_config_react()$dcc$data_model_info),
+                         FALSE, TRUE)
     nx_report_info(
-      title = sprintf("DCA for %s", dcc_config_react()$project_name),
+      title = sprintf("DCA for %s", dcc_config_react()$dcc$project_name),
       tags$ul(
-        if (!is.na(dcc_config_react()$dca_help_link)) tags$li(tags$a(href = dcc_config_react()$dca_help_link, "DCA Help Docs", target = "_blank")),
-        if (!is.na(dcc_config_react()$portal_help_link)) tags$li(tags$a(href = dcc_config_react()$portal_help_link, "Portal Help Docs", target = "_blank")),
-        if (!is.na(dcc_config_react()$data_model_info)) tags$li(tags$a(href = dcc_config_react()$data_model_info, "Data Model Info", target = "_blank")),
+        if (has_dcc) tags$li(tags$a(href = dcc_config_react()$dcc$dcc_help_link, "DCA Help Docs", target = "_blank")),
+        if (has_portal) tags$li(tags$a(href = dcc_config_react()$dcc$portal_help_link, "Portal Help Docs", target = "_blank")),
+        if (has_dm) tags$li(tags$a(href = dcc_config_react()$dcc$data_model_info, "Data Model Info", target = "_blank")),
         tags$li(tags$a(href = paste0("https://www.synapse.org/#!Synapse:", selected$master_asset_view()), paste("Asset View:", selected$master_asset_view()), target = "_blank")),
         tags$li("DCA version: ", dca_version),
         tags$li("Schematic version: ", schematic_version),
