@@ -314,3 +314,17 @@ get_asset_view_table <- function(url="http://localhost:3001/v1/storage/assets/ta
   
 }
 
+#' @param url URL of schematic API endpoint
+#' @param schema_url URL of data model
+#' @param relationship Argument to schematic graph_by_edge_type
+#' @export
+#' @importFrom httr GET content
+graph_by_edge_type <- function(url = "https://schematic-dev.api.sagebionetworks.org/v1/schemas/get/graph_by_edge_type",
+                               schema_url, relationship = "requiresDependency") {
+  req <- httr::GET(url = url,
+                   query = list(
+                     schema_url = schema_url,
+                     relationship = relationship
+                   ))
+  httr::content(req)
+}
