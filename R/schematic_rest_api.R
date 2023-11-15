@@ -115,12 +115,13 @@ manifest_populate <- function(url="http://localhost:3001/v1/manifest/populate",
 #' @export
 manifest_validate <- function(url="http://localhost:3001/v1/model/validate",
                               schema_url="https://raw.githubusercontent.com/ncihtan/data-models/main/HTAN.model.jsonld", #nolint
-                              data_type, file_name, restrict_rules=FALSE) {
+                              data_type, file_name, restrict_rules=FALSE, project_scope = NULL) {
   req <- httr::POST(url,
                      query=list(
                        schema_url=schema_url,
                        data_type=data_type,
-                       restrict_rules=restrict_rules),
+                       restrict_rules=restrict_rules,
+                       project_scope = project_scope),
                     body=list(file_name=httr::upload_file(file_name))
   )
   
