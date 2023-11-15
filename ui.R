@@ -107,9 +107,12 @@ ui <- shinydashboardPlus::dashboardPage(
       # add sidebar footer here
       tags$a(
         id = "sidebar_footer", `data-toggle` = "tab",
-        tags$footer(HTML(' Powered by <i class="far fa-heart"></i> and Sage Bionetworks'))
+        tags$footer(
+          actionButton("info_box", "About Data Curator", icon("circle-info"), class="btn-primary-color"),
+          HTML('&#12288 Powered by <i class="far fa-heart"></i> and Sage Bionetworks')
+        )
       )
-    )
+     )
     )
   ),
   dashboardBody(
@@ -120,7 +123,8 @@ ui <- shinydashboardPlus::dashboardPage(
   ),
   uiOutput("sass"),
   # load dependencies
-  use_notiflix_report(width = "400px"),
+  use_notiflix_report(width = "500px", messageMaxLength = 10000,
+                      titleMaxLength = 100),
   use_waiter(),
   tabItems(
   # second tab content
@@ -294,9 +298,6 @@ ui <- shinydashboardPlus::dashboardPage(
   ),
   # waiter loading screen
   dcWaiter("show", landing = TRUE)
-  ),
-  footer = dashboardFooter(
-    left = sprintf("DCA %s - Schematic %s", dca_version, schematic_version)
   )
 )
 

@@ -31,6 +31,8 @@ ncores <- availableCores()
 message(sprintf("Available cores: %s", ncores))
 plan(multicore, workers = ncores)
 
+options(shiny.maxRequestSize=32*1024^2)
+
 # import R files
 source_files <- list.files(c("functions", "modules"), pattern = "*\\.R$", recursive = TRUE, full.names = TRUE)
 sapply(source_files, FUN = source)

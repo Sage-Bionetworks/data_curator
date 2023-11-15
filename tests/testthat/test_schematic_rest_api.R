@@ -4,7 +4,7 @@ context("test schematic rest api wrappers")
 ### schematic server URL https://github.com/Sage-Bionetworks/schematic/tree/develop/api
 ### If not available, skip these tests.
 
-schematic_url <- "https://schematic.api.sagebionetworks.org"
+schematic_url <- "https://schematic-dev.api.sagebionetworks.org"
 ping <- try(httr::GET(schematic_url), silent = TRUE)
 skip_it <- function(skip=ping) {
   if (inherits(ping, "try-error")) skip(sprintf("schematic server URL unavailable (%s). Is it running locally?", schematic_url)) #nolint
@@ -20,7 +20,7 @@ test_that("manifest_generate returns a URL if sucessful", {
   skip_it()
   
   url <- manifest_generate(url=file.path(schematic_url, "v1/manifest/generate"),
-    schema_url = schema_url, input_token = Sys.getenv("SNYAPSE_PAT"),
+    schema_url = schema_url, access_token = Sys.getenv("SNYAPSE_PAT"),
     title="Test biospecimen", data_type="Biospecimen",
     use_annotations = FALSE,
     dataset_id="syn33715357", asset_view="syn33715412",
