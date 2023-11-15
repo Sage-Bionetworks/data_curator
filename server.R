@@ -727,7 +727,8 @@ shinyServer(function(input, output, session) {
     .infile_data <- inFile$data()
     .dd_template <- input$dropdown_template
     .restrict_rules <- dcc_config_react()$validate_restrict_rules
-    
+    .project_scope <- selected$master_asset_view()    
+
     promises::future_promise({
       annotation_status <- switch(dca_schematic_api,
         reticulate = manifest_validate_py(
@@ -740,7 +741,8 @@ shinyServer(function(input, output, session) {
         schema_url=.data_model,
         data_type=.schema,
         file_name=.datapath,
-        restrict_rules = .restrict_rules),
+        restrict_rules = .restrict_rules,
+        project_scope = .project_scope),
       {
         Sys.sleep(0)
         list(list(
