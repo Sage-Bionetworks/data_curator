@@ -198,7 +198,7 @@ shinyServer(function(input, output, session) {
       color = primary_col())
     
     logo_img <- ifelse(!is.na(dcc_config_react()$dcc$logo_location),
-        file.path(config_dir, dcc_config_react()$dcc$logo_location),
+        dcc_config_react()$dcc$logo_location,
       "https://raw.githubusercontent.com/Sage-Bionetworks/data_curator_config/main/demo/Logo_Sage_Logomark.png")
     
     logo_link <- ifelse(!is.na(dcc_config_react()$dcc$logo_link),
@@ -238,7 +238,7 @@ shinyServer(function(input, output, session) {
     }
     # Use the template dropdown config file from the appropriate branch of
     # data_curator_config
-    conf_file <- reactiveVal(file.path(config_dir, template_config_files[input$dropdown_asset_view]))
+    conf_file <- reactiveVal(template_config_files[input$dropdown_asset_view])
     config_df <- jsonlite::fromJSON(conf_file())
     
     conf_template <- setNames(config_df[[1]]$schema_name, config_df[[1]]$display_name)
@@ -323,7 +323,7 @@ shinyServer(function(input, output, session) {
                            is.null(dcc_config_react()$dcc$data_model_info),
                          FALSE, TRUE)
     nx_report_info(
-      title = sprintf("DCA for %s", dcc_config_react()$dcc$project_name),
+      title = sprintf("DCA for %s", dcc_config_react()$dcc$name),
       tags$ul(
         if (has_dcc) tags$li(tags$a(href = dcc_config_react()$dcc$dcc_help_link, "DCA Help Docs", target = "_blank")),
         if (has_portal) tags$li(tags$a(href = dcc_config_react()$dcc$portal_help_link, "Portal Help Docs", target = "_blank")),
@@ -599,7 +599,7 @@ shinyServer(function(input, output, session) {
     .schema_url <- data_model()
     .asset_view <- selected$master_asset_view()
     .template <- paste(
-      dcc_config_react()$dcc$project_name,
+      dcc_config_react()$dcc$name,
       "-",
       input$dropdown_template
     )
