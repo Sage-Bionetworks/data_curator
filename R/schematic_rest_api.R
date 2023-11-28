@@ -115,13 +115,36 @@ manifest_populate <- function(url="http://localhost:3001/v1/manifest/populate",
 #' @export
 manifest_validate <- function(url="http://localhost:3001/v1/model/validate",
                               schema_url="https://raw.githubusercontent.com/ncihtan/data-models/main/HTAN.model.jsonld", #nolint
-                              data_type, file_name, restrict_rules=FALSE, project_scope = NULL) {
+                              data_type, file_name, restrict_rules=FALSE, project_scope = NULL,
+                              access_token, asset_view = NULL) {
+  
+  flattenbody <- function(x) {
+    # A form/query can only have one value per name, so take
+    # any values that contain vectors length >1 and
+    # split them up
+    # list(x=1:2, y="a") becomes list(x=1, x=2, y="a")
+    if (all(lengths(x)<=1)) return(x);
+    do.call("c", mapply(function(name, val) {
+      if (length(val)==1 || any(c("form_file", "form_data") %in% class(val))) {
+        x <- list(val)
+        names(x) <- name
+        x
+      } else {
+        x <- as.list(val)
+        names(x) <- rep(name, length(val))
+        x
+      }
+    }, names(x), x, USE.NAMES = FALSE, SIMPLIFY = FALSE))
+  }
+  
   req <- httr::POST(url,
-                     query=list(
+                    httr::add_headers(Authorization = sprintf("Bearer %s", access_token)),
+                     query=flattenbody(list(
                        schema_url=schema_url,
                        data_type=data_type,
                        restrict_rules=restrict_rules,
-                       project_scope = project_scope),
+                       project_scope = project_scope,
+                       asset_view = asset_view)),
                     body=list(file_name=httr::upload_file(file_name))
   )
   
