@@ -723,8 +723,10 @@ shinyServer(function(input, output, session) {
     .data_model <- data_model()
     .infile_data <- inFile$data()
     .dd_template <- input$dropdown_template
-    .restrict_rules <- dcc_config_react()$validate_restrict_rules
-    .project_scope <- selected$master_asset_view()    
+    .restrict_rules <- dcc_config_react()$schematic$model_validate$restrict_rules
+    .project_scope <- data_list$projects()
+    .access_token <- access_token
+    .asset_view <- selected$master_asset_view()
 
     promises::future_promise({
       annotation_status <- switch(dca_schematic_api,
@@ -739,7 +741,9 @@ shinyServer(function(input, output, session) {
         data_type=.schema,
         file_name=.datapath,
         restrict_rules = .restrict_rules,
-        project_scope = .project_scope),
+        project_scope = .project_scope,
+        access_token = .access_token,
+        asset_view <- .asset_view),
       {
         Sys.sleep(0)
         list(list(
