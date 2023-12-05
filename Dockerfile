@@ -13,10 +13,6 @@ RUN apt-get install -y libxml2 libglpk-dev libicu-dev libicu70 curl
 COPY shiny-server.conf /etc/shiny-server/shiny-server.conf
 RUN chmod 777 /etc/shiny-server/shiny-server.conf
 
-# Update node. https://github.com/nodesource/distributions
-RUN apt-get remove nodejs
-RUN curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash - && apt-get install -y nodejs
-
 USER shiny
 
 WORKDIR /srv/shiny-server/app
