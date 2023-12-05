@@ -704,13 +704,8 @@
     },
     "openssl": {
       "Package": "openssl",
-      "Version": "2.0.5",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Requirements": [
-        "askpass"
-      ],
-      "Hash": "b04c27110bf367b4daa93f34f3d58e75"
+      "Version": "2.1.1",
+      "Source": "Repository"
     },
     "pillar": {
       "Package": "pillar",
