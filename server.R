@@ -743,7 +743,7 @@ shinyServer(function(input, output, session) {
         restrict_rules = .restrict_rules,
         project_scope = .project_scope,
         access_token = .access_token,
-        asset_view <- .asset_view),
+        asset_view = .asset_view),
       {
         Sys.sleep(0)
         list(list(
