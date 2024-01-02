@@ -64,7 +64,8 @@ shinyServer(function(input, output, session) {
     project = reactiveVal(NULL), folder = reactiveVal(""),
     schema = reactiveVal(NULL), schema_type = reactiveVal(NULL),
     master_asset_view = reactiveVal(NULL),
-    master_asset_view_label = reactiveVal(NULL)
+    master_asset_view_label = reactiveVal(NULL),
+    project_scope = reactiveVal(NULL)
   )
   
   isUpdateFolder <- reactiveVal(FALSE)
@@ -540,6 +541,14 @@ shinyServer(function(input, output, session) {
     selected$schema(data_list$template()[input$dropdown_template])
     schema_type <- config_schema()[[1]]$type[which(config_schema()[[1]]$display_name == input$dropdown_template)]
     selected$schema_type(schema_type)
+    
+    # set project scope for each template for cross-manifest validation.
+    # If project_scope is missing from dca_template_config.json then
+    # this value will be NULL and cross-manifest validation won't happen.
+    # validation will occur.
+    project_scope <- config_schema()[[1]]$project_scope[which(config_schema()[[1]]$display_name == input$dropdown_template)]
+    selected$project_scope(project_scope)
+    
     # clean all tags related with selected template
     sapply(clean_tags, FUN = hide)
   }, ignoreInit = TRUE)
@@ -626,7 +635,6 @@ shinyServer(function(input, output, session) {
         ),
         {
           message("Downloading offline manifest")
-          Sys.sleep(0)
           tibble(a="b", c="d")
         }
       )
@@ -724,7 +732,13 @@ shinyServer(function(input, output, session) {
     .infile_data <- inFile$data()
     .dd_template <- input$dropdown_template
     .restrict_rules <- dcc_config_react()$schematic$model_validate$restrict_rules
-    
+    .project_scope <- selected$project_scope()
+    .access_token <- access_token
+    # asset view must be NULL to avoid cross-manifest validation.
+    # doing this in a verbose way to avoid warning with ifelse
+    .asset_view <- NULL
+    if (!is.null(.project_scope)) .asset_view <- selected$master_asset_view()
+
     promises::future_promise({
       annotation_status <- switch(dca_schematic_api,
         reticulate = manifest_validate_py(
@@ -737,9 +751,11 @@ shinyServer(function(input, output, session) {
         schema_url=.data_model,
         data_type=.schema,
         file_name=.datapath,
-        restrict_rules = .restrict_rules),
+        restrict_rules = .restrict_rules,
+        project_scope = .project_scope,
+        access_token = .access_token,
+        asset_view = .asset_view),
       {
-        Sys.sleep(0)
         list(list(
         "errors" = list(
         Row = NA, Column = NA, Value = NA,
@@ -748,7 +764,7 @@ shinyServer(function(input, output, session) {
         ))
       }
       )
-      
+
       # validation messages
       validationResult(annotation_status, .dd_template, .infile_data)
     
