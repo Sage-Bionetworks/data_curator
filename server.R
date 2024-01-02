@@ -635,7 +635,6 @@ shinyServer(function(input, output, session) {
         ),
         {
           message("Downloading offline manifest")
-          Sys.sleep(0)
           tibble(a="b", c="d")
         }
       )
@@ -757,7 +756,6 @@ shinyServer(function(input, output, session) {
         access_token = .access_token,
         asset_view = .asset_view),
       {
-        Sys.sleep(0)
         list(list(
         "errors" = list(
         Row = NA, Column = NA, Value = NA,
