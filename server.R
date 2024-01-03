@@ -546,9 +546,9 @@ shinyServer(function(input, output, session) {
     # If project_scope is missing from dca_template_config.json then
     # this value will be NULL and cross-manifest validation won't happen.
     # validation will occur.
-    project_scope <- config_schema()[[1]]$project_scope[which(config_schema()[[1]]$display_name == input$dropdown_template)]
+    project_scope <- config_schema()[[1]]$project_scope[[which(config_schema()[[1]]$display_name == input$dropdown_template)]]
     selected$project_scope(project_scope)
-    
+
     # clean all tags related with selected template
     sapply(clean_tags, FUN = hide)
   }, ignoreInit = TRUE)
