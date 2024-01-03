@@ -34,33 +34,28 @@ shinyServer(function(input, output, session) {
   
   ######## session global variables ########
   # read config in
-  if (grepl("dev", dcc_config_file)) {
-    def_config <- fromJSON("https://raw.githubusercontent.com/Sage-Bionetworks/data_curator_config/dev-old/demo/dca-template-config.json")
-  } else if (grepl("staging", dcc_config_file)) {
-    def_config <- fromJSON("https://raw.githubusercontent.com/Sage-Bionetworks/data_curator_config/staging/demo/dca-template-config.json")
-  } else def_config <- fromJSON("https://raw.githubusercontent.com/Sage-Bionetworks/data_curator_config/main/demo/dca-template-config.json")
-  
   config <- reactiveVal()
-  config_schema <- reactiveVal(def_config)
-  model_ops <- setNames(dcc_config$data_model_url,
-  dcc_config$synapse_asset_view)
+  config_schema <- reactiveVal()
   
   # mapping from display name to schema name
   template_namedList <- reactiveVal()
   
-  all_asset_views <- setNames(dcc_config$synapse_asset_view,
-  dcc_config$project_name)
+  all_asset_views <- setNames(tenants_config$synapse_asset_view,
+                              tenants_config$name)
   asset_views <- reactiveVal(c("mock dca fileview"="syn33715412"))
   
-  dcc_config_react <- reactiveVal(dcc_config)
+  dcc_config_react <- reactiveVal()
+  tenant_config_react <- reactiveVal()
   
   manifest_data <- reactiveVal()
   validation_res <- reactiveVal()
   manifest_id <- reactiveVal()
   
+  primary_col <- reactiveVal()
+  
   data_list <- list(
     projects = reactiveVal(NA), folders = reactiveVal(NULL),
-    template = reactiveVal(setNames(def_config$schema_name, def_config$display_name)),
+    template = reactiveVal(NULL),
     files = reactiveVal(NULL),
     master_asset_view = reactiveVal(NULL)
   )
@@ -69,14 +64,16 @@ shinyServer(function(input, output, session) {
     project = reactiveVal(NULL), folder = reactiveVal(""),
     schema = reactiveVal(NULL), schema_type = reactiveVal(NULL),
     master_asset_view = reactiveVal(NULL),
-    master_asset_view_label = reactiveVal(NULL)
+    master_asset_view_label = reactiveVal(NULL),
+    project_scope = reactiveVal(NULL)
   )
   
   isUpdateFolder <- reactiveVal(FALSE)
   
-  data_model_options <- setNames(dcc_config$data_model_url,
-    dcc_config$synapse_asset_view)
   data_model = reactiveVal(NULL)
+  
+  if (dca_schematic_api == "offline") template_config_files <- setNames("www/template_config/config_offline.json",
+                                                                        "synXXXXXX")
   
   # data available to the user
   syn_store <- NULL # gets list of projects they have access to
@@ -162,40 +159,51 @@ shinyServer(function(input, output, session) {
   # within the selected asset view.
   observeEvent(input$btn_asset_view, {
     dcWaiter("show", msg = paste0("Getting data. This may take a minute."),
-      color=col2rgba(col2rgb("#CD0BBC01")))
+      color="#2a668d")
     shinyjs::disable("btn_asset_view")
     
     selected$master_asset_view(input$dropdown_asset_view)
     av_names <- names(asset_views()[asset_views() %in% selected$master_asset_view()])
     selected$master_asset_view_label(av_names)
     
-    dcc_config_react(dcc_config[dcc_config$synapse_asset_view == selected$master_asset_view(), ])
-    if (dca_schematic_api == "offline") dcc_config_react(dcc_config[dcc_config$project_name == "DCA Demo", ])
+    tenant_config_react(tenants_config[tenants_config$synapse_asset_view == selected$master_asset_view(), ])
+    if (dca_schematic_api == "offline") tenant_config_react(tenants_config[tenants_config$name == "DCA Demo", ])
     
-    data_model(data_model_options[selected$master_asset_view()])
+    dcc_config_react(read_json(
+      file.path(config_dir, tenant_config_react()$config_location))
+    )
+    
+    model_ops <- reactive(setNames(dcc_config_react()$dcc$data_model_url,
+                          dcc_config_react()$dcc$synapse_asset_view))
+    
+    data_model(model_ops())
+    
+    template_config_files <- setNames(dcc_config_react()$dcc$template_menu_config_file,
+                                      dcc_config_react()$dcc$synapse_asset_view)
     
     output$sass <- renderUI({
     tags$head(tags$style(css()))
     })
+    
+    primary_col(col2rgba(dcc_config_react()$dca$primary_col, 255*0.9))
     css <- reactive({
     # Don't change theme for default projects
-    sass(input = list(primary_col=dcc_config_react()$primary_col,
-      htan_col=dcc_config_react()$secondary_col,
-      sidebar_col=dcc_config_react()$sidebar_col,
+    sass(input = list(primary_col=dcc_config_react()$dca$primary_col,
+      htan_col=dcc_config_react()$dca$secondary_col,
+      sidebar_col=dcc_config_react()$dca$sidebar_col,
       sass_file("www/scss/main.scss")))
     })
     
     dcWaiter("hide")
     dcWaiter("show", msg = paste0("Getting data. This may take a minute."),
-      color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
+      color = primary_col())
     
-    logo_img <- ifelse(!is.na(dcc_config_react()$logo_location),
-      paste0("https://raw.githubusercontent.com/Sage-Bionetworks/data_curator_config/main/",
-        dcc_config_react()$logo_location),
+    logo_img <- ifelse(!is.na(dcc_config_react()$dcc$logo_location),
+        dcc_config_react()$dcc$logo_location,
       "https://raw.githubusercontent.com/Sage-Bionetworks/data_curator_config/main/demo/Logo_Sage_Logomark.png")
     
-    logo_link <- ifelse(!is.na(dcc_config_react()$logo_link),
-      dcc_config_react()$logo_link,
+    logo_link <- ifelse(!is.na(dcc_config_react()$dcc$logo_link),
+      dcc_config_react()$dcc$logo_link,
       "https://synapse.org"
     )
     
@@ -232,27 +240,6 @@ shinyServer(function(input, output, session) {
     # Use the template dropdown config file from the appropriate branch of
     # data_curator_config
     conf_file <- reactiveVal(template_config_files[input$dropdown_asset_view])
-    if (!file.exists(conf_file())){
-      if (grepl("dev", dcc_config_file)) {
-        conf_file(
-          file.path("https://raw.githubusercontent.com/Sage-Bionetworks/data_curator_config/dev-old",
-                    conf_file()
-          )
-        )
-      } else if (grepl("staging", dcc_config_file)) {
-        conf_file(
-          file.path("https://raw.githubusercontent.com/Sage-Bionetworks/data_curator_config/staging",
-                    conf_file()
-          )
-        )
-      } else {
-        conf_file(
-          file.path("https://raw.githubusercontent.com/Sage-Bionetworks/data_curator_config/main",
-                    conf_file()
-          )
-        )
-      }
-    }
     config_df <- jsonlite::fromJSON(conf_file())
     
     conf_template <- setNames(config_df[[1]]$schema_name, config_df[[1]]$display_name)
@@ -324,13 +311,24 @@ shinyServer(function(input, output, session) {
   })
   
   observeEvent(input$info_box, {
-    
+    has_dcc <- ifelse(is.na(dcc_config_react()$dcc$dcc_help_link) |
+                      dcc_config_react()$dcc$dcc_help_link == "" |
+                      is.null(dcc_config_react()$dcc$dcc_help_link),
+                      FALSE, TRUE)
+    has_portal <- ifelse(is.na(dcc_config_react()$dcc$portal_help_link) |
+                        dcc_config_react()$dcc$portal_help_link == "" |
+                        is.null(dcc_config_react()$dcc$portal_help_link),
+                      FALSE, TRUE)
+    has_dm <- ifelse(is.na(dcc_config_react()$dcc$data_model_info) |
+                           dcc_config_react()$dcc$data_model_info == "" |
+                           is.null(dcc_config_react()$dcc$data_model_info),
+                         FALSE, TRUE)
     nx_report_info(
-      title = sprintf("DCA for %s", dcc_config_react()$project_name),
+      title = sprintf("DCA for %s", dcc_config_react()$dcc$name),
       tags$ul(
-        if (!is.na(dcc_config_react()$dca_help_link)) tags$li(tags$a(href = dcc_config_react()$dca_help_link, "DCA Help Docs", target = "_blank")),
-        if (!is.na(dcc_config_react()$portal_help_link)) tags$li(tags$a(href = dcc_config_react()$portal_help_link, "Portal Help Docs", target = "_blank")),
-        if (!is.na(dcc_config_react()$data_model_info)) tags$li(tags$a(href = dcc_config_react()$data_model_info, "Data Model Info", target = "_blank")),
+        if (has_dcc) tags$li(tags$a(href = dcc_config_react()$dcc$dcc_help_link, "DCA Help Docs", target = "_blank")),
+        if (has_portal) tags$li(tags$a(href = dcc_config_react()$dcc$portal_help_link, "Portal Help Docs", target = "_blank")),
+        if (has_dm) tags$li(tags$a(href = dcc_config_react()$dcc$data_model_info, "Data Model Info", target = "_blank")),
         tags$li(tags$a(href = paste0("https://www.synapse.org/#!Synapse:", selected$master_asset_view()), paste("Asset View:", selected$master_asset_view()), target = "_blank")),
         tags$li("DCA version: ", dca_version),
         tags$li("Schematic version: ", schematic_version),
@@ -343,7 +341,7 @@ shinyServer(function(input, output, session) {
   observeEvent(input$btn_project, {
     ######## Update Folder List ########
     dcWaiter("show", msg = paste0("Getting data"),
-    color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
+    color = primary_col())
     shinyjs::disable("btn_project")
     selected$project(data_list$projects()[names(data_list$projects()) == input$dropdown_project])
     
@@ -415,7 +413,7 @@ shinyServer(function(input, output, session) {
   # Goal of this button is to updpate the template reactive object
   # with the template the user chooses
   observeEvent(input$btn_template_select, {
-    dcWaiter("show", msg = "Please wait", color = col2rgba(dcc_config_react()$primary_col, 255*0.9), sleep=0)
+    dcWaiter("show", msg = "Please wait", color = primary_col(), sleep=0)
     shinyjs::disable("btn_template_select")
     selected$schema(data_list$template()[input$dropdown_template])
     shinyjs::show(select = "li:nth-child(5)")
@@ -435,7 +433,7 @@ shinyServer(function(input, output, session) {
   # Goal of this button is to get the files within a folder the user selects
   observeEvent(input$btn_folder, {
   
-    dcWaiter("show", msg = paste0("Getting data"), color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
+    dcWaiter("show", msg = paste0("Getting data"), color = primary_col())
     shinyjs::disable("btn_folder")
     shinyjs::show(select = "li:nth-child(4)")
 
@@ -543,6 +541,14 @@ shinyServer(function(input, output, session) {
     selected$schema(data_list$template()[input$dropdown_template])
     schema_type <- config_schema()[[1]]$type[which(config_schema()[[1]]$display_name == input$dropdown_template)]
     selected$schema_type(schema_type)
+    
+    # set project scope for each template for cross-manifest validation.
+    # If project_scope is missing from dca_template_config.json then
+    # this value will be NULL and cross-manifest validation won't happen.
+    # validation will occur.
+    project_scope <- config_schema()[[1]]$project_scope[[which(config_schema()[[1]]$display_name == input$dropdown_template)]]
+    selected$project_scope(project_scope)
+
     # clean all tags related with selected template
     sapply(clean_tags, FUN = hide)
   }, ignoreInit = TRUE)
@@ -594,7 +600,7 @@ shinyServer(function(input, output, session) {
   observeEvent(c(input$`switchTab4-Next`, input$tabs), {
   
     req(input$tabs == "tab_template")
-    dcWaiter("show", msg = "Getting template. This may take a minute.", color = dcc_config_react()$primary_col)
+    dcWaiter("show", msg = "Getting template. This may take a minute.", color = dcc_config_react()$dca$primary_col)
     
     ### This doesn't work - try moving manifest_generate outside of downloadButton
     .schema <- selected$schema()
@@ -602,15 +608,15 @@ shinyServer(function(input, output, session) {
     .schema_url <- data_model()
     .asset_view <- selected$master_asset_view()
     .template <- paste(
-      dcc_config_react()$project_name,
+      dcc_config_react()$dcc$name,
       "-",
       input$dropdown_template
     )
     .url <- ifelse(dca_schematic_api != "offline",
     file.path(api_uri, "v1/manifest/generate"),
     NA)
-    .output_format <- dcc_config_react()$manifest_output_format
-    .use_annotations <- dcc_config_react()$manifest_use_annotations
+    .output_format <- dcc_config_react()$schematic$manifest_generate$output_format
+    .use_annotations <- dcc_config_react()$schematic$manifest_generate$use_annotations
     
     promises::future_promise({
       try({
@@ -629,7 +635,6 @@ shinyServer(function(input, output, session) {
         ),
         {
           message("Downloading offline manifest")
-          Sys.sleep(0)
           tibble(a="b", c="d")
         }
       )
@@ -650,7 +655,7 @@ shinyServer(function(input, output, session) {
       shinyjs::enable("btn_template_select")
       updateTabsetPanel(session, "tab_template_select")
     } else {
-      if (dcc_config_react()$manifest_output_format == "google_sheet") {
+      if (dcc_config_react()$schematic$manifest_generate$output_format == "google_sheet") {
         shinyjs::show("div_template")
       } else shinyjs::show("div_download_data")
     }
@@ -668,7 +673,7 @@ shinyServer(function(input, output, session) {
     filename = function() sprintf("%s.xlsx", input$dropdown_template),
     #filename = function() sprintf("%s.csv", input$dropdown_template),
     content = function(file) {
-    dcWaiter("show", msg = "Downloading data", color = dcc_config_react()$primary_col)
+    dcWaiter("show", msg = "Downloading data", color = dcc_config_react()$dca$primary_col)
     dcWaiter("hide", sleep = 0)
     writeBin(manifest_data(), file)
     }
@@ -713,7 +718,7 @@ shinyServer(function(input, output, session) {
   ######## Validation Section #######
   observeEvent(input$btn_validate, {
   
-    dcWaiter("show", msg = "Validating manifest. This may take a minute.", color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
+    dcWaiter("show", msg = "Validating manifest. This may take a minute.", color = primary_col())
     
     # Reset validation_result in case user reuploads the same file. This makes
     # the validation_res observer trigger any time this button is pressed.
@@ -726,8 +731,14 @@ shinyServer(function(input, output, session) {
     .data_model <- data_model()
     .infile_data <- inFile$data()
     .dd_template <- input$dropdown_template
-    .restrict_rules <- dcc_config_react()$validate_restrict_rules
-    
+    .restrict_rules <- dcc_config_react()$schematic$model_validate$restrict_rules
+    .project_scope <- selected$project_scope()
+    .access_token <- access_token
+    # asset view must be NULL to avoid cross-manifest validation.
+    # doing this in a verbose way to avoid warning with ifelse
+    .asset_view <- NULL
+    if (!is.null(.project_scope)) .asset_view <- selected$master_asset_view()
+
     promises::future_promise({
       annotation_status <- switch(dca_schematic_api,
         reticulate = manifest_validate_py(
@@ -740,9 +751,11 @@ shinyServer(function(input, output, session) {
         schema_url=.data_model,
         data_type=.schema,
         file_name=.datapath,
-        restrict_rules = .restrict_rules),
+        restrict_rules = .restrict_rules,
+        project_scope = .project_scope,
+        access_token = .access_token,
+        asset_view = .asset_view),
       {
-        Sys.sleep(0)
         list(list(
         "errors" = list(
         Row = NA, Column = NA, Value = NA,
@@ -751,7 +764,7 @@ shinyServer(function(input, output, session) {
         ))
       }
       )
-      
+
       # validation messages
       validationResult(annotation_status, .dd_template, .infile_data)
     
@@ -782,7 +795,7 @@ shinyServer(function(input, output, session) {
         dcWaiter("update", msg = paste0(validation_res()$error_type, " Found !!! "), spin = spin_inner_circles(), sleep = 2.5)
         shinyjs::show("box_submit")
       } else {
-          if (dca_schematic_api != "offline" & dcc_config_react()$manifest_output_format == "google_sheet") {
+          if (dca_schematic_api != "offline" & dcc_config_react()$schematic$manifest_generate$output_format == "google_sheet") {
           #output$val_gsheet <- renderUI(
           #actionButton("btn_val_gsheet", "  Generate Google Sheet Link", icon = icon("table"), class = "btn-primary-color")
           #)
@@ -804,7 +817,7 @@ shinyServer(function(input, output, session) {
   # if user click gsheet_btn, generating gsheet
   observeEvent(input$btn_val_gsheet, {
     # loading screen for Google link generation
-    dcWaiter("show", msg = "Generating link...", color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
+    dcWaiter("show", msg = "Generating link...", color = primary_col())
     filled_manifest <- switch(dca_schematic_api,
       reticulate = manifest_populate_py(paste0(config$community, " ", input$dropdown_template),
         inFile$raw()$datapath,
@@ -840,7 +853,7 @@ shinyServer(function(input, output, session) {
   ######## Submission Section ########
   observeEvent(input$btn_submit, {
     # loading screen for submitting data
-    dcWaiter("show", msg = "Submitting data. This may take a minute.", color = col2rgba(dcc_config_react()$primary_col, 255*0.9))
+    dcWaiter("show", msg = "Submitting data. This may take a minute.", color = primary_col())
     
     
     if (is.null(selected$folder())) {
@@ -904,11 +917,11 @@ shinyServer(function(input, output, session) {
       .data_model <- data_model()
       .schema <- selected$schema()
       .asset_view <- selected$master_asset_view()
-      .submit_use_schema_labels <- dcc_config_react()$submit_use_schema_labels
-      .table_manipulation <- dcc_config_react()$submit_table_manipulation
-      .submit_manifest_record_type <- dcc_config_react()$submit_manifest_record_type
-      .restrict_rules <- dcc_config_react()$validate_restrict_rules
-      .hide_blanks <- dcc_config_react()$submit_hide_blanks
+      .submit_use_schema_labels <- dcc_config_react()$schematic$model_submit$use_schema_labels
+      .table_manipulation <- dcc_config_react()$schematic$model_submit$table_manipulation
+      .submit_manifest_record_type <- dcc_config_react()$schematic$model_submit$manifest_record_type
+      .restrict_rules <- dcc_config_react()$schematic$model_validate$restrict_rules
+      .hide_blanks <- dcc_config_react()$schematic$model_submit$hide_blanks
       
       # associates metadata with data and returns manifest id
       promises::future_promise({
@@ -949,11 +962,11 @@ shinyServer(function(input, output, session) {
     .data_model <- data_model()
     .schema <- selected$schema()
     .asset_view <- selected$master_asset_view()
-    .submit_use_schema_labels <- dcc_config_react()$submit_use_schema_labels
-    .table_manipulation <- dcc_config_react()$submit_table_manipulation
-    .submit_manifest_record_type <- dcc_config_react()$submit_manifest_record_type
-    .restrict_rules <- dcc_config_react()$validate_restrict_rules
-    .hide_blanks <- dcc_config_react()$submit_hide_blanks
+    .submit_use_schema_labels <- dcc_config_react()$schematic$model_submit$use_schema_labels
+    .table_manipulation <- dcc_config_react()$schematic$model_submit$table_manipulation
+    .submit_manifest_record_type <- dcc_config_react()$schematic$model_submit$manifest_record_type
+    .restrict_rules <- dcc_config_react()$schematic$model_validate$restrict_rules
+    .hide_blanks <- dcc_config_react()$schematic$model_submit$hide_blanks
     # associates metadata with data and returns manifest id
     promises::future_promise({
       try({
