@@ -164,9 +164,8 @@ ui <- shinydashboardPlus::dashboardPage(
         actionButton("btn_project", "Next",
         class = "btn-primary-color"
         )
-      ),
-      dashboardUI("dashboard"),
-    ),
+      )
+    )
   ),
   tabItem(
     tabName = "tab_folder",
@@ -207,7 +206,8 @@ ui <- shinydashboardPlus::dashboardPage(
                      "Skip to validation",
                      class = "btn-primary-color"
         )
-      )
+      ),
+      dashboardUI("dashboard")
     ),
   ),
   tabItem(
