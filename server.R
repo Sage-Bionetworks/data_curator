@@ -559,7 +559,7 @@ shinyServer(function(input, output, session) {
      syn.store = syn_store,
      project.scope = selected$project,
      schema = selected$schema,
-     schema.display.name = reactive(input$dropdown_datatype),
+     schema.display.name = selected$schema(),
      disable.ids = c("box_pick_project", "box_pick_manifest"),
      ncores = ncores,
      access_token = access_token,
