@@ -12,7 +12,7 @@ get_dataset_metadata <- function(syn.store, datasets, ncores = 1, schematic_api=
   file_view <- switch(schematic_api,
                       reticulate = syn.store$storageFileviewTable,
                       rest = get_asset_view_table(url = file.path(api_uri, "v1/storage/assets/tables"),
-                                                  input_token = access_token,
+                                                  access_token = access_token,
                                                   asset_view=fileview)
                       ) %>%
     filter(grepl("synapse_storage_manifest_", name) & parentId %in% datasets)
@@ -39,7 +39,6 @@ get_dataset_metadata <- function(syn.store, datasets, ncores = 1, schematic_api=
   )
   cols <- setNames(rep("", length(cols)), cols)
   metadata <- bind_rows(cols)[0, ]
-
   lapply(file_view$parentId, function(dataset) {
     # get manifest's synapse id(s) in each dataset folder
     manifest_ids <- file_view$id[file_view$parentId == dataset]
@@ -56,9 +55,8 @@ get_dataset_metadata <- function(syn.store, datasets, ncores = 1, schematic_api=
           info <- synapse_get(id = id, auth = access_token)
           manifest <- manifest_download(
             url = file.path(api_uri, "v1/manifest/download"),
-            input_token = access_token,
-            asset_view = fileview,
-            dataset_id = info$parentId,
+            access_token = access_token,
+            manifest_id = info$id,
             as_json = TRUE
           )
           
@@ -76,6 +74,10 @@ get_dataset_metadata <- function(syn.store, datasets, ncores = 1, schematic_api=
     }
   })
 
+  manifest_info <- bind_rows(manifest_info)
+  manifest_info <- unique(manifest_info)
+  manifest_info <- split(manifest_info, manifest_info$id)
+  
   if (length(manifest_info) > 0) {
     metadata <- parallel::mclapply(seq_along(manifest_info), function(i) {
       if (schematic_api == "reticulate"){
@@ -100,7 +102,7 @@ get_dataset_metadata <- function(syn.store, datasets, ncores = 1, schematic_api=
       } else if (schematic_api == "rest"){
         info <- manifest_info[[i]]
         # extract manifest essential information for dashboard
-        manifest_path <- info["Path"]
+        manifest_path <- info$Path
         # See above - don't read from file, read from object
         #manifest_df <- data.table::fread(manifest_path)
         manifest_df <- manifest_dfs[[i]]
@@ -110,15 +112,15 @@ get_dataset_metadata <- function(syn.store, datasets, ncores = 1, schematic_api=
                                      manifest_df$Component[1], NA_character_
         )
         metadata <- tibble(
-          SynapseID = info["id"],
+          SynapseID = info$id,
           Component = manifest_component,
-          CreatedOn = as.Date(info["createdOn"]),
-          ModifiedOn = as.Date(info["modifiedOn"]),
+          CreatedOn = info$createdOn,
+          ModifiedOn = info$modifiedOn,
           ModifiedUser = paste0("@", modified_user[[i]]),
           Path = manifest_path,
-          Folder = names(datasets)[which(datasets == info["parentId"])],
-          FolderSynId = info["parentId"],
-          manifest = manifest_df
+          Folder = names(datasets)[which(datasets == info$parentId)],
+          FolderSynId = info$parentId,
+          manifest = list(manifest_df)
         )
       }
     }, mc.cores = ncores) %>% bind_rows()
@@ -142,7 +144,8 @@ get_dataset_metadata <- function(syn.store, datasets, ncores = 1, schematic_api=
 #' @param metadata output from \code{get_dataset_metadata}.
 #' @param project.scope list of project ids used for cross-manifest validation
 #' @return data frame contains required data types for tree plot
-validate_metadata <- function(metadata, project.scope, schematic_api, schema_url) {
+validate_metadata <- function(metadata, project.scope, schematic_api, schema_url,
+                              access_token) {
   stopifnot(is.list(project.scope))
   if (nrow(metadata) == 0) {
     return(metadata)
@@ -175,7 +178,8 @@ validate_metadata <- function(metadata, project.scope, schematic_api, schema_url
         rest = manifest_validate(url=file.path(api_uri, "v1/model/validate"),
                                  data_type=manifest$Component,
                                  schema_url = schema_url,
-                                 json_str = jsonlite::toJSON(manifest$manifest))
+                                 access_token = access_token,
+                                 json_str = jsonlite::toJSON(manifest$manifest[[1]]))
       )
       # clean validation res from schematicpy
       clean_res <- validationResult(validation_res, manifest$Component, dashboard = TRUE)
