@@ -165,6 +165,7 @@ ui <- shinydashboardPlus::dashboardPage(
         class = "btn-primary-color"
         )
       ),
+      dashboardUI("dashboard"),
     ),
   ),
   tabItem(
