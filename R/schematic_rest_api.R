@@ -14,33 +14,33 @@ check_success <- function(x){
 #' @param url URI of API endpoint
 #' @param access_token Synapse PAT
 #' @param asset_view ID of view listing all project data assets
-#' @param dataset_id the parent ID of the manifest
+#' @param manifest_id the parent ID of the manifest
 #' @param as_json if True return the manifest in JSON format
 #' @returns a csv of the manifest
 #' @export
-manifest_download <- function(url = "http://localhost:3001/v1/manifest/download", access_token, asset_view, dataset_id, as_json=TRUE, new_manifest_name=NULL) {
+manifest_download <- function(url = "http://localhost:3001/v1/manifest/download", access_token, manifest_id, as_json=TRUE, new_manifest_name=NULL) {
   request <- httr::GET(
     url = url,
     httr::add_headers(Authorization = sprintf("Bearer %s", access_token)),
     query = list(
-      asset_view = asset_view,
-      dataset_id = dataset_id,
+      manifest_id = manifest_id,
       as_json = as_json,
       new_manifest_name = new_manifest_name
     )
   )
   
   check_success(request)
-  response <- httr::content(request, type = "application/json")
+  response <- httr::content(request, type = "text")
+  response <- fromJSON(gsub('NaN', '"NA"', response))
   
   # Output can have many NULL values which get dropped or cause errors. Set them to NA
-  nullToNA <- function(x) {
-    x[sapply(x, is.null)] <- NA
-    return(x)
-  }
-  df <- do.call(rbind, lapply(response, rbind))
-  nullToNA(df)
-  
+  # nullToNA <- function(x) {
+  #   x[sapply(x, is.null)] <- NA
+  #   return(x)
+  # }
+  # df <- do.call(rbind, lapply(response, rbind))
+  # nullToNA(df)
+  response
 }
 
 #' schematic rest api to generate manifest
@@ -115,8 +115,8 @@ manifest_populate <- function(url="http://localhost:3001/v1/manifest/populate",
 #' @export
 manifest_validate <- function(url="http://localhost:3001/v1/model/validate",
                               schema_url="https://raw.githubusercontent.com/ncihtan/data-models/main/HTAN.model.jsonld", #nolint
-                              data_type, file_name, restrict_rules=FALSE, project_scope = NULL,
-                              access_token, asset_view = NULL) {
+                              data_type, file_name = NULL, restrict_rules=FALSE, project_scope = NULL,
+                              access_token, asset_view = NULL, json_str = NULL) {
   
   flattenbody <- function(x) {
     # A form/query can only have one value per name, so take
@@ -137,16 +137,31 @@ manifest_validate <- function(url="http://localhost:3001/v1/model/validate",
     }, names(x), x, USE.NAMES = FALSE, SIMPLIFY = FALSE))
   }
   
-  req <- httr::POST(url,
-                    httr::add_headers(Authorization = sprintf("Bearer %s", access_token)),
-                     query=flattenbody(list(
-                       schema_url=schema_url,
-                       data_type=data_type,
-                       restrict_rules=restrict_rules,
-                       project_scope = project_scope,
-                       asset_view = asset_view)),
-                    body=list(file_name=httr::upload_file(file_name))
-  )
+  if (all(is.null(json_str), is.null(file_name))) {
+    stop("Must provide either a file to upload or a json")
+  }
+  
+  req <- ifelse(is.null(json_str),
+                httr::POST(url,
+                           httr::add_headers(Authorization = sprintf("Bearer %s", access_token)),
+                           query=flattenbody(list(
+                             schema_url=schema_url,
+                             data_type=data_type,
+                             restrict_rules=restrict_rules,
+                             project_scope = project_scope,
+                             asset_view = asset_view)),
+                           body=list(file_name=httr::upload_file(file_name))
+                ),
+                httr::POST(url,
+                           httr::add_headers(Authorization = sprintf("Bearer %s", access_token)),
+                           query=flattenbody(list(
+                             schema_url=schema_url,
+                             data_type=data_type,
+                             restrict_rules=restrict_rules,
+                             project_scope = project_scope,
+                             asset_view = asset_view,
+                             json_str = json_str))
+                ))
   
   # Format server error in a way validationResult can handle
   if (httr::http_status(req)$category == "Server error") {
@@ -154,12 +169,12 @@ manifest_validate <- function(url="http://localhost:3001/v1/model/validate",
       list(
         list(
           "errors" = list(
-             Row = NA, Column = NA, Value = NA,
-             Error = sprintf("Cannot validate manifest: %s",
-                             httr::http_status(req)$message)
+            Row = NA, Column = NA, Value = NA,
+            Error = sprintf("Cannot validate manifest: %s",
+                            httr::http_status(req)$message)
           )
-       )
-     )
+        )
+      )
     )
   }
   check_success(req)
@@ -258,7 +273,7 @@ storage_project_datasets <- function(url="http://localhost:3001/v1/storage/proje
                       asset_view=asset_view,
                       project_id=project_id)
   )
-  
+
   check_success(req)
   httr::content(req)
 }
