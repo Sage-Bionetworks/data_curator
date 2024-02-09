@@ -30,7 +30,7 @@ manifest_download <- function(url = "http://localhost:3001/v1/manifest/download"
   )
   
   check_success(request)
-  response <- httr::content(request, type = "text")
+  response <- httr::content(request, type = "text", encoding = "UTF-8")
   response <- fromJSON(gsub('NaN', '"NA"', response))
   
   # Output can have many NULL values which get dropped or cause errors. Set them to NA

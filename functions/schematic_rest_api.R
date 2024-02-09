@@ -30,7 +30,7 @@ manifest_download <- function(url = "http://localhost:3001/v1/manifest/download"
   )
   
   check_success(request)
-  response <- httr::content(request, type = "text")
+  response <- httr::content(request, type = "text", encoding = "UTF-8")
   response <- fromJSON(gsub('NaN', '"NA"', response))
   
   # Output can have many NULL values which get dropped or cause errors. Set them to NA
@@ -143,28 +143,28 @@ manifest_validate <- function(url="http://localhost:3001/v1/model/validate",
   
   if (is.null(json_str)) {
     req <- httr::POST(url,
-      httr::add_headers(Authorization = sprintf("Bearer %s", access_token)),
-      query=flattenbody(list(
-        schema_url=schema_url,
-        data_type=data_type,
-        restrict_rules=restrict_rules,
-        project_scope = project_scope,
-        asset_view = asset_view)),
-      body=list(file_name=httr::upload_file(file_name))
+                      httr::add_headers(Authorization = sprintf("Bearer %s", access_token)),
+                      query=flattenbody(list(
+                        schema_url=schema_url,
+                        data_type=data_type,
+                        restrict_rules=restrict_rules,
+                        project_scope = project_scope,
+                        asset_view = asset_view)),
+                      body=list(file_name=httr::upload_file(file_name))
     )
   } else {
     req <- httr::POST(url,
-      httr::add_headers(Authorization = sprintf("Bearer %s", access_token)),
-      query=flattenbody(list(
-        schema_url=schema_url,
-        data_type=data_type,
-        restrict_rules=restrict_rules,
-        project_scope = project_scope,
-        asset_view = asset_view,
-        json_str = json_str))
+                      httr::add_headers(Authorization = sprintf("Bearer %s", access_token)),
+                      query=flattenbody(list(
+                        schema_url=schema_url,
+                        data_type=data_type,
+                        restrict_rules=restrict_rules,
+                        project_scope = project_scope,
+                        asset_view = asset_view,
+                        json_str = json_str))
     )
   }
-
+  
   # Format server error in a way validationResult can handle
   if (httr::http_status(req)$category == "Server error") {
     return(
