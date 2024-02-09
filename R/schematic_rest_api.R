@@ -143,15 +143,31 @@ manifest_validate <- function(url="http://localhost:3001/v1/model/validate",
   
   if (is.null(json_str)) {
     req <- httr::POST(url,
-                      httr::add_headers(Authorization = sprintf("Bearer %s", access_token)),
-                      query=flattenbody(list(
-                        schema_url=schema_url,
-                        data_type=data_type,
-                        restrict_rules=restrict_rules,
-                        project_scope = project_scope,
-                        asset_view = asset_view)),
+                       httr::add_headers(Authorization = sprintf("Bearer %s", access_token)),
+                       query=flattenbody(list(
+                         schema_url=schema_url,
+                         data_type=data_type,
+                         restrict_rules=restrict_rules,
+                         project_scope = project_scope,
+                         asset_view = asset_view)),
                       body=list(file_name=httr::upload_file(file_name))
     )
+    # req <- httr2::request(url) |>
+    #   httr2::req_method("POST") |>
+    #   httr2::req_error(is_error = \(resp) httr2::resp_status(resp) == 510)
+    # resp <- req |>
+    #   httr2::req_headers(
+    #     Authorization = sprintf("Bearer %s", access_token)
+    #   ) |>
+    #   httr2::req_url_query(
+    #     schema_url=schema_url,
+    #     data_type=data_type,
+    #     restrict_rules=restrict_rules,
+    #     project_scope = project_scope,
+    #     asset_view = asset_view
+    #   ) |>
+    #   httr2::req_body_file(file_name) |>
+    #   httr2::req_perform()
   } else {
     req <- httr::POST(url,
                       httr::add_headers(Authorization = sprintf("Bearer %s", access_token)),
@@ -163,25 +179,46 @@ manifest_validate <- function(url="http://localhost:3001/v1/model/validate",
                         asset_view = asset_view,
                         json_str = json_str))
     )
+    # req <- httr2::request(url) |>
+    #   httr2::req_method("POST") |>
+    #   httr2::req_error(is_error = \(resp) httr2::resp_status(resp) == 510)
+    # resp <- req |>
+    #   httr2::req_headers(
+    #     Authorization = sprintf("Bearer %s", access_token)
+    #   ) |>
+    #   httr2::req_url_query(
+    #     schema_url=schema_url,
+    #     data_type=data_type,
+    #     restrict_rules=restrict_rules,
+    #     project_scope = project_scope,
+    #     asset_view = asset_view,
+    #     json_str = json_str
+    #   ) |>
+    #   httr2::req_perform()
+    
   }
   
   # Format server error in a way validationResult can handle
-  if (httr::http_status(req)$category == "Server error") {
+  #if (httr2::resp_is_error(resp)) {
+  if (httr::http_error(req)) {
     return(
       list(
         list(
           "errors" = list(
             Row = NA, Column = NA, Value = NA,
             Error = sprintf("Cannot validate manifest: %s",
-                            httr::http_status(req)$message)
+                            httr::http_status(req)$message
+            )
           )
         )
       )
     )
   }
-  check_success(req)
-  annotation_status <- httr::content(req)
-  annotation_status
+  #httr2::resp_body_json(resp)
+  httr::content(req)
+  # check_success(req)
+  #annotation_status <- httr::content(req)
+  #annotation_status
 }
 
 
