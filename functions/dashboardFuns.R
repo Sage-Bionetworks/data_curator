@@ -42,8 +42,6 @@ get_dataset_metadata <- function(syn.store, datasets, ncores = 1, schematic_api=
   lapply(file_view$parentId, function(dataset) {
     # get manifest's synapse id(s) in each dataset folder
     manifest_ids <- file_view$id[file_view$parentId == dataset]
-
-    if (length(manifest_ids) > 0) {
       # in case, multiple manifests exist in the same dataset
       for (id in manifest_ids) {
         if (schematic_api == "reticulate"){
@@ -59,10 +57,14 @@ get_dataset_metadata <- function(syn.store, datasets, ncores = 1, schematic_api=
             manifest_id = info$id,
             as_json = TRUE
           )
+          manifest_tempfile <- tempfile(
+            pattern = id, fileext = ".csv"
+          )
+          readr::write_csv(manifest, manifest_tempfile)
           
           # refactor this not to write files but save in a object
           #tmp_man <- tempfile()
-          info$Path <- NA_character_
+          info$Path <- manifest_tempfile
           #write_csv(manifest, tmp_man)
           manifest_dfs[[id]] <<- manifest
           manifest_info <<- append(manifest_info, list(unlist(info)))
@@ -71,7 +73,6 @@ get_dataset_metadata <- function(syn.store, datasets, ncores = 1, schematic_api=
         }
         
       }
-    }
   })
 
   manifest_info <- bind_rows(manifest_info)
@@ -104,8 +105,8 @@ get_dataset_metadata <- function(syn.store, datasets, ncores = 1, schematic_api=
         # extract manifest essential information for dashboard
         manifest_path <- info$Path
         # See above - don't read from file, read from object
-        #manifest_df <- data.table::fread(manifest_path)
-        manifest_df <- manifest_dfs[[i]]
+        manifest_df <- readr::read_csv(manifest_path)
+        #manifest_df <- manifest_dfs[[i]]
         # keep all manifests used for validation, even if it has invalid component value
         # if manifest doesn't have "Component" column, or empty, return NA for component
         manifest_component <- ifelse("Component" %in% colnames(manifest_df) & nrow(manifest_df) > 0,
@@ -150,7 +151,6 @@ validate_metadata <- function(metadata, project.scope, schematic_api, schema_url
   if (nrow(metadata) == 0) {
     return(metadata)
   }
-
   lapply(1:nrow(metadata), function(i) {
     manifest <- metadata[i, ]
     if (is.na(manifest$Component)) {
@@ -179,7 +179,7 @@ validate_metadata <- function(metadata, project.scope, schematic_api, schema_url
                                  data_type=manifest$Component,
                                  schema_url = schema_url,
                                  access_token = access_token,
-                                 json_str = jsonlite::toJSON(manifest$manifest[[1]]))
+                                 file_name = manifest$Path)
       )
       # clean validation res from schematicpy
       clean_res <- validationResult(validation_res, manifest$Component, dashboard = TRUE)
