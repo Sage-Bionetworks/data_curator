@@ -141,28 +141,30 @@ manifest_validate <- function(url="http://localhost:3001/v1/model/validate",
     stop("Must provide either a file to upload or a json")
   }
   
-  req <- ifelse(is.null(json_str),
-                httr::POST(url,
-                           httr::add_headers(Authorization = sprintf("Bearer %s", access_token)),
-                           query=flattenbody(list(
-                             schema_url=schema_url,
-                             data_type=data_type,
-                             restrict_rules=restrict_rules,
-                             project_scope = project_scope,
-                             asset_view = asset_view)),
-                           body=list(file_name=httr::upload_file(file_name))
-                ),
-                httr::POST(url,
-                           httr::add_headers(Authorization = sprintf("Bearer %s", access_token)),
-                           query=flattenbody(list(
-                             schema_url=schema_url,
-                             data_type=data_type,
-                             restrict_rules=restrict_rules,
-                             project_scope = project_scope,
-                             asset_view = asset_view,
-                             json_str = json_str))
-                ))
-  
+  if (is.null(json_str)) {
+    req <- httr::POST(url,
+      httr::add_headers(Authorization = sprintf("Bearer %s", access_token)),
+      query=flattenbody(list(
+        schema_url=schema_url,
+        data_type=data_type,
+        restrict_rules=restrict_rules,
+        project_scope = project_scope,
+        asset_view = asset_view)),
+      body=list(file_name=httr::upload_file(file_name))
+    )
+  } else {
+    req <- httr::POST(url,
+      httr::add_headers(Authorization = sprintf("Bearer %s", access_token)),
+      query=flattenbody(list(
+        schema_url=schema_url,
+        data_type=data_type,
+        restrict_rules=restrict_rules,
+        project_scope = project_scope,
+        asset_view = asset_view,
+        json_str = json_str))
+    )
+  }
+
   # Format server error in a way validationResult can handle
   if (httr::http_status(req)$category == "Server error") {
     return(
