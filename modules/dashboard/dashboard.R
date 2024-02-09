@@ -82,11 +82,11 @@ dashboard <- function(id, syn.store, project.scope, schema, schema.display.name,
       observeEvent(c(project.scope(), input$box$visible), {
         req(input$box$visible)
         # initiate partial loading screen for generating plot
-        # dcWaiter(
-        #  "show",
-        #  id = ns("tab-container"), url = "www/img/logo.svg", custom_spinner = TRUE,
-        #  msg = "Loading, please wait...", style = "color: #000;", color = transparent(0.95)
-        # )
+        dcWaiter(
+         "show",
+         id = ns("tab-container"), url = "www/img/logo.svg", custom_spinner = TRUE,
+         msg = "Loading, please wait..."
+        )
 
         # disable selection to prevent changes until all uploaded manifests are queried
         # make sure to use asis, otherwise it will add module's namespaces
