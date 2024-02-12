@@ -207,7 +207,7 @@ ui <- shinydashboardPlus::dashboardPage(
                      class = "btn-primary-color"
         )
       ),
-      dashboardUI("dashboard")
+      shinyjs::hidden(dashboardUI("dashboard"))
     ),
   ),
   tabItem(

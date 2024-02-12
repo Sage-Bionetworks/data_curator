@@ -194,6 +194,10 @@ shinyServer(function(input, output, session) {
       sass_file("www/scss/main.scss")))
     })
     
+    if (isTRUE(dcc_config_react()$dca$use_compliance_dashboard)) {
+      shinyjs::show("dashboard-toggle-btn-container")
+    }
+
     dcWaiter("hide")
     dcWaiter("show", msg = paste0("Getting data. This may take a minute."),
       color = primary_col())
