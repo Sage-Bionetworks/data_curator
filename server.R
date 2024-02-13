@@ -193,10 +193,6 @@ shinyServer(function(input, output, session) {
       sidebar_col=dcc_config_react()$dca$sidebar_col,
       sass_file("www/scss/main.scss")))
     })
-    
-    if (isTRUE(dcc_config_react()$dca$use_compliance_dashboard)) {
-      shinyjs::show("dashboard-toggle-btn-container")
-    }
 
     dcWaiter("hide")
     dcWaiter("show", msg = paste0("Getting data. This may take a minute."),
@@ -304,6 +300,10 @@ shinyServer(function(input, output, session) {
     shinyjs::hide(select = "li:nth-child(4)")
     shinyjs::hide(select = "li:nth-child(5)")
     shinyjs::hide(select = "li:nth-child(6)")
+    session$sendCustomMessage(
+      "compliance_dashboard",
+      dcc_config_react()$dca$use_compliance_dashboard
+    )
     
     dcWaiter("hide")
     }
@@ -486,7 +486,7 @@ shinyServer(function(input, output, session) {
     updateSelectInput(session, "header_dropdown_folder",
                       choices = selected$folder())
   })
-  
+
   observeEvent(data_list$files(), ignoreInit = TRUE, {
     warn_text <- NULL
     if (length(data_list$folders()) == 0) {

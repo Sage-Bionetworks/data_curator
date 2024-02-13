@@ -119,7 +119,11 @@ ui <- shinydashboardPlus::dashboardPage(
   tags$head(
     tags$style(sass(sass_file("www/scss/main.scss"))),
     singleton(includeScript("www/js/readCookie.js")),
-    tags$script(htmlwidgets::JS("setTimeout(function(){history.pushState({}, 'Data Curator', window.location.pathname);},2000);"))
+    tags$script(htmlwidgets::JS("setTimeout(function(){history.pushState({}, 'Data Curator', window.location.pathname);},2000);"),
+      "Shiny.addCustomMessageHandler('compliance_dashboard', function(x) {
+        Shiny.setInputValue('compliance_dashboard', x);
+      });
+    ")
   ),
   uiOutput("sass"),
   # load dependencies
@@ -207,7 +211,7 @@ ui <- shinydashboardPlus::dashboardPage(
                      class = "btn-primary-color"
         )
       ),
-      shinyjs::hidden(dashboardUI("dashboard"))
+     conditionalPanel("input.compliance_dashboard", dashboardUI("dashboard"))
     ),
   ),
   tabItem(
