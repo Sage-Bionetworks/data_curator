@@ -19,28 +19,21 @@ check_success <- function(x){
 #' @returns a csv of the manifest
 #' @export
 manifest_download <- function(url = "http://localhost:3001/v1/manifest/download", access_token, manifest_id, as_json=TRUE, new_manifest_name=NULL) {
-  request <- httr::GET(
-    url = url,
-    httr::add_headers(Authorization = sprintf("Bearer %s", access_token)),
-    query = list(
+
+  req <- httr2::request(url)
+  resp <- req |>
+    httr2::req_headers(Authorization = sprintf("Bearer %s", access_token)) |>
+    httr2::req_url_query(
       manifest_id = manifest_id,
       as_json = as_json,
       new_manifest_name = new_manifest_name
-    )
-  )
-  
-  check_success(request)
-  response <- httr::content(request, type = "text", encoding = "UTF-8")
-  response <- fromJSON(gsub('NaN', '"NA"', response))
-  
-  # Output can have many NULL values which get dropped or cause errors. Set them to NA
-  # nullToNA <- function(x) {
-  #   x[sapply(x, is.null)] <- NA
-  #   return(x)
-  # }
-  # df <- do.call(rbind, lapply(response, rbind))
-  # nullToNA(df)
-  response
+    ) |>
+    httr2::req_retry() |>
+    httr2::req_throttle(rate = 1) |>
+    httr2::req_perform()
+  resp |> httr2::resp_body_string() |>
+    gsub('NaN', '"NA"', x = _) |>
+    jsonlite::fromJSON()
 }
 
 #' schematic rest api to generate manifest
