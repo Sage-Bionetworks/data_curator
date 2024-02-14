@@ -154,7 +154,7 @@ validate_metadata <- function(metadata, project.scope, schematic_api, schema_url
   if (nrow(metadata) == 0) {
     return(metadata)
   }
-  lapply(1:nrow(metadata), function(i) {
+  parallel::mclapply(1:nrow(metadata), function(i) {
     manifest <- metadata[i, ]
     if (is.na(manifest$Component)) {
       data.frame(
@@ -195,7 +195,7 @@ validate_metadata <- function(metadata, project.scope, schematic_api, schema_url
         WarnMsg = if_else(is.null(clean_res$warning_msg[1]), "Valid", paste(clean_res$warning_msg[1], collapse = "; "))
       )
     }
-  }) %>%
+  }, mc.cores = ncores) %>%
     bind_rows() %>%
     cbind(metadata, .) # expand metadata with validation results
 }
