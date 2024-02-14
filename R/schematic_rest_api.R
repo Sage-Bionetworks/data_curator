@@ -28,8 +28,10 @@ manifest_download <- function(url = "http://localhost:3001/v1/manifest/download"
       as_json = as_json,
       new_manifest_name = new_manifest_name
     ) |>
-    httr2::req_retry() |>
-    httr2::req_throttle(rate = 1) |>
+    httr2::req_retry(
+      max_tries = 3,
+      is_transient = \(resp) httr2::resp_status(resp) %in% c(429, 500, 503)
+    ) |>
     httr2::req_perform()
   resp |> httr2::resp_body_string() |>
     gsub('NaN', '"NA"', x = _) |>
@@ -343,7 +345,7 @@ get_asset_view_table <- function(url="http://localhost:3001/v1/storage/assets/ta
   if (return_type=="json") {
     return(list2DF(fromJSON(httr::content(req))))
   } else {
-  csv <- readr::read_csv(httr::content(req))
+  csv <- readr::read_csv(httr::content(req), show_col_types = FALSE)
   return(csv)
   }
   
