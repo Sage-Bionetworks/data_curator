@@ -60,8 +60,10 @@ synapse_get <- function(url = "https://repo-prod.prod.sagebase.org/repo/v1/entit
   if (is.null(id)) stop("id cannot be NULL")
   req <- httr2::request(file.path(url, id))
   resp <- req |>
-    httr2::req_retry() |>
-    httr2::req_throttle(rate = 1) |>
+    httr2::req_retry(
+      max_tries = 5,
+      is_transient = \(resp) httr2::resp_status(resp) %in% c(429, 500, 503)
+    ) |>
     httr2::req_headers(Authorization = sprintf("Bearer %s", auth)) |>
     httr2::req_perform()
   resp |> httr2::resp_body_json()
@@ -274,6 +276,6 @@ synapse_download_file_handle <- function(dataFileHandleId, id, auth, filepath=NU
   download_url <- httr::content(request)
   destfile <- ifelse(is.null(filepath), tempfile(), filepath)
   download.file(download_url, destfile)
-  if (is.null(filepath)) readr::read_csv(destfile)
+  if (is.null(filepath)) readr::read_csv(destfile, show_col_types = FALSE)
   
 }
