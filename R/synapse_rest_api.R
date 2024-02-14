@@ -54,21 +54,17 @@ synapse_is_certified <- function(url="https://repo-prod.prod.sagebase.org/repo/v
 #' @param auth Synapse PAT
 #' 
 #' @export
-synapse_get <- function(url = "https://repo-prod.prod.sagebase.org/repo/v1/entity/",
+synapse_get <- function(url = "https://repo-prod.prod.sagebase.org/repo/v1/entity",
                         id, auth) {
   
   if (is.null(id)) stop("id cannot be NULL")
-  req_url <- file.path(url, id)
-  req <- httr::GET(req_url,
-             httr::add_headers(Authorization=paste0("Bearer ", auth)))
-  
-  # Send error if unsuccessful query
-  status <- httr::http_status(req)
-  if (status$category != "Success") stop(status$message)
-  
-  cont <- httr::content(req)
-  dplyr::bind_rows(cont)
-  
+  req <- httr2::request(file.path(url, id))
+  resp <- req |>
+    httr2::req_retry() |>
+    httr2::req_throttle(rate = 1) |>
+    httr2::req_headers(Authorization = sprintf("Bearer %s", auth)) |>
+    httr2::req_perform()
+  resp |> httr2::resp_body_json()
 }
 
 
