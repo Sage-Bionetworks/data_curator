@@ -39,41 +39,44 @@ get_dataset_metadata <- function(syn.store, datasets, ncores = 1, schematic_api=
   )
   cols <- setNames(rep("", length(cols)), cols)
   metadata <- bind_rows(cols)[0, ]
-  lapply(file_view$parentId, function(dataset) {
+  metadata_list <- parallel::mclapply(file_view$parentId, function(dataset) {
     # get manifest's synapse id(s) in each dataset folder
     manifest_ids <- file_view$id[file_view$parentId == dataset]
       # in case, multiple manifests exist in the same dataset
-      for (id in manifest_ids) {
-        if (schematic_api == "reticulate"){
-          info <- syn$get(id)
-          manifest_info <<- append(manifest_info, info)
-          user <- syn$getUserProfile(info["properties"]["modifiedBy"])["userName"]
-          modified_user <<- append(modified_user, user)
-        } else if (schematic_api == "rest"){
-          info <- synapse_get(id = id, auth = access_token)
-          manifest <- manifest_download(
-            url = file.path(api_uri, "v1/manifest/download"),
-            access_token = access_token,
-            manifest_id = info$id,
-            as_json = TRUE
-          )
-          manifest_tempfile <- tempfile(
-            pattern = id, fileext = ".csv"
-          )
-          readr::write_csv(manifest, manifest_tempfile)
-          
-          # refactor this not to write files but save in a object
-          #tmp_man <- tempfile()
-          info$Path <- manifest_tempfile
-          #write_csv(manifest, tmp_man)
-          manifest_dfs[[id]] <<- manifest
-          manifest_info <<- append(manifest_info, list(unlist(info)))
-          user <- synapse_user_profile(auth=access_token)[["userName"]]
-          modified_user <<- append(modified_user, user)
-        }
+    manifests <- parallel::mclapply(manifest_ids, function(id) {
+      if (schematic_api == "reticulate"){
+        info <- syn$get(id)
+        manifest_info <<- append(manifest_info, info)
+        user <- syn$getUserProfile(info["properties"]["modifiedBy"])["userName"]
+        modified_user <<- append(modified_user, user)
+      } else if (schematic_api == "rest"){
+        info <- synapse_get(id = id, auth = access_token)
+        manifest <- manifest_download(
+          url = file.path(api_uri, "v1/manifest/download"),
+          access_token = access_token,
+          manifest_id = info$id,
+          as_json = TRUE
+        )
+        manifest_tempfile <- tempfile(
+          pattern = id, fileext = ".csv"
+        )
+        readr::write_csv(manifest, manifest_tempfile)
         
+        # refactor this not to write files but save in a object
+        info$Path <- manifest_tempfile
+        list(
+          manifest_df = manifest,
+          manifest_info = info,
+          modified_user = info$modifiedBy
+        )
       }
-  })
+    }, mc.cores = ncores)
+    manifests
+  }, mc.cores = ncores)
+  
+  manifest_dfs <- lapply(seq_along(metadata_list), function(x) metadata_list[[x]][[1]]$manifest_df)
+  manifest_info <- lapply(seq_along(metadata_list), function(x) metadata_list[[x]][[1]]$manifest_info)
+  modified_user <- lapply(seq_along(metadata_list), function(x) metadata_list[[x]][[1]]$modified_user)
 
   manifest_info <- bind_rows(manifest_info)
   manifest_info <- unique(manifest_info)
