@@ -108,7 +108,7 @@ get_dataset_metadata <- function(syn.store, datasets, ncores = 1, schematic_api=
         # extract manifest essential information for dashboard
         manifest_path <- info$Path
         # See above - don't read from file, read from object
-        manifest_df <- readr::read_csv(manifest_path)
+        manifest_df <- readr::read_csv(manifest_path, show_col_types = FALSE)
         #manifest_df <- manifest_dfs[[i]]
         # keep all manifests used for validation, even if it has invalid component value
         # if manifest doesn't have "Component" column, or empty, return NA for component
