@@ -27,7 +27,7 @@ suppressPackageStartupMessages({
 })
 
 # Set up futures/promises for asynchronous calls
-ncores <- availableCores()
+ncores <- availableCores() - 1
 message(sprintf("Available cores: %s", ncores))
 plan(multicore, workers = ncores)
 
