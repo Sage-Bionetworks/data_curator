@@ -154,7 +154,7 @@ validate_metadata <- function(metadata, project.scope, schematic_api, schema_url
   if (nrow(metadata) == 0) {
     return(metadata)
   }
-  parallel::mclapply(1:nrow(metadata), function(i) {
+  m2 <- parallel::mclapply(1:nrow(metadata), function(i) {
     manifest <- metadata[i, ]
     if (is.na(manifest$Component)) {
       data.frame(
@@ -171,32 +171,45 @@ validate_metadata <- function(metadata, project.scope, schematic_api, schema_url
         WarnMsg = "'Component' is missing"
       )
     } else {
-      validation_res <- switch(schematic_api,
-        reticulate = manifest_validate_py(
-          manifestPath = manifest$Path,
-          rootNode = manifest$Component,
-          restrict_rules = TRUE, # set true to disable great expectation
-          project_scope = project.scope
-        ),
-        rest = manifest_validate(url=file.path(api_uri, "v1/model/validate"),
-                                 data_type=manifest$Component,
-                                 schema_url = schema_url,
-                                 access_token = access_token,
-                                 file_name = manifest$Path)
+      validation_res <- tryCatch(
+        switch(schematic_api,
+          reticulate = manifest_validate_py(
+            manifestPath = manifest$Path,
+            rootNode = manifest$Component,
+            restrict_rules = TRUE, # set true to disable great expectation
+            project_scope = project.scope
+          ),
+          rest = manifest_validate(url=file.path(api_uri, "v1/model/validate"),
+                                   data_type=manifest$Component,
+                                   schema_url = schema_url,
+                                   access_token = access_token,
+                                   file_name = manifest$Path)
+        ), silent = TRUE
       )
-      # clean validation res from schematicpy
-      clean_res <- validationResult(validation_res, manifest$Component, dashboard = TRUE)
-
-      data.frame(
-        Result = clean_res$result,
-        # change wrong schema to out-of-date type
-        ErrorType = if_else(clean_res$error_type == "Wrong Schema", "Out of Date", clean_res$error_type),
-        errorMsg = if_else(is.null(clean_res$error_msg[1]), "Valid", paste(clean_res$error_msg[1], collapse="; ")),
-        WarnMsg = if_else(is.null(clean_res$warning_msg[1]), "Valid", paste(clean_res$warning_msg[1], collapse = "; "))
-      )
+      if (!inherits(validation_res, "try-error")) {
+        # clean validation res from schematicpy
+        clean_res <- validationResult(validation_res, manifest$Component, dashboard = TRUE)
+        
+        data.frame(
+          Result = clean_res$result,
+          # change wrong schema to out-of-date type
+          ErrorType = if_else(clean_res$error_type == "Wrong Schema", "Out of Date", clean_res$error_type),
+          errorMsg = if_else(is.null(clean_res$error_msg[1]), "Valid", paste(clean_res$error_msg[1], collapse="; ")),
+          WarnMsg = if_else(is.null(clean_res$warning_msg[1]), "Valid", paste(clean_res$warning_msg[1], collapse = "; "))
+        )
+      } else {
+        data.frame(
+          Result = "Fail",
+          # change wrong schema to out-of-date type
+          ErrorType = "Unknown Error",
+          errorMsg = "Server Error",
+          WarnMsg = " "
+        )
+      }
+      
     }
-  }, mc.cores = ncores) %>%
-    bind_rows() %>%
+  }, mc.cores = ncores)
+  m2 <- bind_rows(m2) %>%
     cbind(metadata, .) # expand metadata with validation results
 }
 
