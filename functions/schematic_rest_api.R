@@ -137,47 +137,59 @@ manifest_validate <- function(url="http://localhost:3001/v1/model/validate",
   }
   
   if (is.null(json_str)) {
-    req <- httr::POST(url,
-                       httr::add_headers(Authorization = sprintf("Bearer %s", access_token)),
-                       query=flattenbody(list(
-                         schema_url=schema_url,
-                         data_type=data_type,
-                         restrict_rules=restrict_rules,
-                         project_scope = project_scope,
-                         asset_view = asset_view)),
-                      body=list(file_name=httr::upload_file(file_name))
-    )
+    req <- httr2::request(url)
+    resp <- req %>%
+      httr2::req_headers(Authorization = sprintf("Bearer %s", access_token)) |>
+      httr2::req_url_query(
+        schema_url=schema_url,
+        data_type=data_type,
+        restrict_rules=restrict_rules,
+        project_scope = project_scope,
+        asset_view = asset_view
+      ) |>
+      httr2::req_body_multipart(file_name=curl::form_file(file_name)) |>
+      httr2::req_retry(
+        max_tries = 3,
+        is_transient = \(resp) httr2::resp_status(resp) %in% c(429, 500, 503)
+      ) |>
+      httr2::req_error(is_error = \(resp) FALSE) |>
+      httr2::req_perform()
   } else {
-    req <- httr::POST(url,
-                      httr::add_headers(Authorization = sprintf("Bearer %s", access_token)),
-                      query=flattenbody(list(
-                        schema_url=schema_url,
-                        data_type=data_type,
-                        restrict_rules=restrict_rules,
-                        project_scope = project_scope,
-                        asset_view = asset_view,
-                        json_str = json_str))
-    )
+    req <- httr2::request(url)
+    resp <- req %>%
+      httr2::req_headers(Authorization = sprintf("Bearer %s", access_token)) |>
+      httr2::req_url_query(
+        schema_url=schema_url,
+        data_type=data_type,
+        restrict_rules=restrict_rules,
+        project_scope = project_scope,
+        asset_view = asset_view,
+        json_str = json_str
+      ) |>
+      httr2::req_retry(
+        max_tries = 3,
+        is_transient = \(resp) httr2::resp_status(resp) %in% c(429, 500, 503)
+      ) |>
+      httr2::req_error(is_error = \(resp) FALSE) |>
+      httr2::req_perform()
   }
   
   # Format server error in a way validationResult can handle
-  if (httr::http_error(req)) {
+  if (httr2::resp_is_error(resp)) {
     return(
       list(
         list(
           "errors" = list(
             Row = NA, Column = NA, Value = NA,
             Error = sprintf("Cannot validate manifest: %s",
-                            httr::http_status(req)$message
+                            httr2::resp_status_desc(resp)
             )
           )
         )
       )
     )
   }
-  check_success(req)
-  annotation_status <- httr::content(req)
-  annotation_status
+  httr2::resp_body_json(resp)
 }
 
 
@@ -231,22 +243,17 @@ model_component_requirements <- function(url="http://localhost:3001/v1/model/com
                                          schema_url, source_component,
                                          as_graph = FALSE) {
   
-  req <- httr::GET(url,
-                   query =  list(
-                     schema_url = schema_url,
-                     source_component = source_component,
-                     as_graph = as_graph
-                   ))
-  
-  check_success(req)
-  cont <- httr::content(req)
-  
-  if (inherits(cont, "xml_document")){
-    err_msg <- xml2::xml_text(xml2::xml_child(cont, "head/title"))
-    stop(sprintf("%s", err_msg))
-  }
-  
-  cont
+  req <- httr2::request(url)
+  resp <- req |>
+    httr2::req_url_query(
+    schema_url = schema_url,
+    source_component = source_component,
+    as_graph = as_graph
+  ) |>
+    httr2::req_retry(max_tries = 3) |>
+    httr2::req_perform()
+  resp |>
+    httr2::resp_body_json()
   
 }
   
