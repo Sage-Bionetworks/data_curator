@@ -34,7 +34,7 @@ manifest_download <- function(url = "http://localhost:3001/v1/manifest/download"
     ) |>
     httr2::req_perform()
   resp |> httr2::resp_body_string() |>
-    gsub('NaN', '"NA"', x = _) |>
+    (function(d) gsub('NaN', '"NA"', x = d))() |>
     jsonlite::fromJSON()
 }
 
@@ -150,7 +150,7 @@ manifest_validate <- function(url="http://localhost:3001/v1/model/validate",
       httr2::req_body_multipart(file_name=curl::form_file(file_name)) |>
       httr2::req_retry(
         max_tries = 3,
-        is_transient = \(resp) httr2::resp_status(resp) %in% c(429, 500, 503)
+        is_transient = \(resp) httr2::resp_status(resp) %in% c(429, 500, 503, 504)
       ) |>
       httr2::req_error(is_error = \(resp) FALSE) |>
       httr2::req_perform()
@@ -168,7 +168,7 @@ manifest_validate <- function(url="http://localhost:3001/v1/model/validate",
       ) |>
       httr2::req_retry(
         max_tries = 3,
-        is_transient = \(resp) httr2::resp_status(resp) %in% c(429, 500, 503)
+        is_transient = \(resp) httr2::resp_status(resp) %in% c(429, 500, 503, 504)
       ) |>
       httr2::req_error(is_error = \(resp) FALSE) |>
       httr2::req_perform()
