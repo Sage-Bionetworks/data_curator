@@ -113,7 +113,6 @@ manifest_validate <- function(url="http://localhost:3001/v1/model/validate",
                               data_type, file_name = NULL, restrict_rules=FALSE, project_scope = NULL,
                               access_token, asset_view = NULL, json_str = NULL) {
   a <- paste0(sample(1000, 1), "-")
-  cat(paste0(a, "-validate func ", data_type, " ", file_name, "\n"))
   flattenbody <- function(x) {
     # A form/query can only have one value per name, so take
     # any values that contain vectors length >1 and
@@ -145,7 +144,6 @@ manifest_validate <- function(url="http://localhost:3001/v1/model/validate",
       ) |>
       httr2::req_error(is_error = \(reqs) FALSE) |> 
       httr2::req_throttle(1)
-    cat(paste0(a, "-validate func requesting", unlist(reqs), "\n"))
     resp <- reqs %>%
       httr2::req_headers(Authorization = sprintf("Bearer %s", access_token)) |>
       httr2::req_url_query(
@@ -157,7 +155,6 @@ manifest_validate <- function(url="http://localhost:3001/v1/model/validate",
       ) |>
       httr2::req_body_multipart(file_name=curl::form_file(file_name)) |>
       httr2::req_perform()
-    cat(paste0(a, "-validate func response", unlist(resp), "\n"))
   } else {
     req <- httr2::request(url) |>
       httr2::req_throttle(1)
@@ -180,7 +177,6 @@ manifest_validate <- function(url="http://localhost:3001/v1/model/validate",
   }
   
   # Format server error in a way validationResult can handle
-  cat(a, "-validate func response", "\n")
   if (httr2::resp_is_error(resp)) {
     return(
       list(
