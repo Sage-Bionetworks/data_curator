@@ -154,7 +154,7 @@ validate_metadata <- function(metadata, project.scope, schematic_api, schema_url
   if (nrow(metadata) == 0) {
     return(metadata)
   }
-  m2 <- lapply(1:nrow(metadata), function(i) {
+  m2 <- parallel::mclapply(1:nrow(metadata), function(i) {
     manifest <- metadata[i, ]
     cat(paste0("validating ", manifest$Path, "\n"))
     if (is.na(manifest$Component)) {
