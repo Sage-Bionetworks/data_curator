@@ -94,7 +94,7 @@ dashboard <- function(id, syn.store, project.scope, schema, schema.display.name,
 
         # get all datasets from selected project
         folder_list <- switch(schematic_api,
-                              "rest" = storage_project_datasets(url=file.path(api_uri, "v1/storage/project/datasets"),
+                              "rest" = storage_project_datasets(url=file.path("https://schematic-dev.api.sagebionetworks.org/v1/storage/project/datasets"),
                                                                 asset_view = fileview,
                                                                 project_id=folder,
                                                                 access_token=access_token),
@@ -123,7 +123,7 @@ dashboard <- function(id, syn.store, project.scope, schema, schema.display.name,
       selected_datatype_requirement <- eventReactive(c(schema(), input$box$visible), {
         req(input$box$visible)
         get_schema_nodes(schema(), schematic_api = schematic_api,
-                    url=file.path(api_uri, "v1/model/component-requirements"),
+                    url=file.path("https://schematic-dev.api.sagebionetworks.org/v1/model/component-requirements"),
                     schema_url = schema_url)
       })
 
@@ -134,7 +134,7 @@ dashboard <- function(id, syn.store, project.scope, schema, schema.display.name,
         # remove rows with invalid component name
         metadata <- uploaded_manifests() %>% filter(!is.na(Component), Component != "Unknown")
         get_metadata_nodes(metadata, ncores = ncores, schematic_api=schematic_api,
-                          schema_url = schema_url, url = file.path(api_uri, "v1/model/component-requirements"))
+                          schema_url = schema_url, url = file.path("https://schematic-dev.api.sagebionetworks.org/v1/model/component-requirements"))
       })
 
       # render info/plots for selected datatype
