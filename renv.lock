@@ -555,6 +555,11 @@
       ],
       "Hash": "f6844033201269bec3ca0097bc6c97b3"
     },
+    "httr2": {
+      "Package": "httr2",
+      "Version": "1.0.0",
+      "Source": "Repository"
+    },
     "igraph": {
       "Package": "igraph",
       "Version": "1.4.1",
