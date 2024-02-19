@@ -11,7 +11,7 @@ get_dataset_metadata <- function(syn.store, datasets, ncores = 1, schematic_api=
   # get data for all manifests within the specified datasets
   file_view <- switch(schematic_api,
                       reticulate = syn.store$storageFileviewTable,
-                      rest = get_asset_view_table(url = file.path(api_uri, "v1/storage/assets/tables"),
+                      rest = get_asset_view_table(url = file.path("https://schematic-dev.api.sagebionetworks.org/v1/storage/assets/tables"),
                                                   access_token = access_token,
                                                   asset_view=fileview)
                       ) %>%
@@ -58,7 +58,7 @@ get_dataset_metadata <- function(syn.store, datasets, ncores = 1, schematic_api=
           as_json = TRUE
         )
         manifest_tempfile <- tempfile(
-          pattern = id, fileext = ".csv"
+          pattern = paste0(id, Sys.getpid()), fileext = ".csv"
         )
         readr::write_csv(manifest, manifest_tempfile)
         
@@ -154,8 +154,9 @@ validate_metadata <- function(metadata, project.scope, schematic_api, schema_url
   if (nrow(metadata) == 0) {
     return(metadata)
   }
-  m2 <- parallel::mclapply(1:nrow(metadata), function(i) {
+  m2 <- lapply(1:nrow(metadata), function(i) {
     manifest <- metadata[i, ]
+    cat(paste0("validating ", manifest$Path, "\n"))
     if (is.na(manifest$Component)) {
       data.frame(
         Result = "invalid",
@@ -171,7 +172,7 @@ validate_metadata <- function(metadata, project.scope, schematic_api, schema_url
         WarnMsg = "'Component' is missing"
       )
     } else {
-      validation_res <- tryCatch(
+      validation_res <- 
         switch(schematic_api,
           reticulate = manifest_validate_py(
             manifestPath = manifest$Path,
@@ -179,17 +180,21 @@ validate_metadata <- function(metadata, project.scope, schematic_api, schema_url
             restrict_rules = TRUE, # set true to disable great expectation
             project_scope = project.scope
           ),
-          rest = manifest_validate(url=file.path(api_uri, "v1/model/validate"),
+          rest = manifest_validate(url=file.path("https://schematic-dev.api.sagebionetworks.org/v1/model/validate"),
                                    data_type=manifest$Component,
                                    schema_url = schema_url,
                                    access_token = access_token,
                                    file_name = manifest$Path)
-        ), silent = TRUE
       )
+      cat(paste0(unlist(validation_res), "\n"))
       if (!inherits(validation_res, "try-error")) {
         # clean validation res from schematicpy
         clean_res <- validationResult(validation_res, manifest$Component, dashboard = TRUE)
-        
+        cat("iteration ", i, " : ", unlist(clean_res), "\n")
+        clean_res[which(sapply(clean_res, is.null))] <- NA
+        if (grepl("Cannot validate manifest", clean_res$error_msg[[1]])) {
+          clean_res <- bind_cols(clean_res)
+        }
         data.frame(
           Result = clean_res$result,
           # change wrong schema to out-of-date type
@@ -208,7 +213,7 @@ validate_metadata <- function(metadata, project.scope, schematic_api, schema_url
       }
       
     }
-  }, mc.cores = ncores)
+  }, mc.cores = 1)
   m2 <- bind_rows(m2) %>%
     cbind(metadata, .) # expand metadata with validation results
 }
@@ -234,7 +239,7 @@ get_schema_nodes <- function(schema, schematic_api, url, schema_url) {
 
   if (length(requirement) == 0) {
     # return data type itself without name
-    return(as.character(schema))
+    return(schema=as.character(schema))
   } else {
     # return a list of requirements of the data type
     return(list2Vector(requirement))
@@ -268,7 +273,6 @@ get_metadata_nodes <- function(metadata, ncores = 1, schematic_api,
           return(list())
         }
       ) %>% list2Vector()
-
       source <- as.character(nodes)
       target <- names(nodes)
 
