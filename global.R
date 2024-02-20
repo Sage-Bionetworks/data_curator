@@ -32,6 +32,10 @@ message(sprintf("Available cores: %s", ncores))
 plan(multicore, workers = ncores)
 
 options(shiny.maxRequestSize=32*1024^2)
+options(
+  rlang_backtrace_on_error = "branch",
+  error = rlang::entrace
+)
 
 # import R files
 source_files <- list.files(c("functions", "modules"), pattern = "*\\.R$", recursive = TRUE, full.names = TRUE)
