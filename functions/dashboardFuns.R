@@ -70,9 +70,9 @@ get_dataset_metadata <- function(syn.store, datasets, ncores = 1, schematic_api=
           modified_user = info$modifiedBy
         )
       }
-    }, mc.cores = ncores)
+    }, mc.cores = 1)
     manifests
-  }, mc.cores = ncores)
+  }, mc.cores = 1)
   
   manifest_dfs <- lapply(seq_along(metadata_list), function(x) metadata_list[[x]][[1]]$manifest_df)
   manifest_info <- lapply(seq_along(metadata_list), function(x) metadata_list[[x]][[1]]$manifest_info)
@@ -122,12 +122,12 @@ get_dataset_metadata <- function(syn.store, datasets, ncores = 1, schematic_api=
           ModifiedOn = info$modifiedOn,
           ModifiedUser = paste0("@", modified_user[[i]]),
           Path = manifest_path,
-          Folder = names(datasets)[which(datasets == info$parentId)],
+          Folder = names(datasets)[which(datasets %in% info$parentId)],
           FolderSynId = info$parentId,
           manifest = list(manifest_df)
         )
       }
-    }, mc.cores = ncores) %>% bind_rows()
+    }, mc.cores = 1) %>% bind_rows()
   }
 
   # add empty dataset ids even if there are no manifests
@@ -284,7 +284,7 @@ get_metadata_nodes <- function(metadata, ncores = 1, schematic_api,
         folder_id = c(manifest$FolderSynId),
         n_miss = c(n_miss)
       )
-    }, mc.cores = ncores) %>% bind_rows()
+    }, mc.cores = 1) %>% bind_rows()
   }
   
 }
