@@ -156,7 +156,6 @@ validate_metadata <- function(metadata, project.scope, schematic_api, schema_url
   }
   m2 <- parallel::mclapply(1:nrow(metadata), function(i) {
     manifest <- metadata[i, ]
-    cat(paste0("validating ", manifest$Path, "\n"))
     if (is.na(manifest$Component)) {
       data.frame(
         Result = "invalid",
@@ -186,11 +185,9 @@ validate_metadata <- function(metadata, project.scope, schematic_api, schema_url
                                    access_token = access_token,
                                    file_name = manifest$Path)
       )
-      cat(paste0(unlist(validation_res), "\n"))
       if (!inherits(validation_res, "try-error")) {
         # clean validation res from schematicpy
         clean_res <- validationResult(validation_res, manifest$Component, dashboard = TRUE)
-        cat("iteration ", i, " : ", unlist(clean_res), "\n")
         clean_res[which(sapply(clean_res, is.null))] <- NA
         if (grepl("Cannot validate manifest", clean_res$error_msg[[1]])) {
           clean_res <- bind_cols(clean_res)
