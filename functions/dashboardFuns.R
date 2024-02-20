@@ -14,8 +14,8 @@ get_dataset_metadata <- function(syn.store, datasets, ncores = 1, schematic_api=
                       rest = get_asset_view_table(url = file.path("https://schematic-dev.api.sagebionetworks.org/v1/storage/assets/tables"),
                                                   access_token = access_token,
                                                   asset_view=fileview)
-                      ) %>%
-    filter(grepl("synapse_storage_manifest_", name) & parentId %in% datasets)
+                      )
+    file_view <- filter(file_view, grepl("synapse_storage_manifest_", name) & parentId %in% datasets)
 
   # datasets don't have a manifest
   ds_no_manifest <- datasets[which(!datasets %in% file_view$parentId)]
@@ -122,12 +122,13 @@ get_dataset_metadata <- function(syn.store, datasets, ncores = 1, schematic_api=
           ModifiedOn = info$modifiedOn,
           ModifiedUser = paste0("@", modified_user[[i]]),
           Path = manifest_path,
-          Folder = names(datasets)[which(datasets %in% info$parentId)],
+          Folder = names(datasets)[which(datasets == info$parentId)],
           FolderSynId = info$parentId,
           manifest = list(manifest_df)
         )
       }
-    }, mc.cores = ncores) %>% bind_rows()
+    }, mc.cores = ncores)
+    metadata <- bind_rows(metadata)
   }
 
   # add empty dataset ids even if there are no manifests
@@ -187,6 +188,13 @@ validate_metadata <- function(metadata, project.scope, schematic_api, schema_url
       )
       if (!inherits(validation_res, "try-error")) {
         # clean validation res from schematicpy
+        if (!length(validation_res) == 2) {
+          validation_res <- list(list(
+            "errors" = list(
+              Row = NA, Column = NA, Value = NA,
+              Error = "Cannot validate manifest"
+            )))
+        }
         clean_res <- validationResult(validation_res, manifest$Component, dashboard = TRUE)
         clean_res[which(sapply(clean_res, is.null))] <- NA
         if (grepl("Cannot validate manifest", clean_res$error_msg[[1]])) {
@@ -210,9 +218,9 @@ validate_metadata <- function(metadata, project.scope, schematic_api, schema_url
       }
       
     }
-  }, mc.cores = 1)
-  m2 <- bind_rows(m2) %>%
-    cbind(metadata, .) # expand metadata with validation results
+  }, mc.cores = ncores)
+  m2 <- bind_rows(m2)
+  cbind(metadata, m2) # expand metadata with validation results
 }
 
 #' create a list of requirements for selected data type
@@ -233,7 +241,7 @@ get_schema_nodes <- function(schema, schematic_api, url, schema_url) {
       return(list())
     }
   )
-
+  if ("status" %in% names(requirement)) return(schema=as.character(schema))
   if (length(requirement) == 0) {
     # return data type itself without name
     return(schema=as.character(schema))
@@ -253,7 +261,7 @@ get_metadata_nodes <- function(metadata, ncores = 1, schematic_api,
   if (nrow(metadata) == 0) {
     return(data.frame(from = NA, to = NA, folder = NA, folderSynId = NA, nMiss = NA))
   } else {
-    parallel::mclapply(1:nrow(metadata), function(i) {
+    mn <- parallel::mclapply(1:nrow(metadata), function(i) {
       manifest <- metadata[i, ]
       # get all required data types
       nodes <- tryCatch(
@@ -267,9 +275,12 @@ get_metadata_nodes <- function(metadata, ncores = 1, schematic_api,
                ),
         error = function(e) {
           warning("'get_metadata_nodes' failed: ", sQuote(manifest$Component), ":\n", e$message)
+          cat(paste0("'get_metadata_nodes' failed: ", sQuote(manifest$Component), ":\n", e$message))
           return(list())
         }
-      ) %>% list2Vector()
+      )
+      if ("status" %in% names(nodes)) nodes <- list()
+      nodes <- list2Vector(nodes)
       source <- as.character(nodes)
       target <- names(nodes)
 
@@ -284,7 +295,8 @@ get_metadata_nodes <- function(metadata, ncores = 1, schematic_api,
         folder_id = c(manifest$FolderSynId),
         n_miss = c(n_miss)
       )
-    }, mc.cores = ncores) %>% bind_rows()
+    }, mc.cores = ncores)
+    mn <- bind_rows(mn)
   }
   
 }
