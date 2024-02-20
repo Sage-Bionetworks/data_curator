@@ -20,17 +20,18 @@ check_success <- function(x){
 #' @export
 manifest_download <- function(url = "http://localhost:3001/v1/manifest/download", access_token, manifest_id, as_json=TRUE, new_manifest_name=NULL) {
 
-  req <- httr2::request(url)
+  req <- httr2::request(url) |>
+    httr2::req_retry(
+      max_tries = 3,
+      is_transient = \(r) httr2::resp_status(r) %in% c(429, 500, 503)
+    ) |>
+    httr2::req_error(is_error = \(r) FALSE)
   resp <- req |>
     httr2::req_headers(Authorization = sprintf("Bearer %s", access_token)) |>
     httr2::req_url_query(
       manifest_id = manifest_id,
       as_json = as_json,
       new_manifest_name = new_manifest_name
-    ) |>
-    httr2::req_retry(
-      max_tries = 3,
-      is_transient = \(resp) httr2::resp_status(resp) %in% c(429, 500, 503)
     ) |>
     httr2::req_perform()
   resp |> httr2::resp_body_string() |>
@@ -140,10 +141,9 @@ manifest_validate <- function(url="http://localhost:3001/v1/model/validate",
     reqs <- httr2::request(url) |>
       httr2::req_retry(
         max_tries = 3,
-        is_transient = \(reqs) httr2::resp_status(reqs) %in% c(429, 500, 503, 504)
+        is_transient = \(r) httr2::resp_status(r) %in% c(429, 500, 503, 504)
       ) |>
-      httr2::req_error(is_error = \(reqs) FALSE) |> 
-      httr2::req_throttle(1)
+      httr2::req_error(is_error = \(reqs) FALSE)
     resp <- reqs %>%
       httr2::req_headers(Authorization = sprintf("Bearer %s", access_token)) |>
       httr2::req_url_query(
@@ -246,7 +246,11 @@ model_component_requirements <- function(url="http://localhost:3001/v1/model/com
                                          as_graph = FALSE) {
   
   reqs <- httr2::request(url) |>
-    httr2::req_throttle(1)
+    httr2::req_retry(
+      max_tries = 3,
+      is_transient = \(r) httr2::resp_status(r) %in% c(429, 500, 503)
+    ) |>
+    httr2::req_error(is_error = \(r) FALSE)
   resp <- reqs |>
     httr2::req_url_query(
     schema_url = schema_url,
