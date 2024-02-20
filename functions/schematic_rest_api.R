@@ -113,7 +113,6 @@ manifest_validate <- function(url="http://localhost:3001/v1/model/validate",
                               schema_url="https://raw.githubusercontent.com/ncihtan/data-models/main/HTAN.model.jsonld", #nolint
                               data_type, file_name = NULL, restrict_rules=FALSE, project_scope = NULL,
                               access_token, asset_view = NULL, json_str = NULL) {
-  a <- paste0(sample(1000, 1), "-")
   flattenbody <- function(x) {
     # A form/query can only have one value per name, so take
     # any values that contain vectors length >1 and
@@ -177,20 +176,20 @@ manifest_validate <- function(url="http://localhost:3001/v1/model/validate",
   }
   
   # Format server error in a way validationResult can handle
-  if (httr2::resp_is_error(resp)) {
-    return(
-      list(
-        list(
-          "errors" = list(
-            Row = NA, Column = NA, Value = NA,
-            Error = sprintf("Cannot validate manifest: %s",
-                            httr2::resp_status_desc(resp)
-            )
-          )
-        )
-      )
-    )
-  }
+  # if (httr2::resp_is_error(resp)) {
+  #   return(
+  #     list(
+  #       list(
+  #         "errors" = list(
+  #           Row = NA, Column = NA, Value = NA,
+  #           Error = sprintf("Cannot validate manifest: %s",
+  #                           httr2::resp_status_desc(resp)
+  #           )
+  #         )
+  #       )
+  #     )
+  #   )
+  # }
   httr2::resp_body_json(resp)
 }
 
