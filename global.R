@@ -31,8 +31,8 @@ ncores <- availableCores() - 1
 message(sprintf("Available cores: %s", ncores))
 plan(multicore, workers = ncores)
 
-options(shiny.maxRequestSize=32*1024^2)
 options(
+  shiny.maxRequestSize=32*1024^2,
   rlang_backtrace_on_error = "branch",
   error = rlang::entrace
 )
