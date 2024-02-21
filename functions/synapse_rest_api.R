@@ -54,21 +54,19 @@ synapse_is_certified <- function(url="https://repo-prod.prod.sagebase.org/repo/v
 #' @param auth Synapse PAT
 #' 
 #' @export
-synapse_get <- function(url = "https://repo-prod.prod.sagebase.org/repo/v1/entity/",
+synapse_get <- function(url = "https://repo-prod.prod.sagebase.org/repo/v1/entity",
                         id, auth) {
   
   if (is.null(id)) stop("id cannot be NULL")
-  req_url <- file.path(url, id)
-  req <- httr::GET(req_url,
-             httr::add_headers(Authorization=paste0("Bearer ", auth)))
-  
-  # Send error if unsuccessful query
-  status <- httr::http_status(req)
-  if (status$category != "Success") stop(status$message)
-  
-  cont <- httr::content(req)
-  dplyr::bind_rows(cont)
-  
+  req <- httr2::request(file.path(url, id))
+  resp <- req |>
+    httr2::req_retry(
+      max_tries = 5,
+      is_transient = \(resp) httr2::resp_status(resp) %in% c(429, 500, 503)
+    ) |>
+    httr2::req_headers(Authorization = sprintf("Bearer %s", auth)) |>
+    httr2::req_perform()
+  resp |> httr2::resp_body_json()
 }
 
 
@@ -99,3 +97,185 @@ synapse_access <- function(url = "https://repo-prod.prod.sagebase.org/repo/v1/en
   
 }
 
+#' @title Get children of a synapse entity
+#' https://rest-docs.synapse.org/rest/POST/entity/children.html
+#' @param url Synapse api endpoint
+#' @param auth Synapse token
+#' @param parentId Synapse ID of parent folder
+#' @param nextPageToken Synapse next page token
+#' @param includeTypes Types to return
+#' @param sortBy Variable to sort by 
+#' @param sortDirection sort direction 
+#' @param includeTotalChildCount boolean include count of children 
+#' @param includeSumFileSizes boolean include sum of file sizes 
+synapse_entity_children <- function(url = "https://repo-prod.prod.sagebase.org/repo/v1/entity/children",
+                                    auth, parentId=NULL, nextPageToken=NULL, includeTypes="project", sortBy="NAME",
+                                    sortDirection="ASC", includeTotalChildCount=FALSE, includeSumFileSizes=FALSE) {
+  
+  output <- list()
+  req <- httr::POST(url,
+                    httr::add_headers(Authorization=paste0("Bearer ", auth)),
+                    body = 
+                      list(parentId=parentId,
+                           nextPageToken=nextPageToken,
+                           includeTypes=includeTypes,
+                           sortBy=sortBy,
+                           sortDirection=sortDirection,
+                           includeTotalChildCount=includeTotalChildCount,
+                           includeSumFileSizes=includeSumFileSizes),
+                    encode="json")
+  
+  resp <- httr::content(req)
+  output <- resp$page
+  
+  while (!is.null(resp$nextPageToken)) {
+    req <- httr::POST(url,
+                      httr::add_headers(Authorization=paste0("Bearer ", auth)),
+                      body = 
+                        list(parentId=parentId,
+                             nextPageToken=resp$nextPageToken,
+                             includeTypes=includeTypes,
+                             sortBy=sortBy,
+                             sortDirection=sortDirection,
+                             includeTotalChildCount=includeTotalChildCount,
+                             includeSumFileSizes=includeSumFileSizes),
+                      encode="json")
+    resp <- httr::content(req)
+    output <- c(output, resp$page)
+  }
+  bind_rows(output)
+  
+}
+
+#' @title Get projects a user has access to
+#' 
+#' @param url Synapse api endpoint
+#' @param auth Synapse token
+#' @param nextPageToken Synapse next page token
+synapse_projects_user <- function(url = "https://repo-prod.prod.sagebase.org/repo/v1/projects/user", auth, nextPageToken=NULL) {
+  principalId <- synapse_user_profile(auth = auth)[["ownerId"]]
+  hreq <- httr::GET(url = file.path(url, principalId),
+                    query = list(nextPageToken=nextPageToken))
+  output <- list()
+  resp <- httr::content(hreq)
+  output <- resp$results
+  while (!is.null(resp$nextPageToken)) {
+    hreq <- httr::GET(url = file.path(url, principalId),
+                      query = list(nextPageToken=resp$nextPageToken))
+    resp <- httr::content(hreq)
+    output <- c(output, resp$results)
+  }
+  dplyr::bind_rows(output)
+}
+
+#' @title Get projects within scope of Synapse project
+#' 
+#' @param url Synapse api endpoint
+#' @param id Synapse ID
+#' @param auth Synapse token
+synapse_get_project_scope <- function(url = "https://repo-prod.prod.sagebase.org/repo/v1/entity/",
+                                      id, auth) {
+  if (is.null(id)) stop("id cannot be NULL")
+  req_url <- file.path(url, id)
+  req <- httr::GET(req_url,
+                   httr::add_headers(Authorization=paste0("Bearer ", auth)))
+  
+  # Send error if unsuccessful query
+  status <- httr::http_status(req)
+  if (status$category != "Success") stop(status$message)
+  
+  cont <- httr::content(req)
+  unlist(cont$scopeIds)
+}
+
+#' @param title Query a Synapse Table
+#' https://rest-docs.synapse.org/rest/GET/entity/id/table/query/async/get/asyncToken.html
+#' @param id Synapse table ID
+#' @param auth Synapse token
+#' @param query An sql query
+#' @param partMask The part of the Synapse response to get. Defaults to everything.
+synapse_table_query <- function(id, auth, query, partMask=0x7F) {
+  url <- file.path("https://repo-prod.prod.sagebase.org/repo/v1/entity",id, "table/query/async/start")
+  req <- httr::POST(url = url,
+                    httr::add_headers(Authorization=paste0("Bearer ", auth)),
+                    body = list(
+                      query = list(sql=query),
+                      partMask = partMask
+                    ),
+                    encode = "json"
+  )
+  httr::content(req)
+}
+
+#' @param title Get results of synapse_table_query
+#' https://rest-docs.synapse.org/rest/GET/entity/id/table/query/async/get/asyncToken.html
+#' @param id Synapse table ID
+#' @param async_token Token from synapse_table_query
+#' @param auth Synapse token
+synapse_table_get <- function(id, async_token, auth) {
+  url <- file.path("https://repo-prod.prod.sagebase.org/repo/v1/entity", id,"table/query/async/get", async_token)
+  req <- httr::GET(url = url,
+                   httr::add_headers(Authorization=paste0("Bearer ", auth)))
+  httr::content(req)
+}
+
+#' @title Get column names from a Synapse table
+#' https://rest-docs.synapse.org/rest/GET/entity/id/table/query/async/get/asyncToken.html
+#' Uses a table query to get the column names from a Synapse table
+#' @param id Synapse ID of table
+#' @param auth Synapse token
+get_synapse_table_names <- function(id, auth) {
+  query <- sprintf("select id from %s limit 1", id)
+  request <- synapse_table_query(id, auth, query, partMask = 0x10)
+  Sys.sleep(1)
+  response <- synapse_table_get(id, request$token, auth)
+  vapply(response$columnModels, function(x) x$name, character(1L))
+}
+
+#' @title Get storage projects within a Synapse table
+#' https://rest-docs.synapse.org/rest/GET/entity/id/table/query/async/get/asyncToken.html
+#' @param id Synapse ID of table
+#' @param auth Synapse token
+#' @param select_cols Columns to get from table
+synapse_storage_projects <- function(id, auth, select_cols = c("id", "name", "parentId", "projectId", "type", "columnType")) {
+  table_cols <- get_synapse_table_names(id, auth)
+  select_cols <- intersect(select_cols, table_cols)
+  select_cols_format <- paste(select_cols, collapse = ", ")
+  query <- sprintf("select distinct %s from %s", select_cols_format, id)
+  request <- synapse_table_query(id, auth, query, partMask = 0x1)
+  Sys.sleep(1)
+  response <- synapse_table_get(id, request$token, auth)
+  
+  setNames(
+    tibble::as_tibble(
+      t(
+        vapply(
+          response$queryResult$queryResults$rows, function(x) {
+            unlist(x$values)
+          },
+          character(length(select_cols))))),
+    select_cols)
+}
+
+#' @title Download a synapse file from its URL
+#' https://rest-docs.synapse.org/rest/GET/file/id.html
+#' @param dataFileHandleId The dataFileHandleId from an entity
+#' @param id The synapse ID of the file to download
+#' @param auth Synapse token
+#' @param filepath Optional path to download data. If NULL, return a data frame.
+synapse_download_file_handle <- function(dataFileHandleId, id, auth, filepath=NULL) {
+  url <- sprintf("https://repo-prod.prod.sagebase.org/file/v1/file/%s", dataFileHandleId)
+  request <- httr::GET(url = url,
+                       httr::add_headers( Authorization=paste0("Bearer ", auth)),
+                       query = list(
+                         redirect = FALSE,
+                         fileAssociateId = id,
+                         fileAssociateType = "FileEntity"
+                       )
+  )
+  download_url <- httr::content(request)
+  destfile <- ifelse(is.null(filepath), tempfile(), filepath)
+  download.file(download_url, destfile)
+  if (is.null(filepath)) readr::read_csv(destfile, show_col_types = FALSE)
+  
+}
