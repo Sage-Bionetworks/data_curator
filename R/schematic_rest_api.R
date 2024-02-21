@@ -143,7 +143,7 @@ manifest_validate <- function(url="http://localhost:3001/v1/model/validate",
         is_transient = \(r) httr2::resp_status(r) %in% c(429, 500, 503, 504)
       ) |>
       httr2::req_error(is_error = \(reqs) FALSE)
-    resp <- reqs %>%
+    resp <- reqs |>
       httr2::req_headers(Authorization = sprintf("Bearer %s", access_token)) |>
       httr2::req_url_query(
         schema_url=schema_url,
@@ -157,7 +157,7 @@ manifest_validate <- function(url="http://localhost:3001/v1/model/validate",
   } else {
     req <- httr2::request(url) |>
       httr2::req_throttle(1)
-    resp <- req %>%
+    resp <- req |>
       httr2::req_headers(Authorization = sprintf("Bearer %s", access_token)) |>
       httr2::req_url_query(
         schema_url=schema_url,
@@ -246,7 +246,7 @@ model_component_requirements <- function(url="http://localhost:3001/v1/model/com
   
   reqs <- httr2::request(url) |>
     httr2::req_retry(
-      max_tries = 3,
+      max_tries = 5,
       is_transient = \(r) httr2::resp_status(r) %in% c(429, 500, 503)
     ) |>
     httr2::req_error(is_error = \(r) FALSE)
@@ -258,6 +258,11 @@ model_component_requirements <- function(url="http://localhost:3001/v1/model/com
   ) |>
     #httr2::req_retry(max_tries = 3) |>
     httr2::req_perform()
+  if (httr2::resp_is_error(resp)) {
+    warning(sprintf("model/component-requirement failed for %s. returning empty list. %s", 
+                    source_component, httr2::resp_body_json(resp)$title))
+    return(list())
+  }
   resp |>
     httr2::resp_body_json()
   
