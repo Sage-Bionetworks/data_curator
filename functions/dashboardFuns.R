@@ -186,7 +186,6 @@ validate_metadata <- function(metadata, project.scope, schematic_api, schema_url
                                    access_token = access_token,
                                    file_name = manifest$Path)
       )
-      if (!inherits(validation_res, "try-error")) {
         # clean validation res from schematicpy
         if (!length(validation_res) == 2) {
           validation_res <- list(list(
@@ -204,21 +203,21 @@ validate_metadata <- function(metadata, project.scope, schematic_api, schema_url
           Result = clean_res$result,
           # change wrong schema to out-of-date type
           ErrorType = if_else(clean_res$error_type == "Wrong Schema", "Out of Date", clean_res$error_type),
-          errorMsg = if_else(is.null(clean_res$error_msg[1]), "Valid", paste(clean_res$error_msg[1], collapse="; ")),
-          WarnMsg = if_else(is.null(clean_res$warning_msg[1]), "Valid", paste(clean_res$warning_msg[1], collapse = "; "))
+          errorMsg = if_else(is.na(clean_res$error_msg[1]), "Valid", paste(clean_res$error_msg[1], collapse="; ")),
+          WarnMsg = if_else(is.na(clean_res$warning_msg[1]), "Valid", paste(clean_res$warning_msg[1], collapse = "; "))
         )
-      } else {
-        data.frame(
-          Result = "Fail",
-          # change wrong schema to out-of-date type
-          ErrorType = "Unknown Error",
-          errorMsg = "Server Error",
-          WarnMsg = " "
-        )
-      }
+      #} else {
+      #  data.frame(
+      #    Result = "Fail",
+      #    # change wrong schema to out-of-date type
+      #    ErrorType = "Unknown Error",
+      #    errorMsg = "Server Error",
+      #    WarnMsg = " "
+      #  )
+      #}
       
     }
-  }, mc.cores = ncores)
+  }, mc.cores = 1)
   m2 <- bind_rows(m2)
   cbind(metadata, m2) # expand metadata with validation results
 }
@@ -241,7 +240,6 @@ get_schema_nodes <- function(schema, schematic_api, url, schema_url) {
       return(list())
     }
   )
-  if ("status" %in% names(requirement)) return(schema=as.character(schema))
   if (length(requirement) == 0) {
     # return data type itself without name
     return(schema=as.character(schema))
@@ -261,8 +259,8 @@ get_metadata_nodes <- function(metadata, ncores = 1, schematic_api,
   if (nrow(metadata) == 0) {
     return(data.frame(from = NA, to = NA, folder = NA, folderSynId = NA, nMiss = NA))
   } else {
-    mn <- parallel::mclapply(1:nrow(metadata), function(i) {
-      manifest <- metadata[i, ]
+    mn <- parallel::mclapply(1:nrow(metadata), function(n) {
+      manifest <- metadata[n, ]
       # get all required data types
       nodes <- tryCatch(
         switch(schematic_api,
@@ -275,11 +273,9 @@ get_metadata_nodes <- function(metadata, ncores = 1, schematic_api,
                ),
         error = function(e) {
           warning("'get_metadata_nodes' failed: ", sQuote(manifest$Component), ":\n", e$message)
-          cat(paste0("'get_metadata_nodes' failed: ", sQuote(manifest$Component), ":\n", e$message))
           return(list())
         }
       )
-      if ("status" %in% names(nodes)) nodes <- list()
       nodes <- list2Vector(nodes)
       source <- as.character(nodes)
       target <- names(nodes)
