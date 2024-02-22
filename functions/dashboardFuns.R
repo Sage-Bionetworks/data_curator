@@ -16,7 +16,8 @@ get_dataset_metadata <- function(syn.store, datasets, ncores = 1, schematic_api=
                                                   asset_view=fileview)
                       )
     file_view <- filter(file_view, grepl("synapse_storage_manifest_", name) & parentId %in% datasets)
-
+    file_view$contentType <- NA
+    file_view <- as_tibble(lapply(file_view, unlist))
   # datasets don't have a manifest
   ds_no_manifest <- datasets[which(!datasets %in% file_view$parentId)]
 
@@ -39,7 +40,7 @@ get_dataset_metadata <- function(syn.store, datasets, ncores = 1, schematic_api=
   )
   cols <- setNames(rep("", length(cols)), cols)
   metadata <- bind_rows(cols)[0, ]
-  metadata_list <- parallel::mclapply(file_view$parentId, function(dataset) {
+  metadata_list <- parallel::mclapply(unique(file_view$parentId), function(dataset) {
     # get manifest's synapse id(s) in each dataset folder
     manifest_ids <- file_view$id[file_view$parentId == dataset]
       # in case, multiple manifests exist in the same dataset
