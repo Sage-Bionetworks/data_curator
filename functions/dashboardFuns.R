@@ -11,13 +11,12 @@ get_dataset_metadata <- function(syn.store, datasets, ncores = 1, schematic_api=
   # get data for all manifests within the specified datasets
   file_view <- switch(schematic_api,
                       reticulate = syn.store$storageFileviewTable,
-                      rest = get_asset_view_table(url = file.path("https://schematic-dev.api.sagebionetworks.org/v1/storage/assets/tables"),
-                                                  access_token = access_token,
-                                                  asset_view=fileview)
+                      rest = synapse_get_manifests_in_asset_view(
+                        id = fileview,
+                        auth = access_token
+                      )
                       )
     file_view <- filter(file_view, grepl("synapse_storage_manifest_", name) & parentId %in% datasets)
-    file_view$contentType <- NA
-    file_view <- as_tibble(lapply(file_view, unlist))
   # datasets don't have a manifest
   ds_no_manifest <- datasets[which(!datasets %in% file_view$parentId)]
 
