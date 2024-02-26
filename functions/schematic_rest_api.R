@@ -23,7 +23,7 @@ manifest_download <- function(url = "http://localhost:3001/v1/manifest/download"
   req <- httr2::request(url) |>
     httr2::req_retry(
       max_tries = 3,
-      is_transient = \(r) httr2::resp_status(r) %in% c(429, 500, 503)
+      is_transient = \(r) httr2::resp_status(r) %in% c(429, 500, 503, 403)
     ) |>
     httr2::req_error(is_error = \(r) FALSE)
   resp <- req |>
@@ -140,8 +140,9 @@ manifest_validate <- function(url="http://localhost:3001/v1/model/validate",
     reqs <- httr2::request(url) |>
       httr2::req_retry(
         max_tries = 3,
-        is_transient = \(r) httr2::resp_status(r) %in% c(429, 500, 503, 504)
+        is_transient = \(r) httr2::resp_status(r) %in% c(429, 500, 503, 504, 403)
       ) |>
+      httr2::req_throttle(1/2) |>
       httr2::req_error(is_error = \(reqs) FALSE)
     resp <- reqs |>
       httr2::req_headers(Authorization = sprintf("Bearer %s", access_token)) |>
