@@ -192,7 +192,8 @@ model_submit <- function(url="http://localhost:3001/v1/model/submit",
                          table_manipulation="replace",
                          hide_blanks=FALSE,
                          table_column_names="class_label",
-                         annotation_keys="class_label") {
+                         annotation_keys="class_label",
+                         data_model_labels="class_label") {
   req <- httr::POST(url,
                     httr::add_headers(Authorization = sprintf("Bearer %s", access_token)),
                     query=list(
