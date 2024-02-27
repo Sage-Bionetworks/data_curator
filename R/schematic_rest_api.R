@@ -54,11 +54,16 @@ manifest_download <- function(url = "http://localhost:3001/v1/manifest/download"
 #' @returns a URL to a google sheet
 #' @export
 manifest_generate <- function(url="http://localhost:3001/v1/manifest/generate",
-                              schema_url="https://raw.githubusercontent.com/ncihtan/data-models/main/HTAN.model.jsonld", #nolint
-                              title, data_type,
-                              use_annotations="false", dataset_id=NULL,
-                              asset_view, output_format, access_token = NULL,
-                              strict_validation = FALSE) {
+                              schema_url,
+                              title,
+                              data_type,
+                              use_annotations="false",
+                              dataset_id=NULL,
+                              asset_view,
+                              output_format,
+                              access_token = NULL,
+                              strict_validation = FALSE,
+                              data_model_labels = "class_label") {
   
   req <- httr::GET(url,
                    httr::add_headers(Authorization = sprintf("Bearer %s", access_token)),
@@ -70,7 +75,8 @@ manifest_generate <- function(url="http://localhost:3001/v1/manifest/generate",
                      dataset_id=dataset_id,
                      asset_view=asset_view,
                      output_format=output_format,
-                     strict_validation = strict_validation
+                     strict_validation = strict_validation,
+                     data_model_labels = data_model_labels
                    ))
   
   check_success(req)
@@ -87,15 +93,20 @@ manifest_generate <- function(url="http://localhost:3001/v1/manifest/generate",
 #' @param csv_file Filepath of csv to validate
 #' @export
 manifest_populate <- function(url="http://localhost:3001/v1/manifest/populate",
-                              schema_url="https://raw.githubusercontent.com/ncihtan/data-models/main/HTAN.model.jsonld", #notlint
-                              data_type, title, return_excel=FALSE, csv_file) {
+                              schema_url,
+                              data_type,
+                              title,
+                              return_excel=FALSE,
+                              data_model_labels = "class_label",
+                              csv_file) {
   
   req <- httr::POST(url,
                     query=list(
                       schema_url=schema_url,
                       data_type=data_type,
                       title=title,
-                      return_excel=return_excel),
+                      return_excel=return_excel,
+                      data_model_labels=data_model_labels),
                     body=list(csv_file=httr::upload_file(csv_file, type = "text/csv"))
   )
   check_success(req)
@@ -114,9 +125,14 @@ manifest_populate <- function(url="http://localhost:3001/v1/manifest/populate",
 #' @returns An empty list() if sucessfully validated. Or a list of errors.
 #' @export
 manifest_validate <- function(url="http://localhost:3001/v1/model/validate",
-                              schema_url="https://raw.githubusercontent.com/ncihtan/data-models/main/HTAN.model.jsonld", #nolint
-                              data_type, file_name, restrict_rules=FALSE, project_scope = NULL,
-                              access_token, asset_view = NULL) {
+                              schema_url,
+                              data_type,
+                              file_name,
+                              restrict_rules=FALSE,
+                              project_scope = NULL,
+                              access_token,
+                              asset_view = NULL,
+                              data_model_labels = "class_label") {
   
   flattenbody <- function(x) {
     # A form/query can only have one value per name, so take
@@ -144,7 +160,8 @@ manifest_validate <- function(url="http://localhost:3001/v1/model/validate",
                        data_type=data_type,
                        restrict_rules=restrict_rules,
                        project_scope = project_scope,
-                       asset_view = asset_view)),
+                       asset_view = asset_view,
+                       data_model_labels = data_model_labels)),
                     body=list(file_name=httr::upload_file(file_name))
   )
   
@@ -226,14 +243,17 @@ model_submit <- function(url="http://localhost:3001/v1/model/submit",
 #' @returns A list of required components associated with the source component.
 #' @export
 model_component_requirements <- function(url="http://localhost:3001/v1/model/component-requirements",
-                                         schema_url, source_component,
-                                         as_graph = FALSE) {
+                                         schema_url,
+                                         source_component,
+                                         as_graph = FALSE,
+                                         data_model_labels = "class_label") {
   
   req <- httr::GET(url,
                    query =  list(
                      schema_url = schema_url,
                      source_component = source_component,
-                     as_graph = as_graph
+                     as_graph = as_graph,
+                     data_model_labels = data_model_labels
                    ))
   
   check_success(req)
@@ -355,11 +375,14 @@ get_asset_view_table <- function(url="http://localhost:3001/v1/storage/assets/ta
 #' @export
 #' @importFrom httr GET content
 graph_by_edge_type <- function(url = "https://schematic-dev.api.sagebionetworks.org/v1/schemas/get/graph_by_edge_type",
-                               schema_url, relationship = "requiresDependency") {
+                               schema_url,
+                               relationship = "requiresDependency",
+                               data_model_labels = "class_label") {
   req <- httr::GET(url = url,
                    query = list(
                      schema_url = schema_url,
-                     relationship = relationship
+                     relationship = relationship,
+                     data_model_labels = data_model_labels
                    ))
   httr::content(req)
 }
