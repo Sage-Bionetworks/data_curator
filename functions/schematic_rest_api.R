@@ -180,7 +180,7 @@ manifest_validate <- function(url="http://localhost:3001/v1/model/validate",
 #' @returns TRUE if successful upload or validate errors if not.
 #' @export
 model_submit <- function(url="http://localhost:3001/v1/model/submit",
-                         schema_url
+                         schema_url,
                          data_type,
                          dataset_id,
                          restrict_rules=FALSE,
