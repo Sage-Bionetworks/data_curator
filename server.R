@@ -919,6 +919,7 @@ shinyServer(function(input, output, session) {
       .asset_view <- selected$master_asset_view()
       .table_column_names <- dcc_config_react()$schematic$model_submit$table_column_names
       .annotation_keys <- dcc_config_react()$schematic$model_submit$annotation_keys
+      .data_model_labels <- dcc_config_react()$schematic$global$data_model_labels
       .table_manipulation <- dcc_config_react()$schematic$model_submit$table_manipulation
       .submit_manifest_record_type <- dcc_config_react()$schematic$model_submit$manifest_record_type
       .restrict_rules <- dcc_config_react()$schematic$model_validate$restrict_rules
@@ -945,6 +946,7 @@ shinyServer(function(input, output, session) {
                                      annotation_keys = .annotation_keys,
                                      manifest_record_type=.submit_manifest_record_type,
                                      table_manipulation=.table_manipulation,
+                                     data_model_labels = .data_model_labels,
                                      hide_blanks=.hide_blanks),
                  "synXXXX - No data uploaded"
           )
@@ -966,6 +968,7 @@ shinyServer(function(input, output, session) {
     .asset_view <- selected$master_asset_view()
     .table_column_names <- dcc_config_react()$schematic$model_submit$table_column_names
     .annotation_keys <- dcc_config_react()$schematic$model_submit$annotation_keys
+    .data_model_labels <- dcc_config_react()$schematic$global$data_model_labels
     .table_manipulation <- dcc_config_react()$schematic$model_submit$table_manipulation
     .submit_manifest_record_type <- dcc_config_react()$schematic$model_submit$manifest_record_type
     .restrict_rules <- dcc_config_react()$schematic$model_validate$restrict_rules
@@ -991,6 +994,7 @@ shinyServer(function(input, output, session) {
                                    annotation_keys = .annotation_keys,
                                    manifest_record_type=.submit_manifest_record_type,
                                    table_manipulation=.table_manipulation,
+                                   data_model_labels = .data_model_labels,
                                    hide_blanks=.hide_blanks),
                "synXXXX - No data uploaded"
         )
