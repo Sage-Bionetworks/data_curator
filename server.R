@@ -917,7 +917,8 @@ shinyServer(function(input, output, session) {
       .data_model <- data_model()
       .schema <- selected$schema()
       .asset_view <- selected$master_asset_view()
-      .submit_use_schema_labels <- dcc_config_react()$schematic$model_submit$use_schema_labels
+      .table_column_names <- dcc_config_react()$schematic$model_submit$table_column_names
+      .annotation_keys <- dcc_config_react()$schematic$model_submit$annotation_keys
       .table_manipulation <- dcc_config_react()$schematic$model_submit$table_manipulation
       .submit_manifest_record_type <- dcc_config_react()$schematic$model_submit$manifest_record_type
       .restrict_rules <- dcc_config_react()$schematic$model_validate$restrict_rules
@@ -940,7 +941,8 @@ shinyServer(function(input, output, session) {
                                      restrict_rules = .restrict_rules,
                                      file_name = tmp_file_path,
                                      asset_view = .asset_view,
-                                     use_schema_label=.submit_use_schema_labels,
+                                     table_column_names = .table_column_names,
+                                     annotation_keys = .annotation_keys,
                                      manifest_record_type=.submit_manifest_record_type,
                                      table_manipulation=.table_manipulation,
                                      hide_blanks=.hide_blanks),
@@ -962,7 +964,8 @@ shinyServer(function(input, output, session) {
     .data_model <- data_model()
     .schema <- selected$schema()
     .asset_view <- selected$master_asset_view()
-    .submit_use_schema_labels <- dcc_config_react()$schematic$model_submit$use_schema_labels
+    .table_column_names <- dcc_config_react()$schematic$model_submit$table_column_names
+    .annotation_keys <- dcc_config_react()$schematic$model_submit$annotation_keys
     .table_manipulation <- dcc_config_react()$schematic$model_submit$table_manipulation
     .submit_manifest_record_type <- dcc_config_react()$schematic$model_submit$manifest_record_type
     .restrict_rules <- dcc_config_react()$schematic$model_validate$restrict_rules
@@ -984,7 +987,8 @@ shinyServer(function(input, output, session) {
                                    restrict_rules = .restrict_rules,
                                    file_name = tmp_file_path,
                                    asset_view = .asset_view,
-                                   use_schema_label=.submit_use_schema_labels,
+                                   table_column_names = .table_column_names,
+                                   annotation_keys = .annotation_keys,
                                    manifest_record_type=.submit_manifest_record_type,
                                    table_manipulation=.table_manipulation,
                                    hide_blanks=.hide_blanks),
