@@ -180,10 +180,19 @@ manifest_validate <- function(url="http://localhost:3001/v1/model/validate",
 #' @returns TRUE if successful upload or validate errors if not.
 #' @export
 model_submit <- function(url="http://localhost:3001/v1/model/submit",
-                         schema_url="https://raw.githubusercontent.com/ncihtan/data-models/main/HTAN.model.jsonld", #notlint
-                         data_type, dataset_id, restrict_rules=FALSE, access_token, json_str=NULL, asset_view,
-                         use_schema_label=TRUE, manifest_record_type="table_and_file", file_name,
-                         table_manipulation="replace", hide_blanks=FALSE) {
+                         schema_url
+                         data_type,
+                         dataset_id,
+                         restrict_rules=FALSE,
+                         access_token,
+                         json_str=NULL,
+                         asset_view,
+                         manifest_record_type="table_and_file",
+                         file_name,
+                         table_manipulation="replace",
+                         hide_blanks=FALSE,
+                         table_column_names="class_label",
+                         annotation_keys="class_label") {
   req <- httr::POST(url,
                     httr::add_headers(Authorization = sprintf("Bearer %s", access_token)),
                     query=list(
@@ -193,9 +202,10 @@ model_submit <- function(url="http://localhost:3001/v1/model/submit",
                       restrict_rules=restrict_rules,
                       json_str=json_str,
                       asset_view=asset_view,
-                      use_schema_label=use_schema_label,
                       manifest_record_type=manifest_record_type,
                       table_manipulation=table_manipulation,
+                      table_column_names=table_column_names,
+                      annotation_keys=annotation_keys,
                       hide_blanks=hide_blanks),
                     body=list(file_name=httr::upload_file(file_name))
                     #body=list(file_name=file_name)
