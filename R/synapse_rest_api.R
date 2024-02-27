@@ -64,7 +64,6 @@ synapse_get <- function(url = "https://repo-prod.prod.sagebase.org/repo/v1/entit
       max_tries = 5,
       is_transient = \(resp) httr2::resp_status(resp) %in% c(429, 500, 503, 403)
     ) |>
-    httr2::req_throttle(1/2) |>
     httr2::req_headers(Authorization = sprintf("Bearer %s", auth)) |>
     httr2::req_perform()
   resp |> httr2::resp_body_json()
@@ -221,7 +220,6 @@ synapse_table_get <- function(id, async_token, auth) {
       max_tries = 5,
       is_transient = \(r) httr2::resp_status(r) %in% c(429, 500, 503, 202, 403)
     ) |>
-    httr2::req_throttle(1/2) |>
     httr2::req_headers(Authorization = sprintf("Bearer %s", auth)) |>
     httr2::req_perform()
   httr2::resp_body_json(response)
