@@ -224,6 +224,7 @@ model_submit <- function(url="http://localhost:3001/v1/model/submit",
                       table_manipulation=table_manipulation,
                       table_column_names=table_column_names,
                       annotation_keys=annotation_keys,
+                      data_model_labels=data_model_labels,
                       hide_blanks=hide_blanks),
                     body=list(file_name=httr::upload_file(file_name))
                     #body=list(file_name=file_name)
