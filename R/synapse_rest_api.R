@@ -196,12 +196,13 @@ synapse_get_project_scope <- function(url = "https://repo-prod.prod.sagebase.org
 #' @param auth Synapse token
 #' @param query An sql query
 #' @param partMask The part of the Synapse response to get. Defaults to everything.
-synapse_table_query <- function(id, auth, query, partMask=0x7F) {
+synapse_table_query <- function(id, auth, query, partMask=0x7F, offset=0) {
   url <- file.path("https://repo-prod.prod.sagebase.org/repo/v1/entity",id, "table/query/async/start")
   req <- httr::POST(url = url,
                     httr::add_headers(Authorization=paste0("Bearer ", auth)),
                     body = list(
-                      query = list(sql=query),
+                      query = list(sql=query,
+                                   offset=offset),
                       partMask = partMask
                     ),
                     encode = "json"
@@ -216,9 +217,15 @@ synapse_table_query <- function(id, auth, query, partMask=0x7F) {
 #' @param auth Synapse token
 synapse_table_get <- function(id, async_token, auth) {
   url <- file.path("https://repo-prod.prod.sagebase.org/repo/v1/entity", id,"table/query/async/get", async_token)
-  req <- httr::GET(url = url,
-                   httr::add_headers(Authorization=paste0("Bearer ", auth)))
-  httr::content(req)
+  request <- httr2::request(url)
+  response <- request |>
+    httr2::req_retry(
+      max_tries = 5,
+      is_transient = \(r) httr2::resp_status(r) %in% c(429, 500, 503, 202, 403)
+    ) |>
+    httr2::req_headers(Authorization = sprintf("Bearer %s", auth)) |>
+    httr2::req_perform()
+  httr2::resp_body_json(response)
 }
 
 #' @title Get column names from a Synapse table
@@ -227,7 +234,7 @@ synapse_table_get <- function(id, async_token, auth) {
 #' @param id Synapse ID of table
 #' @param auth Synapse token
 get_synapse_table_names <- function(id, auth) {
-  query <- sprintf("select id from %s limit 1", id)
+  query <- sprintf("select id from %s", id)
   request <- synapse_table_query(id, auth, query, partMask = 0x10)
   Sys.sleep(1)
   response <- synapse_table_get(id, request$token, auth)
@@ -239,24 +246,56 @@ get_synapse_table_names <- function(id, auth) {
 #' @param id Synapse ID of table
 #' @param auth Synapse token
 #' @param select_cols Columns to get from table
-synapse_storage_projects <- function(id, auth, select_cols = c("id", "name", "parentId", "projectId", "type", "columnType")) {
+synapse_storage_projects <- function(id, auth, select_cols = c("id", "name", "parentId", "projectId", "type", "columnType", "contentType")) {
   table_cols <- get_synapse_table_names(id, auth)
   select_cols <- intersect(select_cols, table_cols)
   select_cols_format <- paste(select_cols, collapse = ", ")
-  query <- sprintf("select distinct %s from %s", select_cols_format, id)
+  if ("contentType" %in% select_cols) {
+    query <- sprintf("select distinct %s from %s where contentType = 'dataset'", select_cols_format, id)
+  } else {
+    query <- sprintf("select distinct %s from %s where type = 'folder' and parentId = projectId", select_cols_format, id)
+  }
   request <- synapse_table_query(id, auth, query, partMask = 0x1)
-  Sys.sleep(1)
   response <- synapse_table_get(id, request$token, auth)
   
-  setNames(
+  result <- setNames(
     tibble::as_tibble(
       t(
         vapply(
           response$queryResult$queryResults$rows, function(x) {
+            null_ind <- which(sapply(x$values, is.null))
+            x$values[null_ind] <- NA
             unlist(x$values)
           },
           character(length(select_cols))))),
     select_cols)
+  
+  while(!is.null(response$queryResult$nextPageToken$token)) {
+    query_response <- xml2::read_xml(response$queryResult$nextPageToken$token)
+    new_query <- xml2::xml_text(xml2::xml_find_first(query_response, "sql"))
+    new_offset <- xml2::xml_text(xml2::xml_find_first(query_response, "offset"))
+    hreq <- synapse_table_query(id, auth, new_query, partMask = 0x1, new_offset)
+    response <- synapse_table_get(id, hreq$token, auth)
+    hres <- setNames(
+      tibble::as_tibble(
+        t(
+          vapply(
+            response$queryResult$queryResults$rows, function(x) {
+              null_ind <- which(sapply(x$values, is.null))
+              x$values[null_ind] <- NA
+              unlist(x$values)
+            },
+            character(length(select_cols))))),
+      select_cols)
+    result <- dplyr::bind_rows(result, hres)
+  }
+  
+  if ("contentType" %in% select_cols) {
+    dplyr::filter(result, contentType == "dataset")
+  } else {
+    result
+  }
+  
 }
 
 #' @title Download a synapse file from its URL
