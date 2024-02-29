@@ -7,6 +7,6 @@ License: file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
-Imports: httr, dplyr, jsonlite
+Imports: httr, dplyr, jsonlite, shinyjs, yaml, promises, readr
 Suggests: 
     covr
