@@ -32,7 +32,12 @@ create_template_config <- function(
   edges <- graph_by_edge_type(schema_url = data_model, data_model_labels = data_model_labels)
   schema_names <- format_edge_type(edges)
   nl <- setNames(as.list(schema_names$schema_name), rep("node_list", length(schema_names$schema_name)))
-  dnames <- get_display_names(c(schema_url = data_model, nl)) |> httr::content()
+  dnames <- get_display_names(
+    c(schema_url = data_model,
+      nl,
+      data_model_labels=data_model_labels)
+    ) |> 
+    httr::content()
   config <- data.frame(display_name = unlist(dnames), schema_name = unlist(nl)) |>
     dplyr::left_join(schema_names, by = "schema_name") |>
     dplyr::mutate(type = ifelse(file_based, "file", "record")) |>
