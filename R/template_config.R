@@ -22,9 +22,14 @@ get_display_names <- function(qlist) {
 }
 
 #' @export
-create_template_config <- function(data_model, include_schemas = NULL, exclude_schemas = NULL) {
+create_template_config <- function(
+  data_model,
+  include_schemas = NULL,
+  exclude_schemas = NULL,
+  data_model_labels = "class_label") {
+
   if (!is.null(include_schemas) && !is.null(exclude_schemas)) stop("include_schemas and exclude_schemas cannot both have values")
-  edges <- graph_by_edge_type(schema_url = data_model)
+  edges <- graph_by_edge_type(schema_url = data_model, data_model_labels = data_model_labels)
   schema_names <- format_edge_type(edges)
   nl <- setNames(as.list(schema_names$schema_name), rep("node_list", length(schema_names$schema_name)))
   dnames <- get_display_names(c(schema_url = data_model, nl)) |> httr::content()
@@ -44,8 +49,13 @@ create_template_config <- function(data_model, include_schemas = NULL, exclude_s
 }
 
 #' @export
-create_dca_template_config <- function(data_model, include_schemas = NULL, exclude_schemas = NULL) {
-  df <- create_template_config(data_model, include_schemas, exclude_schemas)
+create_dca_template_config <- function(
+  data_model,
+  include_schemas = NULL,
+  exclude_schemas = NULL,
+  data_model_labels = "class_label") {
+
+  df <- create_template_config(data_model, include_schemas, exclude_schemas, data_model_labels)
   schematic_version <- httr::GET("https://schematic-dev.api.sagebionetworks.org/v1/version") |>
     httr::content()
   list(
@@ -57,7 +67,13 @@ create_dca_template_config <- function(data_model, include_schemas = NULL, exclu
 
 #' @export
 #' @description Create a DCA-specific template generation function
-write_dca_template_config <- function(data_model, file, include_schemas = NULL, exclude_schemas = NULL) {
-  df <- create_dca_template_config(data_model, include_schemas, exclude_schemas)
+write_dca_template_config <- function(
+  data_model,
+  file,
+  include_schemas = NULL,
+  exclude_schemas = NULL,
+  data_model_labels = "class_label") {
+
+  df <- create_dca_template_config(data_model, include_schemas, exclude_schemas, data_model_labels)
   jsonlite::write_json(df, file, pretty = TRUE, auto_unbox = TRUE)
 }
