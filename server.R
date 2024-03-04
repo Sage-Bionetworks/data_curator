@@ -313,7 +313,6 @@ shinyServer(function(input, output, session) {
           )
         })
       })
-      })
     
     updateTabsetPanel(session, "tabs", selected = "tab_project")
     
