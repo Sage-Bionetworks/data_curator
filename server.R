@@ -313,16 +313,20 @@ shinyServer(function(input, output, session) {
           )
         })
       })
-
-      updateTabsetPanel(session, "tabs", selected = "tab_project")
-
-      shinyjs::show(selector = ".sidebar-menu")
-      shinyjs::hide(select = "li:nth-child(3)")
-      shinyjs::hide(select = "li:nth-child(4)")
-      shinyjs::hide(select = "li:nth-child(5)")
-      shinyjs::hide(select = "li:nth-child(6)")
-
-      dcWaiter("hide")
+    
+    updateTabsetPanel(session, "tabs", selected = "tab_project")
+    
+    shinyjs::show(selector = ".sidebar-menu")
+    shinyjs::hide(select = "li:nth-child(3)")
+    shinyjs::hide(select = "li:nth-child(4)")
+    shinyjs::hide(select = "li:nth-child(5)")
+    shinyjs::hide(select = "li:nth-child(6)")
+    session$sendCustomMessage(
+      "compliance_dashboard",
+      dcc_config_react()$dca$use_compliance_dashboard
+    )
+    
+    dcWaiter("hide")
     }
   })
 
@@ -597,21 +601,21 @@ shinyServer(function(input, output, session) {
   )
 
   ######## Dashboard ########
-  #  dashboard(
-  #    id = "dashboard",
-  #    syn.store = syn_store,
-  #    project.scope = selected$project,
-  #    schema = selected$schema,
-  #    schema.display.name = reactive(input$dropdown_datatype),
-  #    disable.ids = c("box_pick_project", "box_pick_manifest"),
-  #    ncores = ncores,
-  #    access_token = access_token,
-  #    fileview = selected$master_asset_view(),
-  #    folder = selected$project(),
-  #    schematic_api = dca_schematic_api,
-  #    schema_url = data_model()
-  #  )
-
+   dashboard(
+     id = "dashboard",
+     syn.store = syn_store,
+     project.scope = selected$project,
+     schema = selected$schema,
+     schema.display.name = selected$schema,
+     disable.ids = c("box_pick_project", "box_pick_manifest"),
+     ncores = ncores,
+     access_token = access_token,
+     fileview = selected$master_asset_view(),
+     folder = selected$project(),
+     schematic_api = dca_schematic_api,
+     schema_url = data_model()
+   )
+  
   manifest_url <- reactiveVal(NULL)
 
   ######## Template Google Sheet Link ########
