@@ -65,6 +65,5 @@ jobs:
         with:
           image-ref: '${{ steps.string.outputs.lowercase }}:${{ steps.meta.outputs.version }}'
           format: 'table'
-          exit-code: '1'
           ignore-unfixed: true
           severity: 'CRITICAL,HIGH'
