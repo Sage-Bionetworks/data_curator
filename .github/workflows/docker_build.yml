@@ -54,7 +54,8 @@ jobs:
           build-args: |
             DCA_VERSION=${{ env.DCA_VERSION }}
 
-      - id: Lowercase image name for trivy
+      - name: Lowercase image name for trivy
+        id: string
         uses: ASzc/change-string-case-action@v6
         with:
           string: ${{ env.IMAGE_PATH }}
