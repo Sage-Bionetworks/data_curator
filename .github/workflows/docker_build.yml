@@ -57,7 +57,7 @@ jobs:
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: '${{ env.IMAGE_PATH }}:${{ env.DCA_VERSION }}'
+          image-ref: '${{ env.IMAGE_PATH }}:${{ steps.meta.outputs.version }}'
           format: 'table'
           exit-code: '1'
           ignore-unfixed: true
