@@ -375,36 +375,34 @@ shinyServer(function(input, output, session) {
     shinyjs::disable("btn_project")
     selected$project(data_list$projects()[names(data_list$projects()) == input$dropdown_project])
 
-    observeEvent(input[["dropdown_project"]], {
-      # get synID of selected project
-      project_id <- selected$project()
+    # get synID of selected project
+    .project_id <- selected$project()
 
-      .asset_view <- selected$master_asset_view()
+    .asset_view <- selected$master_asset_view()
 
-      promises::future_promise({
-        try(
-          {
-            folder_list_raw <- switch(dca_schematic_api,
-              reticulate = storage_projects_datasets_py(
-                synapse_driver,
-                project_id
-              ),
-              rest = storage_project_datasets(
-                url = file.path(api_uri, "v1/storage/project/datasets"),
-                asset_view = .asset_view,
-                project_id = project_id,
-                access_token = access_token
-              ),
-              list(list("DatatypeA", "DatatypeA"), list("DatatypeB", "DatatypeB"))
-            )
+    promises::future_promise({
+      try(
+        {
+          folder_list_raw <- switch(dca_schematic_api,
+            reticulate = storage_projects_datasets_py(
+              synapse_driver,
+              .project_id
+            ),
+            rest = storage_project_datasets(
+              url = file.path(api_uri, "v1/storage/project/datasets"),
+              asset_view = .asset_view,
+              project_id = .project_id,
+              access_token = access_token
+            ),
+            list(list("DatatypeA", "DatatypeA"), list("DatatypeB", "DatatypeB"))
+          )
 
-            folder_list <- list2Vector(folder_list_raw)
-            folder_list[sort(names(folder_list))]
-          },
-          silent = TRUE
-        )
-      }) %...>% data_list$folders()
-    })
+          folder_list <- list2Vector(folder_list_raw)
+          folder_list[sort(names(folder_list))]
+        },
+        silent = TRUE
+      )
+    }) %...>% data_list$folders()
   })
 
   observeEvent(data_list$folders(), ignoreInit = TRUE, {
@@ -737,7 +735,18 @@ shinyServer(function(input, output, session) {
 
   # generate link
   output$text_template <- renderUI(
-    tags$a(id = "template_link", href = manifest_data(), list(icon("hand-point-right"), manifest_data()), target = "_blank")
+    tags$a(
+      id = "template_link",
+      href = manifest_data(),
+      list(
+        icon("hand-point-right"),
+           sprintf("%s metadata for %s - %s",
+                   selected$schema(),
+                   names(selected$project()),
+                   names(selected$folder())
+                   )
+        ),
+      target = "_blank")
   )
 
   if (dca_schematic_api == "offline") {
