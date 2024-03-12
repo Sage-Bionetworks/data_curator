@@ -736,7 +736,18 @@ shinyServer(function(input, output, session) {
 
   # generate link
   output$text_template <- renderUI(
-    tags$a(id = "template_link", href = manifest_data(), list(icon("hand-point-right"), manifest_data()), target = "_blank")
+    tags$a(
+      id = "template_link",
+      href = manifest_data(),
+      list(
+        icon("hand-point-right"),
+           sprintf("%s metadata for %s - %s",
+                   selected$schema(),
+                   names(selected$project()),
+                   names(selected$folder())
+                   )
+        ),
+      target = "_blank")
   )
 
   if (dca_schematic_api == "offline") {
