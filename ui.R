@@ -203,6 +203,11 @@ ui <- shinydashboardPlus::dashboardPage(
           label = NULL,
           choices = "Generating..."
         ),
+        hidden(div(
+          id = "div_template_warn",
+          height = "100%",
+          htmlOutput("text_template_warn")
+        )),
         actionButton("btn_template_select", "Download template",
                      class = "btn-primary-color"
         ),
