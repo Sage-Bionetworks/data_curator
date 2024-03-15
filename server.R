@@ -112,6 +112,8 @@ shinyServer(function(input, output, session) {
   shinyjs::hide("box_preview")
   shinyjs::hide("box_validate")
   shinyjs::hide("box_submit")
+  
+  warn_text <- reactiveVal(NULL)
 
   # initial loading page
   observeEvent(input$cookie, {
@@ -455,33 +457,36 @@ shinyServer(function(input, output, session) {
     selected$schema(data_list$template()[input$dropdown_template])
     shinyjs::show(select = "li:nth-child(5)")
     shinyjs::show(select = "li:nth-child(6)")
-    warn_text <- NULL
     if (length(data_list$folders()) == 0) {
       # add warning if there is no folder in the selected project
-      warn_text <- paste0(
+      warn_text(paste0(
         "please create a folder in the ",
         strong(sQuote(input$dropdown_project)),
         " prior to submitting templates."
-      )
+      ))
     }
-    if (is.na(data_list$files()) & selected$schema_type() == "file") {
+    if (all(is.na(data_list$files())) & selected$schema_type() == "file") {
       # display warning message if folder is empty and data type is file-based
-      warn_text <- paste0(
+      warn_text(paste0(
         strong(sQuote(input$dropdown_folder)), " folder is empty,
         please upload your data before generating manifest.",
         "<br>", strong(sQuote(input$dropdown_template)),
         " requires data files to be uploaded prior to generating and submitting templates.",
         "<br>", "Filling in a template before uploading your data,
         may result in errors and delays in your data submission later."
-      )
+      ))
     }
     
     # if there is warning from above checks
-    if (!is.null(warn_text)) {
-      # display warnings
-      output$text_template_warn <- renderUI(tagList(br(), span(class = "warn_msg", HTML(warn_text))))
-      show("div_template_warn")
-    }
+    # if (!is.null(warn_text)) {
+    #   # display warnings
+    #   output$text_template_warn <- renderUI(tagList(br(), span(class = "warn_msg", HTML(warn_text))))
+    #   show("div_template_warn")
+    #   nx_report_warning(
+    #     title = "No data uploaded in folder",
+    #     HTML(warn_text)
+    #   )
+    # }
     updateTabsetPanel(session, "tabs",
       selected = "tab_template"
     )
@@ -714,6 +719,16 @@ shinyServer(function(input, output, session) {
       } else {
         shinyjs::show("div_download_data")
       }
+    }
+    # if there is warning from above checks
+    if (!is.null(warn_text())) {
+      # display warnings
+      output$text_template_warn <- renderUI(tagList(br(), span(class = "warn_msg", HTML(warn_text()))))
+      show("div_template_warn")
+      nx_report_warning(
+        title = "No data uploaded in folder",
+        HTML(warn_text())
+      )
     }
     dcWaiter("hide")
   })
