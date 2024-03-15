@@ -596,10 +596,10 @@ shinyServer(function(input, output, session) {
         # display warnings
         output$text_template_warn <- renderUI(tagList(br(), span(class = "warn_msg", HTML(warn_text()))))
         show("div_template_warn")
-        nx_report_warning(
-          title = "No data uploaded in folder",
-          HTML(warn_text())
-        )
+        # nx_report_warning(
+        #   title = "No data uploaded in folder",
+        #   HTML(warn_text())
+        # )
       }
       
       shinyjs::enable("btn_template")
