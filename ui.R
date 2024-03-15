@@ -203,6 +203,11 @@ ui <- shinydashboardPlus::dashboardPage(
           label = NULL,
           choices = "Generating..."
         ),
+        hidden(div(
+          id = "div_template_warn",
+          height = "100%",
+          htmlOutput("text_template_warn")
+        )),
         actionButton("btn_template_select", "Download template",
                      class = "btn-primary-color"
         ),
@@ -246,11 +251,6 @@ ui <- shinydashboardPlus::dashboardPage(
               id = "div_template_xls",
               height = "100%",
               htmlOutput("text_template_xls")
-            ),
-            div(
-              id = "div_template_warn",
-              height = "100%",
-              htmlOutput("text_template_warn")
             )
           )
         ),
