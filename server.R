@@ -220,7 +220,7 @@ shinyServer(function(input, output, session) {
 
     logo_img <- ifelse(!is.na(dcc_config_react()$dcc$logo_location),
       dcc_config_react()$dcc$logo_location,
-      "https://raw.githubusercontent.com/Sage-Bionetworks/data_curator_config/main/demo/Logo_Sage_Logomark.png"
+      "https://raw.githubusercontent.com/Sage-Bionetworks/data_curator_config/prod/demo/sage_logo_mark_only.png"
     )
 
     logo_link <- ifelse(!is.na(dcc_config_react()$dcc$logo_link),
