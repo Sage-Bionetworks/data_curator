@@ -444,12 +444,6 @@ shinyServer(function(input, output, session) {
     shinyjs::enable("btn_project")
     shinyjs::enable("btn_template_select")
   })
-  
-  # observeEvent(input$dropdown_template, {
-  #   req(input$tabs %in% "tab_template_select")
-  #   type <- config_schema()[[1]]$type[which(config_schema()[[1]]$display_name == input$dropdown_template)]
-  # 
-  # })
 
   # Goal of this button is to updpate the template reactive object
   # with the template the user chooses
@@ -464,10 +458,6 @@ shinyServer(function(input, output, session) {
     )
     dcWaiter("hide")
   })
-
-  # observeEvent(input$dropdown_template, {
-  # 
-  # })
 
   # Goal of this button is to get the files within a folder the user selects
   observeEvent(input$btn_folder, {
