@@ -191,8 +191,18 @@ manifest_validate <- function(url="http://localhost:3001/v1/model/validate",
 #' @param schema_url URL to a schema jsonld 
 #' @param data_type Type of dataset
 #' @param dataset_id Synapse ID of existing manifest
-#' @param access_token Synapse login cookie, PAT, or API key.
-#' @param csv_file Filepath of csv to validate
+#' @param restrict_rules Default = FALSE
+#' @param access_token Synapse login cookie, PAT, or API key
+#' @param json_str Json string to submit
+#' @param asset_view Synapse fileview
+#' @param manifest_record_type Default = "table_and_file"
+#' @param file_name Name of file
+#' @param table_manipulation Default = "replace"
+#' @param hide_blanks Default = FALSE
+#' @param table_column_names Default = "class_and_label"
+#' @param annotation_keys Default = "class_and_label"
+#' @param data_model_labels Default = "class_and_label"
+#' @param upload_file_annotations Default = TRUE
 #' 
 #' @returns TRUE if successful upload or validate errors if not.
 #' @export
@@ -210,7 +220,8 @@ model_submit <- function(url="http://localhost:3001/v1/model/submit",
                          hide_blanks=FALSE,
                          table_column_names="class_label",
                          annotation_keys="class_label",
-                         data_model_labels="class_label") {
+                         data_model_labels="class_label",
+                         upload_file_annotation=TRUE) {
   req <- httr::POST(url,
                     httr::add_headers(Authorization = sprintf("Bearer %s", access_token)),
                     query=list(
@@ -225,7 +236,8 @@ model_submit <- function(url="http://localhost:3001/v1/model/submit",
                       table_column_names=table_column_names,
                       annotation_keys=annotation_keys,
                       data_model_labels=data_model_labels,
-                      hide_blanks=hide_blanks),
+                      hide_blanks=hide_blanks,
+                      upload_file_annotation=upload_file_annotation),
                     body=list(file_name=httr::upload_file(file_name))
                     #body=list(file_name=file_name)
   )
