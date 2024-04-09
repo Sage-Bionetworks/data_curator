@@ -985,6 +985,7 @@ shinyServer(function(input, output, session) {
       .submit_manifest_record_type <- dcc_config_react()$schematic$model_submit$manifest_record_type
       .restrict_rules <- dcc_config_react()$schematic$model_validate$restrict_rules
       .hide_blanks <- dcc_config_react()$schematic$model_submit$hide_blanks
+      .file_annotations_upload <- dcc_config_react()$schematic$model_submit$file_annotations_upload
 
       # associates metadata with data and returns manifest id
       promises::future_promise({
@@ -1012,7 +1013,8 @@ shinyServer(function(input, output, session) {
                 manifest_record_type = .submit_manifest_record_type,
                 table_manipulation = .table_manipulation,
                 data_model_labels = .data_model_labels,
-                hide_blanks = .hide_blanks
+                hide_blanks = .hide_blanks,
+                file_annotations_upload = .file_annotations_upload
               ),
               "synXXXX - No data uploaded"
             )
@@ -1040,6 +1042,8 @@ shinyServer(function(input, output, session) {
       .submit_manifest_record_type <- dcc_config_react()$schematic$model_submit$manifest_record_type
       .restrict_rules <- dcc_config_react()$schematic$model_validate$restrict_rules
       .hide_blanks <- dcc_config_react()$schematic$model_submit$hide_blanks
+      .file_annotations_upload <- dcc_config_react()$schematic$model_submit$file_annotations_upload
+      
       # associates metadata with data and returns manifest id
       promises::future_promise({
         try(
@@ -1066,7 +1070,8 @@ shinyServer(function(input, output, session) {
                 manifest_record_type = .submit_manifest_record_type,
                 table_manipulation = .table_manipulation,
                 data_model_labels = .data_model_labels,
-                hide_blanks = .hide_blanks
+                hide_blanks = .hide_blanks,
+                file_annotations_upload = .file_annotations_upload
               ),
               "synXXXX - No data uploaded"
             )

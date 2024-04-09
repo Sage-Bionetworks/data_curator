@@ -20,7 +20,7 @@ model_submit(
   table_column_names = "class_label",
   annotation_keys = "class_label",
   data_model_labels = "class_label",
-  upload_file_annotation = TRUE
+  file_annotations_upload = TRUE
 )
 }
 \arguments{

@@ -221,7 +221,7 @@ model_submit <- function(url="http://localhost:3001/v1/model/submit",
                          table_column_names="class_label",
                          annotation_keys="class_label",
                          data_model_labels="class_label",
-                         upload_file_annotation=TRUE) {
+                         file_annotations_upload=TRUE) {
   req <- httr::POST(url,
                     httr::add_headers(Authorization = sprintf("Bearer %s", access_token)),
                     query=list(
@@ -237,7 +237,7 @@ model_submit <- function(url="http://localhost:3001/v1/model/submit",
                       annotation_keys=annotation_keys,
                       data_model_labels=data_model_labels,
                       hide_blanks=hide_blanks,
-                      upload_file_annotation=upload_file_annotation),
+                      file_annotations_upload=file_annotations_upload),
                     body=list(file_name=httr::upload_file(file_name))
                     #body=list(file_name=file_name)
   )
