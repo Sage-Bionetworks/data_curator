@@ -6,7 +6,7 @@
 \usage{
 get_asset_view_table(
   url = "http://localhost:3001/v1/storage/assets/tables",
-  input_token,
+  access_token,
   asset_view,
   return_type = "json"
 )
@@ -14,7 +14,7 @@ get_asset_view_table(
 \arguments{
 \item{url}{URL to schematic API endpoint}
 
-\item{input_token}{synapse PAT}
+\item{access_token}{synapse PAT}
 
 \item{asset_view}{Synapse ID of asset view}
 }

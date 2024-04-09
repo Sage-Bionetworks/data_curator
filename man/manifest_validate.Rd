@@ -6,10 +6,14 @@
 \usage{
 manifest_validate(
   url = "http://localhost:3001/v1/model/validate",
-  schema_url =
-    "https://raw.githubusercontent.com/ncihtan/data-models/main/HTAN.model.jsonld",
+  schema_url,
   data_type,
-  json_str
+  file_name,
+  restrict_rules = FALSE,
+  project_scope = NULL,
+  access_token,
+  asset_view = NULL,
+  data_model_labels = "class_label"
 )
 }
 \arguments{
@@ -19,7 +23,7 @@ manifest_validate(
 
 \item{data_type}{Type of dataset}
 
-\item{csv_file}{Filepath of csv to validate}
+\item{file_name}{Filepath of csv to validate}
 }
 \value{
 An empty list() if sucessfully validated. Or a list of errors.

@@ -6,15 +6,16 @@
 \usage{
 manifest_generate(
   url = "http://localhost:3001/v1/manifest/generate",
-  schema_url =
-    "https://raw.githubusercontent.com/ncihtan/data-models/main/HTAN.model.jsonld",
+  schema_url,
   title,
   data_type,
-  oauth = "true",
   use_annotations = "false",
   dataset_id = NULL,
   asset_view,
-  output_format
+  output_format,
+  access_token = NULL,
+  strict_validation = FALSE,
+  data_model_labels = "class_label"
 )
 }
 \arguments{
@@ -22,11 +23,11 @@ manifest_generate(
 
 \item{data_type}{Type of dataset}
 
-\item{oauth}{true or false STRING passed to python}
-
 \item{use_annotations}{true or false STRING passed to python}
 
 \item{dataset_id}{Synapse ID of existing manifest}
+
+\item{oauth}{true or false STRING passed to python}
 }
 \value{
 a URL to a google sheet

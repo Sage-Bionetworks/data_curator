@@ -8,7 +8,8 @@ model_component_requirements(
   url = "http://localhost:3001/v1/model/component-requirements",
   schema_url,
   source_component,
-  as_graph = FALSE
+  as_graph = FALSE,
+  data_model_labels = "class_label"
 )
 }
 \arguments{

@@ -10,7 +10,7 @@ storage_dataset_files(
   dataset_id,
   file_names = list(),
   full_path = FALSE,
-  input_token
+  access_token
 )
 }
 \arguments{
@@ -22,7 +22,7 @@ storage_dataset_files(
 
 \item{full_path}{Boolean. If True return the full path as part of this filename; otherwise return just base filename}
 
-\item{input_token}{synapse PAT}
+\item{access_token}{synapse PAT}
 
 \item{syn_master_file_view}{synapse ID of master file view.}
 

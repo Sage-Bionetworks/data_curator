@@ -8,7 +8,7 @@ storage_project_datasets(
   url = "http://localhost:3001/v1/storage/project/datasets",
   asset_view,
   project_id,
-  input_token
+  access_token
 )
 }
 \arguments{
@@ -16,7 +16,7 @@ storage_project_datasets(
 
 \item{project_id}{synapse ID of a storage project.}
 
-\item{input_token}{synapse PAT}
+\item{access_token}{synapse PAT}
 
 \item{syn_master_file_view}{synapse ID of master file view.}
 
