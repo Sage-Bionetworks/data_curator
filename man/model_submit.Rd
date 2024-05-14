@@ -6,14 +6,21 @@
 \usage{
 model_submit(
   url = "http://localhost:3001/v1/model/submit",
-  schema_url =
-    "https://raw.githubusercontent.com/ncihtan/data-models/main/HTAN.model.jsonld",
+  schema_url,
   data_type,
   dataset_id,
   restrict_rules = FALSE,
-  input_token,
-  json_str,
-  asset_view
+  access_token,
+  json_str = NULL,
+  asset_view,
+  manifest_record_type = "table_and_file",
+  file_name,
+  table_manipulation = "replace",
+  hide_blanks = FALSE,
+  table_column_names = "class_label",
+  annotation_keys = "class_label",
+  data_model_labels = "class_label",
+  file_annotations_upload = TRUE
 )
 }
 \arguments{
@@ -25,9 +32,29 @@ model_submit(
 
 \item{dataset_id}{Synapse ID of existing manifest}
 
-\item{input_token}{Synapse login cookie, PAT, or API key.}
+\item{restrict_rules}{Default = FALSE}
 
-\item{csv_file}{Filepath of csv to validate}
+\item{access_token}{Synapse login cookie, PAT, or API key}
+
+\item{json_str}{Json string to submit}
+
+\item{asset_view}{Synapse fileview}
+
+\item{manifest_record_type}{Default = "table_and_file"}
+
+\item{file_name}{Name of file}
+
+\item{table_manipulation}{Default = "replace"}
+
+\item{hide_blanks}{Default = FALSE}
+
+\item{table_column_names}{Default = "class_and_label"}
+
+\item{annotation_keys}{Default = "class_and_label"}
+
+\item{data_model_labels}{Default = "class_and_label"}
+
+\item{upload_file_annotations}{Default = TRUE}
 }
 \value{
 TRUE if successful upload or validate errors if not.
