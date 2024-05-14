@@ -54,21 +54,19 @@ synapse_is_certified <- function(url="https://repo-prod.prod.sagebase.org/repo/v
 #' @param auth Synapse PAT
 #' 
 #' @export
-synapse_get <- function(url = "https://repo-prod.prod.sagebase.org/repo/v1/entity/",
+synapse_get <- function(url = "https://repo-prod.prod.sagebase.org/repo/v1/entity",
                         id, auth) {
   
   if (is.null(id)) stop("id cannot be NULL")
-  req_url <- file.path(url, id)
-  req <- httr::GET(req_url,
-             httr::add_headers(Authorization=paste0("Bearer ", auth)))
-  
-  # Send error if unsuccessful query
-  status <- httr::http_status(req)
-  if (status$category != "Success") stop(status$message)
-  
-  cont <- httr::content(req)
-  dplyr::bind_rows(cont)
-  
+  req <- httr2::request(file.path(url, id))
+  resp <- req |>
+    httr2::req_retry(
+      max_tries = 5,
+      is_transient = \(resp) httr2::resp_status(resp) %in% c(429, 500, 503, 403)
+    ) |>
+    httr2::req_headers(Authorization = sprintf("Bearer %s", auth)) |>
+    httr2::req_perform()
+  resp |> httr2::resp_body_json()
 }
 
 
@@ -216,9 +214,16 @@ synapse_table_query <- function(id, auth, query, partMask=0x7F) {
 #' @param auth Synapse token
 synapse_table_get <- function(id, async_token, auth) {
   url <- file.path("https://repo-prod.prod.sagebase.org/repo/v1/entity", id,"table/query/async/get", async_token)
-  req <- httr::GET(url = url,
-                   httr::add_headers(Authorization=paste0("Bearer ", auth)))
-  httr::content(req)
+  request <- httr2::request(url)
+  response <- request |>
+    httr2::req_retry(
+      max_tries = 5,
+      is_transient = \(r) httr2::resp_status(r) %in% c(429, 500, 503, 202, 403)
+    ) |>
+    httr2::req_headers(Authorization = sprintf("Bearer %s", auth)) |>
+    httr2::req_perform()
+  httr2::resp_body_json(response)
+    
 }
 
 #' @title Get column names from a Synapse table
@@ -245,7 +250,6 @@ synapse_storage_projects <- function(id, auth, select_cols = c("id", "name", "pa
   select_cols_format <- paste(select_cols, collapse = ", ")
   query <- sprintf("select distinct %s from %s", select_cols_format, id)
   request <- synapse_table_query(id, auth, query, partMask = 0x1)
-  Sys.sleep(1)
   response <- synapse_table_get(id, request$token, auth)
   
   setNames(
@@ -278,6 +282,34 @@ synapse_download_file_handle <- function(dataFileHandleId, id, auth, filepath=NU
   download_url <- httr::content(request)
   destfile <- ifelse(is.null(filepath), tempfile(), filepath)
   download.file(download_url, destfile)
-  if (is.null(filepath)) readr::read_csv(destfile)
+  if (is.null(filepath)) readr::read_csv(destfile, show_col_types = FALSE)
   
+}
+
+#' @title Download the storage manifest records from an asset view table
+synapse_get_manifests_in_asset_view <- function(id, auth) {
+  request <- synapse_table_query(
+    id = id,
+    auth = auth,
+    query = paste("select * from",
+                  id,
+                  "where name like 'synapse|_storage|_manifest|_%' escape '|'"),
+    partMask = 0x11)
+  response <- synapse_table_get(
+    id = id,
+    async_token = request$token,
+    auth = auth)
+  # Format the query results by reshaping the results list and getting column
+  # names. partMask 0x11 gets queryResults and column names
+  setNames(
+    tibble::as_tibble(
+      t(
+        vapply(
+          response$queryResult$queryResults$rows, function(x) {
+            null_ind <- which(sapply(x$values, is.null))
+            x$values[null_ind] <- NA
+            unlist(x$values)
+          },
+          character(length(response$columnModels))))),
+    vapply(response$columnModels, function(x) x$name,character(1L)))
 }

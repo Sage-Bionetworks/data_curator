@@ -32,7 +32,7 @@ dcWaiter <- function(stage = c("show", "update", "hide"),
     if (stage == "show") {
       waiter_show_on_load(
         html = tagList(
-          img(src = "img/Logo_Sage_Logomark.png"),
+          img(src = "img/sage_logo_mark_only.png"),
           h4("Logging into Data Curator App")
         ),
         color = col2rgba("#2a668d", 255*0.9)
@@ -40,7 +40,7 @@ dcWaiter <- function(stage = c("show", "update", "hide"),
     } else if (!isCertified) {
       # when user is not certified synapse user
       waiter_update(html = tagList(
-        img(src = "img/Logo_Sage_Logomark.png", height = "120px"),
+        img(src = "img/sage_logo_mark_only.png", height = "120px"),
         h3("Looks like you're not a synapse certified user!"),
         span(
           "Please follow the ",
@@ -54,7 +54,7 @@ dcWaiter <- function(stage = c("show", "update", "hide"),
     } else if (!isPermission) {
       # when user is not certified synapse user
       waiter_update(html = tagList(
-        img(src = "img/Logo_Sage_Logomark.png", height = "120px"),
+        img(src = "img/sage_logo_mark_only.png", height = "120px"),
         h3("Fileview/Project Access Denied!"),
         span("You may not have sufficient permissions for curation.
          Please contact your team and project administrators.")
@@ -62,7 +62,7 @@ dcWaiter <- function(stage = c("show", "update", "hide"),
     } else {
       # success loading page; userName needed to provide
       waiter_update(html = tagList(
-        img(src = "img/Logo_Sage_Logomark.png", height = "120px"),
+        img(src = "img/sage_logo_mark_only.png", height = "120px"),
         h3(sprintf("Welcome, %s!", userName))
       ))
       Sys.sleep(sleep)

@@ -119,7 +119,11 @@ ui <- shinydashboardPlus::dashboardPage(
   tags$head(
     tags$style(sass(sass_file("www/scss/main.scss"))),
     singleton(includeScript("www/js/readCookie.js")),
-    tags$script(htmlwidgets::JS("setTimeout(function(){history.pushState({}, 'Data Curator', window.location.pathname);},2000);"))
+    tags$script(htmlwidgets::JS("setTimeout(function(){history.pushState({}, 'Data Curator', window.location.pathname);},2000);"),
+      "Shiny.addCustomMessageHandler('compliance_dashboard', function(x) {
+        Shiny.setInputValue('compliance_dashboard', x);
+      });
+    ")
   ),
   uiOutput("sass"),
   # load dependencies
@@ -164,8 +168,8 @@ ui <- shinydashboardPlus::dashboardPage(
         actionButton("btn_project", "Next",
         class = "btn-primary-color"
         )
-      ),
-    ),
+      )
+    )
   ),
   tabItem(
     tabName = "tab_folder",
@@ -199,6 +203,11 @@ ui <- shinydashboardPlus::dashboardPage(
           label = NULL,
           choices = "Generating..."
         ),
+        hidden(div(
+          id = "div_template_warn",
+          height = "100%",
+          htmlOutput("text_template_warn")
+        )),
         actionButton("btn_template_select", "Download template",
                      class = "btn-primary-color"
         ),
@@ -206,7 +215,8 @@ ui <- shinydashboardPlus::dashboardPage(
                      "Skip to validation",
                      class = "btn-primary-color"
         )
-      )
+      ),
+     conditionalPanel("input.compliance_dashboard", dashboardUI("dashboard"))
     ),
   ),
   tabItem(
