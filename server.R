@@ -112,7 +112,7 @@ shinyServer(function(input, output, session) {
   shinyjs::hide("box_preview")
   shinyjs::hide("box_validate")
   shinyjs::hide("box_submit")
-
+  
   # initial loading page
   observeEvent(input$cookie, {
     # login and update session
@@ -218,7 +218,7 @@ shinyServer(function(input, output, session) {
 
     logo_img <- ifelse(!is.na(dcc_config_react()$dcc$logo_location),
       dcc_config_react()$dcc$logo_location,
-      "https://raw.githubusercontent.com/Sage-Bionetworks/data_curator_config/main/demo/Logo_Sage_Logomark.png"
+      "https://raw.githubusercontent.com/Sage-Bionetworks/data_curator_config/prod/demo/sage_logo_mark_only.png"
     )
 
     logo_link <- ifelse(!is.na(dcc_config_react()$dcc$logo_link),
@@ -313,16 +313,20 @@ shinyServer(function(input, output, session) {
           )
         })
       })
-
-      updateTabsetPanel(session, "tabs", selected = "tab_project")
-
-      shinyjs::show(selector = ".sidebar-menu")
-      shinyjs::hide(select = "li:nth-child(3)")
-      shinyjs::hide(select = "li:nth-child(4)")
-      shinyjs::hide(select = "li:nth-child(5)")
-      shinyjs::hide(select = "li:nth-child(6)")
-
-      dcWaiter("hide")
+    
+    updateTabsetPanel(session, "tabs", selected = "tab_project")
+    
+    shinyjs::show(selector = ".sidebar-menu")
+    shinyjs::hide(select = "li:nth-child(3)")
+    shinyjs::hide(select = "li:nth-child(4)")
+    shinyjs::hide(select = "li:nth-child(5)")
+    shinyjs::hide(select = "li:nth-child(6)")
+    session$sendCustomMessage(
+      "compliance_dashboard",
+      dcc_config_react()$dca$use_compliance_dashboard
+    )
+    
+    dcWaiter("hide")
     }
   })
 
@@ -371,36 +375,34 @@ shinyServer(function(input, output, session) {
     shinyjs::disable("btn_project")
     selected$project(data_list$projects()[names(data_list$projects()) == input$dropdown_project])
 
-    observeEvent(input[["dropdown_project"]], {
-      # get synID of selected project
-      project_id <- selected$project()
+    # get synID of selected project
+    .project_id <- selected$project()
 
-      .asset_view <- selected$master_asset_view()
+    .asset_view <- selected$master_asset_view()
 
-      promises::future_promise({
-        try(
-          {
-            folder_list_raw <- switch(dca_schematic_api,
-              reticulate = storage_projects_datasets_py(
-                synapse_driver,
-                project_id
-              ),
-              rest = storage_project_datasets(
-                url = file.path(api_uri, "v1/storage/project/datasets"),
-                asset_view = .asset_view,
-                project_id = project_id,
-                access_token = access_token
-              ),
-              list(list("DatatypeA", "DatatypeA"), list("DatatypeB", "DatatypeB"))
-            )
+    promises::future_promise({
+      try(
+        {
+          folder_list_raw <- switch(dca_schematic_api,
+            reticulate = storage_projects_datasets_py(
+              synapse_driver,
+              .project_id
+            ),
+            rest = storage_project_datasets(
+              url = file.path(api_uri, "v1/storage/project/datasets"),
+              asset_view = .asset_view,
+              project_id = .project_id,
+              access_token = access_token
+            ),
+            list(list("DatatypeA", "DatatypeA"), list("DatatypeB", "DatatypeB"))
+          )
 
-            folder_list <- list2Vector(folder_list_raw)
-            folder_list[sort(names(folder_list))]
-          },
-          silent = TRUE
-        )
-      }) %...>% data_list$folders()
-    })
+          folder_list <- list2Vector(folder_list_raw)
+          folder_list[sort(names(folder_list))]
+        },
+        silent = TRUE
+      )
+    }) %...>% data_list$folders()
   })
 
   observeEvent(data_list$folders(), ignoreInit = TRUE, {
@@ -457,14 +459,6 @@ shinyServer(function(input, output, session) {
     dcWaiter("hide")
   })
 
-  observeEvent(input$dropdown_template, {
-    shinyjs::enable("btn_template")
-    shinyjs::enable("btn_template_select")
-    updateSelectInput(session, "header_dropdown_template",
-      choices = input$dropdown_template
-    )
-  })
-
   # Goal of this button is to get the files within a folder the user selects
   observeEvent(input$btn_folder, {
     dcWaiter("show", msg = paste0("Getting data"), color = primary_col())
@@ -480,7 +474,7 @@ shinyServer(function(input, output, session) {
     sapply(clean_tags[1:2], FUN = hide)
 
 
-    if (selected$schema_type() %in% c("record", "file")) {
+ #   if (selected$schema_type() %in% c("record", "file")) {
       # check number of files if it's file-based template
       # This gets files using the synapse REST API
       # get file list in selected folder
@@ -510,7 +504,7 @@ shinyServer(function(input, output, session) {
         # update files list in the folder
         data_list$files(list2Vector(file_list))
       }
-    }
+ #   }
   })
 
   observeEvent(input$dropdown_folder, {
@@ -524,34 +518,6 @@ shinyServer(function(input, output, session) {
   })
 
   observeEvent(data_list$files(), ignoreInit = TRUE, {
-    warn_text <- NULL
-    if (length(data_list$folders()) == 0) {
-      # add warning if there is no folder in the selected project
-      warn_text <- paste0(
-        "please create a folder in the ",
-        strong(sQuote(input$dropdown_project)),
-        " prior to submitting templates."
-      )
-    }
-    if (is.null(data_list$files())) {
-      # display warning message if folder is empty and data type is file-based
-      warn_text <- paste0(
-        strong(sQuote(input$dropdown_folder)), " folder is empty,
-        please upload your data before generating manifest.",
-        "<br>", strong(sQuote(input$dropdown_template)),
-        " requires data files to be uploaded prior to generating and submitting templates.",
-        "<br>", "Filling in a template before uploading your data,
-        may result in errors and delays in your data submission later."
-      )
-    }
-
-    # if there is warning from above checks
-    if (!is.null(warn_text)) {
-      # display warnings
-      output$text_template_warn <- renderUI(tagList(br(), span(class = "warn_msg", HTML(warn_text))))
-      show("div_template_warn")
-    }
-
     dcWaiter("hide")
   })
 
@@ -577,6 +543,8 @@ shinyServer(function(input, output, session) {
   # update selected schema template name
   observeEvent(input$dropdown_template,
     {
+      req(input$tabs %in% "tab_template_select")
+      warn_text <- reactiveVal(NULL)
       shinyjs::enable("btn_template_select")
       # update reactive selected values for schema
       selected$schema(data_list$template()[input$dropdown_template])
@@ -592,26 +560,63 @@ shinyServer(function(input, output, session) {
 
       # clean all tags related with selected template
       sapply(clean_tags, FUN = hide)
+      
+      if (length(data_list$folders()) == 0) {
+        # add warning if there is no folder in the selected project
+        warn_text(paste0(
+          "please create a folder in the ",
+          strong(sQuote(input$dropdown_project)),
+          " prior to submitting templates."
+        ))
+      }
+      if (all(is.na(data_list$files())) & selected$schema_type() == "file") {
+        # display warning message if folder is empty and data type is file-based
+        warn_text(paste0(
+          strong(sQuote(input$dropdown_folder)), " folder is empty,
+        please upload your data before generating manifest.",
+          "<br>", strong(sQuote(input$dropdown_template)),
+          " requires data files to be uploaded prior to generating and submitting templates.",
+          "<br>", "Filling in a template before uploading your data,
+        may result in errors and delays in your data submission later."
+        ))
+      }
+      
+      # if there is warning from above checks
+      if (!is.null(warn_text())) {
+        # display warnings
+        output$text_template_warn <- renderUI(tagList(br(), span(class = "warn_msg", HTML(warn_text()))))
+        show("div_template_warn")
+        # nx_report_warning(
+        #   title = "No data uploaded in folder",
+        #   HTML(warn_text())
+        # )
+      }
+      
+      shinyjs::enable("btn_template")
+      shinyjs::enable("btn_template_select")
+      updateSelectInput(session, "header_dropdown_template",
+                        choices = input$dropdown_template
+      )
     },
     ignoreInit = TRUE
   )
 
   ######## Dashboard ########
-  #  dashboard(
-  #    id = "dashboard",
-  #    syn.store = syn_store,
-  #    project.scope = selected$project,
-  #    schema = selected$schema,
-  #    schema.display.name = reactive(input$dropdown_datatype),
-  #    disable.ids = c("box_pick_project", "box_pick_manifest"),
-  #    ncores = ncores,
-  #    access_token = access_token,
-  #    fileview = selected$master_asset_view(),
-  #    folder = selected$project(),
-  #    schematic_api = dca_schematic_api,
-  #    schema_url = data_model()
-  #  )
-
+   dashboard(
+     id = "dashboard",
+     syn.store = syn_store,
+     project.scope = selected$project,
+     schema = selected$schema,
+     schema.display.name = selected$schema,
+     disable.ids = c("box_pick_project", "box_pick_manifest"),
+     ncores = ncores,
+     access_token = access_token,
+     fileview = selected$master_asset_view(),
+     folder = selected$project(),
+     schematic_api = dca_schematic_api,
+     schema_url = data_model()
+   )
+  
   manifest_url <- reactiveVal(NULL)
 
   ######## Template Google Sheet Link ########
@@ -734,7 +739,18 @@ shinyServer(function(input, output, session) {
 
   # generate link
   output$text_template <- renderUI(
-    tags$a(id = "template_link", href = manifest_data(), list(icon("hand-point-right"), manifest_data()), target = "_blank")
+    tags$a(
+      id = "template_link",
+      href = manifest_data(),
+      list(
+        icon("hand-point-right"),
+           sprintf("%s metadata for %s - %s",
+                   selected$schema(),
+                   names(selected$project()),
+                   names(selected$folder())
+                   )
+        ),
+      target = "_blank")
   )
 
   if (dca_schematic_api == "offline") {
@@ -985,6 +1001,7 @@ shinyServer(function(input, output, session) {
       .submit_manifest_record_type <- dcc_config_react()$schematic$model_submit$manifest_record_type
       .restrict_rules <- dcc_config_react()$schematic$model_validate$restrict_rules
       .hide_blanks <- dcc_config_react()$schematic$model_submit$hide_blanks
+      .file_annotations_upload <- dcc_config_react()$schematic$model_submit$file_annotations_upload
 
       # associates metadata with data and returns manifest id
       promises::future_promise({
@@ -1012,7 +1029,8 @@ shinyServer(function(input, output, session) {
                 manifest_record_type = .submit_manifest_record_type,
                 table_manipulation = .table_manipulation,
                 data_model_labels = .data_model_labels,
-                hide_blanks = .hide_blanks
+                hide_blanks = .hide_blanks,
+                file_annotations_upload = .file_annotations_upload
               ),
               "synXXXX - No data uploaded"
             )
@@ -1040,6 +1058,8 @@ shinyServer(function(input, output, session) {
       .submit_manifest_record_type <- dcc_config_react()$schematic$model_submit$manifest_record_type
       .restrict_rules <- dcc_config_react()$schematic$model_validate$restrict_rules
       .hide_blanks <- dcc_config_react()$schematic$model_submit$hide_blanks
+      .file_annotations_upload <- dcc_config_react()$schematic$model_submit$file_annotations_upload
+      
       # associates metadata with data and returns manifest id
       promises::future_promise({
         try(
@@ -1066,7 +1086,8 @@ shinyServer(function(input, output, session) {
                 manifest_record_type = .submit_manifest_record_type,
                 table_manipulation = .table_manipulation,
                 data_model_labels = .data_model_labels,
-                hide_blanks = .hide_blanks
+                hide_blanks = .hide_blanks,
+                file_annotations_upload = .file_annotations_upload
               ),
               "synXXXX - No data uploaded"
             )

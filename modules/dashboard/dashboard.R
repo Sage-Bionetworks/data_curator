@@ -77,15 +77,15 @@ dashboard <- function(id, syn.store, project.scope, schema, schema.display.name,
         hide("toggle-btn-container")
         shinydashboardPlus::updateBox("box", action = "restore")
       })
-      # retrieving data progress for dashboard should not be executed until dashboard visiable
+      # retrieving data progress for dashboard should not be executed until dashboard visible
       # get all uploaded manifests once the project/folder changed
       observeEvent(c(project.scope(), input$box$visible), {
         req(input$box$visible)
         # initiate partial loading screen for generating plot
         dcWaiter(
-          "show",
-          id = ns("tab-container"), url = "www/img/logo.svg", custom_spinner = TRUE,
-          msg = "Loading, please wait...", style = "color: #000;", color = transparent(0.95)
+         "show",
+         id = ns("tab-container"), url = "www/img/logo.svg", custom_spinner = TRUE,
+         msg = "Loading, please wait..."
         )
 
         # disable selection to prevent changes until all uploaded manifests are queried
@@ -94,10 +94,10 @@ dashboard <- function(id, syn.store, project.scope, schema, schema.display.name,
 
         # get all datasets from selected project
         folder_list <- switch(schematic_api,
-                              "rest" = storage_project_datasets(url=file.path(api_uri, "v1/storage/project/datasets"),
+                              "rest" = storage_project_datasets(url=file.path("https://schematic-dev.api.sagebionetworks.org/v1/storage/project/datasets"),
                                                                 asset_view = fileview,
                                                                 project_id=folder,
-                                                                input_token=access_token),
+                                                                access_token=access_token),
                               "reticulate" = storage_projects_datasets_py(syn.store, project.scope())
         )
         folder_list <- list2Vector(folder_list)
@@ -113,7 +113,8 @@ dashboard <- function(id, syn.store, project.scope, schema, schema.display.name,
         )
 
         metadata <- validate_metadata(metadata, project.scope = list(project.scope()),
-                                      schematic_api = schematic_api, schema_url=schema_url)
+                                     schematic_api = schematic_api, schema_url=schema_url,
+                                     access_token=access_token)
         # update reactive value
         uploaded_manifests(metadata)
       })
@@ -122,7 +123,7 @@ dashboard <- function(id, syn.store, project.scope, schema, schema.display.name,
       selected_datatype_requirement <- eventReactive(c(schema(), input$box$visible), {
         req(input$box$visible)
         get_schema_nodes(schema(), schematic_api = schematic_api,
-                    url=file.path(api_uri, "v1/model/component-requirements"),
+                    url=file.path("https://schematic-dev.api.sagebionetworks.org/v1/model/component-requirements"),
                     schema_url = schema_url)
       })
 
@@ -133,7 +134,7 @@ dashboard <- function(id, syn.store, project.scope, schema, schema.display.name,
         # remove rows with invalid component name
         metadata <- uploaded_manifests() %>% filter(!is.na(Component), Component != "Unknown")
         get_metadata_nodes(metadata, ncores = ncores, schematic_api=schematic_api,
-                          schema_url = schema_url, url = file.path(api_uri, "v1/model/component-requirements"))
+                          schema_url = schema_url, url = file.path("https://schematic-dev.api.sagebionetworks.org/v1/model/component-requirements"))
       })
 
       # render info/plots for selected datatype

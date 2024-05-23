@@ -7,13 +7,13 @@
 storage_projects(
   url = "http://localhost:3001/v1/storage/projects",
   asset_view,
-  input_token
+  access_token
 )
 }
 \arguments{
 \item{url}{URL to schematic API endpoint}
 
-\item{input_token}{synapse PAT}
+\item{access_token}{synapse PAT}
 
 \item{syn_master_file_view}{synapse ID of master file view.}
 
