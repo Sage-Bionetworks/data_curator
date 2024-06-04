@@ -806,7 +806,10 @@ shinyServer(function(input, output, session) {
     # asset view must be NULL to avoid cross-manifest validation.
     # doing this in a verbose way to avoid warning with ifelse
     .asset_view <- NULL
-    if (!is.null(.project_scope)) .asset_view <- selected$master_asset_view()
+    if (!is.null(dcc_config_react()$schematic$model_validate$enable_cross_manifest_validation) &
+        isTRUE(dcc_config_react()$schematic$model_validate$enable_cross_manifest_validation)) {
+      .asset_view <- selected$master_asset_view()
+    }
 
     promises::future_promise({
       annotation_status <- switch(dca_schematic_api,
@@ -822,7 +825,7 @@ shinyServer(function(input, output, session) {
           data_type = .schema,
           file_name = .datapath,
           restrict_rules = .restrict_rules,
-          project_scope = .project_scope,
+          #project_scope = .project_scope,
           access_token = .access_token,
           data_model_labels = .data_model_labels,
           asset_view = .asset_view
