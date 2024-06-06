@@ -127,18 +127,7 @@ shinyServer(function(input, output, session) {
 
     if (dca_schematic_api != "offline") {
       access_token <- session$userData$access_token
-      has_access <- vapply(all_asset_views, function(x) {
-        synapse_access(id = x, access = "DOWNLOAD", auth = access_token)
-      }, 1L)
-      asset_views(all_asset_views[has_access == 1])
-
-      if (length(asset_views) == 0) stop("You do not have DOWNLOAD access to any supported Asset Views.")
-      updateSelectInput(session, "dropdown_asset_view",
-        choices = asset_views()
-      )
-
       user_name <- synapse_user_profile(auth = access_token)$firstName
-
       is_certified <- synapse_is_certified(auth = access_token)
       if (!is_certified) {
         dcWaiter("update", landing = TRUE, isCertified = FALSE)
@@ -146,6 +135,16 @@ shinyServer(function(input, output, session) {
         # update waiter loading screen once login successful
         dcWaiter("update", landing = TRUE, userName = user_name)
       }
+      
+      has_access <- vapply(all_asset_views, function(x) {
+        synapse_access(id = x, access = "DOWNLOAD", auth = access_token)
+      }, 1L)
+      asset_views(all_asset_views[has_access == 1])
+      
+      if (length(asset_views) == 0) stop("You do not have DOWNLOAD access to any supported Asset Views.")
+      updateSelectInput(session, "dropdown_asset_view",
+                        choices = asset_views()
+      )
     } else {
       updateSelectInput(session, "dropdown_asset_view",
         choices = c("Offline mock data (synXXXXXX)" = "synXXXXXX")
@@ -806,7 +805,10 @@ shinyServer(function(input, output, session) {
     # asset view must be NULL to avoid cross-manifest validation.
     # doing this in a verbose way to avoid warning with ifelse
     .asset_view <- NULL
-    if (!is.null(.project_scope)) .asset_view <- selected$master_asset_view()
+    if (!is.null(dcc_config_react()$schematic$model_validate$enable_cross_manifest_validation) &
+        isTRUE(dcc_config_react()$schematic$model_validate$enable_cross_manifest_validation)) {
+      .asset_view <- selected$master_asset_view()
+    }
 
     promises::future_promise({
       annotation_status <- switch(dca_schematic_api,
@@ -822,7 +824,7 @@ shinyServer(function(input, output, session) {
           data_type = .schema,
           file_name = .datapath,
           restrict_rules = .restrict_rules,
-          project_scope = .project_scope,
+          #project_scope = .project_scope,
           access_token = .access_token,
           data_model_labels = .data_model_labels,
           asset_view = .asset_view
