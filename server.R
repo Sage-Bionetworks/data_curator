@@ -127,18 +127,7 @@ shinyServer(function(input, output, session) {
 
     if (dca_schematic_api != "offline") {
       access_token <- session$userData$access_token
-      has_access <- vapply(all_asset_views, function(x) {
-        synapse_access(id = x, access = "DOWNLOAD", auth = access_token)
-      }, 1L)
-      asset_views(all_asset_views[has_access == 1])
-
-      if (length(asset_views) == 0) stop("You do not have DOWNLOAD access to any supported Asset Views.")
-      updateSelectInput(session, "dropdown_asset_view",
-        choices = asset_views()
-      )
-
       user_name <- synapse_user_profile(auth = access_token)$firstName
-
       is_certified <- synapse_is_certified(auth = access_token)
       if (!is_certified) {
         dcWaiter("update", landing = TRUE, isCertified = FALSE)
@@ -146,6 +135,16 @@ shinyServer(function(input, output, session) {
         # update waiter loading screen once login successful
         dcWaiter("update", landing = TRUE, userName = user_name)
       }
+      
+      has_access <- vapply(all_asset_views, function(x) {
+        synapse_access(id = x, access = "DOWNLOAD", auth = access_token)
+      }, 1L)
+      asset_views(all_asset_views[has_access == 1])
+      
+      if (length(asset_views) == 0) stop("You do not have DOWNLOAD access to any supported Asset Views.")
+      updateSelectInput(session, "dropdown_asset_view",
+                        choices = asset_views()
+      )
     } else {
       updateSelectInput(session, "dropdown_asset_view",
         choices = c("Offline mock data (synXXXXXX)" = "synXXXXXX")
