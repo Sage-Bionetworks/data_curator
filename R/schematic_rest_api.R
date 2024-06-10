@@ -6,6 +6,11 @@ check_success <- function(x){
   if (tolower(status$category) == "success") {
     return()
   } else {
+    # Return content text for Data Type errors
+    if (grepl("LookupError: The DataType", httr::content(x, "text"))) {
+      stop(httr::content(x, "text"))
+    }
+    
     stop(sprintf("Response from server: %s", status$reason))
   }
 }
