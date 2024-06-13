@@ -141,7 +141,13 @@ shinyServer(function(input, output, session) {
       }, 1L)
       asset_views(all_asset_views[has_access == 1])
       
-      if (length(asset_views) == 0) stop("You do not have DOWNLOAD access to any supported Asset Views.")
+      if (length(asset_views) == 0) {
+        nx_report_error(
+          title = "You do not have DOWNLOAD access to any supported Asset Views",
+          message = "Contact your DCC admin for access"
+        )
+        hide(selector = "#NXReportButton") # hide OK button so users can't continue
+      }
       updateSelectInput(session, "dropdown_asset_view",
                         choices = asset_views()
       )
