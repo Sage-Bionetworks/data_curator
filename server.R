@@ -184,7 +184,7 @@ shinyServer(function(input, output, session) {
     tenant_config_react(tenants_config[tenants_config$synapse_asset_view == selected$master_asset_view(), ])
     if (dca_schematic_api == "offline") tenant_config_react(tenants_config[tenants_config$name == "DCA Demo", ])
 
-    dcc_config_react(read_json(
+    dcc_config_react(read_dca_config(
       file.path(config_dir, tenant_config_react()$config_location)
     ))
 
