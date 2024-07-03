@@ -88,7 +88,7 @@ read_dca_config <- function(config) {
   mv_props_conf <- names(conf$schematic$model_validate)
   name_check(names(mv_props_req), mv_props_conf)
   
-  if (!"cross_manifest_validation" %in% mv_props_confg) {
+  if (!"cross_manifest_validation" %in% mv_props_conf) {
     conf$schematic$model_validate$cross_manifest_validation <- FALSE
   }
   
@@ -96,11 +96,29 @@ read_dca_config <- function(config) {
   # WIP, confirm required and move others to ops with defaults
   ms_props_req <- list(
     "table_manipulation" = "replace",
-    "manifest_record_type" = "file_only",
+    "manifest_record_type" = "file_only"
+  )
+  ms_props_ops <- list(
+    "table_column_names" = "class_label",
+    "annotation_keys" = "class_label",
+    "file_annotations_upload" = TRUE,
     "hide_blanks" = FALSE
   )
-  ms_props_ops <- list()
   ms_props_conf <- names(conf$schematic$model_submit)
+  name_check(names(ms_props_req), ms_props_conf)
+  
+  if (!"table_column_names" %in% ms_props_conf) {
+    conf$schematic$model_submit$table_column_names <- "class_label"
+  }
+  if (!"annotation_keys" %in% ms_props_conf) {
+    conf$schematic$model_submit$annotation_keys <- "class_label"
+  }
+  if (!"file_annotations_upload" %in% ms_props_conf) {
+    conf$schematic$model_submit$file_annotations_upload <- TRUE
+  }
+  if (!"hide_blanks" %in% ms_props_conf) {
+    conf$schematic$model_submit$hide_blanks <- FALSE
+  }
   
   conf
   
