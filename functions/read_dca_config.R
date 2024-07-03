@@ -82,9 +82,15 @@ read_dca_config <- function(config) {
   mv_props_req <- list(
     "restrict_rules" = FALSE
   )
-  mv_props_ops <- list()
+  mv_props_ops <- list(
+    "cross_manifest_validation" = FALSE
+  )
   mv_props_conf <- names(conf$schematic$model_validate)
   name_check(names(mv_props_req), mv_props_conf)
+  
+  if (!"cross_manifest_validation" %in% mv_props_confg) {
+    conf$schematic$model_validate$cross_manifest_validation <- FALSE
+  }
   
   # required elements should not have a default. Should error if not provided.
   # WIP, confirm required and move others to ops with defaults
