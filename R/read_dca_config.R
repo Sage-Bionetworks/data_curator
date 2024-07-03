@@ -42,6 +42,29 @@ read_dca_config <- function(config) {
     conf$dca$sidebar_col <- "#191919"
   }
   
+  dcc_props_req <- list(
+    "name" = list(),
+    "synapse_asset_view" = list(),
+    "data_model_url" = list(),
+    "template_menu_config_file" = list()
+  )
+  dcc_props_ops <- list(
+    "data_model_info" = NA_character_,
+    "logo_location" = "https://raw.githubusercontent.com/Sage-Bionetworks/data_curator_config/prod/demo/sage_logo_mark_only.png",
+    "logo_link" = "https://synapse.org",
+    "dcc_help_link" = NA_character_,
+    "portal_help_link" = NA_character_
+  )
+  dcc_props_conf <- names(conf$dcc)
+  name_check(names(dcc_props_req), dcc_props_conf)
+  
+  if (!"logo_location" %in% dcc_props_conf) {
+    conf$dcc$logo_location <- dcc_props_ops$logo_location
+  }
+  if (!"logo_link" %in% dcc_props_conf) {
+    conf$dcc$logo_link <- dcc_props_ops$logo_link
+  }
+  
   # required elements should not have a default. Should error if not provided.
   # WIP, confirm required and move others to ops with defaults
   schematic_props_req <- list(
