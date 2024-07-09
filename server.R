@@ -141,7 +141,13 @@ shinyServer(function(input, output, session) {
       }, 1L)
       asset_views(all_asset_views[has_access == 1])
       
-      if (length(asset_views) == 0) stop("You do not have DOWNLOAD access to any supported Asset Views.")
+      if (length(asset_views) == 0) {
+        nx_report_error(
+          title = "You do not have DOWNLOAD access to any supported Asset Views",
+          message = "Contact your DCC admin for access"
+        )
+        hide(selector = "#NXReportButton") # hide OK button so users can't continue
+      }
       updateSelectInput(session, "dropdown_asset_view",
                         choices = asset_views()
       )
@@ -178,7 +184,7 @@ shinyServer(function(input, output, session) {
     tenant_config_react(tenants_config[tenants_config$synapse_asset_view == selected$master_asset_view(), ])
     if (dca_schematic_api == "offline") tenant_config_react(tenants_config[tenants_config$name == "DCA Demo", ])
 
-    dcc_config_react(read_json(
+    dcc_config_react(read_dca_config(
       file.path(config_dir, tenant_config_react()$config_location)
     ))
 
