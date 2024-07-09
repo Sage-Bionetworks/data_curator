@@ -480,7 +480,7 @@ shinyServer(function(input, output, session) {
       if (dca_synapse_api == TRUE & dca_schematic_api != "offline") {
         .folder <- selected$folder()
         promises::future_promise({
-          files <- synapse_entity_children(auth = access_token, parentId = .folder, includeTypes = list("file"))
+          files <- synapse_entity_children(auth = access_token, parentId = .folder, includeTypes = list("file", "folder"))
           if (nrow(files) > 0) {
             files_vec <- setNames(files$id, files$name)
           } else {
