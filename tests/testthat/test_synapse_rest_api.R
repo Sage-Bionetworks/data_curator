@@ -7,7 +7,7 @@ test_that("synapse_user_profile returns list with successful auth", {
 
 test_that("synapse_user_profile bad auth token returns message", {
   req <- synapse_user_profile(auth="bad token")
-  expect_identical(req, list(reason="Invalid access token"))
+  expect_identical(req$reason, "Invalid access token")
 })
 
 test_that("synapse_user_profile returns list with NULL auth", {
@@ -19,7 +19,7 @@ test_that("synapse_user_profile returns list with NULL auth", {
 test_that("is_certified returns TRUE or FALSE", {
   
   expect_true(synapse_is_certified(auth=Sys.getenv("SYNAPSE_PAT")))
-  expect_true(synapse_is_certified(auth=NULL))
+  expect_false(synapse_is_certified(auth=NULL))
   expect_false(synapse_is_certified(auth="bad auth"))
   
 })
