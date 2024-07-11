@@ -414,7 +414,7 @@ get_asset_view_table <- function(url="http://localhost:3001/v1/storage/assets/ta
   
   check_success(req)
   if (return_type=="json") {
-    return(list2DF(fromJSON(httr::content(req))))
+    return(list2DF(jsonlite::fromJSON(httr::content(req))))
   } else {
   csv <- readr::read_csv(httr::content(req), show_col_types = FALSE)
   return(csv)
