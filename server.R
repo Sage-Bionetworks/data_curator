@@ -548,7 +548,6 @@ shinyServer(function(input, output, session) {
   # update selected schema template name
   observeEvent(input$dropdown_template,
     {
-      req(input$tabs %in% "tab_template_select")
       warn_text <- reactiveVal(NULL)
       shinyjs::enable("btn_template_select")
       # update reactive selected values for schema
