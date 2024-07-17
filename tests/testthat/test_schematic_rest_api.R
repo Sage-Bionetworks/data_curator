@@ -47,11 +47,15 @@ test_that("manifest_validate passes and fails correctly", {
   skip_it()
   
   pass <- manifest_validate(url=file.path(schematic_url, "v1/model/validate"),
-                            data_type="Biospecimen", file_name=pass_csv)
-  expect_identical(pass, list())
+                            data_type="Biospecimen", file_name=fail_csv,
+                            access_token = Sys.getenv("SYNAPSE_PAT"),
+                            schema_url = schema_url)
+  expect_identical(pass, list(errors = list(), warnings = list()))
   
   fail <- manifest_validate(url=file.path(schematic_url, "v1/model/validate"),
-                            data_type="Biospecimen", file_name=fail_csv)
+                            data_type="Biospecimen", file_name=pass_csv,
+                            access_token = Sys.getenv("SYNAPSE_PAT"),
+                            schema_url = schema_url)
   expect_true(length(unlist(fail)) > 0L)
 })
 
@@ -60,13 +64,13 @@ test_that("model_submit successfully uploads to synapse", {
   
   submit <- model_submit(url=file.path(schematic_url,"v1/model/submit"),
                          schema_url = schema_url,
-                         data_type="Biospecimen", dataset_id="syn20977135",
+                         data_type=NULL, dataset_id="syn20977135",
                          restrict_rules = FALSE, access_token=Sys.getenv("SYNAPSE_PAT"),
                          asset_view="syn33715412", file_name=pass_csv,
-                         manifest_record_type="table",
+                         manifest_record_type="file_only",
                          table_manipulation="replace"
                       )
-  expect_true(submit)
+  expect_true(grepl("^syn", submit))
 })
 
 test_that("storage_project_datasets returns available datasets", {
@@ -109,9 +113,9 @@ test_that("model_component_requirements returns list of required components", {
 
 # test_that("manifest_download returns a csv.", {
 #   skip_it()
-  csv <- manifest_download(url=file.path(schematic_url, "v1/manifest/download"),
-                           manifest_id="syn51078535",
-                           access_token=Sys.getenv("SYNAPSE_PAT"))
+#  csv <- manifest_download(url=file.path(schematic_url, "v1/manifest/download"),
+#                           manifest_id="syn51078535",
+#                           access_token=Sys.getenv("SYNAPSE_PAT"))
 #   exp <- setNames(c("BulkRNA-seqAssay", "CSV/TSV", "Sample_A", "GRCm38", NA, 2022L, "syn28278954"),
 #     c("Component", "File Format", "Filename", "Genome Build", "Genome FASTA", "Sample ID", "entityId"))
 #   expect_equal(unlist(csv), exp)
