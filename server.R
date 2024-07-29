@@ -804,7 +804,7 @@ shinyServer(function(input, output, session) {
     .infile_data <- inFile$data()
     .dd_template <- input$dropdown_template
     .restrict_rules <- dcc_config_react()$schematic$model_validate$restrict_rules
-    .project_scope <- selected$project_scope()
+    .project_scope <- NULL
     .access_token <- access_token
     .data_model_labels <- dcc_config_react()$schematic$global$data_model_labels
     # asset view must be NULL to avoid cross-manifest validation.
@@ -813,6 +813,7 @@ shinyServer(function(input, output, session) {
     if (!is.null(dcc_config_react()$schematic$model_validate$enable_cross_manifest_validation) &
         isTRUE(dcc_config_react()$schematic$model_validate$enable_cross_manifest_validation)) {
       .asset_view <- selected$master_asset_view()
+      .project_scope <- selected$project()
     }
 
     promises::future_promise({
@@ -829,7 +830,7 @@ shinyServer(function(input, output, session) {
           data_type = .schema,
           file_name = .datapath,
           restrict_rules = .restrict_rules,
-          #project_scope = .project_scope,
+          project_scope = .project_scope,
           access_token = .access_token,
           data_model_labels = .data_model_labels,
           asset_view = .asset_view
