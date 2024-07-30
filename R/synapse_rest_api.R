@@ -38,7 +38,8 @@ synapse_is_certified <- function(url="https://repo-prod.prod.sagebase.org/repo/v
   ownerid <- user_profile[["ownerId"]]
   url_req <- file.path(url, ownerid, endpoint)
   req <- httr::GET(url_req)
-  httr::content(req)[["passed"]]
+  resp <- httr::content(req)
+  resp[["certified"]]
   
 }
 
