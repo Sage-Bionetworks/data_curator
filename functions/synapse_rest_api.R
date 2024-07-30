@@ -39,7 +39,9 @@ synapse_is_certified <- function(url="https://repo-prod.prod.sagebase.org/repo/v
   url_req <- file.path(url, ownerid, endpoint)
   req <- httr::GET(url_req)
   resp <- httr::content(req)
-  resp[["certified"]]
+  if ("certified" %in% names(resp)) {
+    return(resp[["certified"]])
+  } else return(FALSE)
   
 }
 
