@@ -6,6 +6,11 @@ check_success <- function(x){
   if (tolower(status$category) == "success") {
     return()
   } else {
+    # Return content text for Data Type errors
+    if (grepl("LookupError: The DataType", httr::content(x, "text"))) {
+      stop(httr::content(x, "text"))
+    }
+    
     stop(sprintf("Response from server: %s", status$reason))
   }
 }
@@ -409,7 +414,7 @@ get_asset_view_table <- function(url="http://localhost:3001/v1/storage/assets/ta
   
   check_success(req)
   if (return_type=="json") {
-    return(list2DF(fromJSON(httr::content(req))))
+    return(list2DF(jsonlite::fromJSON(httr::content(req))))
   } else {
   csv <- readr::read_csv(httr::content(req), show_col_types = FALSE)
   return(csv)

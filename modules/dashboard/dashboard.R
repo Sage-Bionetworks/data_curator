@@ -84,7 +84,7 @@ dashboard <- function(id, syn.store, project.scope, schema, schema.display.name,
         # initiate partial loading screen for generating plot
         dcWaiter(
          "show",
-         id = ns("tab-container"), url = "www/img/logo.svg", custom_spinner = TRUE,
+         id = ns("tab-container"), url = "www/img/sage-loader.svg", custom_spinner = TRUE,
          msg = "Loading, please wait..."
         )
 

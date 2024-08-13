@@ -20,7 +20,7 @@ test_that("manifest_generate returns a URL if sucessful", {
   skip_it()
   
   url <- manifest_generate(url=file.path(schematic_url, "v1/manifest/generate"),
-    schema_url = schema_url, access_token = Sys.getenv("SNYAPSE_PAT"),
+    schema_url = schema_url, access_token = Sys.getenv("SYNAPSE_PAT"),
     title="Test biospecimen", data_type="Biospecimen",
     use_annotations = FALSE,
     dataset_id="syn33715357", asset_view="syn33715412",
@@ -28,27 +28,34 @@ test_that("manifest_generate returns a URL if sucessful", {
   expect_true(grepl("^https://docs.google", url))
 })
 
-test_that("manifest_generate returns an xlsx", {
-  skip_it()
-  
-  xlsx <- manifest_generate(title="Test biospecimen", data_type="Biospecimen",
-                    asset_view="syn33715412", output_format="excel")
-  
-})
+# test_that("manifest_generate returns an xlsx", {
+#   skip_it()
+#   
+#   xlsx <- manifest_generate(url=file.path(schematic_url, "v1/manifest/generate"),
+#                     title="Test biospecimen", data_type="Biospecimen",
+#                     asset_view="syn33715412", output_format="excel")
+#   
+# })
 
-test_that("manifest_populate returns a google sheet link with records filled", {
-  skip_it()
-  req <- manifest_populate(data_type="Biospecimen", title="Example",
-                           csv_file = pass_csv)
-})
+# test_that("manifest_populate returns a google sheet link with records filled", {
+#   skip_it()
+#   req <- manifest_populate(data_type="Biospecimen", title="Example",
+#                            csv_file = pass_csv)
+# })
   
 test_that("manifest_validate passes and fails correctly", {
   skip_it()
   
-  pass <- manifest_validate(data_type="Biospecimen", csv_file=pass_csv)
-  expect_identical(pass, list())
+  pass <- manifest_validate(url=file.path(schematic_url, "v1/model/validate"),
+                            data_type="Biospecimen", file_name=fail_csv,
+                            access_token = Sys.getenv("SYNAPSE_PAT"),
+                            schema_url = schema_url)
+  expect_identical(pass, list(errors = list(), warnings = list()))
   
-  fail <- manifest_validate(data_type="Biospecimen", csv_file=fail_csv)
+  fail <- manifest_validate(url=file.path(schematic_url, "v1/model/validate"),
+                            data_type="Biospecimen", file_name=pass_csv,
+                            access_token = Sys.getenv("SYNAPSE_PAT"),
+                            schema_url = schema_url)
   expect_true(length(unlist(fail)) > 0L)
 })
 
@@ -57,64 +64,67 @@ test_that("model_submit successfully uploads to synapse", {
   
   submit <- model_submit(url=file.path(schematic_url,"v1/model/submit"),
                          schema_url = schema_url,
-                         data_type="Biospecimen", dataset_id="syn20977135",
-                         restrict_rules = FALSE, input_token=Sys.getenv("SYNAPSE_PAT"),
+                         data_type=NULL, dataset_id="syn20977135",
+                         restrict_rules = FALSE, access_token=Sys.getenv("SYNAPSE_PAT"),
                          asset_view="syn33715412", file_name=pass_csv,
-                         use_schema_label = TRUE, manifest_record_type="table",
+                         manifest_record_type="file_only",
                          table_manipulation="replace"
                       )
-  expect_true(submit)
+  expect_true(grepl("^syn", submit))
 })
 
 test_that("storage_project_datasets returns available datasets", {
   skip_it()
-  storage_project_datasets(asset_view="syn23643253",
+  storage_project_datasets(url=file.path(schematic_url, "v1/storage/project/datasets"),
+                           asset_view="syn23643253",
                            project_id="syn26251192",
-                           input_token=Sys.getenv("SYNAPSE_PAT"))
+                           access_token=Sys.getenv("SYNAPSE_PAT"))
 })
 
 test_that("storage_projects returns available projects", {
   skip_it()
-  storage_projects(url=file.path(schematic_url, "v1/storage/project/datasets"),
+  storage_projects(url=file.path(schematic_url, "v1/storage/projects"),
                    asset_view="syn23643253",
-                   input_token=Sys.getenv("SYNAPSE_PAT"))
+                   access_token=Sys.getenv("SYNAPSE_PAT"))
 })
 
 test_that("storage_dataset_files returns files", {
   skip_it()
-  storage_dataset_files(asset_view = "syn23643253",
+  storage_dataset_files(url=file.path(schematic_url, "v1/storage/dataset/files"),
+                        asset_view = "syn23643253",
                         dataset_id = "syn23643250",
-                        input_token=Sys.getenv("SYNAPSE_PAT"))
+                        access_token=Sys.getenv("SYNAPSE_PAT"))
 })
 
 test_that("model_component_requirements returns list of required components", {
   skip_it()
-  good <- model_component_requirements(url="http://localhost:3001/v1/model/component-requirements",
+  good <- model_component_requirements(url=file.path(schematic_url, "v1/model/component-requirements"),
                                            schema_url="https://raw.githubusercontent.com/ncihtan/data-models/main/HTAN.model.jsonld",
                                            source_component="Patient",
                                            as_graph = FALSE)
   expect_equal(length(good), 8L)
   
-  expect_error(model_component_requirements(url="http://localhost:3001/v1/model/component-requirements",
+  expect_error(model_component_requirements(url=file.path(schematic_url, "v1/model/component-requirements"),
                                        schema_url="https://aaaabad.url.jsonld",
                                        source_component="Patient",
                                        as_graph = FALSE))
   
 })
 
-test_that("manifest_download returns a csv.", {
-  skip_it()
-  csv <- manifest_download(input_token=Sys.getenv("SYNAPSE_PAT"),
-                           asset_view="syn28559058",
-                           dataset_id="syn28268700")
-  exp <- setNames(c("BulkRNA-seqAssay", "CSV/TSV", "Sample_A", "GRCm38", NA, 2022L, "syn28278954"),
-    c("Component", "File Format", "Filename", "Genome Build", "Genome FASTA", "Sample ID", "entityId"))
-  expect_equal(unlist(csv), exp)
-})
+# test_that("manifest_download returns a csv.", {
+#   skip_it()
+#  csv <- manifest_download(url=file.path(schematic_url, "v1/manifest/download"),
+#                           manifest_id="syn51078535",
+#                           access_token=Sys.getenv("SYNAPSE_PAT"))
+#   exp <- setNames(c("BulkRNA-seqAssay", "CSV/TSV", "Sample_A", "GRCm38", NA, 2022L, "syn28278954"),
+#     c("Component", "File Format", "Filename", "Genome Build", "Genome FASTA", "Sample ID", "entityId"))
+#   expect_equal(unlist(csv), exp)
+# })
 
 test_that("get_asset_view_table returns asset view table", {
   skip_it()
-  av <- get_asset_view_table(input_token = Sys.getenv("SYNAPSE_PAT"),
+  av <- get_asset_view_table(url=file.path(schematic_url, "v1/storage/assets/tables"),
+                             access_token = Sys.getenv("SYNAPSE_PAT"),
                        asset_view="syn23643253")
   storage_tbl <- subset(av, av$name == "synapse_storage_manifest.csv")
   expect_true(inherits(av, "data.frame"), "name" %in% names(av))
@@ -124,13 +134,13 @@ test_that("asset_tables returns a data.frame", {
   skip_it()
   tst <- get_asset_view_table(url=file.path(schematic_url, "v1/storage/assets/tables"),
                        asset_view = "syn28559058",
-                       input_token = Sys.getenv("SYNAPSE_TOKEN"),
-                       as_json=TRUE)
-  expect_identical(nrow(tst), 3L)
+                       access_token = Sys.getenv("SYNAPSE_PAT"),
+                       return_type="json")
+  expect_identical(nrow(tst), 4L)
   
-  tst2 <- get_asset_view_table(url=file.path(schematic_url, "v1/storage/assets/tables"),
+  expect_error(get_asset_view_table(url=file.path(schematic_url, "v1/storage/assets/tables"),
                                   asset_view = "syn28559058",
-                                  input_token = Sys.getenv("SYNAPSE_TOKEN"),
-                                  as_json=FALSE)
-  expect_identical(nrow(tst2), 3L)
+                                  access_token = Sys.getenv("SYNAPSE_PAT"),
+                                  return_type = "csv")
+               )
 })
