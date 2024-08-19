@@ -57,7 +57,7 @@ DTableServer <- function(id, data, escape = TRUE,
         df <- df %>% formatStyle(1:ncol(data), border = "1px solid #ddd")
       }
 
-      output$table <- renderDT(df, future = TRUE)
+      output$table <- renderDT(df, future = TRUE, server = TRUE)
     }
   )
 }
