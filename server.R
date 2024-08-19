@@ -846,6 +846,7 @@ shinyServer(function(input, output, session) {
       )
 
       # validation messages
+      annotation_status <- format_validation_response(annotation_status, 50)
       validationResult(annotation_status, .dd_template, .infile_data)
     }) %...>% validation_res()
   })
@@ -1067,7 +1068,7 @@ shinyServer(function(input, output, session) {
       .restrict_rules <- dcc_config_react()$schematic$model_validate$restrict_rules
       .hide_blanks <- dcc_config_react()$schematic$model_submit$hide_blanks
       .file_annotations_upload <- dcc_config_react()$schematic$model_submit$file_annotations_upload
-      
+
       # associates metadata with data and returns manifest id
       promises::future_promise({
         try(
