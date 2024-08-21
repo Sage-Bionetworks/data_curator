@@ -18,7 +18,7 @@ test_that("synapse_user_profile returns list with NULL auth", {
 
 test_that("is_certified returns TRUE or FALSE", {
   
-  expect_false(synapse_is_certified(auth=Sys.getenv("SYNAPSE_PAT")))
+  expect_true(synapse_is_certified(auth=Sys.getenv("SYNAPSE_PAT")))
   expect_false(synapse_is_certified(auth=NULL))
   expect_false(synapse_is_certified(auth="bad auth"))
   
@@ -55,9 +55,9 @@ test_that("synapse_access returns TRUE/FALSE", {
     synapse_access(id="syn23643255", access = "DOWNLOAD", auth=Sys.getenv("SYNAPSE_PAT"))
   )
   
-  # Bad PAT
+  # Bad PAT ("")
   expect_false(
-    synapse_access(id="syn23643255", access = "DOWNLOAD", auth=Sys.getenv("ABCD"))
+    synapse_access(id="syn23643255", access = "DOWNLOAD", auth="")
   )
 })
 
@@ -73,9 +73,9 @@ test_that("synapse_access returns errors as expected", {
     synapse_access(id="not an id", access = "DOWNLOAD", auth=Sys.getenv("SYNAPSE_PAT"))
   )
   
-  # non existant auth orgument 
+  # bad PAT (string) 
   expect_error(
-    synapse_access(id="syn23643255", access = "DOWNLOAD", auth="Not an auth")
+    synapse_access(id="syn23643255", access = "DOWNLOAD", auth="adfadsf")
   )
 })
 
