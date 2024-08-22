@@ -146,7 +146,7 @@ synapse_entity_children <- function(url = "https://repo-prod.prod.sagebase.org/r
     resp <- httr::content(req)
     output <- c(output, resp$page)
   }
-  bind_rows(output)
+  dplyr::bind_rows(output)
   
 }
 
@@ -157,6 +157,9 @@ synapse_entity_children <- function(url = "https://repo-prod.prod.sagebase.org/r
 #' @param nextPageToken Synapse next page token
 synapse_projects_user <- function(url = "https://repo-prod.prod.sagebase.org/repo/v1/projects/user", auth, nextPageToken=NULL) {
   principalId <- synapse_user_profile(auth = auth)[["ownerId"]]
+  
+  if (is.null(principalId)) stop("Synapse token not valid")
+  
   hreq <- httr::GET(url = file.path(url, principalId),
                     query = list(nextPageToken=nextPageToken))
   output <- list()
@@ -174,7 +177,7 @@ synapse_projects_user <- function(url = "https://repo-prod.prod.sagebase.org/rep
 #' @title Get projects within scope of Synapse project
 #' 
 #' @param url Synapse api endpoint
-#' @param id Synapse ID
+#' @param id Synapse project ID
 #' @param auth Synapse token
 synapse_get_project_scope <- function(url = "https://repo-prod.prod.sagebase.org/repo/v1/entity/",
                                       id, auth) {
