@@ -106,22 +106,7 @@ app <- oauth_app("shinysynapse",
 
 # These are the user info details ('claims') requested from Synapse:
 claims <- list(
-  family_name = NULL,
-  given_name = NULL,
-  email = NULL,
-  email_verified = NULL,
-  userid = NULL,
-  orcid = NULL,
-  is_certified = NULL,
-  is_validated = NULL,
-  validated_given_name = NULL,
-  validated_family_name = NULL,
-  validated_location = NULL,
-  validated_email = NULL,
-  validated_company = NULL,
-  validated_at = NULL,
-  validated_orcid = NULL,
-  company = NULL
+  userid = NULL
 )
 
 claimsParam <- toJSON(list(id_token = claims, userinfo = claims))
