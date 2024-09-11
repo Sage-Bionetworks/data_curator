@@ -216,7 +216,14 @@ manifest_validate <- function(url="http://localhost:3001/v1/model/validate",
   #     )
   #   )
   # }
-  httr2::resp_body_json(resp)
+  if (httr2::resp_is_error(resp)) {
+    list(list(
+      "errors" = list(
+        Row = NA, Column = NA, Value = NA,
+        Error = httr2::resp_body_string(resp)
+      )
+    ))
+  } else httr2::resp_body_json(resp)
 }
 
 

@@ -12,3 +12,17 @@ parse_env_var <- function(x, el_delim=",", kv_delim=":"){
     setNames(kv[[1]][[2]], kv[[1]][[1]])
   }))
 }
+
+#' @title Truncate the results of schematic validation
+#' @param x Schematic validation result
+#' @param n Number of records to keep
+#' @export
+format_validation_response <- function(x, n = 50) {
+  if ("errors" %in% names(x) && length(x$errors) > n) {
+    x$errors <- x$errors[1:n]
+  }
+  if ("warnings" %in% names(x) && length(x$warnings) > n) {
+    x$warnings <- x$warnings[1:n]
+  }
+  x
+}
