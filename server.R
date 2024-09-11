@@ -279,6 +279,7 @@ shinyServer(function(input, output, session) {
         try(
           {
             scopes <- synapse_get_project_scope(id = .asset_view, auth = access_token)
+            scopes <- unique(scopes)
             scope_access <- vapply(scopes, function(x) {
               synapse_access(id = x, access = "DOWNLOAD", auth = access_token)
             }, 1L)
