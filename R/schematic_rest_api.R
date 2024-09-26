@@ -74,10 +74,14 @@ manifest_generate <- function(url = "http://localhost:3001/v1/manifest/generate"
                               use_annotations = "false",
                               dataset_id = NULL,
                               asset_view,
-                              output_format,
+                              output_format = c("google_sheet", "excel"),
                               access_token = NULL,
                               strict_validation = FALSE,
-                              data_model_labels = "class_label") {
+                              data_model_labels = c("class_label", "display_label")) {
+  
+  # do not accept dataframe as input, it's not supported at this time
+  match.arg(output_format)
+  match.arg(data_model_labels)
   
   req <- httr::GET(url,
                    httr::add_headers(Authorization = sprintf("Bearer %s", access_token)),
