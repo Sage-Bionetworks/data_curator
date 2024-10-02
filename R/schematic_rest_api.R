@@ -134,7 +134,8 @@ manifest_validate <- function(url="http://localhost:3001/v1/model/validate",
                               access_token,
                               asset_view = NULL,
                               json_str = NULL,
-                              data_model_labels = "class_label") {
+                              data_model_labels = "class_label",
+                              dataset_scope = NULL) {
   
   flattenbody <- function(x) {
     # A form/query can only have one value per name, so take
@@ -175,7 +176,8 @@ manifest_validate <- function(url="http://localhost:3001/v1/model/validate",
         restrict_rules=restrict_rules,
         project_scope = project_scope,
         data_model_labels = data_model_labels,
-        asset_view = asset_view
+        asset_view = asset_view,
+        dataset_scope = dataset_scope
       ) |>
       httr2::req_body_multipart(file_name=curl::form_file(file_name)) |>
       httr2::req_perform()
@@ -191,7 +193,8 @@ manifest_validate <- function(url="http://localhost:3001/v1/model/validate",
         project_scope = project_scope,
         asset_view = asset_view,
         data_model_labels = data_model_labels,
-        json_str = json_str
+        json_str = json_str,
+        dataset_scope = dataset_scope
       ) |>
       #httr2::req_retry(
       #  max_tries = 3,
