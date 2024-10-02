@@ -1,4 +1,4 @@
-FROM ghcr.io/afwillia/shiny-base:release-1.11
+FROM ghcr.io/afwillia/shiny-base:release-1.12
 
 # add version tag as a build argument
 ARG DCA_VERSION
