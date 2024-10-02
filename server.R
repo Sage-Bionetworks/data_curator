@@ -806,6 +806,7 @@ shinyServer(function(input, output, session) {
     .dd_template <- input$dropdown_template
     .restrict_rules <- dcc_config_react()$schematic$model_validate$restrict_rules
     .project_scope <- NULL
+    .dataset_scope <- selected$folder()
     .access_token <- access_token
     .data_model_labels <- dcc_config_react()$schematic$global$data_model_labels
     # asset view must be NULL to avoid cross-manifest validation.
@@ -834,7 +835,8 @@ shinyServer(function(input, output, session) {
           project_scope = .project_scope,
           access_token = .access_token,
           data_model_labels = .data_model_labels,
-          asset_view = .asset_view
+          asset_view = .asset_view,
+          dataset_scope = .dataset_scope
         ),
         {
           list(list(
