@@ -7,7 +7,7 @@ ENV DCA_VERSION=$DCA_VERSION
 
 USER root
 RUN apt-get update
-RUN apt-get install -y libxml2 libglpk-dev libicu-dev libicu70 curl
+RUN apt-get install -y libxml2 libglpk-dev libicu-dev libicu74 curl
 
 # overwrite the default config with our modified copy
 COPY shiny-server.conf /etc/shiny-server/shiny-server.conf
