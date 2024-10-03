@@ -12,22 +12,34 @@ manifest_generate(
   use_annotations = "false",
   dataset_id = NULL,
   asset_view,
-  output_format,
+  output_format = c("google_sheet", "excel"),
   access_token = NULL,
   strict_validation = FALSE,
-  data_model_labels = "class_label"
+  data_model_labels = c("class_label", "display_label")
 )
 }
 \arguments{
+\item{url}{schematic endpoint url}
+
+\item{schema_url}{url of jsonld schema}
+
 \item{title}{Name of dataset}
 
 \item{data_type}{Type of dataset}
 
-\item{use_annotations}{true or false STRING passed to python}
+\item{use_annotations}{true or false}
 
 \item{dataset_id}{Synapse ID of existing manifest}
 
-\item{oauth}{true or false STRING passed to python}
+\item{asset_view}{Synapse ID of asset view}
+
+\item{output_format}{Desired format of generated manifest (excel, google_sheet)}
+
+\item{access_token}{Synapse PAT}
+
+\item{strict_validation}{If using Google Sheets, can set the strictness of Google Sheets regex match validation. True (default) will block users from entering incorrect values, False will throw a warning to users.}
+
+\item{data_model_labels}{Which labels to use (class_label, display_label)}
 }
 \value{
 a URL to a google sheet

@@ -14,13 +14,11 @@ storage_project_datasets(
 \arguments{
 \item{url}{URL to schematic API endpoint}
 
-\item{project_id}{synapse ID of a storage project.}
+\item{asset_view}{synapse ID of master file view.}
+
+\item{project_id}{Synapse storage manifest file name.}
 
 \item{access_token}{synapse PAT}
-
-\item{syn_master_file_view}{synapse ID of master file view.}
-
-\item{syn_master_file_name}{Synapse storage manifest file name.}
 }
 \description{
 Gets all datasets in folder under a given storage project that the current user has access to.

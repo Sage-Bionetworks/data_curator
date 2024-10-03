@@ -15,15 +15,23 @@ check_success <- function(x){
   }
 }
 
+#' Download a manifest
 #' @description Download an existing manifest
 #' @param url URI of API endpoint
 #' @param access_token Synapse PAT
 #' @param asset_view ID of view listing all project data assets
 #' @param manifest_id the parent ID of the manifest
 #' @param as_json if True return the manifest in JSON format
+#' @param new_manifest_name Name of new manifest (Default = NULL)
 #' @returns a csv of the manifest
 #' @export
-manifest_download <- function(url = "http://localhost:3001/v1/manifest/download", access_token, manifest_id, as_json=TRUE, new_manifest_name=NULL) {
+
+manifest_download <- function(
+    url = "http://localhost:3001/v1/manifest/download", 
+    access_token,
+    manifest_id, 
+    as_json = TRUE, 
+    new_manifest_name = NULL) {
 
   req <- httr2::request(url) |>
     httr2::req_retry(
@@ -45,26 +53,35 @@ manifest_download <- function(url = "http://localhost:3001/v1/manifest/download"
 }
 
 #' schematic rest api to generate manifest
-#'
+#' @param url schematic endpoint url
+#' @param schema_url url of jsonld schema
 #' @param title Name of dataset 
 #' @param data_type Type of dataset 
-#' @param oauth true or false STRING passed to python
-#' @param use_annotations true or false STRING passed to python 
+#' @param use_annotations true or false 
 #' @param dataset_id Synapse ID of existing manifest
+#' @param asset_view Synapse ID of asset view
+#' @param output_format Desired format of generated manifest (excel, google_sheet)
+#' @param access_token Synapse PAT
+#' @param strict_validation If using Google Sheets, can set the strictness of Google Sheets regex match validation. True (default) will block users from entering incorrect values, False will throw a warning to users.
+#' @param data_model_labels Which labels to use (class_label, display_label)
 #' 
 #' @returns a URL to a google sheet
 #' @export
-manifest_generate <- function(url="http://localhost:3001/v1/manifest/generate",
+manifest_generate <- function(url = "http://localhost:3001/v1/manifest/generate",
                               schema_url,
                               title,
                               data_type,
-                              use_annotations="false",
-                              dataset_id=NULL,
+                              use_annotations = "false",
+                              dataset_id = NULL,
                               asset_view,
-                              output_format,
+                              output_format = c("google_sheet", "excel"),
                               access_token = NULL,
                               strict_validation = FALSE,
-                              data_model_labels = "class_label") {
+                              data_model_labels = c("class_label", "display_label")) {
+  
+  # do not accept dataframe as input, it's not supported at this time
+  match.arg(output_format)
+  match.arg(data_model_labels)
   
   req <- httr::GET(url,
                    httr::add_headers(Authorization = sprintf("Bearer %s", access_token)),
@@ -91,8 +108,11 @@ manifest_generate <- function(url="http://localhost:3001/v1/manifest/generate",
 #' @param schema_url URL to a schema jsonld 
 #' @param data_type Type of dataset
 #' @param title Title of csv
+#' @param return_excel Return Excel? TRUE/FALSE
+#' @param data_model_labels Which labels to use (class_label, display_label)
 #' @param csv_file Filepath of csv to validate
 #' @export
+
 manifest_populate <- function(url="http://localhost:3001/v1/manifest/populate",
                               schema_url,
                               data_type,
@@ -122,9 +142,15 @@ manifest_populate <- function(url="http://localhost:3001/v1/manifest/populate",
 #' @param schema_url URL to a schema jsonld 
 #' @param data_type Type of dataset
 #' @param file_name Filepath of csv to validate
-#' 
+#' @param restrict_rules If True, validation suite will only run with in-house validation rule. If False, the Great Expectations suite will be utilized and all rules will be available.
+#' @param project_scope List, a subset of the projects contained within the asset view that are relevant for the current operation. Speeds up some operations that interact with Synapse. Relevant for validating manifests involving cross-manifest validation, but optional.
+#' @param access_token Synapse PAT
+#' @param asset_view SynID of asset view
+#' @param json_str JSON string to validate
+#' @param data_model_labels Which labels to use (class_label, display_label)
 #' @returns An empty list() if sucessfully validated. Or a list of errors.
 #' @export
+
 manifest_validate <- function(url="http://localhost:3001/v1/model/validate",
                               schema_url,
                               data_type,
@@ -294,9 +320,11 @@ model_submit <- function(url="http://localhost:3001/v1/model/submit",
 
 #' Given a source model component (see https://w3id.org/biolink/vocab/category for definnition of component), return all components required by it.
 #' 
+#' @param url URL to schematic API endpoint
 #' @param schema_url Data Model URL
 #' @param source_component an attribute label indicating the source component. (i.e. Patient, Biospecimen, ScRNA-seqLevel1, ScRNA-seqLevel2)
 #' @param as_graph if False return component requirements as a list; if True return component requirements as a dependency graph (i.e. a DAG)
+#' @param data_model_labels Which labels to use (class_label, display_label)
 #' 
 #' @returns A list of required components associated with the source component.
 #' @export
@@ -335,9 +363,8 @@ model_component_requirements <- function(url="http://localhost:3001/v1/model/com
 #' Gets all datasets in folder under a given storage project that the current user has access to.
 #' 
 #' @param url URL to schematic API endpoint
-#' @param syn_master_file_view synapse ID of master file view.
-#' @param syn_master_file_name Synapse storage manifest file name.
-#' @param project_id synapse ID of a storage project.
+#' @param asset_view synapse ID of master file view.
+#' @param project_id Synapse storage manifest file name.
 #' @param access_token synapse PAT
 #'
 #'@export
@@ -360,9 +387,8 @@ storage_project_datasets <- function(url="http://localhost:3001/v1/storage/proje
 #' Get all storage projects the current user has access to
 #' 
 #' @param url URL to schematic API endpoint
-#' @param syn_master_file_view synapse ID of master file view.
-#' @param syn_master_file_name Synapse storage manifest file name.
-#' @param access_token synapse PAT
+#' @param asset_view synapse ID of master file view.
+#' @param access_token Synapse storage manifest file name.
 #'
 #' @export
 storage_projects <- function(url="http://localhost:3001/v1/storage/projects",
@@ -382,8 +408,7 @@ storage_projects <- function(url="http://localhost:3001/v1/storage/projects",
 #' /storage/dataset/files
 #'
 #' @param url URL to schematic API endpoint
-#' @param syn_master_file_view synapse ID of master file view.
-#' @param syn_master_file_name Synapse storage manifest file name.
+#' @param asset_view synapse ID of master file view.
 #' @param dataset_id synapse ID of a storage dataset.
 #' @param file_names a list of files with particular names (i.e. Sample_A.txt). If you leave it empty, it will return all dataset files under the dataset ID.
 #' @param full_path Boolean. If True return the full path as part of this filename; otherwise return just base filename
@@ -407,11 +432,12 @@ storage_dataset_files <- function(url="http://localhost:3001/v1/storage/dataset/
                    
 }
 
-#' /storage/asset/table
+#' /storage/asset/table endpoint
 #' 
 #' @param url URL to schematic API endpoint
 #' @param access_token synapse PAT
 #' @param asset_view Synapse ID of asset view
+#' @param return_type Output format (json, csv)
 #' @export
 get_asset_view_table <- function(url="http://localhost:3001/v1/storage/assets/tables",
                                  access_token, asset_view, return_type="json") {
@@ -432,9 +458,11 @@ get_asset_view_table <- function(url="http://localhost:3001/v1/storage/assets/ta
   
 }
 
+#' graph by edge type endpoint
 #' @param url URL of schematic API endpoint
 #' @param schema_url URL of data model
 #' @param relationship Argument to schematic graph_by_edge_type
+#' @param data_model_labels Which labels to use (class_label, display_label)
 #' @export
 #' @importFrom httr GET content
 graph_by_edge_type <- function(url = "https://schematic-dev.api.sagebionetworks.org/v1/schemas/get/graph_by_edge_type",
