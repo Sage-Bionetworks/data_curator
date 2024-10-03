@@ -810,11 +810,12 @@ shinyServer(function(input, output, session) {
     .access_token <- access_token
     .data_model_labels <- dcc_config_react()$schematic$global$data_model_labels
     # asset view must be NULL to avoid cross-manifest validation.
+    # however, it is necessary for filename validation
+    # always pass asset view, let the data model decide which validations are run
     # doing this in a verbose way to avoid warning with ifelse
-    .asset_view <- NULL
+    .asset_view <- selected$master_asset_view()
     if (!is.null(dcc_config_react()$schematic$model_validate$enable_cross_manifest_validation) &
         isTRUE(dcc_config_react()$schematic$model_validate$enable_cross_manifest_validation)) {
-      .asset_view <- selected$master_asset_view()
       .project_scope <- selected$project()
     }
 
