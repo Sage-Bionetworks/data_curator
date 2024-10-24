@@ -279,6 +279,7 @@ shinyServer(function(input, output, session) {
         try(
           {
             scopes <- synapse_get_project_scope(id = .asset_view, auth = access_token)
+            scopes <- unique(scopes)
             scope_access <- vapply(scopes, function(x) {
               synapse_access(id = x, access = "DOWNLOAD", auth = access_token)
             }, 1L)
@@ -805,14 +806,16 @@ shinyServer(function(input, output, session) {
     .dd_template <- input$dropdown_template
     .restrict_rules <- dcc_config_react()$schematic$model_validate$restrict_rules
     .project_scope <- NULL
+    .dataset_scope <- selected$folder()
     .access_token <- access_token
     .data_model_labels <- dcc_config_react()$schematic$global$data_model_labels
     # asset view must be NULL to avoid cross-manifest validation.
+    # however, it is necessary for filename validation
+    # always pass asset view, let the data model decide which validations are run
     # doing this in a verbose way to avoid warning with ifelse
-    .asset_view <- NULL
+    .asset_view <- selected$master_asset_view()
     if (!is.null(dcc_config_react()$schematic$model_validate$enable_cross_manifest_validation) &
         isTRUE(dcc_config_react()$schematic$model_validate$enable_cross_manifest_validation)) {
-      .asset_view <- selected$master_asset_view()
       .project_scope <- selected$project()
     }
 
@@ -833,7 +836,8 @@ shinyServer(function(input, output, session) {
           project_scope = .project_scope,
           access_token = .access_token,
           data_model_labels = .data_model_labels,
-          asset_view = .asset_view
+          asset_view = .asset_view,
+          dataset_scope = .dataset_scope
         ),
         {
           list(list(
@@ -846,6 +850,7 @@ shinyServer(function(input, output, session) {
       )
 
       # validation messages
+      annotation_status <- format_validation_response(annotation_status, 50)
       validationResult(annotation_status, .dd_template, .infile_data)
     }) %...>% validation_res()
   })
@@ -1067,7 +1072,7 @@ shinyServer(function(input, output, session) {
       .restrict_rules <- dcc_config_react()$schematic$model_validate$restrict_rules
       .hide_blanks <- dcc_config_react()$schematic$model_submit$hide_blanks
       .file_annotations_upload <- dcc_config_react()$schematic$model_submit$file_annotations_upload
-      
+
       # associates metadata with data and returns manifest id
       promises::future_promise({
         try(
