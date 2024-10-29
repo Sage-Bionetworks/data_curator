@@ -1141,12 +1141,9 @@
     "renv": {
       "Package": "renv",
       "Version": "1.0.11",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Requirements": [
-        "utils"
-      ],
-      "Hash": "47623f66b4e80b3b0587bc5d7b309888"
+      "OS_type": null,
+      "Repository": "binaries",
+      "Source": "Repository"
     },
     "reticulate": {
       "Package": "reticulate",
@@ -1305,9 +1302,14 @@
     "shinydashboardPlus": {
       "Package": "shinydashboardPlus",
       "Version": "2.0.4.9000",
-      "Source": "Local",
-      "RemoteType": "local",
-      "RemoteUrl": "/Users/awilliams/Downloads/RinteRface-shinydashboardPlus-v2.0.3-10-gc8c7b13.tar.gz",
+      "Source": "GitHub",
+      "RemoteType": "github",
+      "RemoteHost": "api.github.com",
+      "RemoteRepo": "shinydashboardPlus",
+      "RemoteUsername": "RinteRface",
+      "RemoteRef": "HEAD",
+      "RemoteSha": "c8c7b13046d408201ec87016e382fc7b0d8227d5",
+      "Hash": "c5e57f590bdfd8d91275d984f905476f",
       "Requirements": [
         "fresh",
         "htmltools",
