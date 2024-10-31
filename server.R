@@ -1138,7 +1138,7 @@ shinyServer(function(input, output, session) {
       if (startsWith(manifest_id(), "syn") == TRUE) {
         # If enabled, annotate the file and folder with the data model
         if (isTRUE(dcc_config_react()$dcc$data_model_version_as_annotation)) {
-          lapply(c(manifest_id(), selected$folder()), function(id) {
+          lapply(c(manifest_id()), function(id) { # add selected$folder() if annotating folder.
             # Get existing annotations
             annotations <- request(sprintf("https://repo-prod.prod.sagebase.org/repo/v1/entity/%s/annotations2", id)) |>
               req_auth_bearer_token(access_token) |>
