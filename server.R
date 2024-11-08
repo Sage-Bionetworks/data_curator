@@ -959,6 +959,10 @@ shinyServer(function(input, output, session) {
     # reads file csv again
     submit_data <- csvInfileServer("inputFile", colsAsCharacters = TRUE, keepBlank = TRUE, trimEmptyRows = TRUE)$data()
 
+    # If enabled, create a column in the manifest to store the data model URL
+    if (isTRUE(dcc_config_react()$dcc$data_model_version_as_column)) {
+      submit_data$DataModelURL <- data_model()
+    }
     # If a file-based component selected (define file-based components) note for future
     # the type to filter (eg file-based) on could probably also be a config choice
     display_names <- config_schema()$manifest_schemas$display_name[config_schema()$manifest_schemas$type == "file"]
@@ -1132,6 +1136,38 @@ shinyServer(function(input, output, session) {
 
       # if no error
       if (startsWith(manifest_id(), "syn") == TRUE) {
+        # If enabled, annotate the file and folder with the data model
+        if (isTRUE(dcc_config_react()$dcc$data_model_version_as_annotation)) {
+          lapply(c(manifest_id()), function(id) { # add selected$folder() if annotating folder.
+            # Get existing annotations
+            annotations <- request(sprintf("https://repo-prod.prod.sagebase.org/repo/v1/entity/%s/annotations2", id)) |>
+              req_auth_bearer_token(access_token) |>
+              req_perform() |>
+              resp_body_json()
+            annotations_upload <- annotations$annotations
+            if (!"DataModelURL" %in% names(annotations_upload)) {
+              annotations_upload$DataModelURL <- list(
+                type="STRING", value=list(data_model())
+              )
+            }
+            add_annotation <- request(
+              sprintf(
+                "https://repo-prod.prod.sagebase.org/repo/v1/entity/%s/annotations2",
+                id
+              )) |>
+              req_method("PUT") |>
+              req_auth_bearer_token(access_token) |>
+              req_body_json(
+                list(
+                  id = id,
+                  etag = annotations$etag,
+                  annotations = annotations_upload
+                )
+              ) |>
+              req_error(is_error = function(x) FALSE) |>
+              req_perform()
+          })
+        }
         dcWaiter("hide")
         nx_report_success("Success!", HTML(paste0("Manifest submitted to: ", manifest_path)))
 
