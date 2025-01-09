@@ -13,11 +13,15 @@ model_component_requirements(
 )
 }
 \arguments{
+\item{url}{URL to schematic API endpoint}
+
 \item{schema_url}{Data Model URL}
 
 \item{source_component}{an attribute label indicating the source component. (i.e. Patient, Biospecimen, ScRNA-seqLevel1, ScRNA-seqLevel2)}
 
 \item{as_graph}{if False return component requirements as a list; if True return component requirements as a dependency graph (i.e. a DAG)}
+
+\item{data_model_labels}{Which labels to use (class_label, display_label)}
 }
 \value{
 A list of required components associated with the source component.

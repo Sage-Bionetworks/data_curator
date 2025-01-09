@@ -2,7 +2,7 @@
 % Please edit documentation in R/schematic_rest_api.R
 \name{get_asset_view_table}
 \alias{get_asset_view_table}
-\title{/storage/asset/table}
+\title{/storage/asset/table endpoint}
 \usage{
 get_asset_view_table(
   url = "http://localhost:3001/v1/storage/assets/tables",
@@ -17,7 +17,9 @@ get_asset_view_table(
 \item{access_token}{synapse PAT}
 
 \item{asset_view}{Synapse ID of asset view}
+
+\item{return_type}{Output format (json, csv)}
 }
 \description{
-/storage/asset/table
+/storage/asset/table endpoint
 }

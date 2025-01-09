@@ -16,6 +16,8 @@ storage_dataset_files(
 \arguments{
 \item{url}{URL to schematic API endpoint}
 
+\item{asset_view}{synapse ID of master file view.}
+
 \item{dataset_id}{synapse ID of a storage dataset.}
 
 \item{file_names}{a list of files with particular names (i.e. Sample_A.txt). If you leave it empty, it will return all dataset files under the dataset ID.}
@@ -23,10 +25,6 @@ storage_dataset_files(
 \item{full_path}{Boolean. If True return the full path as part of this filename; otherwise return just base filename}
 
 \item{access_token}{synapse PAT}
-
-\item{syn_master_file_view}{synapse ID of master file view.}
-
-\item{syn_master_file_name}{Synapse storage manifest file name.}
 }
 \description{
 /storage/dataset/files

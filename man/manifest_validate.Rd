@@ -13,6 +13,7 @@ manifest_validate(
   project_scope = NULL,
   access_token,
   asset_view = NULL,
+  json_str = NULL,
   data_model_labels = "class_label"
 )
 }
@@ -24,6 +25,18 @@ manifest_validate(
 \item{data_type}{Type of dataset}
 
 \item{file_name}{Filepath of csv to validate}
+
+\item{restrict_rules}{If True, validation suite will only run with in-house validation rule. If False, the Great Expectations suite will be utilized and all rules will be available.}
+
+\item{project_scope}{List, a subset of the projects contained within the asset view that are relevant for the current operation. Speeds up some operations that interact with Synapse. Relevant for validating manifests involving cross-manifest validation, but optional.}
+
+\item{access_token}{Synapse PAT}
+
+\item{asset_view}{SynID of asset view}
+
+\item{json_str}{JSON string to validate}
+
+\item{data_model_labels}{Which labels to use (class_label, display_label)}
 }
 \value{
 An empty list() if sucessfully validated. Or a list of errors.

@@ -18,6 +18,7 @@ suppressPackageStartupMessages({
   library(shinydashboardPlus)
   library(promises)
   library(future)
+  library(httr2)
   # dashboard
   library(purrr)
   library(data.table)

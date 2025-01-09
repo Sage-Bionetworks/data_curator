@@ -23,6 +23,10 @@ manifest_populate(
 
 \item{title}{Title of csv}
 
+\item{return_excel}{Return Excel? TRUE/FALSE}
+
+\item{data_model_labels}{Which labels to use (class_label, display_label)}
+
 \item{csv_file}{Filepath of csv to validate}
 }
 \description{
