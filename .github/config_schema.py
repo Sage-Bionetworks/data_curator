@@ -2,8 +2,10 @@ import argparse
 import json
 import os
 import re
+import subprocess
 import requests
 import yaml
+from urllib.parse import urlparse
 from schematic.schemas.generator import SchemaGenerator
 
 
@@ -34,8 +36,39 @@ def _get_version(repo_name):
 def _is_valid(value, type):
     if type not in ["repo", "location"]:
         raise ValueError('type must be "repo" or "location"')
-    pattern = "^([-_.A-z0-9]+\\/){1,2}[-_.A-z0-9]+$" if type == "repo" else "^[-_.A-z0-9]+\\/.*.jsonld$"
+    # NOTE: the character class is "A-Za-z", not "A-z" -- the latter also spans
+    # ASCII 91-96 ("[", "\", "]", "^", "_", "`"), which would let a backtick
+    # through into the commands below.
+    pattern = "^[-_.A-Za-z0-9]+(/[-_.A-Za-z0-9]+){1,2}$" if type == "repo" \
+        else "^[-_.A-Za-z0-9]+(/[-_.A-Za-z0-9]+)*\\.jsonld$"
     return bool(re.match(pattern, value))
+
+
+def _resolve_within_cwd(path):
+    """Resolve path and ensure it does not escape the working directory"""
+    cwd = os.path.realpath(os.getcwd())
+    resolved = os.path.realpath(path)
+    if resolved != cwd and not resolved.startswith(cwd + os.sep):
+        raise ValueError(
+            f'"{path}" resolves outside the working directory ❌')
+    return resolved
+
+
+def _run(cmd):
+    """Run a command as an argument list, never through a shell"""
+    subprocess.run(cmd, check=True)
+
+
+def _download(url, dest):
+    """Download url to dest"""
+    if not isinstance(url, str) or urlparse(url).scheme not in ("http", "https"):
+        raise ValueError('"download_url" must be an http(s) URL ❌')
+    os.makedirs(os.path.dirname(dest), exist_ok=True)
+    with requests.get(url, stream=True, timeout=60) as response:
+        response.raise_for_status()
+        with open(dest, "wb") as out:
+            for chunk in response.iter_content(chunk_size=8192):
+                out.write(chunk)
 
 
 def _parse_schema(config_path):
@@ -59,6 +92,10 @@ def download_schema(config_path):
         raise ValueError(
             f'No valid "location" value found in "{config_path}" \u274C')
 
+    # the validated location is still only a shape check, so confirm the path
+    # itself stays inside the working directory before reading/writing it
+    location_path = _resolve_within_cwd(location)
+
     repo = ''
     version = ''
     # get the repo/url info of data model and download the jsonld
@@ -67,16 +104,18 @@ def download_schema(config_path):
         if (len(repo_config) > 2):  # aka version/branch provided
             repo = os.path.join(repo_config[0], repo_config[1])
             version = repo_config[2]
-            os.system(
-                f'git clone https://github.com/{repo}.git -b {version}  -c advice.detachedHead=false --depth 1')
+            if version.startswith('-'):  # would be read as a git option
+                raise ValueError(
+                    f'Invalid version/branch "{version}" in "{config_path}" ❌')
+            _run(['git', 'clone', f'https://github.com/{repo}.git',
+                  '-b', version, '-c', 'advice.detachedHead=false',
+                  '--depth', '1'])
         else:
             repo = config["repo"]
-            os.system(
-                f'git clone https://github.com/{repo}.git --depth 1')
+            _run(['git', 'clone',
+                  f'https://github.com/{repo}.git', '--depth', '1'])
     elif config.get('download_url'):  # to let users keep using 'download_url' for now
-        url = config.get("download_url")
-        os.system(f'mkdir -p {os.path.dirname(location)}')
-        os.system(f'wget {url} -O {location}')
+        _download(config.get("download_url"), location_path)
     else:
         raise ValueError(
             f'No valid "repo" value found in "{config_path}" \u274C')
